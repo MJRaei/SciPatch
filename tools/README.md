@@ -26,11 +26,11 @@ skill, step by step:
 Install it yourself with:
 
 ```bash
-motel add examples/chgnet
+motel add tools/chgnet
 ```
 
 This downloads about 1 GB (mostly PyTorch). Then try
-`motel run chgnet predict structure=examples/chgnet/tests/data/mp-18767-LiMnO2.cif`,
+`motel run chgnet predict structure=tools/chgnet/tests/data/mp-18767-LiMnO2.cif`,
 or ask your AI app to *relax LiMnO₂ with CHGNet and report the Mn magnetic moments*.
 
 ## `pymatgen-diffusion/`: turning an analysis library into a tool
@@ -56,7 +56,7 @@ not recorded in Motel and not reusable. Now it's two tool calls.
    so a vibration-only run is never mistaken for a diffusivity.
 
 ```bash
-motel add examples/pymatgen-diffusion
+motel add tools/pymatgen-diffusion
 ```
 
 ## Featured tools

@@ -81,6 +81,7 @@ reports the result with its limitations and citation.
 | You have | Run | What happens |
 |---|---|---|
 | A featured tool | `motel add ase-emt` | Installs and verifies it (`motel catalog` lists them) |
+| A collection of tools | `motel catalog add <git-url>`, then `motel add <name>` | Adds a lab's or community collection; install its tools by name |
 | A research repository | `motel onboard https://github.com/org/repo --paper <doi>` | Your coding agent turns it into a tool, guided by Motel |
 | A ready tool package | `motel add ./folder` or `motel add <git-url>` | Installs and verifies it |
 
@@ -91,7 +92,7 @@ conformers from SMILES).
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),
 Codex, or Gemini CLI. See [Turning a repository into a tool](docs/onboarding.md),
-and [examples](examples/README.md) for real repositories turned into tools (the
+and [tools](tools/README.md) for real repositories turned into tools (the
 CHGNet universal potential, and pymatgen-analysis-diffusion for diffusivities
 and activation energies), with golden tests that reproduce the values in their
 own test suites.

@@ -54,13 +54,13 @@ def test_catalog_package_is_complete(manifest: Manifest, folder: Path) -> None:
     assert meta.get("description")
 
 
-EXAMPLES = sorted(
-    (Path(__file__).parent.parent / "examples").glob(f"*/{MANIFEST_FILENAME}"),
+TOOLS = sorted(
+    (Path(__file__).parent.parent / "tools").glob(f"*/{MANIFEST_FILENAME}"),
 )
 
 
-@pytest.mark.parametrize("manifest_path", EXAMPLES, ids=[p.parent.name for p in EXAMPLES])
-def test_example_packages_are_valid(manifest_path: Path) -> None:
+@pytest.mark.parametrize("manifest_path", TOOLS, ids=[p.parent.name for p in TOOLS])
+def test_tool_packages_are_valid(manifest_path: Path) -> None:
     manifest = load_manifest(manifest_path.parent)
     assert manifest.golden and manifest.validity and manifest.source.citation
     for test in manifest.golden:
