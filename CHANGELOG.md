@@ -8,12 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
-- Tool collection in `tools/`: CHGNet, MACE, phonopy, phono3py,
+- Tool collection in `tools/`: ML potentials, phonopy, phono3py,
   pymatgen-diffusion, pymatgen-structure, Materials Project, GPAW, Quantum
-  ESPRESSO, matcalc, xTB, CREST, PySCF, RDKit, OpenMM, Cantera, LAMMPS, Open
-  Babel, MDAnalysis, OVITO, and AutoDock Vina, each with golden tests against
-  upstream test suites, reference databases, or established physics, and a CI
-  workflow that rebuilds changed tools from scratch.
+  ESPRESSO, xTB, CREST, PySCF, RDKit, OpenMM, Cantera, LAMMPS, Open Babel,
+  MDAnalysis, OVITO, and AutoDock Vina, each with golden tests against upstream
+  test suites, reference databases, or established physics, and a CI workflow
+  that rebuilds changed tools from scratch.
 - Catalogs: `motel catalog add <git-url>` adds a collection of tools; install
   them by name with `motel add <name>`.
 - `motel freeze` pins the exact packages a tool was tested with and resolves it
@@ -70,19 +70,28 @@ All notable changes to this project are documented here. The format follows
   output is now line-buffered, so it appears while the job runs.
 - Example `pymatgen-diffusion`: diffusivity, conductivity, and Arrhenius analysis
   of MD trajectories, with golden tests reproducing the upstream test suite.
-- CHGNet example: MD prints progress and reports `n_frames` and
+- ML potentials: MD prints progress and reports `n_frames` and
   `frame_interval_fs`; guidance on `fmax` for cell relaxation.
 
 ### Changed
 
+- CHGNet, MACE, and matcalc are merged into one `ml-potentials` tool: Orb-v3
+  (new, the default), MACE-MP/MPA, MACE-OFF, CHGNet, and MatGL's TensorNet and
+  M3GNet share one environment and the same functions (energies, relaxation, MD,
+  elastic constants, equation of state, thermal properties, formation energies),
+  and `compare_models` relaxes a crystal with four model families to show how
+  far they agree. Only models whose packages install together on Linux, macOS,
+  and Windows are included: SevenNet and MatterSim need e3nn 0.5 (MACE pins
+  0.4.4), and FAIRChem's PyTorch has no macOS (Apple silicon) build.
 - `motel.lock` replaces `requirements.lock`; an existing `requirements.lock` is
   still applied until the next `motel freeze`.
-- Tools on Windows: CHGNet installs from its prebuilt PyPI wheels (its source
-  build needs a compiler); OVITO uses Python 3.13 (it has no Windows wheels for
-  3.12); OpenMM simulates biomolecules and water on Windows and explains that
-  small molecules need AmberTools, which has no Windows build; AutoDock Vina runs
-  the `vina` program on every platform (its Python bindings are Linux and macOS
-  only), on Windows the official release's executable, checked at install.
+- Tools on Windows: CHGNet (ML potentials, phonopy) installs from its prebuilt
+  PyPI wheels (its source build needs a compiler); OVITO uses Python 3.13 (it
+  has no Windows wheels for 3.12); OpenMM simulates biomolecules and water on
+  Windows and explains that small molecules need AmberTools, which has no
+  Windows build; AutoDock Vina runs the `vina` program on every platform (its
+  Python bindings are Linux and macOS only), on Windows the official release's
+  executable, checked at install.
 
 ### Fixed
 

@@ -15,7 +15,7 @@ description: >-
   sorted by energy above hull; 0 means on the hull (stable).
 - **Explore a chemical system:** `search(chemsys="Li-Mn-O", max_energy_above_hull_ev=0.05)`.
 - **Start a simulation from a known structure:** `get_structure("mp-18767")`, then
-  pass the CIF path to CHGNet, MACE, phonopy, or the structure tools.
+  pass the CIF path to ml-potentials, phonopy, or the structure tools.
 - **Why is it unstable?** `details(material_id)` lists `decomposes_to`.
 
 ## Setup

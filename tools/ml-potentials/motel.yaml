@@ -1,0 +1,297 @@
+schema: 1
+name: ml-potentials
+version: 0.1.0
+title: Universal machine-learned potentials (Orb, MACE, CHGNet, MatGL)
+summary: >-
+  Energies, forces, stresses, relaxation, molecular dynamics, elastic constants,
+  equations of state, thermal properties, and formation energies of crystals and
+  molecules with universal machine-learned potentials (Orb-v3, MACE-MP/MPA,
+  MACE-OFF, CHGNet, TensorNet/M3GNet), and side-by-side model comparisons.
+domains: [materials, chemistry]
+tags: [ml-potential, universal-potential, foundation-model, interatomic-potential, orb, mace,
+       chgnet, matgl, tensornet, m3gnet, matcalc, relaxation, energy, forces, stress,
+       magnetic-moment, molecular-dynamics, md, elastic-constants, bulk-modulus,
+       equation-of-state, thermal-expansion, heat-capacity, phonons, formation-energy,
+       stability, organic-molecules, model-comparison]
+
+source:
+  homepage: https://github.com/materialsvirtuallab/matcalc
+  paper: "https://doi.org/10.48550/arXiv.2504.06231"
+  citation: >-
+    Cite the model used: Orb-v3: B. Rhodes et al., arXiv:2504.06231 (2025);
+    MACE-MP: I. Batatia et al., arXiv:2401.00096; MACE-OFF: D. P. Kovács et al.,
+    J. Am. Chem. Soc. (2025); CHGNet: B. Deng et al., Nat. Mach. Intell. 5, 1031
+    (2023); TensorNet/M3GNet on MatPES: A. D. Kaplan et al., MatPES,
+    arXiv:2503.04070 (2025), and MatGL; property workflows: matcalc
+    (github.com/materialsvirtuallab/matcalc).
+  license: >-
+    Apache-2.0 (Orb), MIT (MACE code and MACE-MP models), BSD-3-Clause (CHGNet,
+    MatGL, matcalc); MACE-OFF models: Academic Software License, non-commercial
+
+environment:
+  manager: uv
+  python: "3.12"
+  # One environment for all models: only versions that resolve together on Linux,
+  # macOS, and Windows (MACE pins e3nn 0.4.4, so SevenNet and MatterSim, which need
+  # e3nn >= 0.5, are not included).
+  packages: ["matcalc==0.6.0", "matgl==4.1.0", "chgnet==0.4.2", "mace-torch==0.3.16",
+             "orb-models==0.7.0", "pymatgen==2026.9.24", "ase==3.29.0", "phonopy==4.8.3",
+             "matplotlib==3.11.2"]
+  post_install:
+    # Download the default models now, so the first runs work offline.
+    - python -c "from orb_models.forcefield import pretrained as p; p.orb_v3_conservative_inf_mpa(device='cpu', compile=False)"
+    - python -c "from mace.calculators.foundations_models import download_mace_mp_checkpoint as d; d('medium-mpa-0')"
+    - python -c "import matcalc; matcalc.load_fp('TensorNet-MatPES-PBE-2025.2')"
+
+entrypoint: api
+
+functions:
+  predict:
+    params:
+      structure: {kind: structure}
+    outputs:
+      energy_ev: {unit: eV}
+      energy_ev_per_atom: {unit: eV/atom}
+      forces_ev_per_angstrom: {unit: eV/Å}
+      stress_gpa: {unit: GPa}
+      magmoms_mu_b: {unit: μB}
+  relax:
+    params:
+      structure: {kind: structure}
+      fmax: {unit: eV/Å}
+    outputs:
+      final_energy_ev: {unit: eV}
+      relaxed_structure: {kind: structure}
+  molecular_dynamics:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      temperature_k: {unit: K}
+      timestep_fs: {unit: fs}
+    outputs:
+      trajectory: {kind: trajectory}
+  elastic_constants:
+    params:
+      structure: {kind: structure}
+      fmax: {unit: eV/Å}
+    outputs:
+      elastic_tensor_voigt_gpa: {unit: GPa}
+      bulk_modulus_vrh_gpa: {unit: GPa}
+      shear_modulus_vrh_gpa: {unit: GPa}
+      youngs_modulus_gpa: {unit: GPa}
+  equation_of_state:
+    params:
+      structure: {kind: structure}
+      fmax: {unit: eV/Å}
+      plot: {kind: image}
+    outputs:
+      bulk_modulus_gpa: {unit: GPa}
+      volume_per_atom_angstrom3: {unit: Å³/atom}
+      energy_per_atom_ev: {unit: eV/atom}
+      plot: {kind: image}
+  thermal_properties:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      t_max: {unit: K}
+      t_step: {unit: K}
+      report_temperatures: {unit: K}
+      fmax: {unit: eV/Å}
+      table: {kind: table}
+      plot: {kind: image}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  formation_energy:
+    params:
+      structure: {kind: structure}
+    outputs:
+      formation_energy_per_atom_ev: {unit: eV/atom}
+      cohesive_energy_per_atom_ev: {unit: eV/atom}
+      energy_ev: {unit: eV}
+  compare_models:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      fmax: {unit: eV/Å}
+    outputs:
+      mean_volume_per_atom_angstrom3: {unit: Å³/atom}
+      volume_spread_percent: {unit: "%"}
+
+validity: >-
+  Each model reproduces the DFT data it was trained on, with that functional's
+  errors. Orb-v3-mpa, MACE-MP/MPA, and CHGNet were trained on Materials Project
+  PBE/PBE+U data (energies MP-compatible; lattice constants typically 0.5-1% too
+  large); the "omat" Orb model on OMat24 (PBE, not MP-compatible energies);
+  TensorNet/M3GNet/CHGNet-MatPES on MatPES (pure PBE or r2SCAN). Energies of
+  models trained on different data cannot be compared. Models are most reliable
+  near equilibrium for chemistries well covered by training data; band gaps and
+  electronic properties are not predicted. MACE-OFF covers organic molecules (H,
+  C, N, O, F, P, S, Cl, Br, I; no metals or charged species) and is for
+  non-commercial use only. Elastic constants and phonons from PBE-trained models
+  underestimate stiffness like PBE does. Quasi-harmonic results are meaningless
+  with imaginary phonon modes. Formation energies depend on the model's training
+  energies (with or without Materials Project corrections; for Li2O, -1.79 to
+  -2.01 eV/atom across models): compare them within one model only, and against
+  the convex hull with the materials-project tool. Cohesive energies need
+  isolated-atom energies from the training data (MatPES models only). Use
+  compare_models: disagreement between models flags results that need DFT. State
+  the model with every number.
+
+golden:
+  - name: Orb-v3 copper energy matches the Orb test suite
+    quick: true
+    function: predict
+    args: {structure: tests/data/Cu_fcc_3.58.extxyz, model: Orb-v3-conservative-inf-omat}
+    expect:
+      energy_ev: {approx: -14.9525, abs: 0.001}
+    reference: >-
+      orb-models v0.7.0, tests/expensive_tests/test_backwards_compatibility.py::
+      test_orb_v3_con_omat_predictions: fcc Cu (a = 3.58 Å, cubic cell) with
+      orb-v3-conservative-inf-omat has an energy of -14.9525 eV.
+  - name: silicon lattice constant within 1.5% of experiment (Orb-v3, default model)
+    function: relax
+    args: {structure: tests/data/Si_diamond.cif, fmax: 0.005}
+    expect:
+      converged: true
+      lattice.a_angstrom: {approx: 5.431, rel: 0.015}
+    reference: >-
+      Silicon lattice parameter 5.431020511 Å (CODATA 2018, 22.5 °C). PBE-trained
+      models typically overestimate it by about 0.5-1%; Orb-v3-mpa gives 5.467 Å.
+  - name: LiMnO2 energy matches the CHGNet test suite
+    function: predict
+    args: {structure: tests/data/mp-18767-LiMnO2.cif, model: CHGNet-0.3.0}
+    expect:
+      energy_ev_per_atom: {approx: -7.36769, abs: 0.0001}
+      magmoms_mu_b.2: {approx: 3.8694, abs: 0.001}
+      n_atoms: 8
+    reference: >-
+      chgnet v0.4.2 tests/test_model.py::test_predict_structure (model 0.3.0,
+      examples/mp-18767-LiMnO2.cif): energy -7.36769 eV/atom, Mn magmom 3.8694 μB.
+  - name: LiMnO2 relaxation energy matches the CHGNet test suite
+    function: relax
+    args: {structure: tests/data/mp-18767-LiMnO2.cif, model: CHGNet-0.3.0, fmax: 0.1}
+    expect:
+      final_energy_ev: {approx: -58.94209, rel: 0.0001}
+      converged: true
+      relaxed_structure: {exists: true}
+    reference: >-
+      chgnet v0.4.2 tests/test_relaxation.py::test_relaxation (FIRE, fmax 0.1,
+      FrechetCellFilter): final energy -58.94209 eV.
+  - name: MACE-OFF23 water energy matches the MACE test suite
+    function: predict
+    args: {structure: tests/data/water.extxyz, model: MACE-OFF23-small, precision: float64}
+    expect:
+      energy_ev: {approx: -2081.116128586803, abs: 0.000001}
+    reference: >-
+      mace v0.3.16, tests/test_calculator.py::test_mace_off: ASE's H2O molecule
+      with MACE-OFF23 small (float64) has an energy of -2081.116128586803 eV.
+  - name: silicon lattice constant within 1.5% of experiment (MACE-MPA-0)
+    function: relax
+    args: {structure: tests/data/Si_diamond.cif, fmax: 0.005, model: MACE-MPA-0-medium}
+    expect:
+      converged: true
+      lattice.a_angstrom: {approx: 5.431, rel: 0.015}
+    reference: >-
+      Silicon lattice parameter 5.431020511 Å (CODATA 2018, 22.5 °C). PBE-trained
+      models typically overestimate it by about 0.5-1%; MACE-MPA-0 gives 5.467 Å.
+  - name: aluminum lattice constant within 1.5% of experiment (MACE-MP-0)
+    function: relax
+    args: {structure: tests/data/Al_fcc.cif, fmax: 0.005, model: MACE-MP-0-medium}
+    expect:
+      converged: true
+      lattice.a_angstrom: {approx: 4.05, rel: 0.015}
+    reference: >-
+      Experimental room-temperature lattice constant of aluminum, about 4.05 Å;
+      MACE-MP-0 medium (the model of the MACE-MP paper) gives 4.061 Å.
+  - name: Li2O formation and cohesive energies match the matcalc test suite
+    function: formation_energy
+    args: {structure: tests/data/Li2O.json, model: TensorNet-MatPES-PBE-2025.2}
+    expect:
+      formation_energy_per_atom_ev: {approx: -1.7850605646769206, rel: 0.01}
+      cohesive_energy_per_atom_ev: {approx: -4.053125177202149, rel: 0.01}
+    reference: >-
+      matcalc v0.6.0, tests/test_stability.py::test_energetics_calc
+      (TensorNet-MatPES-PBE-2025.2, pymatgen's Li2O test structure): formation
+      energy -1.7850605646769206 eV/atom and cohesive energy -4.053125177202149
+      eV/atom (1%).
+  - name: Li2O bulk modulus matches the matcalc test suite
+    function: equation_of_state
+    args: {structure: tests/data/Li2O.json, fmax: 0.1, model: TensorNet-MatPES-PBE-2025.2}
+    expect:
+      bulk_modulus_gpa: {approx: 84.08164565338282, rel: 0.1}
+      plot: {exists: true}
+    reference: >-
+      matcalc v0.6.0, tests/test_eos.py::test_eos_calc: Li2O bulk modulus
+      (Birch-Murnaghan) 84.08164565338282 GPa (10%).
+  - name: Li2O elastic moduli match the matcalc test suite
+    function: elastic_constants
+    args: {structure: tests/data/Li2O.json, fmax: 0.1, max_normal_strain: 0.004,
+           max_shear_strain: 0.004, model: TensorNet-MatPES-PBE-2025.2}
+    expect:
+      bulk_modulus_vrh_gpa: {approx: 81.1446, rel: 0.1}
+      shear_modulus_vrh_gpa: {approx: 64.4392, rel: 0.1}
+      mechanically_stable: true
+    reference: >-
+      matcalc v0.6.0, tests/test_elasticity.py::test_elastic_calc: Li2O bulk and
+      shear moduli (VRH) 0.5064644749775054 and 0.40219758881584616 eV/Angstrom^3
+      (10%), that is 81.1446 and 64.4392 GPa.
+  - name: Li2O thermal properties at 300 K match the matcalc test suite
+    function: thermal_properties
+    args:
+      structure: tests/data/Li2O.json
+      model: TensorNet-MatPES-PBE-2025.2
+      supercell: [2, 2, 2]
+      scale_range: 0.03
+      n_volumes: 7
+      fmax: 0.1
+      report_temperatures: [300]
+    expect:
+      at.0.temperature_k: 300
+      at.0.thermal_expansion_per_k: {approx: 8.664701952239187e-05, rel: 0.1}
+      at.0.heat_capacity_p_j_per_k_mol: {approx: 59.2773001627165, rel: 0.1}
+      at.0.bulk_modulus_gpa: {approx: 70.91381208222826, rel: 0.1}
+      at.0.gruneisen_parameter: {approx: 1.694821179002536, rel: 0.1}
+      table: {exists: true}
+    reference: >-
+      matcalc v0.6.0, tests/test_qha.py::test_qha_calc (2x2x2 supercell, lattice
+      scale factors 0.97-1.03, T up to 1000 K in 50 K steps): at 300 K, thermal
+      expansion 8.664701952239187e-05 /K, Cp 59.2773001627165 J/K/mol, bulk
+      modulus 70.91381208222826 GPa, Gruneisen parameter 1.694821179002536 (10%).
+  - name: silicon bulk modulus is close to all-electron PBE (TensorNet-MatPES-PBE)
+    function: equation_of_state
+    args: {structure: tests/data/Si.json, model: TensorNet-MatPES-PBE-2025.2}
+    expect:
+      bulk_modulus_gpa: {approx: 88.545, rel: 0.1}
+      volume_per_atom_angstrom3: {approx: 20.453, rel: 0.03}
+    reference: >-
+      Delta benchmark, WIEN2k all-electron PBE (K. Lejaeghere et al., Science 351,
+      aad3000 (2016); github.com/molmod/DeltaCodesDFT WIEN2k.txt at commit
+      f9b6693): Si B0 = 88.545 GPa, V0 = 20.453 Angstrom^3/atom. The PBE-trained
+      model gives about 84 GPa and 20.1 Angstrom^3/atom.
+  - name: four model families agree on silicon's volume
+    function: compare_models
+    args: {structure: tests/data/Si_diamond.cif}
+    expect:
+      models.0.converged: true
+      models.3.converged: true
+      mean_volume_per_atom_angstrom3: {approx: 20.453, rel: 0.03}
+      volume_spread_percent: {max: 4}
+    reference: >-
+      Delta benchmark, WIEN2k all-electron PBE: Si V0 = 20.453 Angstrom^3/atom
+      (Lejaeghere et al., Science 351, aad3000 (2016)). Orb-v3, MACE-MPA-0,
+      TensorNet-MatPES-PBE, and CHGNet are all trained on PBE data, so they must
+      reproduce it within a few percent and agree with each other (they give
+      a = 5.450-5.468 Å, a 1.0% spread in volume, mean 20.36 Angstrom^3/atom).
+  - name: disordered structures are refused
+    function: formation_energy
+    args: {structure: tests/data/Li0.5Cl_disordered.cif}
+    raises: "partial occupancies"
+    reference: >-
+      A potential needs one atom per site; a partially occupied (disordered)
+      structure must be ordered before it can be computed.
+  - name: a molecular model is refused for crystal properties
+    function: elastic_constants
+    args: {structure: tests/data/Li2O.json, model: MACE-OFF23-small}
+    raises: "trained on organic molecules"
+    reference: MACE-OFF23 was trained on organic molecules only; elastic constants of crystals are outside its validity.

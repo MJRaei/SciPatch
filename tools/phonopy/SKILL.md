@@ -12,7 +12,7 @@ description: >-
 ## Recipes
 
 - **Is this structure stable?** Relax it first with the same force model
-  (CHGNet `relax` with `fmax` ≤ 0.01), then `phonons(relaxed_structure)` and read
+  (ml-potentials `relax` with `model="CHGNet-0.3.0"` and `fmax` ≤ 0.01), then `phonons(relaxed_structure)` and read
   `dynamically_stable` and `min_frequency_thz`. Imaginary modes (negative
   frequencies) mean the structure wants to distort.
 - **Thermodynamics:** `phonons(structure, temperatures_k=[300, 600, 900])` gives

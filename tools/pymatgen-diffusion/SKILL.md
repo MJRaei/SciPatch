@@ -4,7 +4,7 @@ description: >-
   Analyze ion transport in molecular dynamics trajectories with
   pymatgen-analysis-diffusion: mean squared displacement (MSD), diffusivity,
   ionic conductivity, Haven ratio, and Arrhenius fits of activation energy with
-  extrapolation to room temperature. Use after an MD run (e.g. CHGNet's
+  extrapolation to room temperature. Use after an MD run (e.g. ml-potentials'
   molecular_dynamics) to quantify Li, Na, or other ion diffusion in battery
   materials and solid electrolytes.
 ---
@@ -12,7 +12,7 @@ description: >-
 ## Recipes
 
 - **One MD run:** `analyze_trajectory(trajectory, specie="Li", temperature_k=600,
-  frame_interval_fs=20)`. CHGNet's `molecular_dynamics` returns both the
+  frame_interval_fs=20)`. ml-potentials' `molecular_dynamics` returns both the
   `trajectory` path and `frame_interval_fs`; pass them through unchanged.
   Discard equilibration with `skip_initial_ps` (1 ps is usually enough). The
   default analysis needs more than 1 ps of trajectory after skipping; plan MD

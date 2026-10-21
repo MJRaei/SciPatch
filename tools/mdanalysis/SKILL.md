@@ -5,7 +5,7 @@ description: >-
   OpenMM, extended XYZ) with MDAnalysis: RMSD and RMSF of proteins or ligands,
   radius of gyration, radial distribution functions and coordination numbers,
   and mean squared displacement with diffusion coefficients. Use after an MD run
-  (e.g. from the openmm, lammps, or mace tools) to check stability, flexibility,
+  (e.g. from the openmm, lammps, or ml-potentials tools) to check stability, flexibility,
   solvation shells, or transport.
 ---
 

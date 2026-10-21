@@ -75,8 +75,8 @@ def analyze_trajectory(
             contain other elements (the host framework).
         temperature_k: Temperature of the MD run in K.
         frame_interval_fs: Time between consecutive frames in fs (MD time step
-            times the save interval; the chgnet and mace molecular_dynamics
-            functions report it).
+            times the save interval; ml-potentials' molecular_dynamics
+            reports it).
         skip_initial_ps: Equilibration time to discard from the start, in ps.
         smoothed: MSD averaging: "max" (default; all time origins, weighted),
             "constant" (fixed window), or "none" (single origin).

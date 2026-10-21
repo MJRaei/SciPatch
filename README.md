@@ -23,7 +23,7 @@ Motel is built for science, with materials science and chemistry first.
   ┌─────────────────────── Motel ────────────────────────┐
   │  front desk:  search · descriptions · run · results   │
   │                                                       │
-  │  room: chgnet     room: mace       room: rdkit   ...  │  ← each with its own environment
+  │  room: ml-potentials   room: gpaw   room: rdkit  ...  │  ← each with its own environment
   │                                                       │
   │  guest book:  every run, its inputs, outputs, and     │  ← memory and provenance
   │               the exact tool version                  │
@@ -86,23 +86,26 @@ reports the result with its limitations and citation.
 | A ready tool package | `motel add ./folder` or `motel add <git-url>` | Installs and verifies it |
 
 Built in: **ase-emt** (fast approximate simulations of metals) and
-**rdkit-descriptors** (molecular properties from SMILES). The
-[tool collection](tools/README.md) adds, for materials, **CHGNet** and **MACE**
-(machine-learned potentials), **GPAW** (DFT for crystals), **matcalc** (elastic
-and thermal properties), **phonopy** (phonons and stability),
+**rdkit-descriptors** (molecular properties from SMILES). The [tool
+collection](tools/README.md) adds, for materials, **ML potentials** (Orb, MACE,
+CHGNet, and MatGL in one tool: relaxation, MD, elastic and thermal properties,
+model comparison), **GPAW** and **Quantum ESPRESSO** (DFT for crystals),
+**LAMMPS** (classical MD), **OVITO** (crystal structure, defects, dislocations),
+**phonopy** (phonons and stability), **phono3py** (thermal conductivity),
 **pymatgen-diffusion** (ion transport from MD), **pymatgen-structure**
-(symmetry, supercells, XRD), **phono3py** (thermal conductivity), **Quantum
-ESPRESSO** (plane-wave DFT), and the **Materials Project** database; and for
+(symmetry, supercells, XRD), and the **Materials Project** database; and for
 chemistry, **PySCF** (ab initio quantum chemistry), **xTB** (fast semiempirical
 quantum chemistry), **CREST** (conformers, protomers, tautomers), **RDKit**
-(cheminformatics), **OpenMM** (molecular dynamics), and **Cantera** (combustion
-chemistry and thermodynamics). Every tool reproduces published or upstream-tested values before it
-installs.
+(cheminformatics), **Open Babel** (chemical file formats, force fields),
+**OpenMM** (molecular dynamics), **MDAnalysis** (trajectory analysis),
+**AutoDock Vina** (docking), and **Cantera** (combustion chemistry and
+thermodynamics). Every tool reproduces published or upstream-tested values
+before it installs.
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),
 Codex, or Gemini CLI. See [Turning a repository into a tool](docs/onboarding.md),
 and [tools](tools/README.md) for real repositories turned into tools (the
-CHGNet universal potential, and pymatgen-analysis-diffusion for diffusivities
+universal ML potentials, and pymatgen-analysis-diffusion for diffusivities
 and activation energies), with golden tests that reproduce the values in their
 own test suites.
 

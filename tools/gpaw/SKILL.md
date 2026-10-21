@@ -5,7 +5,7 @@ description: >-
   (plane waves, PAW): total energies, forces and stress, relaxation of atoms
   and lattice, equation of state (equilibrium volume, bulk modulus), band
   structures and band gaps, Fermi level, and magnetic moments. Use as the
-  reference method to check machine-learned potentials (CHGNet, MACE), for
+  reference method to check machine-learned potentials (the ml-potentials tool), for
   electronic properties such as gaps and metallicity, and for magnetism.
 ---
 
@@ -13,7 +13,7 @@ description: >-
 
 - **Ground state:** `scf("LiFePO4.cif")` gives the energy, gap, stress,
   and magnetic moments, and writes `scf.gpw` for `band_structure`.
-- **Check an ML potential:** relax with `chgnet.relax` or `mace.relax` (fast),
+- **Check an ML potential:** relax with `ml-potentials.relax` (fast),
   then `gpaw.scf` on the relaxed structure. Compare forces and stress (near zero
   if the ML structure is right) and energy differences between structures, not
   absolute energies across codes.

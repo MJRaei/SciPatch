@@ -8,14 +8,12 @@ reproduce published or upstream-tested values on every build.
 | Tool | Field | Runs on | What it does | Checked against |
 |---|---|---|---|---|
 | [cantera](cantera/) | chemistry, engineering | Linux, macOS, Windows | Combustion chemistry: equilibrium, adiabatic flame temperatures, laminar flame speeds, ignition delays, species thermodynamics | NASA CEA flame temperatures; NIST-JANAF heat capacities; methane-air flame speed vs experiment |
-| [chgnet](chgnet/) | materials | Linux, macOS, Windows | Energies, forces, stresses, magnetic moments, relaxation, and MD with the CHGNet universal potential | CHGNet's test suite (LiMnO₂ energy and relaxation) |
 | [crest](crest/) | chemistry | Linux, macOS, Windows (WSL) | Conformer search with Boltzmann populations, protonation and deprotonation sites, tautomers (GFN2-xTB) | Butane anti/gauche; pyridine, acetic acid, and keto-enol chemistry (NIST enthalpies) |
 | [gpaw](gpaw/) | materials | Linux, macOS, Windows (WSL) | DFT for crystals (plane waves, PAW): energies, forces, stress, relaxation, equation of state, band structures and gaps, magnetism | GPAW's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
 | [lammps](lammps/) | materials | Linux, macOS, Windows (WSL) | Classical MD and 0 K crystal properties with EAM, SW, Tersoff, AIREBO, SNAP, ACE or any LAMMPS pair style: lattice constants, cohesive energies, elastic tensors, NVT/NPT dynamics; your own input scripts | NIST Interatomic Potentials Repository (Cu, Fe, Si: lattice, cohesive energy, C11/C12/C44); LAMMPS benchmark log; equipartition |
-| [mace](mace/) | materials, chemistry | Linux, macOS, Windows | The same with MACE-MP (89 elements) and MACE-OFF (organic molecules) | MACE's test suite (water); Si and Al lattice constants vs. experiment |
-| [matcalc](matcalc/) | materials | Linux, macOS, Windows | Elastic tensor and moduli, equation of state, thermal expansion and heat capacity (quasi-harmonic), formation energies, from universal potentials (TensorNet, M3GNet, CHGNet on MatPES) | matcalc's test suite (Li2O); all-electron PBE bulk modulus of Si |
 | [materials-project](materials-project/) | materials | Linux, macOS, Windows | Search known materials, stability (energy above hull), properties, and structures | Silicon (mp-149); needs a free API key |
 | [mdanalysis](mdanalysis/) | chemistry, biology, materials | Linux, macOS, Windows | MD trajectory analysis (GROMACS, AMBER, CHARMM, LAMMPS, OpenMM, extended XYZ): RMSD, RMSF, radius of gyration, g(r) and coordination numbers, MSD and diffusion coefficients | MDAnalysis's test suite (adenylate kinase RMSD); fcc coordination shell; random-walk Einstein relation |
+| [ml-potentials](ml-potentials/) | materials, chemistry | Linux, macOS, Windows | Universal ML potentials (Orb-v3, MACE-MP/MPA, MACE-OFF, CHGNet, TensorNet/M3GNet) in one place: energies, forces, stresses, magnetic moments, relaxation, MD, elastic constants, equation of state, thermal expansion and heat capacity, formation energies, and side-by-side model comparison | The test suites of Orb (Cu), CHGNet (LiMnO₂ energy and relaxation), MACE (water), and matcalc (Li₂O); Si and Al lattice constants vs. experiment; all-electron PBE bulk modulus of Si |
 | [openbabel](openbabel/) | chemistry | Linux, macOS, Windows | Conversion between 100+ chemical formats, canonical SMILES/InChI/InChIKey, protonation at a pH, 3D coordinates, MMFF94/UFF/GAFF energies and minimization, partial charges | Halgren's MMFF94 validation suite (energies, terms, charges); PubChem identifiers; glycine zwitterion; rock-salt unit cell |
 | [openmm](openmm/) | chemistry, biology | Linux, macOS, Windows | Molecular dynamics of proteins, nucleic acids, ligands and water: preparation, solvation, minimization, constant-pressure MD; small molecules with OpenFF Sage or GAFF; densities of molecular liquids | OpenMM's test suite vs Amber (ff14ipq energy); TIP3P density of water; NIST densities of liquid methanol and benzene |
 | [ovito](ovito/) | materials | Linux, macOS, Windows | Local crystal structure of every atom (adaptive CNA, PTM, diamond), vacancies and interstitials (Wigner-Seitz), dislocation lines and Burgers vectors (DXA), for structures and trajectories | Exact answers for ideal fcc/bcc/hcp/diamond lattices, a vacancy, a Frenkel pair, and a Volterra screw dislocation |
@@ -47,7 +45,7 @@ SMILES).
 From a copy of this repository:
 
 ```bash
-motel add tools/chgnet
+motel add tools/ml-potentials
 ```
 
 From the published collection, add it once and install tools by name:
@@ -55,7 +53,7 @@ From the published collection, add it once and install tools by name:
 ```bash
 motel catalog add <repository-url>
 motel catalog                      # browse
-motel add chgnet
+motel add ml-potentials
 motel catalog update               # fetch new and updated tools
 ```
 
@@ -70,13 +68,14 @@ The tools are designed to be chained: outputs are files that the next tool
 accepts.
 
 - **Is a new material stable?** `materials-project.search` (known phases) →
-  `chgnet.relax` and `mace.relax` (two independent potentials) →
+  `ml-potentials.relax` and `ml-potentials.compare_models` (do four independent
+  potentials agree?) →
   `gpaw.scf` on the relaxed structure (do DFT forces and stress agree?) →
   `phonopy.phonons` on the relaxed structure (dynamical stability).
 - **Electronic structure:** `gpaw.scf` → `gpaw.band_structure` on its restart
   file (gap, direct or indirect, band edges; PBE gaps are too small).
 - **How fast do ions move?** `pymatgen-structure.make_supercell` (≥ 100 atoms) →
-  `chgnet.molecular_dynamics` or `mace.molecular_dynamics` at several temperatures
+  `ml-potentials.molecular_dynamics` at several temperatures
   (several ps each) → `pymatgen-diffusion.analyze_trajectory` →
   `pymatgen-diffusion.arrhenius_fit` (activation energy, room-temperature value).
 - **Identify a structure:** `pymatgen-structure.symmetry` and `xrd_pattern`, then
@@ -87,7 +86,7 @@ accepts.
   `pyscf.excited_states` for UV-Vis.
 - **Metals and semiconductors at scale:** `lammps.list_potentials` →
   `lammps.crystal_properties` (lattice and elastic constants; compare with
-  `matcalc.elastic_constants` or DFT) → `lammps.simulate` at several temperatures
+  `ml-potentials.elastic_constants` or DFT) → `lammps.simulate` at several temperatures
   (NPT: thermal expansion; heating: melting) → `ovito.structure_types` on the
   trajectory (phase of each atom per frame) and `mdanalysis.rdf` / `mdanalysis.msd`.
 - **Defects and plasticity:** `lammps.run_script` with your deformation or
