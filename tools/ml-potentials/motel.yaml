@@ -43,6 +43,11 @@ environment:
     - python -c "from mace.calculators.foundations_models import download_mace_mp_checkpoint as d; d('medium-mpa-0')"
     - python -c "import matcalc; matcalc.load_fp('TensorNet-MatPES-PBE-2025.2')"
 
+resources:
+  # Orb, MACE, and CHGNet run on an NVIDIA GPU when the user turns GPU use on
+  # (molecular dynamics of large cells gains most); MatGL models stay on the CPU.
+  gpu: optional
+
 entrypoint: api
 
 functions:

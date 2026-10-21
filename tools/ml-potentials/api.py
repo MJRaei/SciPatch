@@ -14,6 +14,7 @@ included (MACE pins e3nn 0.4.4, which rules out SevenNet and MatterSim here).
 from __future__ import annotations
 
 import functools
+import os
 import time
 import warnings
 from typing import Any, Literal
@@ -40,7 +41,7 @@ Model = Literal[
     "CHGNet-MatPES-r2SCAN-1M-2026.9",
 ]
 Precision = Literal["auto", "float32", "float64"]
-Device = Literal["cpu", "cuda"]
+Device = Literal["auto", "cpu", "cuda"]
 DEFAULT_MODEL = "Orb-v3-conservative-inf-mpa"
 #: One model of each family, for compare_models.
 DEFAULT_COMPARISON = [
@@ -61,9 +62,20 @@ EV_PER_ANGSTROM3_TO_GPA = 160.21766208
 _FRAME_INTERVAL = 10  # MD steps between saved trajectory frames
 
 
+def _device(device: str) -> str:
+    """ "auto": the device Motel chose for this run (an NVIDIA GPU only if the user allows it)."""
+    if device != "auto":
+        return device
+    return "cuda" if os.environ.get("MOTEL_DEVICE") == "cuda" else "cpu"
+
+
 @functools.lru_cache(maxsize=6)
-def _calculator(model: str, precision: str = "auto", device: str = "cpu") -> Any:
-    """An ASE calculator for a model. "auto" precision: float64 for MACE, float32 otherwise."""
+def _calculator(model: str, precision: str = "auto", device: str = "auto") -> Any:
+    """An ASE calculator for a model. "auto" precision: float64 for MACE, float32 otherwise.
+
+    MatGL models (TensorNet, M3GNet, CHGNet-MatPES) run on the CPU.
+    """
+    device = _device(device)
     if model in _MACE_MP or model in _MOLECULAR:
         from mace.calculators import mace_mp, mace_off
 
@@ -170,7 +182,7 @@ def predict(
     structure: str,
     model: Model = DEFAULT_MODEL,
     precision: Precision = "auto",
-    device: Device = "cpu",
+    device: Device = "auto",
 ) -> dict:
     """Energy, forces, stress, and (CHGNet) magnetic moments of a structure or molecule.
 
@@ -183,7 +195,8 @@ def predict(
             (non-commercial license).
         precision: "auto" (float64 for MACE, the models' default otherwise),
             "float32" (faster), or "float64".
-        device: "cpu" (reproducible) or "cuda".
+        device: "auto" (the GPU if the user turned GPU use on, otherwise the CPU), "cpu",
+            or "cuda".
 
     Returns:
         Formula, number of atoms, energy (eV and eV/atom), forces (eV/Å, one row
@@ -222,7 +235,7 @@ def relax(
     steps: int = 500,
     relax_cell: bool = True,
     precision: Precision = "auto",
-    device: Device = "cpu",
+    device: Device = "auto",
     output: str | None = None,
 ) -> dict:
     """Relax atomic positions (and, for crystals, the cell) with the FIRE optimizer.
@@ -237,7 +250,8 @@ def relax(
         relax_cell: Also relax the cell shape and volume (crystals only), with
             ASE's FrechetCellFilter.
         precision: See predict.
-        device: "cpu" or "cuda".
+        device: "auto" (the GPU if the user turned GPU use on, otherwise the CPU), "cpu",
+            or "cuda".
         output: File for the relaxed structure. Default: relaxed.cif for crystals,
             relaxed.xyz for molecules.
 
@@ -294,7 +308,7 @@ def molecular_dynamics(
     ensemble: Literal["nvt", "nve"] = "nvt",
     seed: int = 0,
     precision: Precision = "float32",
-    device: Device = "cpu",
+    device: Device = "auto",
     trajectory: str = "md.traj",
 ) -> dict:
     """Run molecular dynamics and save the trajectory.
@@ -311,7 +325,8 @@ def molecular_dynamics(
         ensemble: "nvt" (constant temperature) or "nve" (constant energy).
         seed: Random seed for the initial velocities and the thermostat.
         precision: "float32" (default for MD; faster), "float64", or "auto".
-        device: "cpu" or "cuda".
+        device: "auto" (the GPU if the user turned GPU use on, otherwise the CPU), "cpu",
+            or "cuda".
         trajectory: ASE trajectory file to write.
 
     Returns:
