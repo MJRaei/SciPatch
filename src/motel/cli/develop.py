@@ -146,6 +146,12 @@ def check(
             )
         for warning in outcome.warnings:
             console.print(f"  [yellow]![/] {escape(warning)}")
+        skipped = [result for result in outcome.golden if result.skipped]
+        if skipped:
+            console.print(
+                f"\n[yellow]{len(skipped)} golden test(s) skipped[/] because a secret is missing; "
+                "set it with [cyan]motel secret set NAME[/] to run them."
+            )
         if not outcome.tests_passed:
             console.print("\n[red]Golden tests failed[/] (see above).")
         elif skip_tests:
