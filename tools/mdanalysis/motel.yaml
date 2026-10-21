@@ -1,0 +1,154 @@
+schema: 1
+name: mdanalysis
+version: 0.1.0
+title: Molecular dynamics trajectory analysis (MDAnalysis)
+summary: >-
+  Analyze MD trajectories from GROMACS, AMBER, CHARMM/NAMD, LAMMPS, OpenMM and
+  ASE-based codes with MDAnalysis: RMSD after superposition, per-residue RMSF,
+  radius of gyration, radial distribution functions with coordination numbers,
+  and mean squared displacement with self-diffusion coefficients.
+domains: [chemistry, biology, materials]
+tags: [molecular-dynamics, trajectory-analysis, md, rmsd, rmsf, radius-of-gyration, rdf,
+       radial-distribution-function, coordination-number, msd, diffusion-coefficient,
+       gromacs, amber, charmm, namd, lammps, openmm, xtc, dcd, protein, mdanalysis]
+
+source:
+  homepage: https://www.mdanalysis.org
+  paper: https://doi.org/10.25080/Majora-629e541a-00e
+  citation: >-
+    R. J. Gowers et al., "MDAnalysis: A Python Package for the Rapid Analysis of
+    Molecular Dynamics Simulations", Proc. 15th Python in Science Conf., 98-105
+    (2016); N. Michaud-Agrawal, E. J. Denning, T. B. Woolf, O. Beckstein, J. Comput.
+    Chem. 32, 2319-2327 (2011).
+  license: LGPL-3.0-or-later
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["MDAnalysis==2.10.0", "tidynamics==1.1.2", "matplotlib==3.11.2", "ase==3.29.0"]
+
+entrypoint: api
+
+functions:
+  info:
+    params:
+      topology: {kind: file}
+      trajectory: {kind: trajectory}
+  rmsd:
+    params:
+      topology: {kind: file}
+      trajectory: {kind: trajectory}
+    outputs:
+      mean_rmsd_angstrom: {unit: Å}
+      final_rmsd_angstrom: {unit: Å}
+      output: {kind: table}
+      plot: {kind: image}
+  rmsf:
+    params:
+      topology: {kind: file}
+      trajectory: {kind: trajectory}
+    outputs:
+      mean_rmsf_angstrom: {unit: Å}
+      output: {kind: table}
+      plot: {kind: image}
+  radius_of_gyration:
+    params:
+      topology: {kind: file}
+      trajectory: {kind: trajectory}
+    outputs:
+      mean_rgyr_angstrom: {unit: Å}
+      output: {kind: table}
+      plot: {kind: image}
+  rdf:
+    params:
+      topology: {kind: file}
+      trajectory: {kind: trajectory}
+      r_max: {unit: Å}
+    outputs:
+      first_peak_r_angstrom: {unit: Å}
+      first_minimum_r_angstrom: {unit: Å}
+      output: {kind: table}
+      plot: {kind: image}
+  msd:
+    long_running: true
+    params:
+      topology: {kind: file}
+      trajectory: {kind: trajectory}
+      fit_start_ps: {unit: ps}
+      fit_end_ps: {unit: ps}
+    outputs:
+      diffusion_coefficient_angstrom2_ps: {unit: Å^2/ps}
+      diffusion_coefficient_cm2_s: {unit: cm^2/s}
+      output: {kind: table}
+      plot: {kind: image}
+
+validity: >-
+  The analyses are exact for the trajectory given; their physical meaning
+  depends on the simulation. RMSD and RMSF need a stable reference and enough
+  sampling; RMSF of short runs underestimates fluctuations. Diffusion
+  coefficients need the linear (diffusive) part of the MSD: check fit_r_squared,
+  move the fit window if the MSD curves at short times (ballistic or caged
+  motion), and note that long lag times have few time origins (with 100 random
+  walkers, a 10-50% window was 9% off and a 1-20 ps window 0.7% off). D from
+  periodic simulations grows with box size (Yeh-Hummer correction) and needs
+  unwrapped or continuous trajectories (applied automatically when a box is
+  present). g(r) needs a periodic box and is limited to half the shortest box
+  length; coordination numbers depend on the cutoff, taken here at the first
+  minimum after the first peak.
+
+golden:
+  - name: the adenylate kinase test system is read correctly
+    function: info
+    args: {topology: tests/data/adk.pdb, trajectory: tests/data/adk_3frames.dcd}
+    expect:
+      n_atoms: 3341
+      n_residues: 214
+      n_frames: 3
+    reference: >-
+      MDAnalysisTests adk.psf / adk_dims.dcd (adenylate kinase, 214 residues,
+      3341 atoms); the test file holds frames 0, 49 and 97 (tests/make_data.py).
+  - name: C-alpha RMSD matches MDAnalysis's test suite
+    function: rmsd
+    args: {topology: tests/data/adk.pdb, trajectory: tests/data/adk_3frames.dcd, selection: name CA}
+    expect:
+      rmsd_angstrom.0: {approx: 0.0, abs: 0.0001}
+      rmsd_angstrom.1: {approx: 4.68953, abs: 0.0001}
+    reference: >-
+      MDAnalysis 2.10.0, testsuite analysis/test_rms.py, TestRMSD.correct_values:
+      C-alpha RMSD of frame 49 of adk_dims.dcd from frame 0 is 4.68953 Å.
+  - name: backbone RMSD matches MDAnalysis's test suite
+    function: rmsd
+    args: {topology: tests/data/adk.pdb, trajectory: tests/data/adk_3frames.dcd}
+    expect:
+      rmsd_angstrom.1: {approx: 4.6997, abs: 0.0001}
+      final_rmsd_angstrom: {approx: 6.820321761927005, abs: 0.00001}
+    reference: >-
+      MDAnalysis 2.10.0, test_rms.py: backbone RMSD of frame 49 is 4.6997 Å
+      (correct_values_backbone_group), and the superposed backbone RMSD between
+      the first and last frames is 6.820321761927005 Å (Testrmsd.test_superposition).
+  - name: an fcc crystal has 12 nearest neighbors at a/sqrt(2)
+    function: rdf
+    args: {topology: tests/data/Cu_fcc_4x4x4.pdb, r_max: 6.0, n_bins: 600}
+    expect:
+      first_peak_r_angstrom: {approx: 2.5562, abs: 0.006}
+      coordination_number: {approx: 12, abs: 0.000001}
+    reference: >-
+      Face-centered cubic lattice (copper, a = 3.615 Å): 12 nearest neighbors at
+      a/sqrt(2) = 2.5562 Å. The structure is a perfect 256-atom periodic crystal.
+  - name: a 3D random walk has MSD = 3t and D = 0.5 Angstrom^2/ps
+    function: msd
+    args: {topology: tests/data/random_walk.pdb, trajectory: tests/data/random_walk.dcd,
+           fit_start_ps: 1, fit_end_ps: 20}
+    expect:
+      msd_angstrom2.1: {approx: 3.0, abs: 0.000001}
+      diffusion_coefficient_angstrom2_ps: {approx: 0.5, rel: 0.02}
+      diffusion_coefficient_cm2_s: {approx: 0.00005, rel: 0.02}
+    reference: >-
+      Einstein relation for a lattice random walk: 100 walkers move +-1 Å along
+      each axis every 1 ps (tests/make_data.py), so every step adds exactly 3 Å^2,
+      MSD(t) = 3 t, and D = MSD / (6 t) = 0.5 Å^2/ps = 5e-5 cm^2/s.
+  - name: a selection that matches nothing is refused
+    function: rmsd
+    args: {topology: tests/data/adk.pdb, trajectory: tests/data/adk_3frames.dcd, selection: resname XYZ}
+    raises: "matched no atoms"
+    reference: An empty selection has no RMSD and must give a clear error.
