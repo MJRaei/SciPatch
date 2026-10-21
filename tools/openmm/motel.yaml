@@ -1,15 +1,16 @@
 schema: 1
 name: openmm
-version: 0.1.0
+version: 0.2.0
 title: Molecular dynamics (OpenMM)
 summary: >-
   Molecular dynamics with OpenMM: prepare a protein or nucleic acid from a PDB
-  file (missing atoms, hydrogens at a chosen pH), solvate it with water and
-  ions, and run minimization, equilibration, and constant-pressure MD; compute
-  and minimize force-field energies of Amber-prepared systems; or simulate pure
-  water boxes. Amber and CHARMM force fields, explicit or implicit solvent.
+  file, add ligands from SDF files (OpenFF Sage or GAFF parameters), solvate
+  with water and ions, and run constant-pressure MD; simulate small molecules
+  in water or as pure liquids (density); compute and minimize force-field
+  energies, including of Amber-prepared systems.
 domains: [chemistry, biology]
 tags: [molecular-dynamics, md, force-field, amber, charmm, protein, nucleic-acid, solvation,
+       ligand, small-molecule, openff, sage, gaff, am1-bcc, liquid-density, packmol,
        water-box, tip3p, explicit-solvent, implicit-solvent, energy-minimization, npt, nvt,
        trajectory, rmsd, density, openmm, pdbfixer, pdb]
 
@@ -18,13 +19,18 @@ source:
   paper: https://doi.org/10.1021/acs.jpcb.3c06662
   citation: >-
     P. Eastman et al., "OpenMM 8: Molecular Dynamics Simulation with Machine
-    Learning Potentials", J. Phys. Chem. B 128, 109-116 (2024).
-  license: MIT (API, CPU and Reference platforms; GPU platforms LGPL-3.0)
+    Learning Potentials", J. Phys. Chem. B 128, 109-116 (2024). Small molecules:
+    the Open Force Field Sage force field (openforcefield.org) via openmmforcefields,
+    or GAFF; AM1-BCC charges from AmberTools; boxes packed with Packmol (L.
+    Martinez et al., J. Comput. Chem. 30, 2157-2164 (2009)).
+  license: MIT (OpenMM API and CPU platform, openmmforcefields, OpenFF); GPU platforms LGPL-3.0
 
 environment:
   manager: conda
   python: "3.12"
-  conda_packages: ["openmm=8.6.1", "pdbfixer=1.12"]
+  conda_packages: ["openmm=8.6.1", "pdbfixer=1.12", "openmmforcefields=0.16.0",
+                   "openff-toolkit=0.19.0", "openff-forcefields=2026.09.0", "ambertools=23.3",
+                   "packmol=21.2.1", "rdkit=2023.09.6"]
   channels: [conda-forge]
 
 entrypoint: api
@@ -33,6 +39,7 @@ functions:
   energy:
     params:
       structure: {kind: structure}
+      small_molecules: {kind: molecule}
       coordinates: {kind: file}
       cutoff_nm: {unit: nm}
     outputs:
@@ -42,6 +49,7 @@ functions:
   minimize:
     params:
       structure: {kind: structure}
+      small_molecules: {kind: molecule}
       coordinates: {kind: file}
       tolerance_kj_mol_nm: {unit: kJ/mol/nm}
       output: {kind: structure}
@@ -54,6 +62,7 @@ functions:
     long_running: true
     params:
       structure: {kind: structure}
+      small_molecules: {kind: molecule}
       temperature_k: {unit: K}
       pressure_bar: {unit: bar}
       time_ps: {unit: ps}
@@ -76,13 +85,36 @@ functions:
       start_structure: {kind: structure}
       final_structure: {kind: structure}
       log: {kind: table}
+  liquid:
+    long_running: true
+    params:
+      molecule: {kind: molecule}
+      temperature_k: {unit: K}
+      pressure_bar: {unit: bar}
+      time_ps: {unit: ps}
+      equilibration_ps: {unit: ps}
+      timestep_fs: {unit: fs}
+      report_interval_ps: {unit: ps}
+      cutoff_nm: {unit: nm}
+    outputs:
+      density_mean_g_cm3: {unit: g/cm³}
+      density_std_g_cm3: {unit: g/cm³}
+      molar_volume_cm3_mol: {unit: cm³/mol}
+      temperature_mean_k: {unit: K}
+      trajectory: {kind: trajectory}
+      final_structure: {kind: structure}
+      log: {kind: table}
 
 validity: >-
   Classical force fields are fixed-charge models: they cannot form or break
   bonds, describe electronic polarization only on average, and are
   parameterized for biomolecules, water, and ions near ambient conditions.
-  Small molecules (ligands, drugs, solvents other than water) are not
-  parameterized by this tool and are refused. Water models reproduce some
+  Small molecules are parameterized with OpenFF Sage (fitted to liquid
+  densities, enthalpies of mixing, and quantum chemistry; typical density errors
+  of a few percent) or GAFF, with AM1-BCC charges; metal complexes, covalent
+  ligands, and unusual chemistry are outside their coverage. Ligands must be
+  given as SDF files with 3D coordinates, all hydrogens, and the intended
+  protonation state; the tool does not dock or protonate them. Water models reproduce some
   properties and not others (TIP3P matches the density at 25 C by design but
   diffuses too fast and has no density maximum near 4 C). Simulated times here
   are nanoseconds at most: enough for local fluctuations and solvent structure,
@@ -136,10 +168,41 @@ golden:
     reference: >-
       Alanine dipeptide from OpenMM's test suite (systems/alanine-dipeptide-implicit.pdb)
       with amber14 and OBC2 implicit solvent; minimization must lower the energy.
-  - name: small-molecule ligands are refused with an explanation
+  - name: liquid methanol has its measured density (OpenFF Sage)
+    function: liquid
+    args: {molecule: CO, n_molecules: 200, time_ps: 60, equilibration_ps: 60}
+    expect:
+      density_mean_g_cm3: {approx: 0.786325, rel: 0.03}
+      temperature_mean_k: {approx: 298.15, abs: 5}
+    timeout: 2400
+    reference: >-
+      NIST Chemistry WebBook, thermophysical properties of fluid systems (Lemmon,
+      McLinden, Friend): methanol at 298.15 K and 1 bar, density 0.786325 g/mL.
+      Sage was fitted to liquid densities; errors of a few percent are typical.
+  - name: liquid benzene has its measured density (OpenFF Sage)
+    function: liquid
+    args: {molecule: c1ccccc1, n_molecules: 200, time_ps: 60, equilibration_ps: 60}
+    expect:
+      density_mean_g_cm3: {approx: 0.873659, rel: 0.03}
+    timeout: 2400
+    reference: >-
+      NIST Chemistry WebBook, fluid properties: benzene at 298.15 K and 1 bar,
+      density 0.873659 g/mL.
+  - name: a small molecule is parameterized and simulated in water
+    function: simulate
+    args: {structure: tests/data/ethanol.sdf, box_nm: 2.5, time_ps: 5, equilibration_ps: 5}
+    expect:
+      n_waters: {min: 400}
+      temperature_mean_k: {approx: 300, abs: 15}
+      final_structure: {exists: true}
+    timeout: 1800
+    reference: >-
+      Ethanol (from an SDF file) with OpenFF Sage parameters and AM1-BCC charges,
+      solvated in TIP3P water; the run must be stable at the set temperature.
+  - name: ligands in a PDB without parameters are refused with an explanation
     function: energy
     args: {structure: tests/data/ethanol_ligand.pdb}
     raises: "no parameters for residue"
     reference: >-
-      Standard biomolecular force fields have no templates for arbitrary small
-      molecules; they need GAFF or OpenFF parameters, which this tool does not set up.
+      Biomolecular force fields have no templates for arbitrary small molecules;
+      the error must explain how to provide them (SDF files in small_molecules).

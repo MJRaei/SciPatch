@@ -1,6 +1,18 @@
 # Exact versions this tool was tested with, written by 'motel freeze'.
 # Built with Python 3.12.15 Darwin arm64. Applied as constraints when building the
 # environment; packages not listed here resolve normally.
+amberutils==21.0
+edgembar==0.2
+matplotlib==3.10.9
+mmpbsa-py==16.0
+munkres==1.1.4
+ndfes==1.8
 openmm==8.6.1
+packmol-memgen==2023.2.24
+pdb4amber==22.0
+pycairo==1.27.0
+pymsmt==22.0
+pytraj==2.0.6
+sander==22.0
 setuptools==84.0.0
 wheel==0.48.0
