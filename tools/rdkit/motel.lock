@@ -1,0 +1,45 @@
+{
+ "lock_version": 1,
+ "inputs": "9fd20ca02d138366fb47a95e0e71c392a48772576a9e2d92b655aa6142347599",
+ "tested_on": "osx-arm64",
+ "platforms": {
+  "linux-64": {
+   "conda": [],
+   "pip": [
+    "numpy==2.5.4",
+    "pillow==13.0.0",
+    "rdkit==2026.9.1"
+   ]
+  },
+  "linux-aarch64": {
+   "conda": [],
+   "pip": [
+    "numpy==2.5.4",
+    "pillow==13.0.0",
+    "rdkit==2026.9.1"
+   ]
+  },
+  "osx-arm64": {
+   "conda": [],
+   "pip": [
+    "numpy==2.5.4",
+    "pillow==13.0.0",
+    "pip==26.2.1",
+    "rdkit==2026.9.1"
+   ]
+  },
+  "osx-64": {
+   "conda": [],
+   "pip": [],
+   "unavailable": "rdkit 2026.9.1 has no prebuilt package for macOS (Intel) (Python 3.12)"
+  },
+  "win-64": {
+   "conda": [],
+   "pip": [
+    "numpy==2.5.4",
+    "pillow==13.0.0",
+    "rdkit==2026.9.1"
+   ]
+  }
+ }
+}

@@ -1,7 +1,0 @@
-# Exact versions this tool was tested with, written by 'motel freeze'.
-# Built with Python 3.12.15 Darwin arm64. Applied as constraints when building the
-# environment; packages not listed here resolve normally.
-matplotlib==3.11.2
-munkres==1.1.4
-setuptools==84.0.0
-wheel==0.48.0

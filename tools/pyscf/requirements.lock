@@ -1,7 +1,0 @@
-# Exact versions this tool was tested with, written by 'motel freeze'.
-# Built with Python 3.11.17 Darwin arm64. Applied as constraints when building the
-# environment; packages not listed here resolve normally.
-pillow==13.0.0
-rdkit==2026.9.1
-setuptools==84.0.0
-wheel==0.48.0
