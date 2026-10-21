@@ -30,6 +30,9 @@ environment:
       description: Materials Project API key
       url: https://next-gen.materialsproject.org/api
 
+resources:
+  network: true  # every function queries the Materials Project's web API
+
 entrypoint: api
 
 functions:
