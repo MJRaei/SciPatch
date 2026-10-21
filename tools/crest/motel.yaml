@@ -1,0 +1,131 @@
+schema: 1
+name: crest
+version: 0.1.0
+title: Conformer, protomer, and tautomer search (CREST)
+summary: >-
+  Explore the low-energy chemical space of a molecule with CREST and GFN2-xTB:
+  find its conformers (metadynamics-based search) with Boltzmann populations,
+  the most favorable protonation and deprotonation sites, and its tautomers,
+  in the gas phase or implicit solvent. Molecules can be given as SMILES or XYZ files.
+domains: [chemistry]
+tags: [conformer, conformer-search, conformational-ensemble, boltzmann, protonation, protonation-site,
+       deprotonation, pka, tautomer, tautomerism, metadynamics, gfn2-xtb, xtb, crest, smiles]
+
+source:
+  homepage: https://crest-lab.github.io/crest-docs/
+  paper: https://doi.org/10.1039/C9CP06869D
+  citation: >-
+    P. Pracht, F. Bohle, S. Grimme, "Automated exploration of the low-energy
+    chemical space with fast quantum chemical methods", Phys. Chem. Chem. Phys.
+    22, 7169-7192 (2020); C. Bannwarth, S. Ehlert, S. Grimme, J. Chem. Theory
+    Comput. 15, 1652-1671 (2019) (GFN2-xTB).
+  license: LGPL-3.0-or-later
+
+environment:
+  manager: conda
+  python: "3.12"
+  # CREST 2.12, not 3.0.2: the conda-forge 3.0.2 build reads the energy window as 0 on
+  # macOS and keeps only one conformer (github.com/crest-lab/crest/issues/431).
+  conda_packages: ["crest=2.12", "xtb=6.7.1"]
+  channels: [conda-forge]
+  packages: ["rdkit==2026.9.1"]
+  variables:
+    OMP_STACKSIZE: "1G"
+    OMP_MAX_ACTIVE_LEVELS: "1"
+
+entrypoint: api
+
+functions:
+  conformer_search:
+    long_running: true
+    params:
+      molecule: {kind: molecule}
+      energy_window_kcal_mol: {unit: kcal/mol}
+    outputs:
+      relative_energies_kcal_mol: {unit: kcal/mol}
+      lowest_energy_hartree: {unit: Eh}
+      conformers_file: {kind: molecule}
+      best_structure: {kind: molecule}
+  protonation_sites:
+    params:
+      molecule: {kind: molecule}
+      energy_window_kcal_mol: {unit: kcal/mol}
+    outputs:
+      file: {kind: molecule}
+  deprotonation_sites:
+    params:
+      molecule: {kind: molecule}
+      energy_window_kcal_mol: {unit: kcal/mol}
+    outputs:
+      file: {kind: molecule}
+  tautomers:
+    params:
+      molecule: {kind: molecule}
+      energy_window_kcal_mol: {unit: kcal/mol}
+    outputs:
+      file: {kind: molecule}
+
+validity: >-
+  Energies are GFN2-xTB (or GFN-FF), which ranks conformers reasonably but with
+  errors of about 1-2 kcal/mol; relative energies of protomers, deprotomers, and
+  tautomers can be off by several kcal/mol (for acetaldehyde's enol, GFN2-xTB
+  gives 5.7 kcal/mol against about 10 kcal/mol from experiment). Refine the
+  lowest structures with DFT (pyscf) before drawing conclusions from small
+  differences. Populations use electronic energies only (no zero-point or
+  entropy corrections, rotamer degeneracy not counted). The search is
+  stochastic: for flexible molecules, check that the lowest conformer is
+  reproduced in a second run; "quick" modes are faster but may miss
+  conformers. Protonation and tautomer rankings in the gas phase can differ
+  from those in solution; pass a solvent. Searches take seconds for small
+  molecules and minutes to hours for flexible drug-sized ones.
+
+golden:
+  - name: butane has anti and gauche conformers with GFN2-xTB energies
+    function: conformer_search
+    args: {molecule: CCCC, mode: quick}
+    expect:
+      n_conformers: {min: 2}
+      relative_energies_kcal_mol.1: {min: 0.4, max: 0.9}
+      lowest_energy_hartree: {approx: -13.665128, abs: 0.00002}
+      conformers_file: {exists: true}
+    timeout: 900
+    reference: >-
+      n-Butane: anti is the global minimum and gauche lies above it by roughly
+      0.6-0.9 kcal/mol (experiments and standard texts); GFN2-xTB gives 0.60
+      kcal/mol. The lowest energy must equal the GFN2-xTB energy of tightly
+      optimized anti-butane from xtb 6.7.1 (-13.665128 Eh, the xtb tool).
+  - name: pyridine is protonated at nitrogen
+    function: protonation_sites
+    args: {molecule: c1ccncc1}
+    expect:
+      charge: 1
+      structures.0.site: N4
+      structures.0.smiles: "c1cc[nH+]cc1"
+    reference: Pyridine is a nitrogen base; its conjugate acid is the pyridinium ion.
+  - name: acetic acid loses its O-H proton
+    function: deprotonation_sites
+    args: {molecule: "CC(=O)O", solvent: water}
+    expect:
+      charge: -1
+      structures.0.site: O4
+      structures.0.smiles: "CC(=O)[O-]"
+    reference: >-
+      Acetic acid (pKa 4.76 in water) dissociates into acetate by losing the
+      carboxylic O-H proton; C-H deprotonation is far less favorable.
+  - name: acetaldehyde is more stable than its enol
+    function: tautomers
+    args: {molecule: "CC=O"}
+    expect:
+      structures.0.smiles: "CC=O"
+      structures.1.smiles: "C=CO"
+      structures.1.relative_energy_kcal_mol: {min: 2}
+    reference: >-
+      NIST Chemistry WebBook, gas phase: acetaldehyde dfH = -170.7 +- 1.5 kJ/mol
+      (Wiberg et al., 1991), ethenol (vinyl alcohol) about -125 to -128 kJ/mol
+      (Holmes and Lossing, 1982; Turecek and Havlas, 1986), so the keto form is
+      about 10 kcal/mol more stable. GFN2-xTB gives 5.7 kcal/mol.
+  - name: invalid SMILES are refused
+    function: conformer_search
+    args: {molecule: "C1CC"}
+    raises: "nor a valid SMILES string"
+    reference: An unclosed ring is not valid SMILES and must give a clear error.

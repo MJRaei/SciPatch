@@ -9,6 +9,7 @@ reproduce published or upstream-tested values on every build.
 |---|---|---|---|
 | [cantera](cantera/) | chemistry, engineering | Combustion chemistry: equilibrium, adiabatic flame temperatures, laminar flame speeds, ignition delays, species thermodynamics | NASA CEA flame temperatures; NIST-JANAF heat capacities; methane-air flame speed vs experiment |
 | [chgnet](chgnet/) | materials | Energies, forces, stresses, magnetic moments, relaxation, and MD with the CHGNet universal potential | CHGNet's test suite (LiMnO₂ energy and relaxation) |
+| [crest](crest/) | chemistry | Conformer search with Boltzmann populations, protonation and deprotonation sites, tautomers (GFN2-xTB) | Butane anti/gauche; pyridine, acetic acid, and keto-enol chemistry (NIST enthalpies) |
 | [gpaw](gpaw/) | materials | DFT for crystals (plane waves, PAW): energies, forces, stress, relaxation, equation of state, band structures and gaps, magnetism | GPAW's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
 | [mace](mace/) | materials, chemistry | The same with MACE-MP (89 elements) and MACE-OFF (organic molecules) | MACE's test suite (water); Si and Al lattice constants vs. experiment |
 | [openmm](openmm/) | chemistry, biology | Molecular dynamics of proteins, nucleic acids and water: preparation, solvation, minimization, constant-pressure MD; Amber-system energies | OpenMM's test suite vs Amber (ff14ipq energy); TIP3P density of water |
