@@ -1,0 +1,126 @@
+schema: 1
+name: pybamm
+version: 0.1.0
+title: Lithium-ion battery cell models (PyBaMM)
+summary: >-
+  Physics-based lithium-ion cell simulations with PyBaMM (Doyle-Fuller-Newman and
+  single-particle models): discharge curves, capacity and energy, rate
+  capability, heating, and cycling protocols (CC-CV charge, rests, power steps),
+  with published parameter sets for real cells such as the LG M50 21700.
+domains: [materials, chemistry, engineering]
+tags: [battery, lithium-ion, li-ion, cell, electrochemistry, dfn, newman, p2d, spm, discharge,
+       capacity, energy, rate-capability, c-rate, cycling, cccv, nmc, graphite, pybamm]
+
+source:
+  homepage: https://pybamm.org
+  paper: https://doi.org/10.5334/jors.309
+  citation: >-
+    V. Sulzer, S. G. Marquis, R. Timms, M. Robinson, S. J. Chapman, "Python Battery
+    Mathematical Modelling (PyBaMM)", J. Open Res. Softw. 9, 14 (2021); parameter
+    sets as listed by parameter_sets, e.g. Chen2020: C.-H. Chen et al., J.
+    Electrochem. Soc. 167, 080534 (2020).
+  license: BSD-3-Clause
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["pybamm==26.10.1.1", "matplotlib==3.11.2"]
+
+entrypoint: api
+
+functions:
+  discharge:
+    params:
+      temperature_c: {unit: °C}
+      cutoff_v: {unit: V}
+    outputs:
+      capacity_ah: {unit: Ah}
+      energy_wh: {unit: Wh}
+      average_voltage_v: {unit: V}
+      max_temperature_c: {unit: °C}
+      table: {kind: table}
+      plot: {kind: image}
+  rate_capability:
+    params:
+      temperature_c: {unit: °C}
+    outputs:
+      plot: {kind: image}
+  run_experiment:
+    long_running: true
+    params:
+      temperature_c: {unit: °C}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  parameter_sets: {}
+
+validity: >-
+  The models are only as good as the parameter set: each describes one cell
+  design, measured or fitted under particular conditions (Chen2020: an LG M50
+  21700 cell at 25 °C, validated against discharges up to about 1.5C). Results
+  for other cells, temperatures far from the measurements, or high rates
+  (electrolyte depletion, lithium plating) are extrapolations. The default
+  models have no ageing (no SEI growth or capacity fade), so cycles repeat
+  exactly; use parameter sets with degradation parameters (e.g. OKane2022) and
+  PyBaMM's degradation options for ageing studies. SPM is valid only at low
+  rates; DFN is the reference. "isothermal" ignores self-heating.
+
+maturity: established
+
+golden:
+  - name: the LG M50 cell delivers its specified energy at C/5 (Chen2020)
+    quick: true
+    function: discharge
+    args: {c_rate: 0.2}
+    expect:
+      capacity_ah: {min: 4.85, max: 5.25}
+      energy_wh: {approx: 18.2, rel: 0.05}
+      average_voltage_v: {approx: 3.63, rel: 0.02}
+      final_voltage_v: {approx: 2.5, abs: 0.001}
+    reference: >-
+      LG INR21700 M50 product specification (as reproduced in cell datasheets):
+      nominal energy 18.2 Wh, minimum capacity 4850 mAh, nominal voltage 3.63 V,
+      discharge end voltage 2.50 V. Chen et al., J. Electrochem. Soc. 167, 080534
+      (2020) measured this cell for the Chen2020 parameters. The model gives
+      5.117 Ah, 18.78 Wh, and 3.67 V at C/5.
+    against: independent
+  - name: a CC-CV cycle conserves charge
+    function: run_experiment
+    args:
+      steps: ["Discharge at C/5 until 2.5 V", "Rest for 30 minutes", "Charge at C/2 until 4.2 V",
+              "Hold at 4.2 V until C/50", "Discharge at C/5 until 2.5 V"]
+    expect:
+      steps.2.charge_ah: {approx: -4.37673, abs: 0.0005}
+      steps.3.charge_ah: {approx: -0.70850, abs: 0.0005}
+      steps.4.charge_ah: {approx: 5.08522, abs: 0.0005}
+      steps.1.charge_ah: {approx: 0.0, abs: 1.0e-9}
+    reference: >-
+      The models have no side reactions, so the charge put in by the constant-current
+      and constant-voltage steps (4.37673 + 0.70850 = 5.08523 Ah) must come back in
+      the following discharge (5.08522 Ah), and a rest passes no charge.
+    against: exact
+  - name: capacity falls as the discharge rate rises
+    function: rate_capability
+    args: {c_rates: [0.2, 1.0, 2.0]}
+    expect:
+      rates.0.relative_capacity: 1.0
+      rates.1.relative_capacity: {min: 0.9, max: 0.999}
+      rates.2.relative_capacity: {min: 0.85, max: 0.99}
+    reference: >-
+      Overpotentials grow with current, so a cell reaches its cut-off voltage earlier
+      at higher rates. The model gives 4.99 Ah at 1C and 4.78 Ah at 2C against 5.12
+      Ah at C/5.
+  - name: a cell heats up when discharged quickly (lumped thermal model)
+    function: discharge
+    args: {c_rate: 1.0, thermal: lumped}
+    expect:
+      max_temperature_c: {min: 26.0, max: 60.0}
+    reference: >-
+      Ohmic, reaction, and entropic heat raise a cell's temperature during a 1C
+      discharge when heat is not removed instantly; the model gives about 39 °C from
+      25 °C.
+  - name: an unknown parameter set is refused
+    function: discharge
+    args: {parameter_set: NoSuchCell}
+    raises: "Unknown parameter set"
+    reference: The tool must list the available parameter sets rather than fail obscurely.

@@ -22,6 +22,7 @@ reproduce published or upstream-tested values on every build.
 | [peptide-assembly](peptide-assembly/) | chemistry, biology | Linux, macOS, Windows | Conditions for peptide self-assembly (pH, concentration, temperature, solvent, time) from the most similar of 989 curated records (SAPdb and literature), for fibers, hydrogels, and spheres; from the peptide-agent hackathon project | experimental | Fmoc-FF hydrogel in water (Mahler et al. 2006); exact self-match; on the held-out split, the nearest records' solvent is right 69% of the time |
 | [phono3py](phono3py/) | materials | Linux, macOS, Windows | Lattice thermal conductivity vs temperature (RTA or full Boltzmann), from DFT forces or a universal ML potential | established | phono3py's test suite (Si with PBEsol forces, with and without isotopes) |
 | [phonopy](phonopy/) | materials | Linux, macOS, Windows | Phonon bands and DOS, dynamical stability, vibrational free energy and heat capacity | established | Dulong-Petit limit; Γ-point symmetry of silicon |
+| [pybamm](pybamm/) | materials, chemistry, engineering | Linux, macOS, Windows | Lithium-ion cells with physics-based models (Doyle-Fuller-Newman, single-particle): discharge curves, capacity and energy, rate capability, heating, CC-CV and other cycling protocols, with published cell parameters (LG M50 21700 and others) | established | LG M50 specification (18.2 Wh, ≥ 4.85 Ah, 3.63 V) at C/5; exact charge conservation over a CC-CV cycle |
 | [pycalphad](pycalphad/) | materials | Linux, macOS, Windows | Alloy thermodynamics (CALPHAD): stable phases and their compositions, liquidus, solidus, and phase fractions during solidification, binary phase diagrams; COST507 light alloys and other published databases, or your own TDB | established | ITS-90 melting point of Al; Al-Si eutectic (Murray & McAlister 1984); Pb-Sn solder eutectic |
 | [pymatgen-diffusion](pymatgen-diffusion/) | materials | Linux, macOS, Windows | Diffusivity, ionic conductivity, Haven ratio, and Arrhenius fits from MD trajectories | published | pymatgen-analysis-diffusion's test suite (LGPS at 600 K) |
 | [pymatgen-structure](pymatgen-structure/) | materials | Linux, macOS, Windows | Space groups, standard cells, supercells, format conversion, XRD patterns, structure matching | established | pymatgen's XRD tests; olivine and diamond space groups |
@@ -87,6 +88,9 @@ accepts.
   `phonopy.phonons` on the relaxed structure (dynamical stability).
 - **Electronic structure:** `gpaw.scf` → `gpaw.band_structure` on its restart
   file (gap, direct or indirect, band edges; PBE gaps are too small).
+- **Batteries:** `ml-potentials` and `pymatgen-diffusion` for ion transport in an
+  electrode or electrolyte material → `pybamm.discharge` and
+  `pybamm.rate_capability` for the cell (capacity and energy versus rate, heating).
 - **How fast do ions move?** `pymatgen-structure.make_supercell` (≥ 100 atoms) →
   `ml-potentials.molecular_dynamics` at several temperatures
   (several ps each) → `pymatgen-diffusion.analyze_trajectory` →
