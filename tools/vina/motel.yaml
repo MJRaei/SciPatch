@@ -1,0 +1,108 @@
+schema: 1
+name: vina
+version: 0.1.0
+title: Protein-ligand docking (AutoDock Vina)
+summary: >-
+  Dock small molecules into protein binding sites with AutoDock Vina: prepare
+  the receptor (PDB with hydrogens) and ligand (SMILES or SDF, via Meeko), search
+  a box around the site, and get ranked poses with Vina or Vinardo scores, RMSDs
+  to a known pose, and an SDF of the poses; or score and locally optimize a given
+  pose.
+domains: [chemistry, biology]
+tags: [docking, molecular-docking, protein-ligand, binding-pose, binding-affinity, virtual-screening,
+       redocking, autodock, vina, vinardo, meeko, pdbqt, drug-discovery, structure-based-design]
+
+source:
+  homepage: https://vina.scripps.edu
+  paper: https://doi.org/10.1021/acs.jcim.1c00203
+  citation: >-
+    J. Eberhardt, D. Santos-Martins, A. F. Tillack, S. Forli, "AutoDock Vina 1.2.0:
+    New Docking Methods, Expanded Force Field, and Python Bindings", J. Chem. Inf.
+    Model. 61, 3891-3898 (2021); O. Trott, A. J. Olson, J. Comput. Chem. 31,
+    455-461 (2010).
+  license: Apache-2.0 (Vina); LGPL-2.1 (Meeko); GPL-2.0 (Open Babel, receptor preparation)
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["vina=1.2.7", "openbabel=3.2.1", "rdkit=2026.03.1", "gemmi=0.7.5", "scipy=1.18.1"]
+  channels: [conda-forge]
+  # Meeko from PyPI: the conda-forge package requires ProDy, which has no Python 3.12
+  # build on conda-forge for all platforms; Meeko prepares ligands without it.
+  packages: ["meeko==0.8.0"]
+
+entrypoint: api
+
+functions:
+  dock:
+    long_running: true
+    params:
+      receptor: {kind: file}
+      ligand: {kind: molecule}
+      center: {unit: Å}
+      size: {unit: Å}
+      box_from_ligand: {kind: molecule}
+      reference_ligand: {kind: molecule}
+    outputs:
+      best_affinity_kcal_mol: {unit: kcal/mol}
+      output: {kind: molecule}
+      receptor_pdbqt: {kind: file}
+  score:
+    params:
+      receptor: {kind: file}
+      ligand: {kind: molecule}
+    outputs:
+      affinity_kcal_mol: {unit: kcal/mol}
+      output: {kind: molecule}
+
+validity: >-
+  Vina scores rank poses well but are rough affinity estimates: errors of 2-3
+  kcal/mol against measured binding free energies are typical, and scores of
+  different ligands should be compared with caution (larger molecules score
+  better). Docking treats the receptor as rigid (no induced fit), uses no explicit
+  water, and needs the right protonation and tautomer states of ligand and
+  receptor. A pose is only credible if the box covers the true site; redocking a
+  known ligand (pose RMSD below 2 Å) is the usual check. Search is stochastic:
+  raise exhaustiveness (32 or more) for flexible ligands and compare runs with
+  different seeds. Receptor PDBQT files made here with Open Babel use rigid
+  receptors and Gasteiger charges (Vina scoring does not use charges).
+
+golden:
+  - name: imatinib redocks into Abl kinase (1IEP) at the crystal pose
+    function: dock
+    args: {receptor: tests/data/1iep_receptorH.pdb, ligand: tests/data/1iep_ligand.sdf,
+           center: [15.190, 53.903, 16.917], size: [20, 20, 20], exhaustiveness: 32,
+           reference_ligand: tests/data/1iep_ligand.sdf}
+    expect:
+      poses.0.rmsd_to_reference_angstrom: {max: 2.0}
+      best_affinity_kcal_mol: {approx: -13.23, abs: 0.5}
+    timeout: 900
+    reference: >-
+      AutoDock Vina 1.2.7 documentation, basic docking tutorial (1IEP, Vina force
+      field, exhaustiveness 32, box centered at 15.190, 53.903, 16.917 with 20 Å
+      edges): best pose -13.23 kcal/mol (solution file -13.234), at the crystal
+      pose. Redocking succeeds when the top pose is within 2 Å heavy-atom RMSD of
+      the crystal ligand (the usual criterion).
+  - name: imatinib built from SMILES docks into the crystal pose
+    function: dock
+    args: {receptor: tests/data/1iep_receptorH.pdb,
+           ligand: "Cc1ccc(NC(=O)c2ccc(CN3CC[NH+](C)CC3)cc2)cc1Nc1nccc(-c2cccnc2)n1",
+           center: [15.190, 53.903, 16.917], size: [20, 20, 20], exhaustiveness: 32,
+           reference_ligand: tests/data/1iep_ligand.sdf}
+    expect:
+      ligand_conformer_generated: true
+      poses.0.rmsd_to_reference_angstrom: {max: 2.0}
+      best_affinity_kcal_mol: {min: -14.5, max: -12.0}
+    timeout: 900
+    reference: >-
+      Same system starting from a 3D structure generated from SMILES (imatinib
+      with the protonated N-methylpiperazine of the 1IEP ligand), so the crystal
+      conformation is not given: the top pose must still be within 2 Å of the
+      crystal pose, with a score near the tutorial's -13 kcal/mol.
+  - name: a receptor without hydrogens is refused
+    function: dock
+    args: {receptor: tests/data/no_hydrogens.pdb, ligand: "CCO", center: [20, 41, -4]}
+    raises: "has no hydrogens"
+    reference: >-
+      Vina's atom types need polar hydrogens (donors); docking into a receptor
+      without them gives wrong scores, so it must be refused with an explanation.

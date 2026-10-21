@@ -26,6 +26,7 @@ reproduce published or upstream-tested values on every build.
 | [pyscf](pyscf/) | chemistry | Ab initio quantum chemistry: HF, DFT, MP2, CCSD(T) energies, optimization, frequencies and thermochemistry, excited states (TDDFT) | PySCF's test suite (water HF, B3LYP, MP2, CCSD(T), frequencies; CIS of HF); NIST CCCBDB |
 | [quantum-espresso](quantum-espresso/) | materials | Plane-wave DFT with the verified SSSP pseudopotentials: energies, forces, stress, relaxation, equation of state, gaps, magnetism | Quantum ESPRESSO's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
 | [rdkit](rdkit/) | chemistry | Similarity and substructure search, 3D conformers (ETKDG + MMFF94), standardization with InChI/InChIKey | RDKit's documentation (doctested similarities and searches); PubChem identifiers |
+| [vina](vina/) | chemistry, biology | Protein-ligand docking: receptor and ligand preparation (SMILES or SDF), ranked poses with Vina/Vinardo scores, RMSD to a known pose, rescoring and local optimization | Vina's 1IEP tutorial (imatinib redocked within 2 Å, -13.2 kcal/mol), from the crystal ligand and from SMILES |
 | [xtb](xtb/) | chemistry | GFN2-xTB energies, optimization, frequencies, and thermochemistry for molecules, with implicit solvent | xtb's test suite (propyne; GBSA solvation) |
 
 Two more tools ship inside Motel itself: `ase-emt` (fast approximate
