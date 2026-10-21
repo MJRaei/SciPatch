@@ -43,6 +43,7 @@ reproduce published or upstream-tested values on every build.
 | [rdkit](rdkit/) | chemistry | Linux, macOS, Windows | Similarity and substructure search, 3D conformers (ETKDG + MMFF94), standardization with InChI/InChIKey | established | RDKit's documentation (doctested similarities and searches); PubChem identifiers |
 | [robocrys](robocrys/) | materials, chemistry | Linux, macOS, Windows | Crystal structures described in words (robocrystallographer): mineral prototype, dimensionality, coordination polyhedra and their corner, edge, or face sharing, tilts, bond lengths; per-site environments with ChemEnv polyhedra | established | robocrystallographer's own tests (rutile SnO2, MAPI); textbook rock salt, cubic perovskite, 2H-MoS2, and solid CO2 from published structures |
 | [structural-analogs](structural-analogs/) | materials | Linux, macOS, Windows | Materials Project compounds with the same crystal structure type as a material or structure file, with band gaps, formation energies, stability, and volumes, for estimating properties by analogy; from the mp-property-analogies hackathon project | experimental | Rock-salt and diamond-structure analogs (KCl for NaCl, Ge for Si); needs a free API key |
+| [surfaces](surfaces/) | materials, chemistry | Linux, macOS, Windows | Slabs along any Miller plane with all terminations, adsorption sites (top, bridge, fcc/hcp and four-fold hollows) and adsorbate placement, and nanoparticle shapes from surface energies (Wulff, Winterbottom, decahedra, icosahedra; WulffPack) | established | WulffPack's own tests (truncated octahedron, supported particle); exact fcc slab spacings, surface cells, and adsorption-site geometry |
 | [synthesis-recipes](synthesis-recipes/) | materials, chemistry | Linux, macOS, Windows | Published synthesis recipes (41,300 text-mined solid-state and sol-gel recipes: precursors, reactions, temperatures, times, atmospheres, DOIs), similar Materials Project compositions, and suggested routes for new materials from their closest analogs; from the SKY hackathon agent | experimental | Exact composition-identity checks; recipe counts of the bundled dataset; NCA analog for a new NCA composition |
 | [thermo](thermo/) | chemistry, engineering | Linux, macOS, Windows | Chemical engineering thermodynamics: properties of about 20,000 chemicals, vapor-liquid equilibrium with UNIFAC, Peng-Robinson, or Raoult's law (flash, bubble and dew points, T-x-y diagrams, azeotropes), and pipe pressure drop | published | NIST constants of ethanol; IAPWS-95 vapor pressure of water; the ethanol-water azeotrope (Evans 1916); Hagen-Poiseuille and Prandtl-Karman pipe flow |
 | [vina](vina/) | chemistry, biology | Linux, macOS, Windows | Protein-ligand docking: receptor and ligand preparation (SMILES or SDF), ranked poses with Vina/Vinardo scores, RMSD to a known pose, rescoring and local optimization | established | Vina's 1IEP tutorial (imatinib redocked within 2 Å, -13.2 kcal/mol), from the crystal ligand and from SMILES |
@@ -118,6 +119,11 @@ accepts.
 - **Heat treatment by diffusion:** `pycalphad.equilibrium` (which phase at the
   treatment temperature?) → `fipy.diffusion_1d` with D0 and Q (case depth, or
   the time to reach a concentration at a depth).
+- **Catalysis on surfaces:** `surfaces.make_slab` (any Miller plane and
+  termination) → `surfaces.adsorption_sites` (place O, OH, CO, ... on top,
+  bridge, or hollow sites) → `ml-potentials.relax` or DFT on both → adsorption
+  energy; slab energies of several facets → `surfaces.wulff_shape` (particle
+  shape and exposed facets).
 - **How fast do ions move?** `pymatgen-structure.make_supercell` (≥ 100 atoms) →
   `ml-potentials.molecular_dynamics` at several temperatures
   (several ps each) → `pymatgen-diffusion.analyze_trajectory` →

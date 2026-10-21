@@ -1,0 +1,185 @@
+schema: 1
+name: surfaces
+version: 0.1.0
+title: Surfaces, adsorption sites, and nanoparticle shapes (pymatgen, WulffPack)
+summary: >-
+  Build slabs of any crystal along any Miller plane (with all terminations), find
+  top, bridge, and fcc/hcp/four-fold hollow adsorption sites and place adsorbates
+  (H, O, OH, CO, H2O, NH3, ...), and construct equilibrium nanoparticle shapes from
+  surface energies with WulffPack: free Wulff shapes, particles on supports
+  (Winterbottom), decahedra, and icosahedra, with atomistic models.
+domains: [materials, chemistry]
+tags: [surface, slab, miller-index, termination, adsorption-site, adsorbate, catalysis, hollow-site,
+       wulff-construction, nanoparticle, winterbottom, decahedron, icosahedron, facet,
+       surface-energy, pymatgen, wulffpack, ase]
+
+source:
+  homepage: https://wulffpack.materialsmodeling.org
+  paper: https://doi.org/10.21105/joss.01944
+  citation: >-
+    J. M. Rahm, P. Erhart, "WulffPack: A Python package for Wulff constructions", J.
+    Open Source Softw. 5, 1944 (2020); slabs: R. Tran et al., Sci. Data 3, 160080
+    (2016) (pymatgen SlabGenerator); adsorption sites: J. H. Montoya, K. A. Persson,
+    npj Comput. Mater. 3, 14 (2017) (pymatgen AdsorbateSiteFinder).
+  license: MIT (WulffPack, pymatgen); LGPL-2.1 (ASE)
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["pymatgen=2026.9.24", "ase=3.29.0", "wulffpack=1.5", "matplotlib=3.11.2"]
+  channels: [conda-forge]
+
+entrypoint: api
+
+functions:
+  make_slab:
+    params:
+      structure: {kind: structure}
+      vacuum_angstrom: {unit: Å}
+      lattice_constant: {unit: Å}
+      output: {kind: structure}
+    outputs:
+      interlayer_spacing_angstrom: {unit: Å}
+      output: {kind: structure}
+  adsorption_sites:
+    params:
+      slab: {kind: structure}
+      height_angstrom: {unit: Å}
+      output: {kind: structure}
+  wulff_shape:
+    params:
+      structure: {kind: structure}
+      lattice_constant: {unit: Å}
+      output: {kind: molecule}
+    outputs:
+      volume_angstrom3: {unit: Å3}
+      area_angstrom2: {unit: Å2}
+      output: {kind: molecule}
+      plot: {kind: image}
+
+validity: >-
+  Geometry only: slabs are cut from the bulk structure without relaxation or
+  reconstruction, and adsorbates are placed at a chosen height without
+  optimization; relax both (ml-potentials, quantum-espresso, gpaw) before
+  computing energies. Polar terminations need care (dipole corrections or
+  symmetric slabs). Site types are assigned from the top layer's geometry; on
+  stepped or rough surfaces, check them visually. Wulff shapes are equilibrium
+  shapes at 0 K from the surface energies you give, ignoring edge and corner
+  energies, so they are least reliable for particles below a few nanometres;
+  atomistic models are cut from the bulk lattice.
+
+maturity: established
+
+golden:
+  - name: WulffPack's truncated-octahedron test
+    quick: true
+    function: wulff_shape
+    args: {surface_energies: {"111": 1.0, "100": 1.1547005383792515, "211": 1.7},
+           structure: Pd, lattice_constant: 3.9, natoms: 230}
+    expect:
+      facet_fractions.111: {approx: 0.77599076, abs: 1.0e-7}
+      facet_fractions.100: {approx: 0.22400924, abs: 1.0e-7}
+      number_of_corners: 24
+      formula: Pd201
+    reference: >-
+      WulffPack test suite, tests/unittest/test_single_crystal.py (Pd, a = 3.9
+      Angstrom, gamma(111) = 1, gamma(100) = 2/sqrt 3, gamma(211) = 1.7, 230 atoms):
+      facet fractions 0.77599076 (111) and 0.22400924 (100), 24 corners, Pd201.
+      These are the exact area fractions 12 sqrt 3 / (6 + 12 sqrt 3) and 6 / (6 +
+      12 sqrt 3) of the regular truncated octahedron.
+    against: upstream-tests
+  - name: WulffPack's Winterbottom (supported particle) test
+    function: wulff_shape
+    args: {surface_energies: {"111": 1.0, "100": 1.1547005383792515, "211": 1.7},
+           structure: Pd, lattice_constant: 3.9, natoms: 600, kind: winterbottom,
+           interface_energy: 0.5, interface_direction: [-1, -1, -1]}
+    expect:
+      facet_fractions.111: {approx: 0.64486065, abs: 1.0e-7}
+      facet_fractions.100: {approx: 0.15594156, abs: 1.0e-7}
+      facet_fractions.interface: {approx: 0.19919779, abs: 1.0e-7}
+      formula: Pd626
+    reference: >-
+      WulffPack test suite, tests/unittest/test_winterbottom.py (interface (-1,-1,-1),
+      interface energy 0.5, 600 atoms): 0.64486065 (111), 0.15594156 (100),
+      0.19919779 (interface), Pd626.
+    against: upstream-tests
+  - name: a much higher (111) energy gives a cube
+    function: wulff_shape
+    args: {surface_energies: {"100": 1.0, "111": 2.0}, structure: Cu}
+    expect:
+      facet_fractions.100: {approx: 1.0, abs: 1.0e-9}
+      number_of_corners: 8
+    reference: >-
+      In a cubic crystal, (111) facets appear on the Wulff shape only if gamma(111) /
+      gamma(100) < sqrt 3 (the cube corner lies at sqrt 3 times the (100) distance);
+      with a ratio of 2 the shape is a cube with 8 corners.
+    against: exact
+  - name: Cu(111) slab spacing and surface cell from the crystal structure
+    function: make_slab
+    args: {structure: tests/data/Cu_wyckoff.cif, miller: [1, 1, 1], layers: 4}
+    expect:
+      interlayer_spacing_angstrom: {approx: 2.0870981, abs: 1.0e-5}
+      area_per_surface_cell_angstrom2: {approx: 5.6585822, abs: 1.0e-4}
+      surface_lattice.a_angstrom: {approx: 2.5561627, abs: 1.0e-4}
+      surface_lattice.gamma_deg: {approx: 60.0, abs: 0.01}
+      atoms: 4
+      layers: 4
+    reference: >-
+      Copper, fcc with a = 3.61496 Angstrom (Wyckoff 1963, COD 9008468): (111) layers
+      are a/sqrt 3 = 2.08710 Angstrom apart, and the 1x1 surface cell is a 60°
+      rhombus of side a/sqrt 2 = 2.55616 Angstrom and area sqrt 3 a^2 / 4 = 5.65858
+      Angstrom2, one atom per layer.
+    against: exact
+  - name: Cu(110) slab spacing and rectangular surface cell
+    function: make_slab
+    args: {structure: tests/data/Cu_wyckoff.cif, miller: "110", layers: 6}
+    expect:
+      interlayer_spacing_angstrom: {approx: 1.2780814, abs: 1.0e-5}
+      area_per_surface_cell_angstrom2: {approx: 9.2404260, abs: 1.0e-4}
+      surface_lattice.gamma_deg: {approx: 90.0, abs: 0.01}
+      atoms: 6
+    reference: >-
+      fcc (110): layers a/(2 sqrt 2) = 1.27808 Angstrom apart; rectangular 1x1 cell of
+      a/sqrt 2 by a, area a^2 / sqrt 2 = 9.24043 Angstrom2 (a = 3.61496 Angstrom).
+    against: exact
+  - name: the four adsorption sites of fcc(111), with O placed in the fcc hollow
+    function: adsorption_sites
+    args: {slab: tests/data/Cu111_ase.vasp, adsorbate: O, site: fcc_hollow, height_angstrom: 1.2}
+    expect:
+      counts.top: 1
+      counts.bridge: 1
+      counts.fcc_hollow: 1
+      counts.hcp_hollow: 1
+      sites.1.lateral_distance_angstrom: {approx: 1.2780814, abs: 1.0e-4}
+      sites.2.lateral_distance_angstrom: {approx: 1.4757934, abs: 1.0e-4}
+      adsorbate.site.position_angstrom.0: {approx: 1.2780814, abs: 1.0e-3}
+      adsorbate.site.position_angstrom.1: {approx: 0.7379006, abs: 1.0e-3}
+      adsorbate.nearest_surface_atom_distance_angstrom: {approx: 1.9021013, abs: 1.0e-4}
+    reference: >-
+      An fcc(111) surface has top, bridge, fcc-hollow (no atom in the second layer
+      below), and hcp-hollow (atom below) sites. For Cu (a = 3.61496 Angstrom; slab
+      from ASE's fcc111 builder) the bridge lies a/(2 sqrt 2) = 1.27808 and the
+      hollows a/sqrt 6 = 1.47579 Angstrom from their surface atoms, and ASE places
+      the fcc site at (1/3, 1/3) of the surface cell, (1.27808, 0.73790) Angstrom. An
+      O atom 1.2 Angstrom above it is sqrt(1.2^2 + a^2/6) = 1.90210 Angstrom from its
+      three Cu neighbours.
+    against: exact
+  - name: the three adsorption sites of fcc(100)
+    function: adsorption_sites
+    args: {slab: tests/data/Cu100_ase.vasp}
+    expect:
+      counts.top: 1
+      counts.bridge: 1
+      counts.fourfold_hollow: 1
+      sites.2.surface_neighbours: 4
+      sites.2.lateral_distance_angstrom: {approx: 1.80748, abs: 1.0e-4}
+    reference: >-
+      An fcc(100) surface has top, bridge, and four-fold hollow sites; the hollow is
+      a/2 = 1.80748 Angstrom laterally from its four Cu atoms (slab from ASE's fcc100
+      builder, a = 3.61496 Angstrom).
+    against: exact
+  - name: invalid Miller indices are refused
+    function: make_slab
+    args: {structure: Cu, miller: [0, 0, 0]}
+    raises: "Invalid Miller indices"
+    reference: The tool must reject the (000) plane.
