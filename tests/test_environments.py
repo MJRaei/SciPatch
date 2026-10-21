@@ -50,6 +50,29 @@ def test_conda_retries_with_classic_solver(tmp_path: Path, monkeypatch: pytest.M
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="uses a POSIX shell script")
+def test_conda_uses_only_the_manifest_channels(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    conda = tmp_path / "conda"
+    record = f'#!/bin/sh\necho "$@" > "{tmp_path}/args"\n'
+    conda.write_text(FAKE_CONDA.replace("#!/bin/sh\n", record))
+    conda.chmod(0o755)
+    monkeypatch.setenv("CONDA_EXE", str(conda))
+    monkeypatch.delenv("MAMBA_EXE", raising=False)
+    monkeypatch.setenv("CONDA_SOLVER", "classic")
+    CondaBackend().create(
+        Environment(manager="conda", python="3.12", conda_packages=["xtb=6.7.1"]),
+        env_dir=tmp_path / "env",
+        package_dir=tmp_path,
+        source_dir=None,
+        log=BuildLog(tmp_path / "build.log", NullReporter()),
+    )
+    arguments = (tmp_path / "args").read_text().split()
+    assert "--override-channels" in arguments
+    assert arguments[arguments.index("-c") + 1] == "conda-forge"
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="uses a POSIX shell script")
 def test_conda_errors_name_the_problem(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     conda = tmp_path / "conda"
     conda.write_text("#!/bin/sh\necho 'PackagesNotFoundError: nope'\nexit 1\n")

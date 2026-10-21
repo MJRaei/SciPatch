@@ -80,7 +80,11 @@ class CondaBackend(EnvironmentBackend):
         env_dir.parent.mkdir(parents=True, exist_ok=True)
 
         is_micromamba = Path(conda).name.startswith("micromamba")
+        # Only the manifest's channels: a user's own conda configuration (often with
+        # Anaconda's defaults channel) must not change, or slow down, a tool's environment.
         channels = [arg for channel in spec.channels for arg in ("-c", channel)]
+        if channels:
+            channels.insert(0, "--override-channels")
         if spec.conda_file:
             file = str(package_dir / spec.conda_file)
             command = (
