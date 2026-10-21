@@ -21,13 +21,17 @@ description: >-
   e.g. on Mn about 3 μB suggests Mn4+ (d3), about 4 μB Mn3+ (d4), and about
   5 μB high-spin Mn2+ (d5). Use as a hint, not proof.
 - **Diffusion:** `molecular_dynamics(structure, temperature_k=800, steps=5000)`
-  runs in the background; collect the result later. Analyze the trajectory
-  file with ASE or pymatgen.
+  runs in the background (progress is shown while it runs); collect the result
+  later. Use a supercell of at least about 100 atoms. Pass the returned
+  `trajectory` and `frame_interval_fs` to a diffusion-analysis tool.
 
 ## Parameters that matter
 
-- `fmax`: 0.1 eV/Å is fine for screening; use 0.02 to 0.05 before computing
-  phonons or comparing small energy differences.
+- `fmax`: 0.1 eV/Å is fine for screening atomic positions; use 0.02 to 0.05
+  before computing phonons or comparing small energy differences.
+- **Cell relaxation needs a tighter `fmax`.** With `relax_cell`, a stress counts
+  as converged when stress × volume per atom < `fmax`, so at 0.1 eV/Å stresses
+  up to about 1 GPa remain. Use `fmax` ≤ 0.01 for lattice constants.
 - `model`: keep "0.3.0" unless you need r2SCAN-level energies ("r2scan").
 - `device`: "cpu" is reproducible; "auto" uses a GPU if available, which is
   faster for MD.

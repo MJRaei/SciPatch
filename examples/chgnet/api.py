@@ -14,6 +14,7 @@ from typing import Literal
 import numpy as np
 
 Model = Literal["0.3.0", "0.2.0", "r2scan"]
+_FRAME_INTERVAL = 10  # MD steps between saved trajectory frames
 Device = Literal["cpu", "auto", "cuda", "mps"]
 
 
@@ -83,7 +84,9 @@ def relax(
 
     Args:
         structure: Path to the starting structure file.
-        fmax: Force convergence threshold in eV/Å.
+        fmax: Force convergence threshold in eV/Å. With relax_cell it also limits the
+            residual stress (to roughly fmax / volume per atom: 0.1 eV/Å is about
+            1 GPa), so use 0.01 or less when the lattice constant matters.
         steps: Maximum number of optimizer steps.
         relax_cell: Also relax the cell shape and volume.
         model: Pretrained model: "0.3.0", "0.2.0", or "r2scan".
@@ -152,7 +155,8 @@ def molecular_dynamics(
 
     Returns:
         Simulated time (ps), final temperature (K), final potential energy
-        (eV/atom), and the trajectory and log file paths.
+        (eV/atom), the trajectory and log file paths, the number of saved frames,
+        and the time between saved frames (fs), which diffusion analysis needs.
     """
     from ase.md.velocitydistribution import MaxwellBoltzmannDistribution, Stationary
     from chgnet.model.dynamics import MolecularDynamics
@@ -173,9 +177,18 @@ def molecular_dynamics(
         timestep=timestep_fs,
         trajectory=trajectory,
         logfile="md.log",
-        loginterval=10,
+        loginterval=_FRAME_INTERVAL,
         use_device=_device(device),
     )
+
+    def report_progress() -> None:
+        energy = float(md.atoms.get_potential_energy()) / len(md.atoms)
+        print(
+            f"step {md.dyn.nsteps}/{steps}: T = {md.atoms.get_temperature():.0f} K, "
+            f"E_pot = {energy:.4f} eV/atom"
+        )
+
+    md.dyn.attach(report_progress, interval=max(1, steps // 50))
     md.run(steps)
     atoms = md.atoms
     return {
@@ -183,5 +196,7 @@ def molecular_dynamics(
         "final_temperature_k": float(atoms.get_temperature()),
         "final_energy_ev_per_atom": float(atoms.get_potential_energy()) / len(atoms),
         "trajectory": trajectory,
+        "n_frames": steps // _FRAME_INTERVAL + 1,
+        "frame_interval_fs": timestep_fs * _FRAME_INTERVAL,
         "log": "md.log",
     }
