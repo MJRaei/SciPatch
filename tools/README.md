@@ -76,13 +76,32 @@ accepts.
   `pyscf.optimize` and `pyscf.frequencies` with DFT (minimum? free energy) →
   `pyscf.single_point` with a larger basis or `ccsd(t)` for the final energy;
   `pyscf.excited_states` for UV-Vis.
+- **Metals and semiconductors at scale:** `lammps.list_potentials` →
+  `lammps.crystal_properties` (lattice and elastic constants; compare with
+  `matcalc.elastic_constants` or DFT) → `lammps.simulate` at several temperatures
+  (NPT: thermal expansion; heating: melting) → `ovito.structure_types` on the
+  trajectory (phase of each atom per frame) and `mdanalysis.rdf` / `mdanalysis.msd`.
+- **Defects and plasticity:** `lammps.run_script` with your deformation or
+  cascade input → `ovito.dislocations` (line length, Burgers vectors, density)
+  and `ovito.point_defects` (vacancies, interstitials per frame).
+- **Docking:** `openbabel.convert` (protonate the ligand for pH 7.4) →
+  `vina.dock` (redock the crystal ligand first to validate the box) →
+  `openmm.simulate` with the best pose as `small_molecules` →
+  `mdanalysis.rmsd` on `start.pdb` + `trajectory.dcd` (does the pose stay?).
+- **Chemical files:** `openbabel.convert` and `openbabel.identifiers` move
+  molecules between programs and formats and give InChIKeys for lookups.
 
 ## Licenses
 
 Each tool's `motel.yaml` states its license. Note especially: MACE-OFF models
 are for non-commercial use only (Academic Software License), Materials Project
-data is CC BY 4.0, and xtb is LGPL-3.0. Upstream code is downloaded from its
-original repository at install time and is not redistributed here.
+data is CC BY 4.0, xtb is LGPL-3.0, and LAMMPS and Open Babel are GPL-2.0.
+Upstream code, potential files, and pseudopotentials are downloaded from their
+original sources at install time and are not redistributed here. Small test
+inputs taken from upstream projects (the LAMMPS benchmark input, the Vina 1IEP
+tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory, and
+molecules of the MMFF94 validation suite) keep their projects' licenses; each
+golden test names its source.
 
 ## Adding a tool
 
