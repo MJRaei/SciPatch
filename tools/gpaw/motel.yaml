@@ -108,6 +108,8 @@ validity: >-
   zero-point motion. Cost grows with the number of atoms cubed and with the
   k-point count: dozens of atoms are practical, hundreds are not.
 
+maturity: established
+
 golden:
   - name: silicon energy and gap match the GPAW test suite
     quick: true
@@ -129,6 +131,7 @@ golden:
       Angstrom), GPAW's default LDA functional, PW 200 eV, 4x4x4 Monkhorst-Pack
       k-points, tetrahedron method, spin-polarized: E = -11.8584 eV (0.001) and
       LUMO - HOMO on that mesh = 1.117 eV (0.002).
+    against: upstream-tests
   - name: silicon equation of state matches all-electron PBE
     function: equation_of_state
     args: {structure: tests/data/Si_5.475.extxyz, ecut_ev: 500, kpoint_density: 5}
@@ -142,6 +145,7 @@ golden:
       Science 351, aad3000 (2016); github.com/molmod/DeltaCodesDFT WIEN2k.txt at
       commit f9b6693): Si V0 = 20.4530 Angstrom^3/atom, B0 = 88.545 GPa. This tool
       gives 20.52 Angstrom^3/atom and 88.58 GPa (PW 500 eV, 10x10x10 k-points).
+    against: independent
   - name: silicon has an indirect gap from Gamma to the Gamma-X line
     function: band_structure
     args: {structure: tests/data/Si_5.475.extxyz, n_points: 60}
@@ -157,6 +161,7 @@ golden:
       conduction band minimum on the Delta line about 85% of the way from Gamma to
       X (e.g. P. Y. Yu and M. Cardona, Fundamentals of Semiconductors). PBE
       underestimates the 1.17 eV measured gap, typically giving about 0.6 eV.
+    against: independent
   - name: iron is a ferromagnet with the measured moment
     function: scf
     args: {structure: tests/data/Fe_bcc.extxyz, ecut_ev: 500, kpoint_density: 5, smearing_ev: 0.1}
@@ -171,6 +176,7 @@ golden:
       mu_B at the all-electron PBE volume (a = 2.8309 Angstrom, V = 11.3436
       Angstrom^3/atom from the Delta benchmark). Spin polarization must switch on
       automatically for Fe.
+    against: independent
   - name: molecules without a periodic cell are refused
     function: scf
     args: {structure: tests/data/water.xyz}

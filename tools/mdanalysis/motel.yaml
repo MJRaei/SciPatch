@@ -96,6 +96,8 @@ validity: >-
   length; coordination numbers depend on the cutoff, taken here at the first
   minimum after the first peak.
 
+maturity: established
+
 golden:
   - name: the adenylate kinase test system is read correctly
     function: info
@@ -107,6 +109,7 @@ golden:
     reference: >-
       MDAnalysisTests adk.psf / adk_dims.dcd (adenylate kinase, 214 residues,
       3341 atoms); the test file holds frames 0, 49 and 97 (tests/make_data.py).
+    against: upstream-tests
   - name: C-alpha RMSD matches MDAnalysis's test suite
     quick: true
     function: rmsd
@@ -117,6 +120,7 @@ golden:
     reference: >-
       MDAnalysis 2.10.0, testsuite analysis/test_rms.py, TestRMSD.correct_values:
       C-alpha RMSD of frame 49 of adk_dims.dcd from frame 0 is 4.68953 Å.
+    against: upstream-tests
   - name: backbone RMSD matches MDAnalysis's test suite
     function: rmsd
     args: {topology: tests/data/adk.pdb, trajectory: tests/data/adk_3frames.dcd}
@@ -127,6 +131,7 @@ golden:
       MDAnalysis 2.10.0, test_rms.py: backbone RMSD of frame 49 is 4.6997 Å
       (correct_values_backbone_group), and the superposed backbone RMSD between
       the first and last frames is 6.820321761927005 Å (Testrmsd.test_superposition).
+    against: upstream-tests
   - name: an fcc crystal has 12 nearest neighbors at a/sqrt(2)
     function: rdf
     args: {topology: tests/data/Cu_fcc_4x4x4.pdb, r_max: 6.0, n_bins: 600}
@@ -136,6 +141,7 @@ golden:
     reference: >-
       Face-centered cubic lattice (copper, a = 3.615 Å): 12 nearest neighbors at
       a/sqrt(2) = 2.5562 Å. The structure is a perfect 256-atom periodic crystal.
+    against: exact
   - name: a 3D random walk has MSD = 3t and D = 0.5 Angstrom^2/ps
     function: msd
     args: {topology: tests/data/random_walk.pdb, trajectory: tests/data/random_walk.dcd,
@@ -148,6 +154,7 @@ golden:
       Einstein relation for a lattice random walk: 100 walkers move +-1 Å along
       each axis every 1 ps (tests/make_data.py), so every step adds exactly 3 Å^2,
       MSD(t) = 3 t, and D = MSD / (6 t) = 0.5 Å^2/ps = 5e-5 cm^2/s.
+    against: exact
   - name: a selection that matches nothing is refused
     function: rmsd
     args: {topology: tests/data/adk.pdb, trajectory: tests/data/adk_3frames.dcd, selection: resname XYZ}

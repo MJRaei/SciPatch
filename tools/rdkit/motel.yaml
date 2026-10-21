@@ -69,6 +69,8 @@ validity: >-
   another seed. Standardization rules follow RDKit's MolStandardize defaults
   and may not match a particular database's conventions.
 
+maturity: established
+
 golden:
   - name: Morgan similarity matches the RDKit documentation
     quick: true
@@ -80,6 +82,7 @@ golden:
       RDKit 2026.09.1, Docs/Book/GettingStartedInPython.rst, "Morgan Fingerprints"
       (doctest): Dice similarity of radius-2 count fingerprints of toluene and
       2-methylpyridine is 0.55...
+    against: upstream-tests
   - name: RDKit fingerprint similarities match the RDKit documentation
     function: similarity_search
     args: {query: CCOC, molecules: [COC, CCO], fingerprint: rdkit}
@@ -91,6 +94,7 @@ golden:
       RDKit 2026.09.1, GettingStartedInPython.rst, "RDKit (Topological)
       Fingerprints" (doctest): Tanimoto(CCOC, CCO) = 0.6..., Tanimoto(CCOC, COC) =
       0.4...; the more similar molecule is ranked first.
+    against: upstream-tests
   - name: substructure search matches the RDKit documentation
     function: substructure_search
     args: {pattern: "c[NH1]", molecules: tests/data/actives_5ht3.sdf}
@@ -100,6 +104,7 @@ golden:
     reference: >-
       RDKit 2026.09.1, GettingStartedInPython.rst, "Substructure Searching"
       (doctest): 22 molecules of Docs/Book/data/actives_5ht3.sdf match c[NH1].
+    against: upstream-tests
   - name: substructure atom indices match the RDKit documentation
     function: substructure_search
     args: {pattern: ccO, molecules: [c1ccccc1O]}
@@ -108,6 +113,7 @@ golden:
     reference: >-
       RDKit 2026.09.1, GettingStartedInPython.rst (doctest): phenol matches ccO at
       atoms ((0, 5, 6), (4, 5, 6)).
+    against: upstream-tests
   - name: standardization gives the PubChem parent compounds
     function: standardize
     args:
@@ -121,6 +127,7 @@ golden:
       PubChem: sodium acetate (CID 31372) has the parent compound acetic acid
       (CID 176, QTBSBXVTEAMEQO-UHFFFAOYSA-N, C2H4O2); aspirin CID 2244
       (BSYNRYMUTXBXSQ-UHFFFAOYSA-N); caffeine CID 2519 (RYYVLZVUVIJVGH-UHFFFAOYSA-N).
+    against: independent
   - name: butane has anti and gauche conformers, benzene one
     function: conformers
     args: {molecule: CCCC}
@@ -132,12 +139,14 @@ golden:
       n-Butane has two distinct conformers, anti and gauche (the gauche pair are
       mirror images); gauche lies above anti by roughly 0.6-0.9 kcal/mol in
       experiments and standard texts. MMFF94 gives 0.78 kcal/mol here.
+    against: independent
   - name: rigid benzene has a single conformer
     function: conformers
     args: {molecule: c1ccccc1}
     expect:
       n_unique: 1
     reference: Benzene is rigid; all embedded conformers must collapse into one.
+    against: exact
   - name: invalid SMILES are refused
     function: similarity_search
     args: {query: C1CC, molecules: [CCO]}

@@ -73,6 +73,8 @@ validity: >-
   as the reference for removing drift, so self-diffusion in a pure element
   cannot be analyzed.
 
+maturity: published
+
 golden:
   - name: LGPS at 600 K matches the pymatgen-analysis-diffusion test suite
     function: analyze_trajectory
@@ -94,6 +96,7 @@ golden:
       decimal places), conductivity 74.165372613735684 mS/cm (4 places), Haven
       ratio 0.31854161048867402. The trajectory was rebuilt from that test's
       DiffusionAnalyzer.json (initial structure plus displacements, 20 fs apart).
+    against: upstream-tests
   - name: Arrhenius fit matches the pymatgen-analysis-diffusion test suite
     quick: true
     function: arrhenius_fit
@@ -109,6 +112,7 @@ golden:
       pymatgen-analysis-diffusion v2025.11.14, tests/pymatgen/analysis/diffusion/test_analyzer.py::FuncTest::test_fit_arrhenius:
       Ea = 0.5 eV, prefactor 12 cm²/s, standard error 0.000895566 eV for
       D = 12 exp(-0.5 eV / kT) at 300, 1000, 500 K with small fixed perturbations.
+    against: upstream-tests
   - name: a trajectory shorter than 1 ps is refused with an explanation
     function: analyze_trajectory
     args:

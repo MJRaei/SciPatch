@@ -62,6 +62,8 @@ validity: >-
   models, e.g. CHGNet, are far worse), so treat ML values as screening
   estimates and confirm important ones with DFT forces.
 
+maturity: established
+
 golden:
   - name: silicon conductivity matches the phono3py test suite
     quick: true
@@ -81,6 +83,7 @@ golden:
       2x2x2, PBEsol forces from VASP in the test suite, RTA, 9x9x9 mesh, 300 K):
       kappa = 107.694 W/m/K for full and 107.794 for compact force constants
       (tolerance 0.5). This tool gives 107.788.
+    against: upstream-tests
   - name: isotope scattering lowers silicon's conductivity as in the test suite
     function: thermal_conductivity
     args:
@@ -94,6 +97,7 @@ golden:
     reference: >-
       phono3py v4.8.2, test_kappa_RTA.py::test_kappa_RTA_si_iso: 97.296 W/m/K
       (tolerance 0.5).
+    against: upstream-tests
   - name: the ML potential gives silicon's conductivity close to DFT
     function: thermal_conductivity
     args: {structure: tests/data/Si.json, temperatures_k: [300, 600]}
@@ -107,6 +111,7 @@ golden:
       300 K); the PBE-trained default model gives about 92 W/m/K, within the
       30% tolerance expected of a universal potential. At 600 K, three-phonon
       (Umklapp) scattering roughly halves kappa (kappa ~ 1/T); the model gives 44.
+    against: independent
   - name: displacement files without forces are refused
     function: thermal_conductivity
     args: {structure: tests/data/phono3py_si_pbesol.yaml}

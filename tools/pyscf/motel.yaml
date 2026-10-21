@@ -106,6 +106,8 @@ validity: >-
   typically within 0.2-0.5 eV for valence states, but charge-transfer and
   Rydberg states need range-separated functionals and diffuse basis sets.
 
+maturity: established
+
 golden:
   - name: Hartree-Fock water matches the PySCF test suite
     function: single_point
@@ -119,6 +121,7 @@ golden:
       PySCF v2.14.0, pyscf/scf/test/test_rhf.py: test_scf, E(RHF/cc-pVDZ) =
       -76.026765673119627 Eh (9 decimals), and test_analyze, |dipole| =
       2.0584447549532596 D, for water at the test's geometry (tests/data/water.xyz).
+    against: upstream-tests
   - name: B3LYP water matches the PySCF test suite
     quick: true
     function: single_point
@@ -130,6 +133,7 @@ golden:
       -76.384928891413438 Eh for the same water geometry, on a (50, 194) grid; the
       default grid used here differs by about 0.00002 Eh. "b3lyp" and "b3lypg" are
       the same functional in PySCF (libxc's B3LYP, with VWN-RPA).
+    against: upstream-tests
   - name: MP2 water matches the PySCF test suite
     function: single_point
     args: {molecule: tests/data/water.xyz, method: mp2, basis: cc-pvdz}
@@ -140,6 +144,7 @@ golden:
       PySCF v2.14.0, pyscf/mp/test/test_mp2.py::test_mp2: E_corr(MP2/cc-pVDZ, all
       electrons) = -0.204019967288338 Eh for the same water geometry; the total is
       that plus the RHF energy above.
+    against: upstream-tests
   - name: CCSD(T) water matches the PySCF test suite
     function: single_point
     args: {molecule: tests/data/water.xyz, method: ccsd(t), basis: 6-31g}
@@ -150,6 +155,7 @@ golden:
       PySCF v2.14.0, pyscf/cc/test/test_rccsd.py: test_incore_complete,
       E_corr(CCSD/6-31G) = -0.13539788638119823 Eh (7 decimals), and test_ccsd_t,
       E(T) = -0.0009964234049929792 Eh (8 decimals), for the same water geometry.
+    against: upstream-tests
   - name: water frequencies and zero-point energy match the PySCF test suite
     function: frequencies
     args: {molecule: tests/data/water.xyz, method: hf, basis: sto-3g, optimize_first: false}
@@ -164,6 +170,7 @@ golden:
       PySCF v2.14.0, pyscf/hessian/test/test_thermo.py::test_thermo (HF/STO-3G
       water at the same geometry): frequencies 2044.5497, 4486.6572, 4788.2700
       cm⁻¹ (3 decimals) and E(0 K) = -74.93727546 Eh (7 decimals).
+    against: upstream-tests
   - name: excited states of HF match the PySCF test suite
     function: excited_states
     args: {molecule: tests/data/hf.xyz, method: hf, basis: 6-31g, tda: true, n_states: 5}
@@ -176,6 +183,7 @@ golden:
       hydrogen fluoride, H at 0.917 Angstrom): 11.90276464, 11.90276464, 16.86036434
       eV (5 decimals, converted with 27.2114 eV/Eh; this tool uses CODATA's
       27.211386, a 0.00001 eV difference).
+    against: upstream-tests
   - name: water optimizes to the CCCBDB Hartree-Fock minimum
     function: optimize
     args: {molecule: O, method: hf, basis: sto-3g}
@@ -187,6 +195,7 @@ golden:
       NIST CCCBDB, Release 22 (May 2022), H2O at HF/STO-3G: optimized energy
       -74.965901 Eh, r(OH) 0.9894 Angstrom, angle 100.027 degrees (this tool gives
       0.9894 Angstrom and 100.02 degrees).
+    against: independent
   - name: optimized water has the CCCBDB Hartree-Fock frequencies
     function: frequencies
     args: {molecule: O, method: hf, basis: sto-3g}
@@ -198,6 +207,7 @@ golden:
     reference: >-
       NIST CCCBDB, Release 22 (May 2022), H2O at HF/STO-3G: unscaled harmonic
       frequencies 2170, 4140, 4391 cm⁻¹ (rounded to integers) at the optimized geometry.
+    against: independent
   - name: a radical needs its unpaired electron
     function: single_point
     args: {molecule: tests/data/oh.xyz, method: hf, basis: sto-3g}
@@ -213,3 +223,4 @@ golden:
       charge: 0
       formula: HO
     reference: The SMILES [OH] has one radical electron, so the doublet is used.
+    against: exact

@@ -79,6 +79,8 @@ validity: >-
   from those in solution; pass a solvent. Searches take seconds for small
   molecules and minutes to hours for flexible drug-sized ones.
 
+maturity: established
+
 golden:
   - name: butane has anti and gauche conformers with GFN2-xTB energies
     function: conformer_search
@@ -94,6 +96,7 @@ golden:
       0.6-0.9 kcal/mol (experiments and standard texts); GFN2-xTB gives 0.60
       kcal/mol. The lowest energy must equal the GFN2-xTB energy of tightly
       optimized anti-butane from xtb 6.7.1 (-13.665128 Eh, the xtb tool).
+    against: independent
   - name: pyridine is protonated at nitrogen
     quick: true
     function: protonation_sites
@@ -103,6 +106,7 @@ golden:
       structures.0.site: N4
       structures.0.smiles: "c1cc[nH+]cc1"
     reference: Pyridine is a nitrogen base; its conjugate acid is the pyridinium ion.
+    against: independent
   - name: acetic acid loses its O-H proton
     function: deprotonation_sites
     args: {molecule: "CC(=O)O", solvent: water}
@@ -113,6 +117,7 @@ golden:
     reference: >-
       Acetic acid (pKa 4.76 in water) dissociates into acetate by losing the
       carboxylic O-H proton; C-H deprotonation is far less favorable.
+    against: independent
   - name: acetaldehyde is more stable than its enol
     function: tautomers
     args: {molecule: "CC=O"}
@@ -125,6 +130,7 @@ golden:
       (Wiberg et al., 1991), ethenol (vinyl alcohol) about -125 to -128 kJ/mol
       (Holmes and Lossing, 1982; Turecek and Havlas, 1986), so the keto form is
       about 10 kcal/mol more stable. GFN2-xTB gives 5.7 kcal/mol.
+    against: independent
   - name: invalid SMILES are refused
     function: conformer_search
     args: {molecule: "C1CC"}

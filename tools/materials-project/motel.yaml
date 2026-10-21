@@ -58,6 +58,8 @@ validity: >-
   ML potentials) are only comparable with MP's after the same compatibility
   corrections. Requires an internet connection and a free API key.
 
+maturity: established
+
 golden:
   - name: silicon's only stable phase is diamond (mp-149)
     function: search
@@ -70,6 +72,7 @@ golden:
     reference: >-
       Diamond-structure silicon (Fd-3m, No. 227) is the ground state of Si and
       has Materials Project ID mp-149.
+    against: independent
   - name: silicon's computed band gap is a PBE gap
     function: details
     args: {material_id: mp-149}
@@ -81,6 +84,7 @@ golden:
     reference: >-
       PBE underestimates silicon's experimental 1.12 eV gap; Materials Project
       reports about 0.6 eV, so a value between 0.4 and 0.9 eV is expected.
+    against: independent
   - name: the conventional silicon cell has 8 atoms
     quick: true
     function: get_structure
@@ -93,3 +97,4 @@ golden:
     reference: >-
       Conventional diamond cell: 8 atoms; PBE lattice constant about 5.47 Å
       (experiment 5.431 Å).
+    against: exact

@@ -76,6 +76,8 @@ validity: >-
   single, quickly optimized conformers, not global minima. Gasteiger and other
   empirical charges are approximations; dipole moments from them are rough.
 
+maturity: established
+
 golden:
   - name: MMFF94 energy of a validation-suite anion (AMHTAR01)
     quick: true
@@ -92,6 +94,7 @@ golden:
       server.ccl.net/cca/data/MMFF94), MMFF94_opti.log, OPTIMOL energies at the
       geometry of MMFF94_dative.mol2: total 66.18011, electrostatic 45.53613, net
       vdW 9.77884, angle bending 6.83749 kcal/mol.
+    against: independent
   - name: MMFF94 energy of a validation-suite dianion (DEFLEF)
     function: energy
     args: {molecule: tests/data/DEFLEF.mol2}
@@ -102,12 +105,14 @@ golden:
     reference: >-
       MMFF94 validation suite, MMFF94_opti.log (OPTIMOL): DEFLEF total -296.27657,
       torsion 29.05751, electrostatic -380.64089 kcal/mol.
+    against: independent
   - name: MMFF94 energy of a validation-suite organophosphorus compound (VOJJIN)
     function: energy
     args: {molecule: tests/data/VOJJIN.mol2}
     expect:
       molecules.0.energy_kcal_mol: {approx: -8.99563, abs: 0.001}
     reference: MMFF94 validation suite, MMFF94.energies (OPTIMOL and BatchMin agree) -8.99563 kcal/mol.
+    against: independent
   - name: MMFF94 partial charges match the reference implementation
     function: partial_charges
     args: {molecule: tests/data/AMHTAR01.mol2, method: mmff94}
@@ -121,6 +126,7 @@ golden:
       MMFF94 validation suite, MMFF94_opti.log, AMHTAR01 partial charges: O5
       -0.900 (O2CM), C1 0.659 (COO), C4 0.906 (CO2M), H5 0.500 (HOCO); the ion
       carries a total charge of -1.
+    against: independent
   - name: caffeine identifiers match PubChem
     function: identifiers
     args: {molecule: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"}
@@ -132,6 +138,7 @@ golden:
     reference: >-
       PubChem CID 2519 (caffeine): C8H10N4O2, molecular weight 194.19 g/mol, exact
       mass 194.08037557, InChIKey RYYVLZVUVIJVGH-UHFFFAOYSA-N.
+    against: independent
   - name: glycine is a zwitterion at pH 7.4
     function: convert
     args: {molecule: "NCC(=O)O", output: glycine.smi, hydrogens: ph, ph: 7.4}
@@ -140,6 +147,7 @@ golden:
     reference: >-
       Glycine pKa values 2.34 (carboxylic acid) and 9.60 (ammonium) (CRC Handbook);
       at pH 7.4 both groups are ionized and glycine is the zwitterion.
+    against: independent
   - name: rock salt unit cell has four formula units
     function: convert
     args: {molecule: tests/data/NaCl.cif, output: NaCl.xyz, fill_unit_cell: true}
@@ -149,6 +157,7 @@ golden:
     reference: >-
       NaCl (rock salt, Fm-3m, Z = 4): the conventional cell holds 4 Na and 4 Cl;
       the CIF lists only the two symmetry-unique sites.
+    against: exact
   - name: invalid SMILES are refused with the reason
     function: identifiers
     args: {molecule: "C1CC"}

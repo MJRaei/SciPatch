@@ -127,6 +127,8 @@ validity: >-
   experimental structures are not rebuilt; chain breaks remain. Protonation
   states are assigned from standard pKa values at the given pH, not computed.
 
+maturity: established
+
 golden:
   - name: an Amber NBFIX system gives Amber's energy
     function: energy
@@ -139,6 +141,7 @@ golden:
       (ff14ipq system with NBFIX modifications, PME, 8 Angstrom cutoff, input files
       from the test suite): the energy computed with Amber is -7099.44989739
       kcal/mol, matched to 0.1% (this tool: -7099.476 kcal/mol).
+    against: independent
   - name: TIP3P water has the density of water at 25 C
     function: simulate
     args:
@@ -162,6 +165,7 @@ golden:
       926 (1983); C. Vega and J. L. F. Abascal, Phys. Chem. Chem. Phys. 13, 19663
       (2011), Sec. II); measured density 0.997 g/cm^3 at 25 C. This tool gives
       0.995 g/cm^3 (501 waters, PME, 40 ps after 20 ps of equilibration).
+    against: independent
   - name: alanine dipeptide minimizes in implicit solvent
     quick: true
     function: minimize
@@ -188,6 +192,7 @@ golden:
       about 0.017 g/mL, 1.3% (Boothroyd et al., J. Chem. Theory Comput. 19, 3251,
       2023); for methanol, Sage 2.3.0 gives about 3% less (0.762 and 0.765 g/mL in
       two runs of this protocol), so the test allows 5%.
+    against: independent
   - name: liquid benzene has its measured density (OpenFF Sage)
     function: liquid
     platforms: [linux-64, linux-aarch64, osx-arm64, osx-64]   # needs AmberTools
@@ -200,6 +205,7 @@ golden:
       density 0.873659 g/mL. Sage 2.3.0 gives about 2% more (0.889 and 0.894 g/mL
       in two runs of this protocol); see the methanol test for the force field's
       typical density error.
+    against: independent
   - name: a small molecule is parameterized and simulated in water
     quick: true
     function: simulate

@@ -99,6 +99,8 @@ validity: >-
   thermodynamics follow the mechanism's NASA polynomials, valid only within
   their temperature range (typically 200 or 300 to 3500 K).
 
+maturity: established
+
 golden:
   - name: species heat capacities and entropies match NIST-JANAF
     function: species_properties
@@ -115,6 +117,7 @@ golden:
       Chase, NIST-JANAF Thermochemical Tables, 1998) at 1000 K: N2 Cp 32.69 and S
       228.2, CO2 Cp 54.30 and S 269.3, H2O Cp 41.27 and S 232.7 J/mol/K. GRI-Mech
       3.0 gives these within 0.25%.
+    against: independent
   - name: methane-air flame temperature matches NASA CEA
     quick: true
     function: adiabatic_flame_temperature
@@ -128,6 +131,7 @@ golden:
       NASA CEA (CEARUN), stoichiometric methane with air (N2/O2/Ar/CO2 as in CEA)
       at 298.15 K and 1 atm, chemical equilibrium: 2224.25 K (O. A. Marzouk, Eng.
       Technol. Appl. Sci. Res. 13, 11437 (2023), Table VII). This tool gives 2224.9 K.
+    against: independent
   - name: oxy-methane flame temperature matches NASA CEA
     function: adiabatic_flame_temperature
     args: {fuel: "CH4:1", oxidizer: "O2:1", equivalence_ratio: 1.0}
@@ -136,6 +140,7 @@ golden:
     reference: >-
       NASA CEA (CEARUN), stoichiometric methane with pure oxygen at 298.15 K and
       1 atm: 3050.12 K (Marzouk 2023, Table V; Cantera with GRI-Mech 3.0 there: 3052.06 K).
+    against: independent
   - name: hydrogen-air flame temperature matches NASA CEA
     function: adiabatic_flame_temperature
     args:
@@ -147,6 +152,7 @@ golden:
     reference: >-
       NASA CEA (CEARUN), stoichiometric hydrogen with air at 298.15 K and 1 atm:
       2378.62 K (Marzouk 2023, Table VIII). This tool gives 2380.1 K.
+    against: independent
   - name: methane-air flame speed agrees with experiment
     function: flame_speed
     args: {fuel: "CH4:1", equivalence_ratio: 1.0}
@@ -160,6 +166,7 @@ golden:
       velocity of about 36 cm/s within 1 cm/s after stretch correction (R. T. E.
       Hermanns, PhD thesis, TU Eindhoven, 2007, doi:10.6100/IR630126, Sec. 4.1).
       GRI-Mech 3.0 gives 0.377 m/s here, slightly above experiment.
+    against: independent
   - name: ignited mixtures reach chemical equilibrium
     function: ignition_delay
     args: {fuel: "H2:1", temperature_k: 1100}
@@ -171,6 +178,7 @@ golden:
       An adiabatic constant-pressure reactor must end at the constant-enthalpy
       equilibrium of the same mixture; hydrogen-air at 1100 K and 1 atm ignites
       in well under a millisecond (89 microseconds here).
+    against: exact
   - name: species missing from the mechanism are refused
     function: adiabatic_flame_temperature
     args: {fuel: "C8H18:1"}

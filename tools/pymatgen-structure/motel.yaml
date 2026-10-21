@@ -74,6 +74,8 @@ validity: >-
   Structure matching uses tolerances, so near-identical distorted variants can
   count as the same structure.
 
+maturity: established
+
 golden:
   - name: CsCl XRD peaks match the pymatgen test suite
     function: xrd_pattern
@@ -89,6 +91,7 @@ golden:
     reference: >-
       pymatgen v2026.9.24, tests/analysis/diffraction/test_xrd.py::TestXRDCalculator::test_get_pattern
       (CsCl test structure shipped with pymatgen, Cu Kα, 2θ = 0-90°).
+    against: upstream-tests
   - name: LiFePO4 XRD peak matches the pymatgen test suite
     function: xrd_pattern
     args: {structure: tests/data/LiFePO4.json}
@@ -98,6 +101,7 @@ golden:
     reference: >-
       pymatgen v2026.9.24, tests/analysis/diffraction/test_xrd.py::TestXRDCalculator::test_get_pattern
       (LiFePO4 test structure shipped with pymatgen).
+    against: upstream-tests
   - name: LiFePO4 is olivine (Pnma) at a 0.1 Å tolerance
     function: symmetry
     args: {structure: tests/data/LiFePO4.json, symprec: 0.1}
@@ -110,6 +114,7 @@ golden:
       Nanjundaswamy, J. B. Goodenough, J. Electrochem. Soc. 144, 1188-1194
       (1997). This slightly distorted test structure reads as P2_1/c at the
       default 0.01 Å tolerance.
+    against: independent
   - name: silicon has the diamond structure
     quick: true
     function: symmetry
@@ -122,6 +127,7 @@ golden:
     reference: >-
       Diamond-structure silicon: space group Fd-3m (No. 227), 8 atoms in the
       conventional cubic cell and 2 in the primitive cell (standard crystallography).
+    against: exact
   - name: a converted CIF is the same structure as its source
     function: compare
     args: {structure_a: tests/data/LiFePO4.json, structure_b: tests/data/LiFePO4.cif}
@@ -131,6 +137,7 @@ golden:
     reference: >-
       tests/data/LiFePO4.cif was written from LiFePO4.json with this tool's
       convert function; a lossless round trip must match exactly.
+    against: exact
   - name: a 2x1x1 supercell doubles the sites
     function: make_supercell
     args: {structure: tests/data/LiFePO4.json, scaling: [2, 1, 1]}
@@ -138,3 +145,4 @@ golden:
       n_sites: 56
       supercell: {exists: true}
     reference: LiFePO4 has 28 sites per cell (4 formula units).
+    against: exact

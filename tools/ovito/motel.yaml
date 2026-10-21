@@ -71,6 +71,8 @@ validity: >-
   or amorphous regions are missed. Dislocation densities refer to the whole
   simulation cell, including vacuum if there is any.
 
+maturity: established
+
 golden:
   - name: the 12 neighbors of a vacancy in fcc are not fcc (adaptive CNA)
     quick: true
@@ -85,6 +87,7 @@ golden:
       FCC to atoms with 12 nearest neighbors forming 421 pairs. In a 256-atom fcc
       crystal with one vacancy, the vacancy's 12 nearest neighbors have only 11
       and are "Other"; the remaining 243 atoms are FCC.
+    against: exact
   - name: a perfect bcc crystal is all BCC (PTM)
     function: structure_types
     args: {structure: tests/data/Fe_bcc.xyz, method: ptm}
@@ -95,6 +98,7 @@ golden:
       Polyhedral template matching (Larsen, Schmidt, Schiotz, MSMSE 24, 055007,
       2016): every atom of an ideal bcc lattice matches the BCC template with zero
       deviation.
+    against: exact
   - name: an ideal hcp crystal is all HCP (adaptive CNA)
     function: structure_types
     args: {structure: tests/data/Mg_hcp.xyz}
@@ -102,6 +106,7 @@ golden:
       counts.HCP: 96
       counts.Other: 0
     reference: Ideal hcp (c/a = sqrt(8/3)) has 12 nearest neighbors with 6 x 421 and 6 x 422 pairs, the HCP signature.
+    against: exact
   - name: diamond silicon is all cubic diamond
     function: structure_types
     args: {structure: tests/data/Si_diamond.xyz, method: diamond}
@@ -111,6 +116,7 @@ golden:
     reference: >-
       Identify diamond structure (Maras et al., Comput. Phys. Commun. 205, 13,
       2016): every atom of ideal cubic diamond (216-atom silicon cell) is cubic diamond.
+    against: exact
   - name: a Frenkel pair is one vacancy and one interstitial (Wigner-Seitz)
     function: point_defects
     args: {structure: tests/data/Cu_frenkel.xyz, reference: tests/data/Cu_fcc.xyz}
@@ -123,6 +129,7 @@ golden:
       Wigner-Seitz cell occupancy: one atom of the 256-atom fcc crystal is moved
       from its site to an octahedral interstitial position, leaving one empty site
       and one doubly occupied site.
+    against: exact
   - name: DXA finds the screw dislocation with b = a/2 <110>
     function: dislocations
     args: {structure: tests/data/Cu_screw_dislocation.xyz, lattice: fcc}
@@ -138,6 +145,7 @@ golden:
       along [1-10] through a cell of 4 periods of a/2 [1-10] (10.22476 Å),
       Burgers vector a/2 [1-10] of length a/sqrt(2) = 2.55619 Å, parallel to the
       line (screw, 0 degrees).
+    against: exact
   - name: a frame outside the trajectory is refused
     function: dislocations
     args: {structure: tests/data/Cu_fcc.xyz, frame: 5}

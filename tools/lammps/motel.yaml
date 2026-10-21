@@ -87,6 +87,8 @@ validity: >-
   ReaxFF force fields need real units and charge equilibration and are run with
   run_script.
 
+maturity: established
+
 golden:
   - name: Cu (Foiles EAM) lattice, cohesive energy and elastic constants
     function: crystal_properties
@@ -105,6 +107,7 @@ golden:
       76.447 GPa (iprPy, 0 K). Foiles, Baskes and Daw (Phys. Rev. B 33, 7983,
       1986) fitted a0 = 3.615 Å and Esub = 3.54 eV; the LAMMPS bench log
       (bench/log.15Jul25.eam.fixed.g++.1) gives -113280 eV for 32000 atoms at a = 3.615 Å.
+    against: independent
   - name: Si (Stillinger-Weber) lattice, cohesive energy and relaxed elastic constants
     quick: true
     function: crystal_properties
@@ -121,6 +124,7 @@ golden:
       a = 5.43095 Å, E_coh = -4.3366 eV/atom (= -2 epsilon), C11 = 151.424, C12 =
       76.422, C44 = 56.449 GPa. C44 includes the internal relaxation of the two
       sublattices, so it checks that atoms are relaxed in the strained cells.
+    against: independent
   - name: bcc Fe (Mendelev EAM, eam/fs) lattice, cohesive energy and elastic constants
     function: crystal_properties
     args: {structure: tests/data/Fe_bcc.cif, potential: Fe_mm.eam.fs}
@@ -135,6 +139,7 @@ golden:
       2003--Mendelev-M-I--Fe-2--LAMMPS--ipr1 (file Fe_2.eam.fs, identical data to
       LAMMPS's Fe_mm.eam.fs): bcc a = 2.85532 Å, E_coh = -4.12244 eV/atom, C11 =
       244.307, C12 = 145.324, C44 = 116.350 GPa.
+    against: independent
   - name: the LAMMPS Lennard-Jones benchmark reproduces its reference log
     function: run_script
     args: {script: tests/data/in.lj}
@@ -147,6 +152,7 @@ golden:
       LAMMPS stable_22Jul2025, bench/in.lj and bench/log.15Jul25.lj.fixed.g++.1:
       step 0 E_pair = -6.7733681, Press = -5.0197073; step 100 Temp = 0.7574531,
       TotEng = -4.6223613 (32000 atoms, Lennard-Jones melt, NVE).
+    against: upstream-tests
   - name: a classical solid has its equipartition potential energy (Cu, 100 K)
     function: simulate
     args: {structure: tests/data/Cu_fcc.cif, potential: Cu_u3.eam, ensemble: nvt,
@@ -162,6 +168,7 @@ golden:
       100 K, so E_pot = -3.54 + 0.012926 eV/atom for this potential (static energy
       -3.54 eV/atom, Foiles et al. 1986; NIST). Anharmonic corrections at 100 K
       (about 0.1 of the melting point) are well below the tolerance.
+    against: exact
   - name: a potential that lacks an element is refused
     function: crystal_properties
     args: {structure: tests/data/Si_diamond.cif, potential: Cu_mishin1.eam.alloy}

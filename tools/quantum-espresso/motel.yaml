@@ -101,6 +101,8 @@ validity: >-
   at 0 K without zero-point motion. pw.x runs on all cores of one computer
   (MPI); cells beyond a few dozen atoms become slow.
 
+maturity: established
+
 golden:
   - name: silicon energy matches the Quantum ESPRESSO test suite
     quick: true
@@ -122,6 +124,7 @@ golden:
       pseudopotentials.quantum-espresso.org), ecutwfc 12 Ry, 2x2x2 k-points shifted
       by 1 1 1: total energy -15.79449593 Ry (-214.895065 eV), highest occupied
       level 5.5371 eV. This tool gives -214.895041 eV and 5.5365 eV with pw.x 7.6.
+    against: upstream-tests
   - name: silicon equation of state matches all-electron PBE (SSSP)
     function: equation_of_state
     args: {structure: tests/data/Si_5.475.extxyz, kpoint_density: 5}
@@ -135,6 +138,7 @@ golden:
       Science 351, aad3000 (2016); github.com/molmod/DeltaCodesDFT WIEN2k.txt at
       commit f9b6693): Si V0 = 20.4530 Angstrom^3/atom, B0 = 88.545 GPa. With SSSP
       (30/240 Ry) this tool gives 20.462 Angstrom^3/atom and 89.48 GPa.
+    against: independent
   - name: iron is a ferromagnet with the measured moment
     function: scf
     args: {structure: tests/data/Fe_bcc.extxyz, kpoint_density: 3, smearing_ry: 0.02}
@@ -147,6 +151,7 @@ golden:
       Introduction to Solid State Physics, 8th ed., Ch. 11), at the all-electron PBE
       volume (a = 2.8309 Angstrom); this tool gives 2.10 mu_B (PBE, 10x10x10
       k-points). Spin polarization must switch on automatically.
+    against: independent
   - name: molecules without a periodic cell are refused
     function: scf
     args: {structure: tests/data/water.xyz}

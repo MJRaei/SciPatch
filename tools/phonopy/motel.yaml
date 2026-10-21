@@ -59,6 +59,8 @@ validity: >-
   result. Small imaginary frequencies (above -0.05 THz) near Γ are treated as
   numerical noise.
 
+maturity: established
+
 golden:
   - name: Cu heat capacity reaches the Dulong-Petit limit (EMT)
     function: phonons
@@ -71,6 +73,7 @@ golden:
       per atom far above the Debye temperature (about 343 K for copper). The
       structure is fcc Cu at EMT's equilibrium lattice constant (3.590 Å, from
       the ase-emt tool).
+    against: exact
   - name: Si is stable, with zero acoustic and degenerate optical modes at Γ (CHGNet)
     quick: true
     function: phonons
@@ -88,3 +91,4 @@ golden:
       value for CHGNet 0.3.0 at the experimental lattice constant; the measured
       Raman frequency is about 15.6 THz (520 cm⁻¹), illustrating the systematic
       softening noted under validity.
+    against: exact

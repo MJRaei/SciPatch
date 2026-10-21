@@ -138,6 +138,8 @@ validity: >-
   compare_models: disagreement between models flags results that need DFT. State
   the model with every number.
 
+maturity: published
+
 golden:
   - name: Orb-v3 copper energy matches the Orb test suite
     quick: true
@@ -149,6 +151,7 @@ golden:
       orb-models v0.7.0, tests/expensive_tests/test_backwards_compatibility.py::
       test_orb_v3_con_omat_predictions: fcc Cu (a = 3.58 Å, cubic cell) with
       orb-v3-conservative-inf-omat has an energy of -14.9525 eV.
+    against: upstream-tests
   - name: silicon lattice constant within 1.5% of experiment (Orb-v3, default model)
     function: relax
     args: {structure: tests/data/Si_diamond.cif, fmax: 0.005}
@@ -158,6 +161,7 @@ golden:
     reference: >-
       Silicon lattice parameter 5.431020511 Å (CODATA 2018, 22.5 °C). PBE-trained
       models typically overestimate it by about 0.5-1%; Orb-v3-mpa gives 5.467 Å.
+    against: independent
   - name: LiMnO2 energy matches the CHGNet test suite
     function: predict
     args: {structure: tests/data/mp-18767-LiMnO2.cif, model: CHGNet-0.3.0}
@@ -168,6 +172,7 @@ golden:
     reference: >-
       chgnet v0.4.2 tests/test_model.py::test_predict_structure (model 0.3.0,
       examples/mp-18767-LiMnO2.cif): energy -7.36769 eV/atom, Mn magmom 3.8694 μB.
+    against: upstream-tests
   - name: LiMnO2 relaxation energy matches the CHGNet test suite
     function: relax
     args: {structure: tests/data/mp-18767-LiMnO2.cif, model: CHGNet-0.3.0, fmax: 0.1}
@@ -178,6 +183,7 @@ golden:
     reference: >-
       chgnet v0.4.2 tests/test_relaxation.py::test_relaxation (FIRE, fmax 0.1,
       FrechetCellFilter): final energy -58.94209 eV.
+    against: upstream-tests
   - name: MACE-OFF23 water energy matches the MACE test suite
     function: predict
     args: {structure: tests/data/water.extxyz, model: MACE-OFF23-small, precision: float64}
@@ -186,6 +192,7 @@ golden:
     reference: >-
       mace v0.3.16, tests/test_calculator.py::test_mace_off: ASE's H2O molecule
       with MACE-OFF23 small (float64) has an energy of -2081.116128586803 eV.
+    against: upstream-tests
   - name: silicon lattice constant within 1.5% of experiment (MACE-MPA-0)
     function: relax
     args: {structure: tests/data/Si_diamond.cif, fmax: 0.005, model: MACE-MPA-0-medium}
@@ -195,6 +202,7 @@ golden:
     reference: >-
       Silicon lattice parameter 5.431020511 Å (CODATA 2018, 22.5 °C). PBE-trained
       models typically overestimate it by about 0.5-1%; MACE-MPA-0 gives 5.467 Å.
+    against: independent
   - name: aluminum lattice constant within 1.5% of experiment (MACE-MP-0)
     function: relax
     args: {structure: tests/data/Al_fcc.cif, fmax: 0.005, model: MACE-MP-0-medium}
@@ -204,6 +212,7 @@ golden:
     reference: >-
       Experimental room-temperature lattice constant of aluminum, about 4.05 Å;
       MACE-MP-0 medium (the model of the MACE-MP paper) gives 4.061 Å.
+    against: independent
   - name: Li2O formation and cohesive energies match the matcalc test suite
     function: formation_energy
     args: {structure: tests/data/Li2O.json, model: TensorNet-MatPES-PBE-2025.2}
@@ -215,6 +224,7 @@ golden:
       (TensorNet-MatPES-PBE-2025.2, pymatgen's Li2O test structure): formation
       energy -1.7850605646769206 eV/atom and cohesive energy -4.053125177202149
       eV/atom (1%).
+    against: upstream-tests
   - name: Li2O bulk modulus matches the matcalc test suite
     function: equation_of_state
     args: {structure: tests/data/Li2O.json, fmax: 0.1, model: TensorNet-MatPES-PBE-2025.2}
@@ -224,6 +234,7 @@ golden:
     reference: >-
       matcalc v0.6.0, tests/test_eos.py::test_eos_calc: Li2O bulk modulus
       (Birch-Murnaghan) 84.08164565338282 GPa (10%).
+    against: upstream-tests
   - name: Li2O elastic moduli match the matcalc test suite
     function: elastic_constants
     args: {structure: tests/data/Li2O.json, fmax: 0.1, max_normal_strain: 0.004,
@@ -236,6 +247,7 @@ golden:
       matcalc v0.6.0, tests/test_elasticity.py::test_elastic_calc: Li2O bulk and
       shear moduli (VRH) 0.5064644749775054 and 0.40219758881584616 eV/Angstrom^3
       (10%), that is 81.1446 and 64.4392 GPa.
+    against: upstream-tests
   - name: Li2O thermal properties at 300 K match the matcalc test suite
     function: thermal_properties
     args:
@@ -258,6 +270,7 @@ golden:
       scale factors 0.97-1.03, T up to 1000 K in 50 K steps): at 300 K, thermal
       expansion 8.664701952239187e-05 /K, Cp 59.2773001627165 J/K/mol, bulk
       modulus 70.91381208222826 GPa, Gruneisen parameter 1.694821179002536 (10%).
+    against: upstream-tests
   - name: silicon bulk modulus is close to all-electron PBE (TensorNet-MatPES-PBE)
     function: equation_of_state
     args: {structure: tests/data/Si.json, model: TensorNet-MatPES-PBE-2025.2}
@@ -269,6 +282,7 @@ golden:
       aad3000 (2016); github.com/molmod/DeltaCodesDFT WIEN2k.txt at commit
       f9b6693): Si B0 = 88.545 GPa, V0 = 20.453 Angstrom^3/atom. The PBE-trained
       model gives about 84 GPa and 20.1 Angstrom^3/atom.
+    against: independent
   - name: four model families agree on silicon's volume
     function: compare_models
     args: {structure: tests/data/Si_diamond.cif}
@@ -283,6 +297,7 @@ golden:
       TensorNet-MatPES-PBE, and CHGNet are all trained on PBE data, so they must
       reproduce it within a few percent and agree with each other (they give
       a = 5.450-5.468 Å, a 1.0% spread in volume, mean 20.36 Angstrom^3/atom).
+    against: independent
   - name: disordered structures are refused
     function: formation_energy
     args: {structure: tests/data/Li0.5Cl_disordered.cif}

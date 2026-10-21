@@ -72,6 +72,8 @@ validity: >-
   different seeds. Receptor PDBQT files made here with Open Babel use rigid
   receptors and Gasteiger charges (Vina scoring does not use charges).
 
+maturity: established
+
 golden:
   - name: imatinib redocks into Abl kinase (1IEP) at the crystal pose
     function: dock
@@ -88,6 +90,7 @@ golden:
       edges): best pose -13.23 kcal/mol (solution file -13.234), at the crystal
       pose. Redocking succeeds when the top pose is within 2 Å heavy-atom RMSD of
       the crystal ligand (the usual criterion).
+    against: independent
   - name: imatinib built from SMILES docks into the crystal pose
     quick: true
     function: dock
@@ -105,6 +108,7 @@ golden:
       with the protonated N-methylpiperazine of the 1IEP ligand), so the crystal
       conformation is not given: the top pose must still be within 2 Å of the
       crystal pose, with a score near the tutorial's -13 kcal/mol.
+    against: independent
   - name: a receptor without hydrogens is refused
     function: dock
     args: {receptor: tests/data/no_hydrogens.pdb, ligand: "CCO", center: [20, 41, -4]}
