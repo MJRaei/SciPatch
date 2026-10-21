@@ -7,6 +7,7 @@ reproduce published or upstream-tested values on every build.
 
 | Tool | Field | What it does | Checked against |
 |---|---|---|---|
+| [cantera](cantera/) | chemistry, engineering | Combustion chemistry: equilibrium, adiabatic flame temperatures, laminar flame speeds, ignition delays, species thermodynamics | NASA CEA flame temperatures; NIST-JANAF heat capacities; methane-air flame speed vs experiment |
 | [chgnet](chgnet/) | materials | Energies, forces, stresses, magnetic moments, relaxation, and MD with the CHGNet universal potential | CHGNet's test suite (LiMnO₂ energy and relaxation) |
 | [gpaw](gpaw/) | materials | DFT for crystals (plane waves, PAW): energies, forces, stress, relaxation, equation of state, band structures and gaps, magnetism | GPAW's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
 | [mace](mace/) | materials, chemistry | The same with MACE-MP (89 elements) and MACE-OFF (organic molecules) | MACE's test suite (water); Si and Al lattice constants vs. experiment |

@@ -1,0 +1,179 @@
+schema: 1
+name: cantera
+version: 0.1.0
+title: Chemical thermodynamics and kinetics (Cantera)
+summary: >-
+  Combustion and gas-phase chemistry with Cantera: chemical equilibrium,
+  adiabatic flame temperatures, laminar flame speeds of premixed flames,
+  ignition delays in adiabatic reactors, and thermodynamic properties of
+  species, with detailed mechanisms (GRI-Mech 3.0 for natural gas, hydrogen,
+  or any Cantera YAML mechanism).
+domains: [chemistry, engineering]
+tags: [combustion, chemical-kinetics, thermodynamics, equilibrium, adiabatic-flame-temperature,
+       flame-speed, laminar-burning-velocity, ignition-delay, reactor, gri-mech, methane, hydrogen,
+       natural-gas, heat-capacity, enthalpy, entropy, cantera]
+
+source:
+  homepage: https://cantera.org
+  paper: https://doi.org/10.5281/zenodo.17620923
+  citation: >-
+    D. G. Goodwin, H. K. Moffat, I. Schoegl, R. L. Speth, and B. W. Weber,
+    "Cantera: An Object-oriented Software Toolkit for Chemical Kinetics,
+    Thermodynamics, and Transport Processes", version 3.2.0 (2025),
+    doi:10.5281/zenodo.17620923; G. P. Smith et al., GRI-Mech 3.0,
+    http://combustion.berkeley.edu/gri-mech/.
+  license: BSD-3-Clause
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["cantera==3.2.0", "matplotlib"]
+
+entrypoint: api
+
+functions:
+  adiabatic_flame_temperature:
+    params:
+      temperature_k: {unit: K}
+      pressure_atm: {unit: atm}
+      mechanism: {kind: file}
+      plot: {kind: image}
+    outputs:
+      plot: {kind: image}
+  equilibrium:
+    params:
+      temperature_k: {unit: K}
+      pressure_atm: {unit: atm}
+      mechanism: {kind: file}
+    outputs:
+      temperature_k: {unit: K}
+      pressure_atm: {unit: atm}
+      density_kg_m3: {unit: kg/m³}
+      mean_molar_mass_g_mol: {unit: g/mol}
+  flame_speed:
+    long_running: true
+    params:
+      temperature_k: {unit: K}
+      pressure_atm: {unit: atm}
+      mechanism: {kind: file}
+      width_m: {unit: m}
+      profile: {kind: table}
+      plot: {kind: image}
+    outputs:
+      laminar_flame_speed_m_s: {unit: m/s}
+      burned_temperature_k: {unit: K}
+      flame_thickness_m: {unit: m}
+      profile: {kind: table}
+      plot: {kind: image}
+  ignition_delay:
+    params:
+      temperature_k: {unit: K}
+      pressure_atm: {unit: atm}
+      mechanism: {kind: file}
+      max_time_s: {unit: s}
+      history: {kind: table}
+      plot: {kind: image}
+    outputs:
+      ignition_delay_s: {unit: s}
+      final_temperature_k: {unit: K}
+      equilibrium_temperature_k: {unit: K}
+      final_minus_equilibrium_k: {unit: K}
+      history: {kind: table}
+      plot: {kind: image}
+  species_properties:
+    params:
+      temperatures_k: {unit: K}
+      mechanism: {kind: file}
+
+validity: >-
+  Results are only as good as the mechanism. GRI-Mech 3.0 was optimized for
+  natural gas (methane, ethane, propane) combustion and NO formation at roughly
+  1000-2500 K, 10 torr to 10 atm, and equivalence ratios 0.1-5; it is not
+  valid for larger hydrocarbons, liquid fuels, soot, or low-temperature (cool
+  flame) chemistry, and it predicts methane-air flame speeds a few cm/s above
+  experiment. Equilibrium and flame temperatures assume ideal gases and
+  adiabatic conditions; real flames lose heat and are cooler. Flame speeds are
+  for one-dimensional, unstretched, laminar flames (not turbulent burning
+  rates). Ignition delays come from homogeneous adiabatic reactors and differ
+  from shock tube or engine data where those are not ideal. Species
+  thermodynamics follow the mechanism's NASA polynomials, valid only within
+  their temperature range (typically 200 or 300 to 3500 K).
+
+golden:
+  - name: species heat capacities and entropies match NIST-JANAF
+    function: species_properties
+    args: {species: [N2, CO2, H2O], temperatures_k: [1000]}
+    expect:
+      properties.0.cp_j_mol_k: {approx: 32.69, rel: 0.005}
+      properties.0.s_j_mol_k: {approx: 228.2, rel: 0.005}
+      properties.1.cp_j_mol_k: {approx: 54.30, rel: 0.005}
+      properties.1.s_j_mol_k: {approx: 269.3, rel: 0.005}
+      properties.2.cp_j_mol_k: {approx: 41.27, rel: 0.005}
+      properties.2.s_j_mol_k: {approx: 232.7, rel: 0.005}
+    reference: >-
+      NIST Chemistry WebBook, gas-phase thermochemistry (Shomate fits to M. W.
+      Chase, NIST-JANAF Thermochemical Tables, 1998) at 1000 K: N2 Cp 32.69 and S
+      228.2, CO2 Cp 54.30 and S 269.3, H2O Cp 41.27 and S 232.7 J/mol/K. GRI-Mech
+      3.0 gives these within 0.25%.
+  - name: methane-air flame temperature matches NASA CEA
+    function: adiabatic_flame_temperature
+    args:
+      fuel: "CH4:1"
+      oxidizer: "O2:0.209476, N2:0.78084, AR:0.009365, CO2:0.000319"
+      equivalence_ratio: 1.0
+    expect:
+      results.0.temperature_k: {approx: 2224.25, abs: 10}
+    reference: >-
+      NASA CEA (CEARUN), stoichiometric methane with air (N2/O2/Ar/CO2 as in CEA)
+      at 298.15 K and 1 atm, chemical equilibrium: 2224.25 K (O. A. Marzouk, Eng.
+      Technol. Appl. Sci. Res. 13, 11437 (2023), Table VII). This tool gives 2224.9 K.
+  - name: oxy-methane flame temperature matches NASA CEA
+    function: adiabatic_flame_temperature
+    args: {fuel: "CH4:1", oxidizer: "O2:1", equivalence_ratio: 1.0}
+    expect:
+      results.0.temperature_k: {approx: 3050.12, abs: 10}
+    reference: >-
+      NASA CEA (CEARUN), stoichiometric methane with pure oxygen at 298.15 K and
+      1 atm: 3050.12 K (Marzouk 2023, Table V; Cantera with GRI-Mech 3.0 there: 3052.06 K).
+  - name: hydrogen-air flame temperature matches NASA CEA
+    function: adiabatic_flame_temperature
+    args:
+      fuel: "H2:1"
+      oxidizer: "O2:0.209476, N2:0.78084, AR:0.009365, CO2:0.000319"
+      equivalence_ratio: 1.0
+    expect:
+      results.0.temperature_k: {approx: 2378.62, abs: 10}
+    reference: >-
+      NASA CEA (CEARUN), stoichiometric hydrogen with air at 298.15 K and 1 atm:
+      2378.62 K (Marzouk 2023, Table VIII). This tool gives 2380.1 K.
+  - name: methane-air flame speed agrees with experiment
+    function: flame_speed
+    args: {fuel: "CH4:1", equivalence_ratio: 1.0}
+    expect:
+      laminar_flame_speed_m_s: {approx: 0.36, rel: 0.1}
+      burned_temperature_k: {approx: 2225, abs: 25}
+      profile: {exists: true}
+    timeout: 900
+    reference: >-
+      Stoichiometric methane-air at ambient conditions: consensus laminar burning
+      velocity of about 36 cm/s within 1 cm/s after stretch correction (R. T. E.
+      Hermanns, PhD thesis, TU Eindhoven, 2007, doi:10.6100/IR630126, Sec. 4.1).
+      GRI-Mech 3.0 gives 0.377 m/s here, slightly above experiment.
+  - name: ignited mixtures reach chemical equilibrium
+    function: ignition_delay
+    args: {fuel: "H2:1", temperature_k: 1100}
+    expect:
+      ignited: true
+      ignition_delay_s: {min: 0.00001, max: 0.001}
+      final_minus_equilibrium_k: {min: -5, max: 5}
+    reference: >-
+      An adiabatic constant-pressure reactor must end at the constant-enthalpy
+      equilibrium of the same mixture; hydrogen-air at 1100 K and 1 atm ignites
+      in well under a millisecond (89 microseconds here).
+  - name: species missing from the mechanism are refused
+    function: adiabatic_flame_temperature
+    args: {fuel: "C8H18:1"}
+    raises: "is not in the mechanism"
+    reference: >-
+      GRI-Mech 3.0 has no octane; a fuel outside the mechanism must give a clear
+      error instead of a wrong answer.
