@@ -1,0 +1,145 @@
+schema: 1
+name: openmm
+version: 0.1.0
+title: Molecular dynamics (OpenMM)
+summary: >-
+  Molecular dynamics with OpenMM: prepare a protein or nucleic acid from a PDB
+  file (missing atoms, hydrogens at a chosen pH), solvate it with water and
+  ions, and run minimization, equilibration, and constant-pressure MD; compute
+  and minimize force-field energies of Amber-prepared systems; or simulate pure
+  water boxes. Amber and CHARMM force fields, explicit or implicit solvent.
+domains: [chemistry, biology]
+tags: [molecular-dynamics, md, force-field, amber, charmm, protein, nucleic-acid, solvation,
+       water-box, tip3p, explicit-solvent, implicit-solvent, energy-minimization, npt, nvt,
+       trajectory, rmsd, density, openmm, pdbfixer, pdb]
+
+source:
+  homepage: https://openmm.org
+  paper: https://doi.org/10.1021/acs.jpcb.3c06662
+  citation: >-
+    P. Eastman et al., "OpenMM 8: Molecular Dynamics Simulation with Machine
+    Learning Potentials", J. Phys. Chem. B 128, 109-116 (2024).
+  license: MIT (API, CPU and Reference platforms; GPU platforms LGPL-3.0)
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["openmm=8.6.1", "pdbfixer=1.12"]
+  channels: [conda-forge]
+
+entrypoint: api
+
+functions:
+  energy:
+    params:
+      structure: {kind: structure}
+      coordinates: {kind: file}
+      cutoff_nm: {unit: nm}
+    outputs:
+      energy_kj_mol: {unit: kJ/mol}
+      energy_kcal_mol: {unit: kcal/mol}
+      components_kj_mol: {unit: kJ/mol}
+  minimize:
+    params:
+      structure: {kind: structure}
+      coordinates: {kind: file}
+      tolerance_kj_mol_nm: {unit: kJ/mol/nm}
+      output: {kind: structure}
+    outputs:
+      energy_before_kj_mol: {unit: kJ/mol}
+      energy_after_kj_mol: {unit: kJ/mol}
+      energy_change_kj_mol: {unit: kJ/mol}
+      minimized_structure: {kind: structure}
+  simulate:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      temperature_k: {unit: K}
+      pressure_bar: {unit: bar}
+      time_ps: {unit: ps}
+      equilibration_ps: {unit: ps}
+      timestep_fs: {unit: fs}
+      report_interval_ps: {unit: ps}
+      padding_nm: {unit: nm}
+      box_nm: {unit: nm}
+      ionic_strength_molar: {unit: mol/L}
+      cutoff_nm: {unit: nm}
+    outputs:
+      temperature_mean_k: {unit: K}
+      potential_energy_mean_kj_mol: {unit: kJ/mol}
+      density_mean_g_cm3: {unit: g/cm³}
+      density_std_g_cm3: {unit: g/cm³}
+      volume_mean_nm3: {unit: nm³}
+      ca_rmsd_nm: {unit: nm}
+      speed_ns_per_day: {unit: ns/day}
+      trajectory: {kind: trajectory}
+      start_structure: {kind: structure}
+      final_structure: {kind: structure}
+      log: {kind: table}
+
+validity: >-
+  Classical force fields are fixed-charge models: they cannot form or break
+  bonds, describe electronic polarization only on average, and are
+  parameterized for biomolecules, water, and ions near ambient conditions.
+  Small molecules (ligands, drugs, solvents other than water) are not
+  parameterized by this tool and are refused. Water models reproduce some
+  properties and not others (TIP3P matches the density at 25 C by design but
+  diffuses too fast and has no density maximum near 4 C). Simulated times here
+  are nanoseconds at most: enough for local fluctuations and solvent structure,
+  not for folding, binding, or large conformational changes, and averages from
+  short runs carry statistical error (compare several seeds). Missing loops in
+  experimental structures are not rebuilt; chain breaks remain. Protonation
+  states are assigned from standard pKa values at the given pH, not computed.
+
+golden:
+  - name: an Amber NBFIX system gives Amber's energy
+    function: energy
+    args: {structure: tests/data/ff14ipq.parm7, coordinates: tests/data/ff14ipq.rst7, cutoff_nm: 0.8}
+    expect:
+      energy_kcal_mol: {approx: -7099.44989739, rel: 0.001}
+      periodic: true
+    reference: >-
+      OpenMM 8.6.1, wrappers/python/tests/TestAmberPrmtopFile.py::test_NBFIX_LongRange
+      (ff14ipq system with NBFIX modifications, PME, 8 Angstrom cutoff, input files
+      from the test suite): the energy computed with Amber is -7099.44989739
+      kcal/mol, matched to 0.1% (this tool: -7099.476 kcal/mol).
+  - name: TIP3P water has the density of water at 25 C
+    function: simulate
+    args:
+      structure: water
+      box_nm: 2.5
+      water_model: tip3p
+      temperature_k: 298.15
+      pressure_bar: 1.0
+      time_ps: 40
+      equilibration_ps: 20
+      report_interval_ps: 0.5
+    expect:
+      density_mean_g_cm3: {approx: 0.997, rel: 0.03}
+      temperature_mean_k: {approx: 298.15, abs: 5}
+      ensemble: NPT
+      trajectory: {exists: true}
+    timeout: 1800
+    reference: >-
+      TIP3P's parameters were chosen to reproduce the density of liquid water at
+      room temperature and pressure (W. L. Jorgensen et al., J. Chem. Phys. 79,
+      926 (1983); C. Vega and J. L. F. Abascal, Phys. Chem. Chem. Phys. 13, 19663
+      (2011), Sec. II); measured density 0.997 g/cm^3 at 25 C. This tool gives
+      0.995 g/cm^3 (501 waters, PME, 40 ps after 20 ps of equilibration).
+  - name: alanine dipeptide minimizes in implicit solvent
+    function: minimize
+    args: {structure: tests/data/alanine-dipeptide-implicit.pdb, implicit_solvent: obc2}
+    expect:
+      energy_change_kj_mol: {max: 0}
+      n_atoms: 22
+      minimized_structure: {exists: true}
+    reference: >-
+      Alanine dipeptide from OpenMM's test suite (systems/alanine-dipeptide-implicit.pdb)
+      with amber14 and OBC2 implicit solvent; minimization must lower the energy.
+  - name: small-molecule ligands are refused with an explanation
+    function: energy
+    args: {structure: tests/data/ethanol_ligand.pdb}
+    raises: "no parameters for residue"
+    reference: >-
+      Standard biomolecular force fields have no templates for arbitrary small
+      molecules; they need GAFF or OpenFF parameters, which this tool does not set up.
