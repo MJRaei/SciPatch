@@ -1,0 +1,122 @@
+schema: 1
+name: pyxtal
+version: 0.1.0
+title: Crystal structure generation by symmetry (PyXtal)
+summary: >-
+  Generate random crystal structures of a given composition in chosen or random
+  space groups (atoms on compatible Wyckoff positions), molecular crystals from
+  built-in molecules or SMILES, Wyckoff position tables, and the space groups that
+  can hold a composition; the starting points for crystal structure prediction
+  with an energy model such as ml-potentials.
+domains: [materials, chemistry]
+tags: [crystal-structure-prediction, csp, structure-generation, random-structure, space-group, wyckoff,
+       symmetry, polymorph, molecular-crystal, organic-crystal, cif, pyxtal]
+
+source:
+  homepage: https://pyxtal.readthedocs.io
+  paper: https://doi.org/10.1016/j.cpc.2020.107810
+  citation: >-
+    S. Fredericks, K. Parrish, D. Sayre, Q. Zhu, "PyXtal: A Python library for crystal
+    structure generation and symmetry analysis", Comput. Phys. Commun. 261, 107810
+    (2021).
+  license: MIT
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["pyxtal==1.1.5", "pymatgen==2026.9.24", "ase==3.29.0", "rdkit==2026.9.1"]
+
+entrypoint: api
+
+functions:
+  random_crystals: {}
+  molecular_crystals:
+    long_running: true
+  wyckoff_positions: {}
+  compatible_space_groups: {}
+  list_molecules: {}
+
+validity: >-
+  Structures are random and unrelaxed: lattice parameters come from a volume
+  estimate and atoms are only kept apart by minimum distances, so energies,
+  densities, and bond lengths are not physical until relaxed with an energy
+  model (ml-potentials, DFT). Finding the ground state requires many structures
+  across space groups and formula units (Z), and the most stable one found is
+  not guaranteed to be the global minimum. The space group found by symmetry
+  analysis can differ from the one requested when special positions add
+  symmetry (e.g. a smaller cell). Molecules are placed as rigid conformers
+  (SMILES are embedded once); flexible molecules need conformer sampling.
+
+maturity: established
+
+golden:
+  - name: four Na and four Cl in Fm-3m can only form rock salt
+    quick: true
+    function: random_crystals
+    args: {composition: {Na: 4, Cl: 4}, space_group: 225, count: 2}
+    expect:
+      structures: {length: 2}
+      structures.0.space_group_found: 225
+      structures.0.sites.0.site_symmetry: m-3m
+      structures.0.sites.0.coordination: 6
+      structures.0.sites.1.coordination: 6
+      structures.1.sites.0.neighbors: {length: 1}
+    reference: >-
+      International Tables for Crystallography, Vol. A, space group 225 (Fm-3m): the
+      only Wyckoff positions of multiplicity 4 are 4a (0,0,0) and 4b (1/2,1/2,1/2),
+      both of site symmetry m-3m, so Na4Cl4 per cell must be the rock-salt (B1)
+      arrangement, in which each ion has six nearest neighbours of the other kind.
+    against: exact
+  - name: eight carbon atoms in Fd-3m can only form diamond
+    function: random_crystals
+    args: {composition: {C: 8}, space_group: 227, count: 2, prefix: diamond}
+    expect:
+      structures.0.space_group_found: 227
+      structures.0.sites.0.site_symmetry: -43m
+      structures.0.sites.0.coordination: 4
+      structures.1.sites.0.coordination: 4
+    reference: >-
+      International Tables for Crystallography, Vol. A, space group 227 (Fd-3m,
+      origin choice 2): the smallest multiplicity is 8 (8a and 8b, site symmetry
+      -43m), so C8 per cell is the diamond structure, with four tetrahedral
+      neighbours per atom.
+    against: exact
+  - name: the Wyckoff positions of Fm-3m match the International Tables
+    function: wyckoff_positions
+    args: {space_group: 225}
+    expect:
+      symbol: Fm-3m
+      positions: {length: 12}
+      positions.0.wyckoff: 192l
+      positions.0.site_symmetry: "1"
+      positions.6.wyckoff: 32f
+      positions.6.site_symmetry: .3m
+      positions.9.wyckoff: 8c
+      positions.9.site_symmetry: -43m
+      positions.9.coordinates: 1/4, 1/4, 1/4
+      positions.11.wyckoff: 4a
+      centrosymmetric: true
+    reference: >-
+      International Tables for Crystallography, Vol. A, space group 225: twelve
+      Wyckoff positions from 192l (site symmetry 1) to 4a (m-3m), including 32f (.3m)
+      and 8c (-43m) at 1/4,1/4,1/4; the group contains inversion.
+    against: exact
+  - name: a molecular crystal of water with Z = 4 in P2_1/c
+    function: molecular_crystals
+    args: {molecules: [H2O], counts: [4], space_group: 14, count: 1, prefix: ice}
+    expect:
+      structures.0.space_group_found: 14
+      structures.0.formula: H8 O4
+      structures.0.atoms_in_cell: 12
+    reference: >-
+      Four molecules on the general position 4e of P2_1/c (International Tables,
+      space group 14) give 4 O and 8 H per cell, and the cell keeps the symmetry of
+      P2_1/c.
+    against: exact
+  - name: a composition that no Wyckoff combination fits is refused
+    function: random_crystals
+    args: {composition: {Na: 3}, space_group: 225}
+    raises: "does not fit the Wyckoff multiplicities"
+    reference: >-
+      The multiplicities in Fm-3m are 4, 8, 24, 32, 48, 96, and 192, so 3 atoms per
+      cell cannot be placed.

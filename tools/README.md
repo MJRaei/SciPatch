@@ -31,6 +31,7 @@ reproduce published or upstream-tested values on every build.
 | [pymatgen-diffusion](pymatgen-diffusion/) | materials | Linux, macOS, Windows | Diffusivity, ionic conductivity, Haven ratio, and Arrhenius fits from MD trajectories | published | pymatgen-analysis-diffusion's test suite (LGPS at 600 K) |
 | [pymatgen-structure](pymatgen-structure/) | materials | Linux, macOS, Windows | Space groups, standard cells, supercells, format conversion, XRD patterns, structure matching | established | pymatgen's XRD tests; olivine and diamond space groups |
 | [pyscf](pyscf/) | chemistry | Linux, macOS, Windows | Ab initio quantum chemistry: HF, DFT, MP2, CCSD(T) energies, optimization, frequencies and thermochemistry, excited states (TDDFT) | established | PySCF's test suite (water HF, B3LYP, MP2, CCSD(T), frequencies; CIS of HF); NIST CCCBDB |
+| [pyxtal](pyxtal/) | materials, chemistry | Linux, macOS, Windows | Crystal structure generation by symmetry: random crystals of a composition in chosen or random space groups, molecular crystals from built-in molecules or SMILES, Wyckoff tables, compatible space groups; starting points for crystal structure prediction | established | International Tables: rock salt and diamond as the only fits in Fm-3m and Fd-3m, the Wyckoff positions of Fm-3m, a P2_1/c molecular crystal |
 | [quantum-espresso](quantum-espresso/) | materials | Linux, macOS, Windows (WSL) | Plane-wave DFT with the verified SSSP pseudopotentials: energies, forces, stress, relaxation, equation of state, gaps, magnetism | established | Quantum ESPRESSO's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
 | [raspa3](raspa3/) | materials, chemistry | Linux, macOS, Windows | Gas adsorption in zeolites and MOFs by Monte Carlo (GCMC, Widom): isotherms, uptake and selectivity from mixtures such as CO2/N2 flue gas, Henry coefficients, heats of adsorption for CO2, N2, and methane, in bundled frameworks (silicalite, HKUST-1, MOF-5, CALF-20) or any CIF | established | Measured methane and CO2 isotherms in silicalite (Abdul-Rehman et al. 1990; Siperstein & Myers 2001; Smit 2015); methane storage in HKUST-1 (Mason et al. 2014) |
 | [reaktoro](reaktoro/) | chemistry, earth science, engineering | Linux, macOS, Windows | Aqueous and geochemical equilibrium with the PHREEQC databases: speciation of water analyses (pH, ionic strength, species, mineral saturation indices), mineral solubility and precipitation, water open to air or CO2, solubility versus temperature, Pitzer brines | established | PHREEQC 3 manual examples: gypsum in pure water, calcite open to atmospheric CO2, seawater speciation |
@@ -92,6 +93,10 @@ accepts.
   potentials agree?) →
   `gpaw.scf` on the relaxed structure (do DFT forces and stress agree?) →
   `phonopy.phonons` on the relaxed structure (dynamical stability).
+- **Crystal structure prediction:** `pyxtal.compatible_space_groups` →
+  `pyxtal.random_crystals` (many structures, several formula units per cell) →
+  `ml-potentials.relax` on each → the lowest energy per atom →
+  `pymatgen-structure.symmetry` and `phonopy.phonons` on the best.
 - **Electronic structure:** `gpaw.scf` → `gpaw.band_structure` on its restart
   file (gap, direct or indirect, band edges; PBE gaps are too small).
 - **Batteries:** `ml-potentials` and `pymatgen-diffusion` for ion transport in an
