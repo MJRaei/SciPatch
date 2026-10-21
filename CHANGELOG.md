@@ -8,6 +8,19 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Tool collection in `tools/`: CHGNet, MACE, phonopy, pymatgen-diffusion,
+  pymatgen-structure, Materials Project, and xTB, each with golden tests against
+  upstream test suites or established physics, and a CI workflow that rebuilds
+  changed tools from scratch.
+- Catalogs: `motel catalog add <git-url>` adds a collection of tools; install
+  them by name with `motel add <name>`.
+- `motel freeze` pins the exact package versions a tool was tested with
+  (`requirements.lock`, applied as constraints).
+- Secrets for tools that call online services (`motel secret set NAME`); each
+  tool receives only the secrets it declares.
+- Golden tests can require secrets (skipped when missing) or require a clear
+  error (`raises:`) for inputs outside a tool's validity.
+- Arguments are checked against each function's types before a run starts.
 - Progress for running jobs: `get_run`, `motel runs show`, and the dashboard show
   the elapsed time and the tool's latest printed lines (`latest_output`). Tool
   output is now line-buffered, so it appears while the job runs.

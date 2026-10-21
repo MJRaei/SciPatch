@@ -1,66 +1,80 @@
-# Example tool packages
+# Motel tools
 
-## `chgnet/`: a research repository turned into a tool
+A collection of research tools for [Motel](../README.md), each one a tool
+package: pinned upstream code, an isolated environment, typed functions, usage
+notes for AI agents, stated validity limits, and **golden tests** that
+reproduce published or upstream-tested values on every build.
 
-[CHGNet](https://github.com/CederGroupHub/chgnet) is a universal
-machine-learning interatomic potential for crystals (Deng et al., *Nat. Mach.
-Intell.* 2023). This package was produced by following the `motel-onboard`
-skill, step by step:
+| Tool | Field | What it does | Checked against |
+|---|---|---|---|
+| [chgnet](chgnet/) | materials | Energies, forces, stresses, magnetic moments, relaxation, and MD with the CHGNet universal potential | CHGNet's test suite (LiMnO₂ energy and relaxation) |
+| [mace](mace/) | materials, chemistry | The same with MACE-MP (89 elements) and MACE-OFF (organic molecules) | MACE's test suite (water); Si and Al lattice constants vs. experiment |
+| [phonopy](phonopy/) | materials | Phonon bands and DOS, dynamical stability, vibrational free energy and heat capacity | Dulong-Petit limit; Γ-point symmetry of silicon |
+| [pymatgen-diffusion](pymatgen-diffusion/) | materials | Diffusivity, ionic conductivity, Haven ratio, and Arrhenius fits from MD trajectories | pymatgen-analysis-diffusion's test suite (LGPS at 600 K) |
+| [pymatgen-structure](pymatgen-structure/) | materials | Space groups, standard cells, supercells, format conversion, XRD patterns, structure matching | pymatgen's XRD tests; olivine and diamond space groups |
+| [materials-project](materials-project/) | materials | Search known materials, stability (energy above hull), properties, and structures | Silicon (mp-149); needs a free API key |
+| [xtb](xtb/) | chemistry | GFN2-xTB energies, optimization, frequencies, and thermochemistry for molecules, with implicit solvent | xtb's test suite (propyne; GBSA solvation) |
 
-1. `motel onboard https://github.com/CederGroupHub/chgnet --ref v0.4.2 --paper https://doi.org/10.1038/s42256-023-00716-3`
-   pinned the release to commit `8d04abc` and prepared the workspace.
-2. Reading the README, `pyproject.toml`, and the test suite showed three
-   capabilities worth exposing: `predict` (energy, forces, stress, magnetic
-   moments), `relax`, and `molecular_dynamics` (marked long-running). It also
-   showed that the pretrained weights ship with the code, so nothing needs
-   downloading.
-3. `motel check . --skip-tests` built the environment (PyTorch, pymatgen, and
-   CHGNet's compiled Cython extension) in under a minute. No patches were
-   needed.
-4. The repository's own test suite documents reference values for the bundled
-   LiMnO₂ structure. Running the README example with `motel exec` reproduced
-   them exactly before any wrapper code was written.
-5. The golden tests in `motel.yaml` check those values and cite the exact test
-   they come from. `motel check . --clean` passed, then `motel add .`.
+Two more tools ship inside Motel itself: `ase-emt` (fast approximate
+simulations of metals) and `rdkit-descriptors` (molecular properties from
+SMILES).
 
-Install it yourself with:
+## Installing
+
+From a copy of this repository:
 
 ```bash
 motel add tools/chgnet
 ```
 
-This downloads about 1 GB (mostly PyTorch). Then try
-`motel run chgnet predict structure=tools/chgnet/tests/data/mp-18767-LiMnO2.cif`,
-or ask your AI app to *relax LiMnO₂ with CHGNet and report the Mn magnetic moments*.
-
-## `pymatgen-diffusion/`: turning an analysis library into a tool
-
-[pymatgen-analysis-diffusion](https://github.com/materialsvirtuallab/pymatgen-analysis-diffusion)
-computes diffusivities, conductivities, and activation energies from MD
-trajectories (Deng et al., *Chem. Mater.* 2017). It was onboarded because an
-agent analyzing a CHGNet MD run had to write its own MSD scripts: work that is
-not recorded in Motel and not reusable. Now it's two tool calls.
-
-1. `motel onboard https://github.com/materialsvirtuallab/pymatgen-analysis-diffusion --ref v2025.11.14 --name pymatgen-diffusion`
-2. Two capabilities were exposed: `analyze_trajectory` (MSD, diffusivity,
-   conductivity, Haven ratio, plot) and `arrhenius_fit` (activation energy,
-   extrapolation to room temperature). Any ASE-readable trajectory works, so it
-   chains directly with CHGNet's `molecular_dynamics`, which reports the
-   `frame_interval_fs` this tool needs.
-3. The upstream tests check a preprocessed LGPS run, not a trajectory file. To
-   test this tool's own path, that run was rebuilt as a trajectory
-   ([tests/data](pymatgen-diffusion/tests/data/README.md)); the golden test
-   reproduces the upstream values (D = 1.1608e-6 cm²/s, 74.165 mS/cm, Haven
-   ratio 0.3185), as does the exact Arrhenius test.
-4. The analysis reports how many ions actually hopped and warns when none did,
-   so a vibration-only run is never mistaken for a diffusivity.
+From the published collection, add it once and install tools by name:
 
 ```bash
-motel add tools/pymatgen-diffusion
+motel catalog add <repository-url>
+motel catalog                      # browse
+motel add chgnet
+motel catalog update               # fetch new and updated tools
 ```
 
-## Featured tools
+The Materials Project tool needs a free API key from
+<https://next-gen.materialsproject.org/api>: `motel secret set MP_API_KEY`.
 
-The tools in [`src/motel/catalog/`](../src/motel/catalog) (`ase-emt`,
-`rdkit-descriptors`) are also complete examples. They wrap PyPI packages
-instead of a git repository, and they install by name: `motel add ase-emt`.
+## Workflows
+
+The tools are designed to be chained: outputs are files that the next tool
+accepts.
+
+- **Is a new material stable?** `materials-project.search` (known phases) →
+  `chgnet.relax` and `mace.relax` (two independent potentials) →
+  `phonopy.phonons` on the relaxed structure (dynamical stability).
+- **How fast do ions move?** `pymatgen-structure.make_supercell` (≥ 100 atoms) →
+  `chgnet.molecular_dynamics` or `mace.molecular_dynamics` at several temperatures
+  (several ps each) → `pymatgen-diffusion.analyze_trajectory` →
+  `pymatgen-diffusion.arrhenius_fit` (activation energy, room-temperature value).
+- **Identify a structure:** `pymatgen-structure.symmetry` and `xrd_pattern`, then
+  `compare` with candidates from `materials-project.get_structure`.
+- **Molecules:** `xtb.optimize` from SMILES → `xtb.frequencies` (minimum? free
+  energy) → `mace.predict` with an `off23` model as a second opinion.
+
+## Licenses
+
+Each tool's `motel.yaml` states its license. Note especially: MACE-OFF models
+are for non-commercial use only (Academic Software License), Materials Project
+data is CC BY 4.0, and xtb is LGPL-3.0. Upstream code is downloaded from its
+original repository at install time and is not redistributed here.
+
+## Adding a tool
+
+See [Turning a repository into a tool](../docs/onboarding.md). A tool is
+accepted when:
+
+- [ ] `motel check tools/<name> --clean` passes;
+- [ ] at least one golden test reproduces a published or upstream-tested value,
+      and its `reference` names the exact source (never an invented one);
+- [ ] a golden test with `raises:` shows that an input outside the tool's
+      validity is refused, where that applies;
+- [ ] `validity`, `citation`, and `license` are filled in;
+- [ ] versions are pinned with `motel freeze tools/<name>`.
+
+The **Tools** CI workflow rebuilds every changed tool from scratch on Linux and
+macOS and runs its golden tests; all tools are re-checked weekly.

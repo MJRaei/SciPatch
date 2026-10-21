@@ -85,10 +85,13 @@ reports the result with its limitations and citation.
 | A research repository | `motel onboard https://github.com/org/repo --paper <doi>` | Your coding agent turns it into a tool, guided by Motel |
 | A ready tool package | `motel add ./folder` or `motel add <git-url>` | Installs and verifies it |
 
-Featured tools today: **ase-emt** (fast approximate simulations of metals:
-energies, relaxations, lattice constants, bulk moduli) and **rdkit-descriptors**
-(molecular weight, logP, polar surface area, drug-likeness, similarity, and 3D
-conformers from SMILES).
+Built in: **ase-emt** (fast approximate simulations of metals) and
+**rdkit-descriptors** (molecular properties from SMILES). The
+[tool collection](tools/README.md) adds **CHGNet** and **MACE** (machine-learned
+potentials), **phonopy** (phonons and stability), **pymatgen-diffusion** (ion
+transport from MD), **pymatgen-structure** (symmetry, supercells, XRD), the
+**Materials Project** database, and **xTB** (quantum chemistry for molecules).
+Every tool reproduces published or upstream-tested values before it installs.
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),
 Codex, or Gemini CLI. See [Turning a repository into a tool](docs/onboarding.md),
