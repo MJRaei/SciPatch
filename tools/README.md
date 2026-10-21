@@ -9,6 +9,7 @@ reproduce published or upstream-tested values on every build.
 |---|---|---|---|---|---|
 | [aizynthfinder](aizynthfinder/) | chemistry | Linux, macOS, Windows | Retrosynthesis: ranked routes from purchasable starting materials (17.4 million ZINC compounds) or your own inventory, with each reaction step and route images; one-step precursor suggestions with feasibility; purchasability lookups | established | Textbook syntheses of paracetamol, aspirin (Olmsted 1998), and lidocaine in two steps (Reilly 1999); the published ZINC stock |
 | [atombridge](atombridge/) | materials | Linux, macOS, Windows | Lattice vectors from atomic-resolution STEM/TEM images (from the AtomBridge hackathon project), figures and captions from paper PDFs with micrographs flagged, and overlap checks for structures | experimental | Synthetic lattices of known spacing (square, triangular, noisy rectangular); wurtzite ZnO from AtomBridge's example HRTEM image; exact figure and overlap checks |
+| [atomic-shorts](atomic-shorts/) | chemistry, materials, physics | Linux, macOS, Windows | Short narrated science videos (from the AtomicShorts hackathon project): storyboard checks (narration time, terms to fact-check), Manim animation rendering with error reports, and text-to-speech narration | experimental | Manim's documented quality presets and exact scene durations; narration time at AtomicShorts' 140 words per minute; narration merged and the video extended |
 | [cantera](cantera/) | chemistry, engineering | Linux, macOS, Windows | Combustion chemistry: equilibrium, adiabatic flame temperatures, laminar flame speeds, ignition delays, species thermodynamics | established | NASA CEA flame temperatures; NIST-JANAF heat capacities; methane-air flame speed vs experiment |
 | [catalyze](catalyze/) | chemistry | Linux, macOS, Windows | Opentrons OT-2 and Flex protocol simulation with error checks and run logs, Opentrons labware lookup, and GHS hazard classifications from PubChem (from the Catalyze hackathon project) | experimental | Opentrons' documented default flow rate; exact volumes and tips of transfer and dilution protocols; ANSI/SLAS microplate footprint; EU harmonised classifications of ethanol and benzene |
 | [clue](clue/) | materials | Linux, macOS, Windows | Metallicity predictions explained by counterfactuals (from the CLUE hackathon project): random-forest metal/non-metal classifier, crystal similarity (ElMD, SOAP, volume), and similar Materials Project compounds classified the other way | experimental | CLUE's own example predictions and MgF2 counterfactuals; copper and rock salt; exact supercell similarity; ElMD's documented CaTiO3-SrTiO3 distance |
@@ -217,6 +218,9 @@ accepts.
   (hazards, handling) → `catalyze.labware` for valid labware → write the Opentrons
   protocol → `catalyze.simulate_protocol` until it runs cleanly → check the
   volumes and run log before the robot.
+- **Explain a result in a short video:** write a storyboard →
+  `atomic-shorts.check_storyboard` (length, terms to verify) → Manim code →
+  `atomic-shorts.render_scene` (fix errors it reports) → `atomic-shorts.narrate`.
 - **Chemical files:** `openbabel.convert` and `openbabel.identifiers` move
   molecules between programs and formats and give InChIKeys for lookups.
 

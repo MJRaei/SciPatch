@@ -1,0 +1,133 @@
+schema: 1
+name: atomic-shorts
+version: 0.1.0
+title: Narrated science explainer videos (AtomicShorts)
+summary: >-
+  Make short narrated science videos with the steps of the AtomicShorts hackathon
+  pipeline: check a storyboard (structure, narration time against a target length,
+  scientific terms to fact-check), render Manim animation code to MP4 (with the
+  error and line when it fails), and add a spoken narration track, extending the
+  video to fit.
+domains: [chemistry, materials, physics]
+tags: [science-communication, video, animation, manim, storyboard, narration, text-to-speech,
+       outreach, education, explainer, hackathon]
+
+source:
+  repo: https://github.com/vrindaasomjit/atomic-shorts
+  ref: 01978fa786b19baf39385896d3973e77f6bf75af
+  install: false
+  homepage: https://github.com/vrindaasomjit/atomic-shorts
+  citation: >-
+    AtomicShorts, scientist-in-the-loop prompt-to-video workflow (V. Somjit et al.,
+    hackathon project, 2025), github.com/vrindaasomjit/atomic-shorts; animation: The
+    Manim Community Developers, Manim (www.manim.community); speech: gTTS (Google
+    Translate text-to-speech).
+  license: >-
+    not stated (the repository has no LICENSE file); Manim, MIT; gTTS, MIT (speech
+    from Google's text-to-speech service).
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["manim=0.22.0", "gtts=2.5.4", "ffmpeg=9.0.2"]
+  channels: [conda-forge]
+
+entrypoint: api
+
+functions:
+  check_storyboard:
+    params:
+      storyboard: {kind: file}
+    outputs:
+      total_narration_seconds: {unit: s}
+  render_scene:
+    long_running: true
+    params:
+      code: {kind: file}
+      output: {kind: video}
+    outputs:
+      duration_s: {unit: s}
+      video: {kind: video}
+  narrate:
+    resources: {network: true}
+    params:
+      video: {kind: video}
+      output: {kind: video}
+    outputs:
+      duration_s: {unit: s}
+      video: {kind: video}
+
+validity: >-
+  The tool renders and narrates what it is given: scientific accuracy depends on
+  the storyboard and the animation code, so verify every claim (the listed terms
+  are a starting point, not a check). Narration time is estimated at a fixed
+  words-per-minute rate; the synthesized voice may run somewhat faster or
+  slower. Text-to-speech uses Google's service and needs the internet. Rendering
+  time grows with quality and animation length (seconds at low quality for short
+  scenes, minutes at high quality).
+
+maturity: experimental
+
+golden:
+  - name: a 3-second scene renders at Manim's low quality
+    quick: true
+    function: render_scene
+    args: {code: tests/data/rock_salt_scene.py}
+    expect:
+      duration_s: {approx: 3.0, abs: 0.05}
+      width: 854
+      height: 480
+      fps: {approx: 15.0, abs: 1.0e-6}
+    reference: >-
+      The scene plays two 1-second animations and waits 1 second (3 s). Manim's
+      documentation (command-line flags) defines -ql as 854x480 at 15 frames per
+      second.
+    against: exact
+  - name: medium quality is 720p at 30 frames per second
+    function: render_scene
+    args: {code: tests/data/rock_salt_scene.py, quality: medium}
+    expect:
+      duration_s: {approx: 3.0, abs: 0.05}
+      width: 1280
+      height: 720
+      fps: {approx: 30.0, abs: 1.0e-6}
+    reference: Manim's documentation defines -qm as 1280x720 at 30 frames per second.
+    against: exact
+  - name: storyboard narration time at 140 words per minute
+    function: check_storyboard
+    args: {storyboard: tests/data/salt_storyboard.json}
+    expect:
+      required_fields_present: true
+      scene_count: 3
+      scenes.0.narration_words: 33
+      scenes.0.narration_seconds: {approx: 14.1, abs: 1.0e-6}
+      total_narration_words: 99
+      total_narration_seconds: {approx: 42.4, abs: 1.0e-6}
+      length: fits
+      terms_to_fact_check: {contains: lattice}
+    reference: >-
+      The storyboard's three narrations have 33, 34, and 32 words; at AtomicShorts'
+      140 words per minute (validationagent.estimate_reading_time) that is 14.1 s and
+      42.4 s in total, inside its default 30-60 s target.
+    against: exact
+  - name: narration is added and the video extended to fit it
+    function: narrate
+    args: {video: tests/data/rock_salt_scene.mp4, storyboard: tests/data/salt_storyboard.json}
+    expect:
+      has_audio: true
+      narration_longer_than_video: true
+      narration_seconds: {approx: 42.4, rel: 0.25}
+      duration_s: {min: 34.0}
+    reference: >-
+      99 words spoken at about 140 words per minute (the rate AtomicShorts assumes)
+      take about 42 s, longer than the 3-second video, which is therefore held on its
+      last frame.
+    against: upstream-tests
+  - name: a scene with an error reports Manim's message
+    function: render_scene
+    args: {code: tests/data/broken_scene.py}
+    raises: "ShowCreation"
+    reference: >-
+      ShowCreation was removed from Manim Community (replaced by Create, as
+      AtomicShorts' fixer prompt notes); the error must name it so the code can be
+      fixed.

@@ -1,0 +1,38 @@
+{
+  "prompt": "Explain the crystal structure of table salt for a high school audience.",
+  "title": "Why Salt Grains Are Cubes",
+  "age_level": "High School",
+  "video_length": "45 seconds",
+  "scenes": [
+    {
+      "scene_id": 1,
+      "title": "Ions",
+      "narration": "Table salt is made of two kinds of charged atoms called ions. Sodium gives away one electron and becomes positive, while chlorine takes that electron and becomes negative, so the two ions attract.",
+      "visuals": [
+        {
+          "description": "A purple Na+ sphere hands an electron to a green Cl- sphere."
+        }
+      ]
+    },
+    {
+      "scene_id": 2,
+      "title": "The lattice",
+      "narration": "These ions pack into a repeating pattern called a crystal lattice. Each sodium ion is surrounded by six chloride ions, arranged at the corners of an octahedron, and the pattern repeats in every direction.",
+      "visuals": [
+        {
+          "description": "A 3x3 grid of alternating Na+ and Cl- dots grows into a cube."
+        }
+      ]
+    },
+    {
+      "scene_id": 3,
+      "title": "Cubic grains",
+      "narration": "Because the ions hold each other so tightly, salt melts only near eight hundred degrees Celsius and its crystals break along flat faces, which is why salt grains look like tiny cubes.",
+      "visuals": [
+        {
+          "description": "A cube of dots fades into a photo-like salt grain outline."
+        }
+      ]
+    }
+  ]
+}
