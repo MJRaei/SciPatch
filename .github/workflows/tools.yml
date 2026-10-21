@@ -1,0 +1,60 @@
+name: Tools
+
+# Rebuild tool packages from scratch and run their golden tests: on every change
+# to a tool, and weekly for all tools, to catch upstream breakage early.
+on:
+  pull_request:
+    paths: ["tools/**"]
+  push:
+    branches: [main]
+    paths: ["tools/**"]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  select:
+    name: Select tools
+    runs-on: ubuntu-latest
+    outputs:
+      tools: ${{ steps.list.outputs.tools }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: list
+        run: |
+          case "${{ github.event_name }}" in
+            pull_request) changed=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD -- tools) ;;
+            push) changed=$(git diff --name-only "${{ github.event.before }}" HEAD -- tools) ;;
+            *) changed=$(ls tools/*/motel.yaml) ;;
+          esac
+          tools=$(echo "$changed" | cut -d/ -f2 | sort -u | while read -r t; do
+            [ -n "$t" ] && [ -f "tools/$t/motel.yaml" ] && echo "$t"; done)
+          echo "tools=$(echo "$tools" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read().split()))')" >> "$GITHUB_OUTPUT"
+
+  check:
+    name: ${{ matrix.tool }} (${{ matrix.os }})
+    needs: select
+    if: needs.select.outputs.tools != '[]'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        tool: ${{ fromJSON(needs.select.outputs.tools) }}
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - id: manager
+        run: echo "conda=$(grep -q 'manager: conda' tools/${{ matrix.tool }}/motel.yaml && echo yes || echo no)" >> "$GITHUB_OUTPUT"
+      - if: steps.manager.outputs.conda == 'yes'
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+      - run: uv tool install --python 3.12 .
+      - name: Build from scratch and run golden tests
+        run: motel check tools/${{ matrix.tool }} --clean
+        env:
+          # Golden tests that need a secret are skipped when it is not configured.
+          MP_API_KEY: ${{ secrets.MP_API_KEY }}
