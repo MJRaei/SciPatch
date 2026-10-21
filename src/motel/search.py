@@ -12,9 +12,11 @@ from __future__ import annotations
 import math
 import re
 from collections import Counter
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any
 
+from motel.manifest import Manifest
 from motel.registry import InstalledTool
 from motel.schema import type_label
 
@@ -86,6 +88,17 @@ def _document(tool: InstalledTool, function_index: int) -> list[str]:
     return tokenize(" ".join(parts))
 
 
+def catalog_document(manifest: Manifest) -> list[str]:
+    """Words describing a tool that is not installed yet (from its manifest only)."""
+    functions = manifest.exported_names or []
+    parts = [
+        manifest.name, manifest.name, manifest.title or "", manifest.summary,
+        manifest.description or "", " ".join(manifest.domains), " ".join(manifest.tags),
+        " ".join(functions),
+    ]  # fmt: skip
+    return tokenize(" ".join(parts))
+
+
 def _shared_prefix(a: str, b: str) -> int:
     length = 0
     for x, y in zip(a, b, strict=False):
@@ -113,15 +126,27 @@ class ToolIndex:
     """BM25 index over the functions of a set of tools."""
 
     def __init__(self, tools: list[InstalledTool]) -> None:
+        self._index(
+            ((tool.name, function.name), _document(tool, index))
+            for tool in tools
+            for index, function in enumerate(tool.functions)
+        )
+
+    @classmethod
+    def of_documents(cls, documents: Iterable[tuple[tuple[str, str], list[str]]]) -> ToolIndex:
+        """An index over any (tool, function) keyed documents, e.g. catalog tools."""
+        index = cls.__new__(cls)
+        index._index(documents)
+        return index
+
+    def _index(self, documents: Iterable[tuple[tuple[str, str], list[str]]]) -> None:
         self._keys: list[tuple[str, str]] = []
         self._docs: list[Counter[str]] = []
         self._lengths: list[int] = []
-        for tool in tools:
-            for index, function in enumerate(tool.functions):
-                tokens = _document(tool, index)
-                self._keys.append((tool.name, function.name))
-                self._docs.append(Counter(tokens))
-                self._lengths.append(len(tokens))
+        for key, tokens in documents:
+            self._keys.append(key)
+            self._docs.append(Counter(tokens))
+            self._lengths.append(len(tokens))
         self._average = sum(self._lengths) / len(self._lengths) if self._lengths else 0.0
         frequency: Counter[str] = Counter()
         for doc in self._docs:

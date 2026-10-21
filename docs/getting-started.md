@@ -79,9 +79,15 @@ Then try the memory:
 
 ## 4. Add more tools
 
+You don't have to install tools in advance. When your AI app needs a tool that
+is in one of your catalogs but not installed, it tells you which one and, if you
+agree, installs it (installs download packages and take a few minutes). To add
+the [tool collection](../tools/README.md) as a catalog, or install by hand:
+
 ```bash
-motel catalog                  # featured tools that ship with Motel
-motel add rdkit-descriptors    # chemistry: properties of molecules from SMILES
+motel catalog add <git-url>    # a collection of tools, e.g. this repository
+motel catalog                  # what you can install
+motel add rdkit-descriptors    # install one by hand
 ```
 
 To turn a research repository into a tool, see

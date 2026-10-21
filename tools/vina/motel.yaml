@@ -89,6 +89,7 @@ golden:
       pose. Redocking succeeds when the top pose is within 2 Å heavy-atom RMSD of
       the crystal ligand (the usual criterion).
   - name: imatinib built from SMILES docks into the crystal pose
+    quick: true
     function: dock
     args: {receptor: tests/data/1iep_receptorH.pdb,
            ligand: "Cc1ccc(NC(=O)c2ccc(CN3CC[NH+](C)CC3)cc2)cc1Nc1nccc(-c2cccnc2)n1",

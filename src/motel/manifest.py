@@ -212,6 +212,11 @@ class GoldenTest(_Model):
         description="Run only on these platforms, e.g. when a package the test needs "
         "does not exist everywhere (see environment markers).",
     )
+    quick: bool = Field(
+        False,
+        description="Also run when the tool is installed (keep these to seconds). The "
+        "other tests run with 'motel check', 'motel test', and in CI.",
+    )
 
     @field_validator("platforms")
     @classmethod

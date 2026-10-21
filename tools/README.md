@@ -120,6 +120,8 @@ accepted when:
 - [ ] `motel check tools/<name> --clean` passes;
 - [ ] at least one golden test reproduces a published or upstream-tested value,
       and its `reference` names the exact source (never an invented one);
+- [ ] one fast golden test exercising the main computation is marked
+      `quick: true` (installs run only the quick tests);
 - [ ] a golden test with `raises:` shows that an input outside the tool's
       validity is refused, where that applies;
 - [ ] `validity`, `citation`, and `license` are filled in;

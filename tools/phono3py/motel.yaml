@@ -64,6 +64,7 @@ validity: >-
 
 golden:
   - name: silicon conductivity matches the phono3py test suite
+    quick: true
     function: thermal_conductivity
     args:
       structure: tests/data/phono3py_si_pbesol.yaml

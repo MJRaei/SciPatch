@@ -80,7 +80,7 @@ reports the result with its limitations and citation.
 
 | You have | Run | What happens |
 |---|---|---|
-| A featured tool | `motel add ase-emt` | Installs and verifies it (`motel catalog` lists them) |
+| A featured tool | `motel add ase-emt`, or just ask your AI app | Installs and verifies it (`motel catalog` lists them); AI apps suggest and install catalog tools on first use, after asking you |
 | A collection of tools | `motel catalog add <git-url>`, then `motel add <name>` | Adds a lab's or community collection; install its tools by name |
 | A research repository | `motel onboard https://github.com/org/repo --paper <doi>` | Your coding agent turns it into a tool, guided by Motel |
 | A ready tool package | `motel add ./folder` or `motel add <git-url>` | Installs and verifies it |

@@ -91,12 +91,16 @@ class ToolState(BaseModel):
         passed = sum(result.passed for result in self.golden)
         skipped = sum(result.skipped for result in self.golden)
         summary = f"{passed}/{len(self.golden) - skipped} golden tests passed"
-        secrets = sum((r.error or "").startswith("skipped: needs") for r in self.golden)
+
+        def count(prefix: str) -> int:
+            return sum((r.error or "").startswith(prefix) for r in self.golden if r.skipped)
+
         reasons = [
-            f"{secrets} skipped (missing secrets)" if secrets else "",
-            f"{skipped - secrets} for other platforms" if skipped > secrets else "",
+            (count("skipped: needs"), "skipped (missing secrets)"),
+            (count("skipped: not run at install"), "more run with 'motel test'"),
+            (count("skipped: not run on"), "for other platforms"),
         ]
-        return ", ".join([summary, *filter(None, reasons)])
+        return ", ".join([summary, *(f"{n} {text}" for n, text in reasons if n)])
 
 
 class RunStatus(StrEnum):

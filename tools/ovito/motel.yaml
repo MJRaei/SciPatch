@@ -73,6 +73,7 @@ validity: >-
 
 golden:
   - name: the 12 neighbors of a vacancy in fcc are not fcc (adaptive CNA)
+    quick: true
     function: structure_types
     args: {structure: tests/data/Cu_fcc_vacancy.xyz}
     expect:

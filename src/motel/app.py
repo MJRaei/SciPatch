@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from motel.build import BuildOutcome, runtime_for
+from motel.catalogs import CatalogEntry, CatalogStore
 from motel.clients import APPS, AppIntegration, ConnectionStore, get_app, server_command
 from motel.errors import MotelError
 from motel.freeze import FreezeResult
@@ -29,7 +30,7 @@ from motel.paths import MotelPaths
 from motel.registry import InstalledTool, Registry
 from motel.reporting import NullReporter, Reporter
 from motel.runs import RunManager
-from motel.search import SearchHit, ToolIndex
+from motel.search import SearchHit, ToolIndex, catalog_document
 from motel.secrets import SecretStore
 from motel.skills import SkillManager, SyncReport
 
@@ -79,6 +80,23 @@ class Motel:
             matches.append(Match(hit, tool, tool.function(hit.function)))
         return matches
 
+    def find_installable(self, query: str, limit: int = 3) -> list[tuple[CatalogEntry, float]]:
+        """Catalog tools that are not installed yet, best matches first."""
+        installed = set(self.registry.names())
+        entries = {
+            entry.manifest.name: entry
+            for entry in CatalogStore(self.paths).entries()
+            if entry.manifest.name not in installed
+        }
+        index = ToolIndex.of_documents(
+            ((name, ""), catalog_document(entry.manifest)) for name, entry in entries.items()
+        )
+        return [(entries[hit.tool], hit.score) for hit in index.search(query, limit=limit)]
+
+    def catalog_entry(self, name: str) -> CatalogEntry | None:
+        """The catalog package of a tool, if a catalog (or Motel itself) has one."""
+        return CatalogStore(self.paths).find(name)
+
     def add(self, spec: str, **options: Any) -> InstalledTool:
         """Install a tool package (folder, featured tool name, or git URL)."""
         tool = self.installer.install(spec, **options)
@@ -90,8 +108,10 @@ class Motel:
         self.registry.remove(name)
         self.sync_skills()
 
-    def rebuild(self, name: str, *, clean: bool = False, run_tests: bool = True) -> InstalledTool:
-        tool = self.installer.rebuild(name, clean=clean, run_tests=run_tests)
+    def rebuild(
+        self, name: str, *, clean: bool = False, run_tests: bool = True, all_tests: bool = False
+    ) -> InstalledTool:
+        tool = self.installer.rebuild(name, clean=clean, run_tests=run_tests, all_tests=all_tests)
         self.sync_skills()
         return tool
 

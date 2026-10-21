@@ -361,3 +361,23 @@ def test_golden_tests_can_be_limited_to_some_platforms(
     assert results["here"].passed
     assert results["elsewhere"].skipped and not results["elsewhere"].passed
     assert outcome.tests_passed
+
+
+def test_install_runs_only_the_quick_golden_tests(
+    motel: Motel, make_package: ManifestFactory
+) -> None:
+    golden = [
+        {"name": "quick", "function": "add", "args": {"a": 1}, "expect": {"sum": 2},
+         "quick": True},
+        {"name": "slow", "function": "add", "args": {"a": 2}, "expect": {"sum": 3}},
+    ]  # fmt: skip
+    package = make_package(functions=["add"], golden=golden)
+    tool = motel.add(str(package))
+    assert tool.state is not None
+    assert tool.state.golden_summary == "1/1 golden tests passed, 1 more run with 'motel test'"
+    tested = motel.test("sample")
+    assert tested.state is not None
+    assert tested.state.golden_summary == "2/2 golden tests passed"
+    everything = motel.add(str(package), force=True, all_tests=True)
+    assert everything.state is not None
+    assert everything.state.golden_summary == "2/2 golden tests passed"

@@ -110,6 +110,7 @@ golden:
       energy -1.7850605646769206 eV/atom and cohesive energy -4.053125177202149
       eV/atom (1%).
   - name: Li2O bulk modulus matches the matcalc test suite
+    quick: true
     function: equation_of_state
     args: {structure: tests/data/Li2O.json, fmax: 0.1}
     expect:

@@ -95,6 +95,7 @@ golden:
       kcal/mol. The lowest energy must equal the GFN2-xTB energy of tightly
       optimized anti-butane from xtb 6.7.1 (-13.665128 Eh, the xtb tool).
   - name: pyridine is protonated at nitrogen
+    quick: true
     function: protonation_sites
     args: {molecule: c1ccncc1}
     expect:

@@ -71,6 +71,7 @@ validity: >-
 
 golden:
   - name: Morgan similarity matches the RDKit documentation
+    quick: true
     function: similarity_search
     args: {query: Cc1ccccc1, molecules: [Cc1ncccc1], radius: 2, counts: true, metric: dice}
     expect:

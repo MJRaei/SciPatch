@@ -82,6 +82,7 @@ golden:
       PBE underestimates silicon's experimental 1.12 eV gap; Materials Project
       reports about 0.6 eV, so a value between 0.4 and 0.9 eV is expected.
   - name: the conventional silicon cell has 8 atoms
+    quick: true
     function: get_structure
     args: {material_id: mp-149}
     requires: [MP_API_KEY]

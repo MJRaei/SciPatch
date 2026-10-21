@@ -116,6 +116,7 @@ golden:
       228.2, CO2 Cp 54.30 and S 269.3, H2O Cp 41.27 and S 232.7 J/mol/K. GRI-Mech
       3.0 gives these within 0.25%.
   - name: methane-air flame temperature matches NASA CEA
+    quick: true
     function: adiabatic_flame_temperature
     args:
       fuel: "CH4:1"

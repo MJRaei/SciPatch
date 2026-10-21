@@ -103,6 +103,7 @@ validity: >-
 
 golden:
   - name: silicon energy matches the Quantum ESPRESSO test suite
+    quick: true
     function: scf
     args:
       structure: tests/data/Si_10.20bohr.extxyz

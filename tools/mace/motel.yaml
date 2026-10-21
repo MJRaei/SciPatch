@@ -73,6 +73,7 @@ validity: >-
 
 golden:
   - name: MACE-OFF23 water energy matches the MACE test suite
+    quick: true
     function: predict
     args: {structure: tests/data/water.extxyz, model: off23-small}
     expect:

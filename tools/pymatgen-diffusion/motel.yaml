@@ -95,6 +95,7 @@ golden:
       ratio 0.31854161048867402. The trajectory was rebuilt from that test's
       DiffusionAnalyzer.json (initial structure plus displacements, 20 fs apart).
   - name: Arrhenius fit matches the pymatgen-analysis-diffusion test suite
+    quick: true
     function: arrhenius_fit
     args:
       temperatures_k: [300, 1000, 500]

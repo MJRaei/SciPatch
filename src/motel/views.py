@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import Any
 
 from motel.app import Match
-from motel.lock import platform_summary, runs_in_wsl
+from motel.catalogs import CatalogEntry
+from motel.lock import platform_summary, runs_in_wsl, unavailable_here
 from motel.models import RunRecord, RunStatus, utcnow
 from motel.platforms import label as platform_label
 from motel.registry import InstalledTool
@@ -99,6 +100,20 @@ def match_view(match: Match) -> dict[str, Any]:
         "inputs": describe_inputs(function.properties, function.required),
         "long_running": function.long_running,
         "score": match.hit.score,
+    }
+
+
+def installable_view(entry: CatalogEntry) -> dict[str, Any]:
+    """A catalog tool that is not installed yet, as find_tools suggests it."""
+    manifest = entry.manifest
+    reason = unavailable_here(entry.folder)
+    return {
+        "tool": manifest.name,
+        "title": manifest.display_title,
+        "summary": manifest.summary,
+        "catalog": entry.catalog,
+        "installable_here": reason is None,
+        **({"why_not": reason} if reason else {}),
     }
 
 

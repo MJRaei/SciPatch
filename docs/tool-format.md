@@ -225,6 +225,7 @@ the relevant caveats.
 | `timeout` | Seconds (default 900). |
 | `requires` | Secrets the test needs, e.g. `[MP_API_KEY]`. Without them the test is skipped, not failed, so the tool still installs. |
 | `raises` | Text the call's error message must contain: the test passes only if the call *fails* this way. Use it to prove that inputs outside the tool's validity are refused, e.g. `raises: "no reliable parameters for Fe"`. |
+| `quick` | Also run when the tool is installed. Mark one fast test (seconds) that exercises the main computation; `motel add` runs only the quick tests (all of them if none is marked), while `motel check`, `motel test`, `motel add --all-tests`, and CI run every test. |
 | `platforms` | Run only on these platforms (e.g. `[linux-64, osx-arm64, osx-64]`), for tests that need a package some platform lacks. Elsewhere the test is skipped. Pair it with a test for the other platforms that checks the function explains what is missing. |
 
 Each check is a literal (numbers are compared to within about 1e-9) or a matcher:

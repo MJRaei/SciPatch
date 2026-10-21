@@ -163,6 +163,7 @@ golden:
       (2011), Sec. II); measured density 0.997 g/cm^3 at 25 C. This tool gives
       0.995 g/cm^3 (501 waters, PME, 40 ps after 20 ps of equilibration).
   - name: alanine dipeptide minimizes in implicit solvent
+    quick: true
     function: minimize
     args: {structure: tests/data/alanine-dipeptide-implicit.pdb, implicit_solvent: obc2}
     expect:
@@ -200,6 +201,7 @@ golden:
       in two runs of this protocol); see the methanol test for the force field's
       typical density error.
   - name: a small molecule is parameterized and simulated in water
+    quick: true
     function: simulate
     platforms: [linux-64, linux-aarch64, osx-arm64, osx-64]   # needs AmberTools
     args: {structure: tests/data/ethanol.sdf, box_nm: 2.5, time_ps: 5, equilibration_ps: 5}
@@ -219,6 +221,7 @@ golden:
       Biomolecular force fields have no templates for arbitrary small molecules;
       the error must explain how to provide them (SDF files in small_molecules).
   - name: on Windows, small molecules are refused with the reason
+    quick: true
     function: energy
     platforms: [win-64]
     args: {structure: tests/data/ethanol.sdf}

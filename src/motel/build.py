@@ -39,7 +39,7 @@ from motel.lock import (
     PlatformUnavailableError,
     pins_for_build,
 )
-from motel.manifest import Manifest
+from motel.manifest import GoldenTest, Manifest
 from motel.models import FunctionInfo, GoldenResult
 from motel.reporting import Reporter
 from motel.runtime import executor
@@ -103,9 +103,14 @@ def build(
     reporter: Reporter,
     fresh: bool = False,
     run_tests: bool = True,
+    quick_tests: bool = False,
     secrets: Mapping[str, str] | None = None,
 ) -> BuildOutcome:
-    """Build and verify a tool package. Raises :class:`BuildError` on failure."""
+    """Build and verify a tool package. Raises :class:`BuildError` on failure.
+
+    With ``quick_tests``, only the golden tests marked ``quick`` run (all of them if
+    the tool marks none), as when installing.
+    """
     log = BuildLog(layout.log_path, reporter)
     # Before anything is downloaded: can this platform build the tool at all?
     pins, distro = _pins_for_this_computer(manifest, layout.package_dir)
@@ -183,8 +188,9 @@ def build(
     # 4. Golden tests
     results: list[GoldenResult] = []
     if run_tests and manifest.golden:
-        reporter.step(f"Running {len(manifest.golden)} golden test(s)")
-        results = run_golden_tests(manifest, runtime, layout.package_dir, reporter)
+        selected = quick_selection(manifest) if quick_tests else manifest.golden
+        reporter.step(f"Running {len(selected)} golden test(s)")
+        results = run_golden_tests(manifest, runtime, layout.package_dir, reporter, only=selected)
     elif not manifest.golden:
         warnings.append("no golden tests: add one that reproduces a number from the paper")
 
@@ -281,12 +287,34 @@ def merge_function_options(
     return functions
 
 
+def quick_selection(manifest: Manifest) -> list[GoldenTest]:
+    """The golden tests to run at install: those marked quick, or all if none are."""
+    quick = [test for test in manifest.golden if test.quick]
+    return quick or list(manifest.golden)
+
+
 def run_golden_tests(
-    manifest: Manifest, runtime: ToolRuntime, package_dir: Path, reporter: Reporter
+    manifest: Manifest,
+    runtime: ToolRuntime,
+    package_dir: Path,
+    reporter: Reporter,
+    only: list[GoldenTest] | None = None,
 ) -> list[GoldenResult]:
     results = []
     here = platforms.current()
     for test in manifest.golden:
+        if only is not None and test not in only:
+            results.append(
+                GoldenResult(
+                    name=test.name,
+                    function=test.function,
+                    passed=False,
+                    skipped=True,
+                    error=f"skipped: not run at install ('motel test {manifest.name}' runs it)",
+                    reference=test.reference,
+                )
+            )
+            continue
         if test.platforms and here not in test.platforms:
             reporter.detail(f"golden test '{test.name}' skipped on {platforms.label(here)}")
             results.append(

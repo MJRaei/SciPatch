@@ -32,8 +32,11 @@ from pydantic import Field
 from motel import __version__
 from motel.app import Motel
 from motel.errors import MissingSecretsError, MotelError
+from motel.installs import BackgroundInstalls
 from motel.keypage import LINK_LIFETIME_SECONDS, KeyPage
+from motel.lock import unavailable_here
 from motel.models import RunRecord, RunStatus
+from motel.views import installable_view as _installable_view
 from motel.views import match_view, run_view, tool_summary_view, tool_view
 
 INSTRUCTIONS = """\
@@ -43,7 +46,10 @@ Every run is recorded.
 
 Recommended workflow:
 1. search_history: an earlier run may already answer the question.
-2. find_tools with a plain-language description of what you need.
+2. find_tools with a plain-language description of what you need. If the best
+   match is listed under "not_installed", ask the user whether to install it
+   (installs download packages, often hundreds of MB, and take minutes); if they
+   agree, call install_tool and call it again until it reports "ready".
 3. describe_tool before the first use: parameters and units, usage notes,
    validity limits, and how to cite.
 4. run_tool. If it returns status "running", call get_run later with the run_id.
@@ -168,6 +174,18 @@ def build_server(motel: Motel) -> MCPServer:
         "motel", instructions=INSTRUCTIONS, version=__version__, log_level="WARNING"
     )
     key_page = KeyPage(motel.secrets)
+    installs = BackgroundInstalls(motel.paths)
+
+    def require_installed(tool: str) -> None:
+        """A clear way forward when the tool exists in a catalog but is not installed."""
+        if motel.registry.exists(tool):
+            return
+        entry = motel.catalog_entry(tool)
+        if entry is not None:
+            raise MotelError(
+                f"'{tool}' is not installed; it is available from the '{entry.catalog}' catalog.",
+                hint=f"Ask the user, then call install_tool(tool='{tool}').",
+            )
 
     @_friendly_errors
     def find_tools(
@@ -177,14 +195,27 @@ def build_server(motel: Motel) -> MCPServer:
         ],
         limit: Annotated[int, Field(ge=1, le=50, description="Maximum number of matches.")] = 8,
     ) -> dict[str, Any]:
-        matches = [match_view(m) for m in motel.find(query, limit=limit)]
-        if not matches:
-            return {
-                "matches": [],
-                "hint": "No installed tool matches. Try other words, or list_tools. The user "
-                "can add tools with 'motel onboard <repository-url>'.",
-            }
-        return {"matches": matches}
+        found = motel.find(query, limit=limit)
+        matches = [match_view(m) for m in found]
+        best = max((m.hit.score for m in found), default=0.0)
+        suggestions = [
+            _installable_view(entry)
+            for entry, score in motel.find_installable(query)
+            if score >= 0.5 * best
+        ]
+        result: dict[str, Any] = {"matches": matches}
+        if suggestions:
+            result["not_installed"] = suggestions
+            result["hint"] = (
+                "Tools under not_installed match too. Ask the user before installing one with "
+                "install_tool: installs download packages and take minutes."
+            )
+        elif not matches:
+            result["hint"] = (
+                "No tool matches. Try other words, or list_tools. The user can add tools "
+                "with 'motel onboard <repository-url>'."
+            )
+        return result
 
     @_friendly_errors
     def list_tools() -> dict[str, Any]:
@@ -194,7 +225,53 @@ def build_server(motel: Motel) -> MCPServer:
     def describe_tool(
         tool: Annotated[str, Field(description="Tool name, as returned by find_tools.")],
     ) -> dict[str, Any]:
+        require_installed(tool)
         return tool_view(motel.tool(tool))
+
+    @_friendly_errors
+    def install_tool(
+        tool: Annotated[str, Field(description="Tool name from find_tools' not_installed list.")],
+        wait_seconds: Annotated[
+            float,
+            Field(ge=0, le=MAX_WAIT_SECONDS, description="Wait up to this long for it to finish."),
+        ] = 60,
+    ) -> dict[str, Any]:
+        if motel.registry.exists(tool) and motel.tool(tool).usable:
+            return {
+                "tool": tool,
+                "status": "ready",
+                "next_step": f"Call describe_tool(tool='{tool}') before the first run.",
+            }
+        entry = motel.catalog_entry(tool)
+        if entry is None:
+            raise MotelError(
+                f"No catalog has a tool named '{tool}'.",
+                hint="Use a name from find_tools. The user can add new tools with "
+                "'motel onboard <repository-url>'.",
+            )
+        reason = unavailable_here(entry.folder)
+        if reason:
+            raise MotelError(f"'{tool}' cannot be installed on this computer: {reason}")
+        install = installs.start(tool)
+        if install.thread is not None:
+            install.thread.join(timeout=wait_seconds)
+        if install.running:
+            return {
+                "tool": tool,
+                "status": "installing",
+                "elapsed_seconds": install.elapsed,
+                "latest_steps": list(install.reporter.lines),
+                "next_step": f"Call install_tool(tool='{tool}') again to wait for it; "
+                "installs usually take a few minutes.",
+            }
+        if install.error:
+            return {"tool": tool, "status": "failed", "error": install.error}
+        return {
+            "tool": tool,
+            "status": "ready",
+            "elapsed_seconds": install.elapsed,
+            "next_step": f"Call describe_tool(tool='{tool}') before the first run.",
+        }
 
     @_friendly_errors
     def run_tool(
@@ -224,6 +301,7 @@ def build_server(motel: Motel) -> MCPServer:
         ] = True,
         ctx: Context | None = None,
     ) -> dict[str, Any] | InputRequiredResult:
+        require_installed(tool)
         installed = motel.tool(tool)
         info = installed.function(function)
         wait = 0.0 if info.long_running else wait_seconds
@@ -302,6 +380,15 @@ def build_server(motel: Motel) -> MCPServer:
         description="Full details of one tool: function parameters (JSON Schema with units), "
         "usage notes, validity limits, and citation. Read before the first use.",
         annotations=_READ_ONLY,
+    )
+    server.add_tool(
+        install_tool,
+        description="Install a tool listed under not_installed by find_tools (only after the "
+        "user agrees: installs download packages and take minutes). Returns status "
+        "'installing' while it runs; call again until 'ready'.",
+        annotations=ToolAnnotations(
+            read_only_hint=False, destructive_hint=False, open_world_hint=True
+        ),
     )
     server.add_tool(
         run_tool,

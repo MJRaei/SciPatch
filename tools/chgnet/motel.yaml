@@ -67,6 +67,7 @@ validity: >-
 
 golden:
   - name: LiMnO2 energy matches the CHGNet test suite
+    quick: true
     function: predict
     args: {structure: tests/data/mp-18767-LiMnO2.cif}
     expect:

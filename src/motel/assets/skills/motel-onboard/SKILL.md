@@ -132,6 +132,10 @@ golden:
     reference: <exact source, e.g. "Paper, Table 2, row 3">
 ```
 
+Mark one fast test (seconds) that exercises the main computation with
+`quick: true`: installing a tool runs only the quick tests, while `motel check`,
+`motel test`, and CI run all of them.
+
 Copy the input files into `tests/data/` (golden tests must not point into
 `source/`, which lives elsewhere once the tool is installed). Set the tolerance
 from the precision the paper reports; explain unusual tolerances in `reference`. Also add a test

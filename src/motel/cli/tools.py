@@ -28,7 +28,13 @@ from motel.registry import InstalledTool
 from motel.schema import type_label
 from motel.search import describe_inputs
 from motel.secrets import check_name
-from motel.views import match_view, secrets_view, tool_summary_view, tool_view
+from motel.views import (
+    installable_view,
+    match_view,
+    secrets_view,
+    tool_summary_view,
+    tool_view,
+)
 
 JsonOption = Annotated[bool, typer.Option("--json", help="Print machine-readable JSON.")]
 
@@ -110,15 +116,38 @@ def find(
     limit: Annotated[int, typer.Option("--limit", "-n", help="Maximum results.")] = 10,
     as_json: JsonOption = False,
 ) -> None:
-    """Search installed tools for a capability, e.g. [cyan]motel find "relax a structure"[/]."""
-    matches = get_motel().find(query, limit=limit)
+    """Search installed tools for a capability, e.g. [cyan]motel find "relax a structure"[/].
+
+    Tools from catalogs that match but are not installed are listed too.
+    """
+    motel = get_motel()
+    matches = motel.find(query, limit=limit)
+    best = max((match.hit.score for match in matches), default=0.0)
+    available = [entry for entry, score in motel.find_installable(query) if score >= 0.5 * best]
     if as_json:
-        print_json([match_view(match) for match in matches])
+        suggestions = [
+            {
+                **installable_view(entry),
+                "installed": False,
+                "install": f"motel add {entry.manifest.name}",
+            }
+            for entry in available
+        ]
+        print_json([{**match_view(match), "installed": True} for match in matches] + suggestions)
         return
+    if available:
+        console.print("[bold]Not installed yet[/] (install with [cyan]motel add <name>[/]):")
+        for entry in available:
+            reason = unavailable_here(entry.folder)
+            note = f" [dim](not for this computer: {escape(reason)})[/]" if reason else ""
+            console.print(f"  {entry.manifest.name}: {escape(short(entry.manifest.summary))}{note}")
+        console.print()
     if not matches:
-        console.print(
-            f"No tool matches [bold]{escape(query)}[/]. See everything with [cyan]motel list[/]."
-        )
+        if not available:
+            console.print(
+                f"No tool matches [bold]{escape(query)}[/]. See everything with "
+                "[cyan]motel list[/]."
+            )
         return
     table = Table(box=None, pad_edge=False)
     table.add_column("Tool and function", style="bold")
@@ -345,6 +374,10 @@ def add(
     skip_tests: Annotated[
         bool, typer.Option("--skip-tests", help="Don't run golden tests.")
     ] = False,
+    all_tests: Annotated[
+        bool,
+        typer.Option("--all-tests", help="Run every golden test, not only the quick ones."),
+    ] = False,
     allow_failing_tests: Annotated[
         bool, typer.Option("--allow-failing-tests", help="Install even if golden tests fail.")
     ] = False,
@@ -364,6 +397,7 @@ def add(
             force=force,
             ref=ref,
             run_tests=not skip_tests,
+            all_tests=all_tests,
             allow_failing_tests=allow_failing_tests,
             ask_secret=ask if _is_terminal() else None,
         )
@@ -404,11 +438,15 @@ def rebuild(
     skip_tests: Annotated[
         bool, typer.Option("--skip-tests", help="Don't run golden tests.")
     ] = False,
+    all_tests: Annotated[
+        bool,
+        typer.Option("--all-tests", help="Run every golden test, not only the quick ones."),
+    ] = False,
 ) -> None:
     """Rebuild a tool's environment and re-check its functions."""
     motel = get_motel()
     with reporter_of(motel).live("Rebuilding..."):
-        installed = motel.rebuild(tool, clean=clean, run_tests=not skip_tests)
+        installed = motel.rebuild(tool, clean=clean, run_tests=not skip_tests, all_tests=all_tests)
     console.print(f"[green]✓[/] {installed.name}: {status_label(installed)}")
 
 

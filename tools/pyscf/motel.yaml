@@ -120,6 +120,7 @@ golden:
       -76.026765673119627 Eh (9 decimals), and test_analyze, |dipole| =
       2.0584447549532596 D, for water at the test's geometry (tests/data/water.xyz).
   - name: B3LYP water matches the PySCF test suite
+    quick: true
     function: single_point
     args: {molecule: tests/data/water.xyz, method: b3lyp, basis: 6-31g}
     expect:

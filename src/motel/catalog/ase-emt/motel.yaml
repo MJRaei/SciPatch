@@ -75,6 +75,7 @@ golden:
       Experimental room-temperature lattice constant of copper, 3.615 Å. EMT gives
       3.590 Å with this setup, 0.7% below experiment.
   - name: Cu equation of state matches the reference calculation
+    quick: true
     function: equation_of_state
     args: {element: Cu, crystal: fcc}
     expect:

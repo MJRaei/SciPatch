@@ -110,6 +110,7 @@ validity: >-
 
 golden:
   - name: silicon energy and gap match the GPAW test suite
+    quick: true
     function: scf
     args:
       structure: tests/data/Si_5.475.extxyz

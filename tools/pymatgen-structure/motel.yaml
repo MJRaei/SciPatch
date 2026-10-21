@@ -111,6 +111,7 @@ golden:
       (1997). This slightly distorted test structure reads as P2_1/c at the
       default 0.01 Å tolerance.
   - name: silicon has the diamond structure
+    quick: true
     function: symmetry
     args: {structure: tests/data/Si.json}
     expect:

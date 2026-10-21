@@ -106,6 +106,7 @@ golden:
       1986) fitted a0 = 3.615 Å and Esub = 3.54 eV; the LAMMPS bench log
       (bench/log.15Jul25.eam.fixed.g++.1) gives -113280 eV for 32000 atoms at a = 3.615 Å.
   - name: Si (Stillinger-Weber) lattice, cohesive energy and relaxed elastic constants
+    quick: true
     function: crystal_properties
     args: {structure: tests/data/Si_diamond.cif, potential: Si.sw}
     expect:

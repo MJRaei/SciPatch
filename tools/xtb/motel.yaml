@@ -77,6 +77,7 @@ validity: >-
 
 golden:
   - name: propyne energy and gap match the xtb test suite
+    quick: true
     function: single_point
     args: {molecule: tests/data/propyne.coord}
     expect:

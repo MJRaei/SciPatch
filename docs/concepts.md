@@ -84,9 +84,10 @@ tools, with a fixed set of operations:
 | Operation | Purpose |
 |---|---|
 | `search_history` | find earlier runs (check before computing again) |
-| `find_tools` | search all functions by plain-language description |
+| `find_tools` | search all functions by plain-language description; also suggests matching tools from catalogs that are not installed yet |
 | `list_tools` | everything installed |
 | `describe_tool` | parameters with units, usage notes, validity, citation |
+| `install_tool` | install a suggested tool, after the user agrees (runs in the background; call again until it is ready) |
 | `run_tool` | run a function; long jobs continue in the background |
 | `get_run`, `cancel_run` | collect or stop a background run |
 

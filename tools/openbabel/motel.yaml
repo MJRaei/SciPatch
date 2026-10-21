@@ -78,6 +78,7 @@ validity: >-
 
 golden:
   - name: MMFF94 energy of a validation-suite anion (AMHTAR01)
+    quick: true
     function: energy
     args: {molecule: tests/data/AMHTAR01.mol2}
     expect:

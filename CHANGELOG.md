@@ -53,6 +53,17 @@ All notable changes to this project are documented here. The format follows
   opts out). `motel doctor` reports which one is used.
 - Golden tests can require secrets (skipped when missing) or require a clear
   error (`raises:`) for inputs outside a tool's validity.
+- Install on first use: `find_tools` (and `motel find`) also suggest matching
+  tools from catalogs that are not installed yet, with whether they can be
+  installed on this computer; the new MCP operation `install_tool` installs one
+  in the background (after the user agrees) and reports progress until it is
+  ready, so users never need the command line to get a tool. `describe_tool` and
+  `run_tool` on a catalog tool that is not installed say how to install it.
+- Faster installs: `motel add` and `motel rebuild` run only the golden tests
+  marked `quick: true` (seconds), or all of them if a tool marks none; the
+  status says how many more `motel test` runs. `--all-tests` runs every test, as
+  `motel check` and CI do. Every tool in `tools/` marks one quick test (OpenMM's
+  install check drops from about 8 minutes to under a minute).
 - Arguments are checked against each function's types before a run starts.
 - Progress for running jobs: `get_run`, `motel runs show`, and the dashboard show
   the elapsed time and the tool's latest printed lines (`latest_output`). Tool

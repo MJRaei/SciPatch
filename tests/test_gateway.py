@@ -42,16 +42,25 @@ def test_tool_list_is_small_and_fixed(motel: Motel) -> None:
 
     assert anyio.run(names) == [
         "search_history", "find_tools", "list_tools", "describe_tool",
-        "run_tool", "get_run", "cancel_run",
+        "install_tool", "run_tool", "get_run", "cancel_run",
     ]  # fmt: skip
 
 
 def test_empty_motel_gives_helpful_answers(motel: Motel) -> None:
-    found, missing = call(
-        motel, ("find_tools", {"query": "relax"}), ("describe_tool", {"tool": "x"})
+    found, nothing, missing, not_installed = call(
+        motel,
+        ("find_tools", {"query": "relax a metal"}),
+        ("find_tools", {"query": "zebra crossing"}),
+        ("describe_tool", {"tool": "x"}),
+        ("run_tool", {"tool": "ase-emt", "function": "relax"}),
     )
     assert found.structured_content["matches"] == []
-    assert "motel onboard" in found.structured_content["hint"]
+    suggestion = found.structured_content["not_installed"][0]
+    assert suggestion["tool"] == "ase-emt" and suggestion["installable_here"]
+    assert "install_tool" in found.structured_content["hint"]
+    assert "motel onboard" in nothing.structured_content["hint"]
+    assert not_installed.is_error
+    assert "call install_tool(tool='ase-emt')" in not_installed.content[0].text
     assert missing.is_error
     assert "No tool named 'x'" in missing.content[0].text
     assert "Hint:" in missing.content[0].text
@@ -171,3 +180,39 @@ def test_preview_truncates_large_results() -> None:
     assert value["text"].endswith("[6000 more characters]")
     assert value["n"] == 1
     assert preview({"a": [1, 2]}) == ({"a": [1, 2]}, False)
+
+
+@pytest.mark.integration
+@requires_uv
+def test_tools_can_be_installed_from_the_ai_app(motel: Motel) -> None:
+    started, unknown = call(
+        motel,
+        ("install_tool", {"tool": "ase-emt", "wait_seconds": 600}),
+        ("install_tool", {"tool": "no-such-tool"}),
+    )
+    assert started.structured_content["status"] == "ready", started.structured_content
+    assert motel.tool("ase-emt").usable
+    assert unknown.is_error and "No catalog has a tool named" in unknown.content[0].text
+    (again,) = call(motel, ("install_tool", {"tool": "ase-emt"}))
+    assert again.structured_content["status"] == "ready"
+
+
+@pytest.mark.integration
+@requires_uv
+def test_a_long_install_is_collected_by_calling_again(motel: Motel) -> None:
+    server = build_server(motel)
+
+    async def install_twice() -> tuple[Any, Any]:
+        async with Client(server) as client:
+            first = await client.call_tool(
+                "install_tool", {"tool": "rdkit-descriptors", "wait_seconds": 0}
+            )
+            second = await client.call_tool(
+                "install_tool", {"tool": "rdkit-descriptors", "wait_seconds": 600}
+            )
+            return first, second
+
+    first, second = anyio.run(install_twice)
+    assert first.structured_content["status"] == "installing"
+    assert first.structured_content["next_step"].startswith("Call install_tool")
+    assert second.structured_content["status"] == "ready", second.structured_content

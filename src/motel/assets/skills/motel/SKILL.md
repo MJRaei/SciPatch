@@ -15,9 +15,9 @@ Motel holds the user's installed research tools. Each runs in its own isolated
 environment, every run is recorded with full provenance, and identical calls are
 answered from cache.
 
-Use the **MCP tools** (`find_tools`, `describe_tool`, `run_tool`, `get_run`,
-`search_history`, `cancel_run`) when the `motel` server is connected. Otherwise
-use the **`motel` command line** with `--json`.
+Use the **MCP tools** (`find_tools`, `describe_tool`, `install_tool`, `run_tool`,
+`get_run`, `search_history`, `cancel_run`) when the `motel` server is connected.
+Otherwise use the **`motel` command line** with `--json`.
 
 ## Workflow
 
@@ -25,7 +25,10 @@ use the **`motel` command line** with `--json`.
    `motel runs --search "<keywords>" --json` (MCP: `search_history`). Earlier runs
    may already answer the question.
 2. **Find a tool.** `motel find "<what you need, in plain words>" --json`
-   (MCP: `find_tools`).
+   (MCP: `find_tools`). Results marked `"installed": false` (MCP: under
+   `not_installed`) exist in a catalog but are not installed: ask the user before
+   installing (it downloads packages and takes minutes), then `motel add <tool>`
+   (MCP: `install_tool`, called again until it reports `ready`).
 3. **Read it before running it.** `motel info <tool> --json` (MCP: `describe_tool`)
    gives parameters with units, usage notes, validity limits, and the citation.
 4. **Run it.**

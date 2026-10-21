@@ -72,6 +72,7 @@ golden:
       structure is fcc Cu at EMT's equilibrium lattice constant (3.590 Å, from
       the ase-emt tool).
   - name: Si is stable, with zero acoustic and degenerate optical modes at Γ (CHGNet)
+    quick: true
     function: phonons
     args: {structure: tests/data/Si_diamond.cif}
     expect:

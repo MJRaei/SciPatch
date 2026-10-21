@@ -160,6 +160,7 @@ class Installer:
         link: bool = False,
         force: bool = False,
         run_tests: bool = True,
+        all_tests: bool = False,
         allow_failing_tests: bool = False,
         ref: str | None = None,
         ask_secret: AskSecret | None = None,
@@ -168,6 +169,7 @@ class Installer:
 
         ``ask_secret`` is called for each declared secret that is not set yet;
         a returned value is stored before building, so golden tests can use it.
+        Only the quick golden tests run unless ``all_tests`` is set.
         """
         with tempfile.TemporaryDirectory(prefix="motel-add-") as scratch:
             package = resolve_package(
@@ -208,6 +210,7 @@ class Installer:
                     reporter=self.reporter,
                     fresh=True,
                     run_tests=run_tests,
+                    quick_tests=not all_tests,
                     secrets=self._secrets_for(manifest),
                 )
                 if not outcome.tests_passed and not allow_failing_tests:
@@ -239,7 +242,9 @@ class Installer:
         self.reporter.success(f"Installed '{name}' ({len(tool.functions)} function(s))")
         return tool
 
-    def rebuild(self, name: str, *, clean: bool = False, run_tests: bool = True) -> InstalledTool:
+    def rebuild(
+        self, name: str, *, clean: bool = False, run_tests: bool = True, all_tests: bool = False
+    ) -> InstalledTool:
         tool = self.registry.get(name)
         previous = tool.state
         self.reporter.step(f"Rebuilding '{name}'" + (" from scratch" if clean else ""))
@@ -250,6 +255,7 @@ class Installer:
                 reporter=self.reporter,
                 fresh=clean,
                 run_tests=run_tests,
+                quick_tests=not all_tests,
                 secrets=self._secrets_for(tool.manifest),
             )
         except MotelError as exc:
