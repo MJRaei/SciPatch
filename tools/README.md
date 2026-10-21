@@ -10,6 +10,7 @@ reproduce published or upstream-tested values on every build.
 | [aizynthfinder](aizynthfinder/) | chemistry | Linux, macOS, Windows | Retrosynthesis: ranked routes from purchasable starting materials (17.4 million ZINC compounds) or your own inventory, with each reaction step and route images; one-step precursor suggestions with feasibility; purchasability lookups | established | Textbook syntheses of paracetamol, aspirin (Olmsted 1998), and lidocaine in two steps (Reilly 1999); the published ZINC stock |
 | [atombridge](atombridge/) | materials | Linux, macOS, Windows | Lattice vectors from atomic-resolution STEM/TEM images (from the AtomBridge hackathon project), figures and captions from paper PDFs with micrographs flagged, and overlap checks for structures | experimental | Synthetic lattices of known spacing (square, triangular, noisy rectangular); wurtzite ZnO from AtomBridge's example HRTEM image; exact figure and overlap checks |
 | [cantera](cantera/) | chemistry, engineering | Linux, macOS, Windows | Combustion chemistry: equilibrium, adiabatic flame temperatures, laminar flame speeds, ignition delays, species thermodynamics | established | NASA CEA flame temperatures; NIST-JANAF heat capacities; methane-air flame speed vs experiment |
+| [catalyze](catalyze/) | chemistry | Linux, macOS, Windows | Opentrons OT-2 and Flex protocol simulation with error checks and run logs, Opentrons labware lookup, and GHS hazard classifications from PubChem (from the Catalyze hackathon project) | experimental | Opentrons' documented default flow rate; exact volumes and tips of transfer and dilution protocols; ANSI/SLAS microplate footprint; EU harmonised classifications of ethanol and benzene |
 | [coolprop](coolprop/) | engineering, chemistry | Linux, macOS, Windows | Reference-quality fluid properties for about 120 fluids and refrigerants (IAPWS-95 water, Span-Wagner CO2, ...): density, enthalpy, heat capacity, speed of sound, viscosity, thermal conductivity, saturation and latent heat, isobar tables, p-h and T-s diagrams, mixtures, brines, humid-air psychrometrics | established | IAPWS-95 verification tables (single-phase and saturation); NIST WebBook water, R134a, and nitrogen including viscosity and conductivity; Span-Wagner CO2 critical point |
 | [crest](crest/) | chemistry | Linux, macOS, Windows (WSL) | Conformer search with Boltzmann populations, protonation and deprotonation sites, tautomers (GFN2-xTB) | established | Butane anti/gauche; pyridine, acetic acid, and keto-enol chemistry (NIST enthalpies) |
 | [doping-knowledge](doping-knowledge/) | materials | Linux, macOS, Windows | What papers report about doping and intercalation of 2D and layered materials: 440 studies (dopants, methods, conditions, sites, phase transitions, property changes) and 1,443 cause-effect relationships with the authors' mechanisms, extracted by an LLM; from the ARIA hackathon project | experimental | Li-intercalated WTe2 record vs its paper (Wang et al. 2022); counts and a quoted mechanism from the knowledge base |
@@ -207,6 +208,10 @@ accepts.
 - **Why do two molecules bind?** `crest.conformer_search` or `xtb.optimize` on
   the complex → `psi4.sapt` (electrostatics, exchange, induction, dispersion) →
   `psi4.interaction_energy` with DFT-D3 or, for small complexes, CCSD(T)/CBS.
+- **Automating a lab procedure:** `catalyze.chemical_safety` for each reagent
+  (hazards, handling) → `catalyze.labware` for valid labware → write the Opentrons
+  protocol → `catalyze.simulate_protocol` until it runs cleanly → check the
+  volumes and run log before the robot.
 - **Chemical files:** `openbabel.convert` and `openbabel.identifiers` move
   molecules between programs and formats and give InChIKeys for lookups.
 

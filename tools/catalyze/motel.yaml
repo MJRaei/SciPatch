@@ -1,0 +1,152 @@
+schema: 1
+name: catalyze
+version: 0.1.0
+title: Opentrons protocol checks and chemical safety (Catalyze)
+summary: >-
+  Lab-automation and safety checks from the Catalyze hackathon assistant: simulate
+  Opentrons OT-2 and Flex Python protocols to catch errors before they reach a robot
+  (deck slots, volumes, tips) and report what they do; look up standard Opentrons
+  labware; and get a compound's identity, properties, and GHS hazard classification
+  (EU harmonised and notified) from PubChem.
+domains: [chemistry]
+tags: [lab-automation, opentrons, ot-2, flex, liquid-handling, protocol, simulation, labware,
+       safety, ghs, hazard, pubchem, hackathon]
+
+source:
+  repo: https://github.com/srustisain/mit-catalyze
+  ref: e86f04cdfe111a09eba067e952e7ced9b7133105
+  install: false
+  homepage: https://github.com/srustisain/mit-catalyze
+  citation: >-
+    Catalyze, AI chemistry assistant (hackathon project, 2025),
+    github.com/srustisain/mit-catalyze; simulation: Opentrons Python API
+    (docs.opentrons.com); compound data: S. Kim et al., "PubChem 2025 update", Nucleic
+    Acids Res. 53, D1516 (2025).
+  license: >-
+    not stated (the repository has no LICENSE file); Opentrons Python API,
+    Apache-2.0; PubChem data, public domain with source attributions.
+
+environment:
+  manager: uv
+  python: "3.12"
+  # opentrons 9 and later simulate Flex protocols only; 8.8 still covers the OT-2.
+  packages: ["opentrons==8.8.2", "requests==2.34.2"]
+
+entrypoint: api
+
+functions:
+  simulate_protocol:
+    params:
+      protocol: {kind: file}
+    outputs:
+      aspirated_ul: {unit: µL}
+      dispensed_ul: {unit: µL}
+  labware: {}
+  chemical_safety:
+    resources: {network: true}
+    outputs:
+      molecular_weight: {unit: g/mol}
+
+validity: >-
+  The simulation runs Opentrons' own protocol engine without hardware: it
+  catches API errors, invalid slots, labware and pipette names, and volumes that
+  exceed tips, and it lists every command, but it cannot detect wrong liquids,
+  insufficient well volumes, collisions with hand-placed items, or calibration
+  problems; review the run log before running on a robot. GHS data come from
+  PubChem, which aggregates the EU harmonised classification and company
+  notifications (with the share of reports for each statement); notified codes
+  reported by a few companies can overstate hazards, and the safety data sheet
+  of the actual product is authoritative.
+
+maturity: experimental
+
+golden:
+  - name: an OT-2 transfer simulates with Opentrons' default flow rate
+    quick: true
+    function: simulate_protocol
+    args: {protocol: tests/data/transfer_ot2.py}
+    expect:
+      success: true
+      robot: ot2
+      tips_used: 1
+      aspirated_ul: {approx: 100.0, abs: 1.0e-9}
+      dispensed_ul: {approx: 100.0, abs: 1.0e-9}
+      runlog.2: {contains: "Aspirating 100.0 uL from A1 of Corning 96 Well Plate 360 µL Flat on slot 2 at 92.86 uL/sec"}
+    reference: >-
+      The protocol transfers 100 µL from A1 to B1 with one P300 Single-Channel GEN2
+      tip. Opentrons' pipette documentation ("Pipette Characteristics") gives 92.86
+      µL/s as that pipette's default flow rate for API version 2.6 and later.
+    against: independent
+  - name: a Flex serial dilution moves the expected volume
+    function: simulate_protocol
+    args: {protocol: tests/data/dilution_flex.py}
+    expect:
+      success: true
+      robot: flex
+      tips_used: 3
+      aspirated_ul: {approx: 4050.0, abs: 1.0e-9}
+      dispensed_ul: {approx: 4050.0, abs: 1.0e-9}
+    reference: >-
+      Three transfer() calls with one tip each: 100 µL to 11 wells, 200 µL to A1,
+      then 100 µL down the row into 11 wells with three 50 µL mixes after each;
+      1100 + 200 + 1100 + 11 x 150 = 4050 µL aspirated and dispensed.
+    against: exact
+  - name: aspirating more than the tip holds is caught
+    function: simulate_protocol
+    args: {protocol: tests/data/overdraw_ot2.py}
+    expect:
+      success: false
+      errors.0: {contains: "Cannot aspirate 400.0 µL"}
+    reference: The protocol aspirates 400 µL into a 300 µL tip, which must fail.
+    against: exact
+  - name: Catalyze's deck-slot check rejects Flex slots on an OT-2
+    function: simulate_protocol
+    args: {protocol: tests/data/wrong_slot_ot2.py}
+    expect:
+      success: false
+      errors.0: {contains: "Invalid deck slot 'D2' for OT-2"}
+    reference: >-
+      Catalyze's OpentronsValidator._validate_deck_slots: OT-2 slots are 1-11, so a
+      Flex-style "D2" is reported before simulation.
+    against: upstream-tests
+  - name: a standard microplate has the ANSI/SLAS footprint
+    function: labware
+    args: {search: corning 96 flat 360}
+    expect:
+      labware.0.load_name: corning_96_wellplate_360ul_flat
+      labware.0.wells: 96
+      labware.0.well_volume_ul: 360
+      labware.0.footprint_mm.0: {approx: 127.76, abs: 0.05}
+      labware.0.footprint_mm.1: {approx: 85.48, abs: 0.05}
+    reference: >-
+      ANSI/SLAS 1-2004 (microplate footprint): 127.76 x 85.48 mm (each +/- 0.5 mm);
+      the 96 wells of 360 µL are those of Opentrons' labware definition.
+    against: independent
+  - name: ethanol's EU harmonised classification from PubChem
+    function: chemical_safety
+    args: {compound: ethanol}
+    expect:
+      cid: 702
+      formula: C2H6O
+      molecular_weight: {approx: 46.07, abs: 0.01}
+      eu_harmonised_hazard_codes: [H225]
+    reference: >-
+      Regulation (EC) No 1272/2008, Annex VI, index 603-002-00-5: ethanol, Flam. Liq.
+      2, H225; molar mass 46.07 g/mol.
+    against: independent
+  - name: benzene's EU harmonised hazard statements
+    function: chemical_safety
+    args: {compound: c1ccccc1}
+    expect:
+      cid: 241
+      eu_harmonised_hazard_codes: [H225, H304, H315, H319, H340, H350, H372]
+    reference: >-
+      Regulation (EC) No 1272/2008, Annex VI, index 601-020-00-8: benzene, Flam. Liq.
+      2 H225, Asp. Tox. 1 H304, Skin Irrit. 2 H315, Eye Irrit. 2 H319, Muta. 1B H340,
+      Carc. 1A H350, STOT RE 1 H372.
+    against: independent
+  - name: a missing protocol file is refused
+    function: simulate_protocol
+    args: {protocol: no-such-protocol.py}
+    raises: "not found"
+    reference: The tool must report the missing file.
