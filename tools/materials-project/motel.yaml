@@ -25,7 +25,10 @@ environment:
   manager: uv
   python: "3.12"
   packages: ["mp-api==0.46.5"]
-  secrets: [MP_API_KEY]
+  secrets:
+    - name: MP_API_KEY
+      description: Materials Project API key
+      url: https://next-gen.materialsproject.org/api
 
 entrypoint: api
 
