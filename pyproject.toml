@@ -48,6 +48,11 @@ dev = [
     "types-PyYAML>=6.0",
 ]
 
+[tool.uv]
+# Rebuild when any source file changes, not only pyproject.toml, so reinstalling
+# from a checkout (./install.sh, `uv tool install .`) never reuses a stale build.
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*" }]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/motel"]
 
