@@ -35,7 +35,7 @@ jobs:
           echo "matrix=$(python3 .github/scripts/tool_matrix.py $tools)" >> "$GITHUB_OUTPUT"
 
   check:
-    name: ${{ matrix.tool }} (${{ matrix.os }})
+    name: ${{ matrix.tool }} (${{ matrix.os }}${{ matrix.wsl && ', WSL' || '' }})
     needs: select
     if: needs.select.outputs.matrix != '{"include": []}'
     runs-on: ${{ matrix.os }}
@@ -46,6 +46,11 @@ jobs:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       # conda tools need no setup: Motel downloads its own micromamba.
+      # Tools without Windows builds run inside WSL on Windows, as for users.
+      - if: matrix.wsl
+        uses: Vampire/setup-wsl@v7.0.0
+        with:
+          distribution: Ubuntu-24.04
       - run: uv tool install --python 3.12 .
       - name: Build from scratch and run golden tests
         run: motel check tools/${{ matrix.tool }} --clean

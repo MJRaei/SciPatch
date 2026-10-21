@@ -28,10 +28,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from motel import golden, platforms
+from motel import golden, platforms, wsl
 from motel.environments import BuildLog, get_backend
+from motel.environments.inside_wsl import WslBackend
 from motel.errors import BuildError
-from motel.lock import LEGACY_LOCK_FILENAME, LOCK_FILENAME, pins_for_build
+from motel.lock import (
+    LEGACY_LOCK_FILENAME,
+    LOCK_FILENAME,
+    BuildPins,
+    PlatformUnavailableError,
+    pins_for_build,
+)
 from motel.manifest import Manifest
 from motel.models import FunctionInfo, GoldenResult
 from motel.reporting import Reporter
@@ -73,8 +80,12 @@ def runtime_for(
 ) -> ToolRuntime:
     """How to run a tool built at ``layout``; only its declared secrets are passed on."""
     declared = manifest.environment.secret_names
+    linux = wsl.read_pointer(layout.env_dir)
     return ToolRuntime(
-        python=executor.environment_python(layout.env_dir),
+        python=layout.env_dir / wsl.POINTER
+        if linux
+        else executor.environment_python(layout.env_dir),
+        linux=linux,
         env_dir=layout.env_dir,
         package_dir=layout.package_dir,
         entrypoint=manifest.entrypoint,
@@ -97,7 +108,7 @@ def build(
     """Build and verify a tool package. Raises :class:`BuildError` on failure."""
     log = BuildLog(layout.log_path, reporter)
     # Before anything is downloaded: can this platform build the tool at all?
-    pins = pins_for_build(manifest, layout.package_dir)
+    pins, distro = _pins_for_this_computer(manifest, layout.package_dir)
     warnings: list[str] = list(pins.warnings)
 
     # 1. Source
@@ -129,7 +140,11 @@ def build(
     fingerprint = environment_fingerprint(manifest, layout.package_dir, source_commit)
     spec = manifest.environment
     if fresh or read_env_fingerprint(layout.env_dir) != fingerprint:
-        backend = get_backend(spec.manager)
+        backend = (
+            WslBackend(distro, distro.environment_prefix(_wsl_key(manifest, layout)))
+            if distro is not None
+            else get_backend(spec.manager)
+        )
         what = f"{len(spec.packages)} package(s)" if spec.packages else "no extra packages"
         reporter.step(f"Building the environment ({spec.manager}, Python {spec.python}, {what})")
         _remove_marker(layout.env_dir)
@@ -182,6 +197,48 @@ def build(
         warnings=warnings,
         unsaved_source_changes=unsaved,
     )
+
+
+def _pins_for_this_computer(
+    manifest: Manifest, package_dir: Path
+) -> tuple[BuildPins, wsl.Distro | None]:
+    """The locked packages for this computer, and the WSL distribution to build in, if any.
+
+    On Windows, a tool whose lock has Linux packages but no Windows ones is built
+    inside WSL, as the scientific codes' own documentation recommends.
+    """
+    try:
+        return pins_for_build(manifest, package_dir), None
+    except PlatformUnavailableError as unavailable:
+        linux = {
+            name: entry
+            for name, entry in unavailable.lock.platforms.items()
+            if name.startswith("linux") and not entry.unavailable
+        }
+        if not wsl.host_is_windows() or not linux:
+            raise
+        distro = wsl.detect()
+        if distro is None:
+            raise BuildError(
+                f"'{manifest.name}' has no Windows build ({unavailable.reason}). It runs on "
+                "Windows inside WSL (the Windows Subsystem for Linux), which is not set up "
+                "on this computer.",
+                hint=wsl.INSTALL_HINT,
+            ) from None
+        entry = linux.get(distro.platform)
+        if entry is None:
+            raise BuildError(
+                f"'{manifest.name}' has no build for {platforms.label(distro.platform)}, "
+                f"so it cannot run inside WSL ({distro.name}) either."
+            ) from None
+        note = f"no Windows build: built and run inside WSL ({distro.name})"
+        return BuildPins(conda=list(entry.conda), pip=list(entry.pip), warnings=[note]), distro
+
+
+def _wsl_key(manifest: Manifest, layout: BuildLayout) -> str:
+    """A name for the Linux environment of one build location of a tool."""
+    digest = hashlib.sha256(str(layout.env_dir).encode()).hexdigest()[:10]
+    return f"{manifest.name}-{digest}"
 
 
 def merge_function_options(
@@ -332,7 +389,7 @@ def read_env_fingerprint(env_dir: Path) -> str | None:
         data = json.loads((env_dir / _ENV_MARKER).read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError):
         return None
-    if not executor.environment_python(env_dir).exists():
+    if not (executor.environment_python(env_dir).exists() or (env_dir / wsl.POINTER).exists()):
         return None
     fingerprint = data.get("fingerprint")
     return fingerprint if isinstance(fingerprint, str) else None

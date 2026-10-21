@@ -9,7 +9,7 @@ import subprocess
 from dataclasses import dataclass
 from typing import Literal
 
-from motel import __version__
+from motel import __version__, platforms, wsl
 from motel.app import Motel
 from motel.environments import micromamba
 from motel.environments.conda import CondaBackend, find_conda
@@ -92,6 +92,21 @@ def run_checks(motel: Motel) -> list[Check]:
                 CondaBackend.install_hint,
             )
         )
+
+    if wsl.host_is_windows():
+        distro = wsl.detect()
+        checks.append(
+            Check("WSL", "ok", f"{distro.name} ({platforms.label(distro.platform)}): "
+                  "tools with only Linux builds run there")
+            if distro
+            else Check(
+                "WSL",
+                "warn",
+                "not set up (needed only for tools with Linux builds only: CREST, GPAW, "
+                "LAMMPS, Quantum ESPRESSO)",
+                wsl.INSTALL_HINT,
+            )
+        )  # fmt: skip
 
     on_path = shutil.which("motel")
     checks.append(

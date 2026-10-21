@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from motel.app import Match
-from motel.lock import platform_summary
+from motel.lock import platform_summary, runs_in_wsl
 from motel.models import RunRecord, RunStatus, utcnow
 from motel.platforms import label as platform_label
 from motel.registry import InstalledTool
@@ -166,7 +166,10 @@ def _platforms_view(package_dir: Path) -> dict[str, str] | None:
     summary = platform_summary(package_dir)
     if summary is None:
         return None
-    return {platform_label(name): reason or "available" for name, reason in summary.items()}
+    view = {platform_label(name): reason or "available" for name, reason in summary.items()}
+    if runs_in_wsl(summary):
+        view[platform_label("win-64")] = "available inside WSL (no Windows build)"
+    return view
 
 
 def secrets_view(tools: Iterable[InstalledTool], stored: Iterable[str]) -> list[dict[str, Any]]:

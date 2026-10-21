@@ -71,6 +71,11 @@ def ensure(home: Path) -> Path:
     if name is None:
         here = f"{platform.system()} {platform.machine()}"
         raise DownloadError(f"micromamba has no release for {here}.")
+    return download(name, path)
+
+
+def download(name: str, path: Path) -> Path:
+    """Download micromamba for platform ``name`` to ``path``, checked against its SHA-256."""
     url = _URL.format(version=VERSION, name=name)
     try:
         with urllib.request.urlopen(url, timeout=120) as response:  # noqa: S310 - fixed https URL

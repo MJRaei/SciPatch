@@ -124,9 +124,12 @@ class Motel:
             hint = f"Rebuild it with 'motel rebuild {target}'."
         secrets = SecretStore(self.paths.secrets).resolve(manifest.environment.secret_names)
         runtime = runtime_for(manifest, layout, secrets)
-        if not runtime.python.exists():
+        if not runtime.ready():
             raise MotelError(f"The environment for '{target}' does not exist yet.", hint=hint)
         env = runtime.child_environment()
+        if runtime.linux is not None:  # inside WSL, with the environment first on PATH
+            script = 'PATH="$MOTEL_PREPEND_PATH:$PATH"; export PATH; exec "$@"'
+            command = runtime.linux.distro.command(["sh", "-c", script, "sh", *command], Path.cwd())
         try:
             return subprocess.call(command, env=env)
         except FileNotFoundError as exc:

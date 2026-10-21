@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from motel import wsl
 from motel.errors import BuildError
 
 SHIM_PATH = Path(__file__).with_name("shim.py")
@@ -51,9 +52,19 @@ class ToolRuntime:
     source_dir: Path | None = None
     #: Secrets the tool declared and the user provided (e.g. API keys).
     secrets: dict[str, str] = field(default_factory=dict)
+    #: On Windows, a tool with only Linux builds runs in this environment inside WSL.
+    linux: wsl.LinuxEnvironment | None = None
+
+    def ready(self) -> bool:
+        """Whether the environment has been built."""
+        if self.linux is not None:
+            return (self.env_dir / wsl.POINTER).exists()
+        return self.python.exists()
 
     def child_environment(self, extra: dict[str, str] | None = None) -> dict[str, str]:
         """Process environment that behaves like an activated tool environment."""
+        if self.linux is not None:
+            return self._wsl_environment(self.linux, extra)
         env = {k: v for k, v in os.environ.items() if k not in _LEAKY_VARIABLES}
         bin_dirs = environment_bin_dirs(self.env_dir)
         env["PATH"] = os.pathsep.join([*map(str, bin_dirs), env.get("PATH", "")])
@@ -64,6 +75,27 @@ class ToolRuntime:
         env.update(self.variables)
         env.update(self.secrets)
         env.update(extra or {})
+        return env
+
+    def _wsl_environment(
+        self, linux: wsl.LinuxEnvironment, extra: dict[str, str] | None
+    ) -> dict[str, str]:
+        """Variables for the Linux process, handed over through WSLENV (never argv)."""
+        distro = linux.distro
+        variables = {
+            "PYTHONIOENCODING": "utf-8",
+            "VIRTUAL_ENV": linux.prefix,
+            "MOTEL_PREPEND_PATH": f"{linux.prefix}/bin",
+            "MOTEL_WSL_ROOT": distro.mount_root,
+        }
+        if self.source_dir is not None:
+            variables["MOTEL_SOURCE_DIR"] = distro.to_linux(self.source_dir)
+        variables.update(self.variables)
+        variables.update(self.secrets)
+        variables.update(extra or {})
+        env = distro.environment(variables)
+        for name in _LEAKY_VARIABLES:
+            env.pop(name, None)
         return env
 
 
@@ -106,7 +138,13 @@ def _request(runtime: ToolRuntime, response_path: Path, **extra: Any) -> dict[st
     }
 
 
-def _command(runtime: ToolRuntime, command: str, request_path: Path) -> list[str]:
+def _command(
+    runtime: ToolRuntime, command: str, request_path: Path, cwd: Path | None = None
+) -> list[str]:
+    if runtime.linux is not None:
+        distro = runtime.linux.distro
+        shim, request = distro.to_linux(SHIM_PATH), distro.to_linux(request_path)
+        return distro.command([runtime.linux.python, "-I", shim, command, request], cwd=cwd)
     return [str(runtime.python), "-I", str(SHIM_PATH), command, str(request_path)]
 
 
@@ -128,7 +166,7 @@ def launch(
     extra_env: dict[str, str] | None = None,
 ) -> subprocess.Popen[bytes]:
     """Start a call in the background and return the child process."""
-    if not runtime.python.exists():
+    if not runtime.ready():
         raise BuildError(
             f"The environment for this tool is missing ({runtime.python}).",
             hint="Rebuild it with 'motel rebuild <tool>'.",
@@ -140,7 +178,7 @@ def launch(
     request_path.write_text(json.dumps(request, indent=1), encoding="utf-8")
     with (run_dir / STDOUT_FILE).open("wb") as stdout, (run_dir / STDERR_FILE).open("wb") as stderr:
         return subprocess.Popen(
-            _command(runtime, "call", request_path),
+            _command(runtime, "call", request_path, workdir),
             cwd=workdir,
             env=runtime.child_environment(extra_env),
             stdin=subprocess.DEVNULL,
@@ -176,7 +214,7 @@ def call_sync(
     try:
         process.wait(timeout=timeout)
     except subprocess.TimeoutExpired:
-        terminate(process.pid, process=process)
+        terminate(process.pid, process=process, run_dir=run_dir)
         return {
             "ok": False,
             "error": {"type": "Timeout", "message": f"Did not finish within {timeout:g} s."},
@@ -203,7 +241,7 @@ def describe(runtime: ToolRuntime, *, work_dir: Path, timeout: float = 600) -> D
     with log_path.open("wb") as log:
         try:
             completed = subprocess.run(
-                _command(runtime, "describe", request_path),
+                _command(runtime, "describe", request_path, work_dir),
                 cwd=work_dir,
                 env=runtime.child_environment(),
                 stdin=subprocess.DEVNULL,
@@ -300,13 +338,20 @@ def run_process_alive(pid: int | None, run_dir: Path) -> bool:
 
 
 def terminate(
-    pid: int, *, process: subprocess.Popen[bytes] | None = None, grace: float = 5.0
+    pid: int,
+    *,
+    process: subprocess.Popen[bytes] | None = None,
+    grace: float = 5.0,
+    run_dir: Path | None = None,
 ) -> None:
     """Stop a run and everything it started; escalate if it ignores the request.
 
     Pass ``process`` when this process started the child, so it is reaped
-    (otherwise a finished child lingers as a zombie that looks alive).
+    (otherwise a finished child lingers as a zombie that looks alive), and
+    ``run_dir`` so a run inside WSL is stopped on the Linux side too.
     """
+    if run_dir is not None:
+        wsl.stop_run(run_dir, grace=grace)
     if IS_WINDOWS:  # pragma: no cover - exercised on Windows only
         subprocess.run(["taskkill", "/T", "/F", "/PID", str(pid)], capture_output=True, check=False)
         if process is not None:

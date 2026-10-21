@@ -148,7 +148,7 @@ class RunManager:
         with self._lock:
             process = self._children.pop(run_id, None)
         if record.pid:
-            executor.terminate(record.pid, process=process)
+            executor.terminate(record.pid, process=process, run_dir=Path(record.run_dir))
         self.store.finish(
             run_id,
             status=RunStatus.CANCELLED,

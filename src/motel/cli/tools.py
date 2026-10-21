@@ -19,7 +19,7 @@ from motel.cli._app import PANEL_MANAGE, PANEL_USE, app, get_motel, reporter_of
 from motel.cli.console import console, print_json
 from motel.errors import MotelError
 from motel.keypage import KeyPage
-from motel.lock import platform_summary, unavailable_here
+from motel.lock import platform_summary, runs_in_wsl, unavailable_here
 from motel.manifest import Secret
 from motel.models import FunctionInfo
 from motel.platforms import current as current_platform
@@ -165,9 +165,11 @@ def info(
     summary = platform_summary(installed.package_dir)
     if summary:
         supported = [platform_label(name) for name, reason in summary.items() if not reason]
+        if runs_in_wsl(summary):
+            supported.append("Windows (inside WSL)")
         lines.append(f"Runs on: {', '.join(supported) or 'no platform'}")
         for name, reason in summary.items():
-            if reason:
+            if reason and not (name == "win-64" and runs_in_wsl(summary)):
                 lines.append(f"  [dim]Not on {platform_label(name)}: {escape(reason)}[/]")
     available = installed.runtime.secrets
     for secret in manifest.environment.secrets:

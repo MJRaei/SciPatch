@@ -9,7 +9,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
-from motel import __version__
+from motel import __version__, wsl
 from motel.build import BuildLayout, BuildOutcome, build, run_golden_tests
 from motel.catalogs import CatalogStore
 from motel.environments import BuildLog
@@ -221,6 +221,7 @@ class Installer:
                 if replacing:
                     self._mark_broken(name, f"Replacing the tool failed: {exc}")
                 else:
+                    wsl.remove_environment(layout.env_dir)
                     for directory in (layout.env_dir, layout.source_dir):
                         _remove_path(directory)
                 raise
@@ -342,6 +343,12 @@ class Installer:
                 hint=f"Build and test it first with 'motel check {target}'.",
             )
         env_dir, source_root = found
+        if wsl.read_pointer(env_dir) is not None:
+            raise MotelError(
+                f"'{manifest.name}' was built inside WSL; freeze reads the tested environment "
+                "directly, which needs Linux or macOS.",
+                hint="Run 'motel check' and 'motel freeze' for this tool on Linux or macOS.",
+            )
         source = manifest.source
         source_dir = (
             source_root / (source.subdirectory or "") if source.repo and source.install else None

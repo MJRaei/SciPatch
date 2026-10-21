@@ -177,7 +177,10 @@ The exact packages a tool was tested with, for every platform, written by
 Builds install exactly the locked conda packages and use the locked PyPI
 versions as constraints. On a platform marked unavailable, `motel add` stops at
 once with the reason, `motel catalog` shows the tool as not installable there,
-and CI skips it. `motel info` lists where a tool runs.
+and CI skips it. `motel info` lists where a tool runs. On Windows, a tool with
+Linux packages but no Windows ones is built and run inside WSL with its locked
+Linux packages (and CI checks it there); write such tools so they need nothing
+but their environment and the files they are given.
 
 The lock records a hash of the environment section; when you change the
 requested packages, it is out of date and is not applied until you test and

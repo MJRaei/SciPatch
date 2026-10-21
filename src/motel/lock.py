@@ -97,6 +97,15 @@ def save(package_dir: Path, lock: Lock) -> Path:
     return path
 
 
+class PlatformUnavailableError(BuildError):
+    """The lock says the tool cannot be installed on this computer's platform."""
+
+    def __init__(self, message: str, *, hint: str, lock: Lock, reason: str) -> None:
+        super().__init__(message, hint=hint)
+        self.lock = lock
+        self.reason = reason
+
+
 @dataclass
 class BuildPins:
     """What a build on this computer installs exactly (empty lists: resolve freely)."""
@@ -127,10 +136,12 @@ def pins_for_build(manifest: Manifest, package_dir: Path) -> BuildPins:
         return BuildPins(warnings=[f"motel.lock has no versions for {platforms.label(here)}"])
     if entry.unavailable:
         supported = ", ".join(platforms.label(name) for name in lock.supported()) or "none"
-        raise BuildError(
+        raise PlatformUnavailableError(
             f"'{manifest.name}' cannot be installed on {platforms.label(here)}: "
             f"{entry.unavailable}",
             hint=f"It is available on: {supported}.",
+            lock=lock,
+            reason=entry.unavailable,
         )
     return BuildPins(conda=list(entry.conda), pip=list(entry.pip))
 
@@ -146,7 +157,19 @@ def platform_summary(package_dir: Path) -> dict[str, str | None] | None:
     return {name: entry.unavailable for name, entry in lock.platforms.items()}
 
 
+def runs_in_wsl(summary: dict[str, str | None]) -> bool:
+    """Whether a tool with this availability runs on Windows only inside WSL."""
+    linux = [name for name in summary if name.startswith("linux") and not summary[name]]
+    return bool(summary.get("win-64")) and bool(linux)
+
+
 def unavailable_here(package_dir: Path) -> str | None:
     """Why the tool cannot be installed on this computer (None if it can, or unknown)."""
+    from motel import wsl
+
     summary = platform_summary(package_dir) or {}
-    return summary.get(platforms.current() or "")
+    here = platforms.current() or ""
+    reason = summary.get(here)
+    if reason and here == "win-64" and runs_in_wsl(summary):
+        return None if wsl.detect() else f"{reason}; it runs inside WSL. {wsl.INSTALL_HINT}"
+    return reason

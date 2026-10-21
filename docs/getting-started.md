@@ -25,6 +25,13 @@ Open PowerShell in your copy of the Motel repository and run:
 powershell -ExecutionPolicy ByPass -File install.ps1
 ```
 
+Most tools run natively on Windows. A few scientific codes have no Windows build
+(CREST, GPAW, LAMMPS, Quantum ESPRESSO), and their own documentation recommends
+WSL, the Windows Subsystem for Linux; Motel runs them there by itself, with the
+same Linux packages it tests. To use them, set WSL up once: open PowerShell as
+administrator, run `wsl --install`, restart, and finish setting up Ubuntu.
+`motel doctor` shows whether WSL is ready.
+
 ### By hand
 
 If you already use uv:

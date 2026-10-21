@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import asyncio
 import collections.abc
+import contextlib
 import dataclasses
 import enum
 import importlib
@@ -73,6 +74,9 @@ def main(argv: list[str]) -> int:
     command, request_path = argv[1], argv[2]
     with open(request_path, encoding="utf-8") as handle:
         request = json.load(handle)
+    wsl_root = os.environ.get("MOTEL_WSL_ROOT")
+    if wsl_root:
+        request = wsl_enter(request, command, wsl_root)
     # Output goes to log files; flush every line so progress is visible while running.
     for stream in (sys.stdout, sys.stderr):
         reconfigure = getattr(stream, "reconfigure", None)
@@ -93,11 +97,75 @@ def main(argv: list[str]) -> int:
     except BaseException as exc:
         payload = {"ok": False, "error": format_error(exc)}
 
+    if wsl_root and "value" in payload:
+        distro = os.environ.get("WSL_DISTRO_NAME", "")
+        payload["value"] = map_strings(
+            payload["value"], lambda s: windows_path(s, wsl_root, distro)
+        )
     payload["duration"] = round(time.time() - started, 6)
     payload["protocol"] = PROTOCOL_VERSION
     payload["python"] = platform.python_version()
     write_json_atomic(request["response_path"], payload)
     return 0 if payload["ok"] else 1
+
+
+# --------------------------------------------------------------------------- #
+# Running inside WSL for a Windows host
+# --------------------------------------------------------------------------- #
+
+_DRIVE_PATH = re.compile(r"^([A-Za-z]):[\\/](.*)$", re.DOTALL)
+_WSL_UNC = re.compile(r"^[\\/]{2}wsl(?:\$|\.localhost)[\\/][^\\/]+(.*)$", re.IGNORECASE | re.DOTALL)
+PROCESS_FILE = "linux-process.json"
+
+
+def wsl_enter(request: dict[str, Any], command: str, root: str) -> dict[str, Any]:
+    """Prepare a request from a Windows host: Linux paths, and a recorded process group."""
+    prepend = os.environ.get("MOTEL_PREPEND_PATH")
+    if prepend:
+        os.environ["PATH"] = prepend + os.pathsep + os.environ.get("PATH", "")
+    request = dict(request)
+    for key in ("package_dir", "response_path"):
+        request[key] = linux_path(request[key], root)
+    request["args"] = map_strings(request.get("args") or {}, lambda s: linux_path(s, root))
+    if command == "call":
+        with contextlib.suppress(OSError):
+            os.setsid()  # its own process group, so cancelling stops its children too
+        info = {"distro": os.environ.get("WSL_DISTRO_NAME", ""), "pgid": os.getpgid(0)}
+        folder = os.path.dirname(request["response_path"])
+        write_json_atomic(os.path.join(folder, PROCESS_FILE), info)
+    return request
+
+
+def linux_path(value: str, root: str) -> str:
+    """``C:\\data\\x.cif`` -> ``/mnt/c/data/x.cif``; anything else unchanged."""
+    unc = _WSL_UNC.match(value)
+    if unc:
+        return "/" + unc.group(1).replace("\\", "/").lstrip("/")
+    drive = _DRIVE_PATH.match(value)
+    if drive:
+        return root + drive.group(1).lower() + "/" + drive.group(2).replace("\\", "/")
+    return value
+
+
+def windows_path(value: str, root: str, distro: str) -> str:
+    """``/mnt/c/x/y.png`` -> ``C:\\x\\y.png``; other existing Linux paths as UNC paths."""
+    drive = value[len(root) : len(root) + 2]
+    if value.startswith(root) and len(drive) == 2 and drive[0].isalpha() and drive[1] == "/":
+        rest = value[len(root) + 2 :].replace("/", "\\")
+        return drive[0].upper() + ":\\" + rest
+    if value.startswith("/") and distro and os.path.exists(value):
+        return "\\\\wsl.localhost\\" + distro + value.replace("/", "\\")
+    return value
+
+
+def map_strings(value: Any, convert: Callable[[str], str]) -> Any:
+    if isinstance(value, str):
+        return convert(value)
+    if isinstance(value, list):
+        return [map_strings(item, convert) for item in value]
+    if isinstance(value, dict):
+        return {key: map_strings(item, convert) for key, item in value.items()}
+    return value
 
 
 def load_module(package_dir: str, entrypoint: str) -> types.ModuleType:

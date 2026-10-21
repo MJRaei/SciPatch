@@ -16,7 +16,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from motel import frontmatter
+from motel import frontmatter, wsl
 from motel.build import BuildLayout, runtime_for
 from motel.errors import ManifestError, ToolNotFoundError
 from motel.manifest import MANIFEST_FILENAME, NAME_PATTERN, Manifest, load_manifest
@@ -185,6 +185,7 @@ class Registry:
             tool_dir.unlink()
         elif tool_dir.exists():
             shutil.rmtree(tool_dir)
+        wsl.remove_environment(self.paths.envs / name)  # its Linux side, if it has one
         for directory in (self.paths.envs / name, self.paths.sources / name):
             if directory.exists():
                 shutil.rmtree(directory)

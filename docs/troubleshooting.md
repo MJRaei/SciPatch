@@ -31,8 +31,10 @@ command. Typical causes:
 - **"cannot be installed on Windows"** (or another platform): the scientific
   code has no build for it, so the tool's `motel.lock` marks it unsupported and
   names what is missing; `motel info <tool>` lists the platforms it runs on. On
-  Windows, codes that exist only for Linux (GPAW, Quantum ESPRESSO, CREST,
-  LAMMPS) can be used from Linux under WSL (`wsl --install`).
+  Windows, tools that exist only for Linux (GPAW, Quantum ESPRESSO, CREST,
+  LAMMPS) run inside WSL: if the message says WSL is not set up, open PowerShell
+  as administrator, run `wsl --install`, restart, finish setting up Ubuntu, and
+  install the tool again. `motel doctor` shows whether WSL is ready.
 - **No internet connection**: environments download Python and packages.
 - **A package can't be built**: it may need a compiler or system library.
   Tools that need compiled scientific software should use

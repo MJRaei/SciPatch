@@ -30,6 +30,14 @@ All notable changes to this project are documented here. The format follows
   run only on some (`platforms:`).
 - Tools CI runs on Linux, macOS, and Windows, choosing for each tool the runners
   its `motel.lock` supports; Motel's own Windows tests are now required.
+- On Windows, tools that exist only for Linux (CREST, GPAW, LAMMPS, Quantum
+  ESPRESSO) are built and run inside WSL, as their own documentation recommends:
+  the environment is created on the Linux side from exactly the locked Linux
+  packages (with a checked micromamba), calls go through the usual shim with
+  paths translated both ways and variables passed through `WSLENV` (secrets never
+  on a command line), and cancelling a run stops its Linux processes. Without
+  WSL, `motel add` explains how to set it up; `motel doctor`, `motel info`, and
+  `motel catalog` show WSL support, and CI checks these tools on Windows in WSL.
 - Secrets for tools that call online services; each tool receives only the
   secrets it declares, which can name what they are and where to get one.
   `motel add` asks for missing keys (hidden), the dashboard has a Keys page, and

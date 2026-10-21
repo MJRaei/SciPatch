@@ -48,6 +48,14 @@ your own conda installation and settings are never touched. Set
 `MOTEL_SYSTEM_CONDA=1` to use your conda instead. Only the channels in the tool's
 manifest are used, so a tool's environment is the same on every computer.
 
+Each tool's `motel.lock` pins its packages for Linux, macOS, and Windows, and says
+where it cannot be installed. On Windows, a tool that exists only for Linux is
+built and run inside WSL (the Windows Subsystem for Linux) with exactly its
+locked Linux packages: the environment lives on the Linux side, and the tool
+reads and writes files on Windows through `/mnt/c/...`. Paths are translated both
+ways, and secrets reach the Linux process as environment variables, never on a
+command line.
+
 Motel never imports tool code into its own process. To call a function it starts
 the tool's own Python interpreter with a tiny standard-library-only *shim*, which
 imports `api.py`, calls the function, and writes the result as JSON. This is why
