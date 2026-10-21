@@ -98,15 +98,16 @@ model comparison), **GPAW** and **Quantum ESPRESSO** (DFT for crystals),
 **phonopy** (phonons and stability), **phono3py** (thermal conductivity),
 **pymatgen-diffusion** (ion transport from MD), **pymatgen-structure**
 (symmetry, supercells, XRD), **synthesis recipes** (precursors and temperatures
-from papers, routes for new materials), and the **Materials Project** database;
-and for chemistry, **PySCF** (ab initio quantum chemistry), **xTB** (fast
-semiempirical quantum chemistry), **CREST** (conformers, protomers, tautomers),
-**RDKit** (cheminformatics), **Open Babel** (chemical file formats, force
-fields), **OpenMM** (molecular dynamics), **MDAnalysis** (trajectory analysis),
-**NMR mixtures** (mole fractions from crude 1H NMR), **AutoDock Vina**
-(docking), **peptide assembly** (self-assembly conditions from similar
-peptides), and **Cantera** (combustion chemistry and thermodynamics). Every tool
-reproduces published or upstream-tested values before it installs.
+from papers, routes for new materials), **doping knowledge** (what papers report
+about doping layered materials), and the **Materials Project** database; and for
+chemistry, **PySCF** (ab initio quantum chemistry), **xTB** (fast semiempirical
+quantum chemistry), **CREST** (conformers, protomers, tautomers), **RDKit**
+(cheminformatics), **Open Babel** (chemical file formats, force fields),
+**OpenMM** (molecular dynamics), **MDAnalysis** (trajectory analysis), **NMR
+mixtures** (mole fractions from crude 1H NMR), **AutoDock Vina** (docking),
+**peptide assembly** (self-assembly conditions from similar peptides), and
+**Cantera** (combustion chemistry and thermodynamics). Every tool reproduces
+published or upstream-tested values before it installs.
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),
 Codex, or Gemini CLI. See [Turning a repository into a tool](docs/onboarding.md),

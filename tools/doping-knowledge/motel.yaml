@@ -1,0 +1,90 @@
+schema: 1
+name: doping-knowledge
+version: 0.1.0
+title: Doping of 2D and layered materials from papers (ARIA)
+summary: >-
+  Search 440 doping and intercalation studies of 2D and layered materials
+  (graphene, MoS2, WSe2, WTe2, Bi2Se3, FeSe, ...) for dopants, methods,
+  conditions, dopant sites, phase transitions, and property changes, and 1,443
+  cause-effect relationships with the authors' mechanisms, extracted from papers.
+domains: [materials]
+tags: [doping, dopant, intercalation, 2d-materials, layered, graphene, tmd, transition-metal-dichalcogenide,
+       mos2, wse2, wte2, topological-insulator, superconductivity, band-gap, carrier-concentration,
+       mechanism, literature, knowledge-graph, causal, aria]
+
+source:
+  repo: https://github.com/yicao-elina/LLM4Chem-Explainable-synthesis
+  ref: 16151741e82ff9ef8cfe675a7516c49e02f32881
+  install: false
+  homepage: https://github.com/yicao-elina/LLM4Chem-Explainable-synthesis
+  citation: >-
+    ARIA, Autonomous Reasoning Intelligence for Atomics (Y. Cao et al., hackathon
+    project, 2025), github.com/yicao-elina/LLM4Chem-Explainable-synthesis; the
+    records cite the papers they were extracted from.
+  license: MIT
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: []
+
+entrypoint: api
+
+validity: >-
+  The records were extracted from papers by an LLM and not checked by hand:
+  values can be missing, misattributed, or wrong, and a few entries are
+  computational (DFT) rather than experimental studies. Papers are identified by
+  title (no DOIs); look them up before relying on a number. Coverage is a few
+  hundred papers, mostly 2D and layered materials, so the absence of a match
+  says nothing about the literature. Matching is by words, not meaning: try
+  synonyms (e.g. "intercalation" and "doping", "CDW" and "charge density wave").
+  ARIA's cause-effect links are within single papers; the tool does not chain
+  them into multi-step causal paths across papers.
+
+maturity: experimental
+
+golden:
+  - name: lithium-intercalated WTe2 opens a gap as its paper reports
+    quick: true
+    function: find_doping
+    args: {host: WTe2, dopant: Li}
+    expect:
+      studies.0.method: electrochemical intercalation
+      studies.0.outcome.structural_changes.phase_transition: Td to Td'
+      studies.0.property_changes.electronic.band_gap_ev.after.indirect: {approx: 0.14, abs: 0.005}
+      studies.0.paper: A Gapped Phase in Semimetallic Td-WTe2 Induced by Lithium Intercalation
+    reference: >-
+      M. Wang et al., "A Gapped Phase in Semimetallic Td-WTe2 Induced by Lithium
+      Intercalation", Adv. Mater. 34, 2200861 (2022), abstract: lithium intercalation
+      produces a phase structurally distinct from Td, with carrier density almost two
+      orders of magnitude lower, predicted to be a charge-density-wave phase with a
+      band gap of about 0.14 eV.
+    against: independent
+  - name: the knowledge base holds ARIA's 440 studies and 1,443 relationships
+    function: overview
+    expect:
+      studies: 440
+      relationships: 1443
+      hosts.0.name: graphene
+      hosts.0.studies: 60
+    reference: >-
+      outputs/combined_doping_data.json of ARIA at commit 1615174: 440 doping
+      experiments (60 on graphene, the most studied host) and 1,443 causal
+      relationships.
+    against: regression
+  - name: mechanisms are found by keywords, best supported first
+    function: find_mechanisms
+    args: {keywords: Li intercalation CDW}
+    expect:
+      relationships.0.effect: CDW formation (Td' phase)
+      relationships.0.confidence: strongly suggested
+      relationships.0.mechanism: {contains: "extremely high levels of electron doping"}
+    reference: >-
+      ARIA's relationship rel_2 (labelled "strongly suggested"), from the WTe2 paper
+      above, quoting its conclusion that the CDW formation is driven by the extremely
+      high electron doping from Li intercalants.
+    against: regression
+  - name: a search needs at least one filter
+    function: find_doping
+    raises: "Give at least one of host, dopant, method, or keywords"
+    reference: Without a filter the tool would return the whole knowledge base.
