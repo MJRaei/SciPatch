@@ -236,9 +236,7 @@ def energy(
     import openmm
     from openmm import unit
 
-    topology, positions, prmtop, molecules = _system_inputs(
-        structure, coordinates, small_molecules
-    )
+    topology, positions, prmtop, molecules = _system_inputs(structure, coordinates, small_molecules)
     field = None
     if prmtop is None:
         field = _forcefield(
@@ -709,9 +707,7 @@ def minimize(
     import openmm
     from openmm import app, unit
 
-    topology, positions, prmtop, molecules = _system_inputs(
-        structure, coordinates, small_molecules
-    )
+    topology, positions, prmtop, molecules = _system_inputs(structure, coordinates, small_molecules)
     field = None
     if prmtop is None:
         field = _forcefield(
