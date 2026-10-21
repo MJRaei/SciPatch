@@ -1,0 +1,143 @@
+schema: 1
+name: ovito
+version: 0.1.0
+title: Crystal structure, defect and dislocation analysis (OVITO)
+summary: >-
+  Analyze atomistic simulations of materials with OVITO: identify the local
+  crystal structure of every atom (adaptive common neighbor analysis, polyhedral
+  template matching, diamond), count vacancies and interstitials by Wigner-Seitz
+  analysis, and extract dislocation lines with their Burgers vectors (DXA), for
+  single structures or whole trajectories.
+domains: [materials]
+tags: [structure-identification, common-neighbor-analysis, cna, adaptive-cna, ptm,
+       polyhedral-template-matching, fcc, bcc, hcp, diamond, point-defects, vacancy,
+       interstitial, wigner-seitz, radiation-damage, dislocations, dxa, burgers-vector,
+       dislocation-density, plasticity, molecular-dynamics, lammps, ovito]
+
+source:
+  homepage: https://www.ovito.org
+  paper: https://doi.org/10.1088/0965-0393/18/1/015012
+  citation: >-
+    A. Stukowski, "Visualization and analysis of atomistic simulation data with
+    OVITO - the Open Visualization Tool", Modelling Simul. Mater. Sci. Eng. 18,
+    015012 (2010); methods: A. Stukowski, Modelling Simul. Mater. Sci. Eng. 20,
+    045021 (2012) (adaptive CNA); P. M. Larsen, S. Schmidt, J. Schiotz, Modelling
+    Simul. Mater. Sci. Eng. 24, 055007 (2016) (PTM); E. Maras et al., Comput. Phys.
+    Commun. 205, 13 (2016) (diamond); A. Stukowski, V. V. Bulatov, A. Arsenlis,
+    Modelling Simul. Mater. Sci. Eng. 20, 085007 (2012) (DXA).
+  license: MIT (ovito Python module from PyPI)
+
+environment:
+  manager: uv
+  python: "3.12"
+  # The 3.16.1 macOS wheel lacks a library; 3.16.1.post1 (macOS only) fixes it.
+  # OVITO publishes no wheels for Intel Macs.
+  packages: ["ovito==3.16.1.post1; sys_platform == 'darwin'",
+             "ovito==3.16.1; sys_platform != 'darwin'", "ase==3.29.0"]
+
+entrypoint: api
+
+functions:
+  structure_types:
+    params:
+      structure: {kind: structure}
+    outputs:
+      output: {kind: structure}
+      table: {kind: table}
+  point_defects:
+    params:
+      structure: {kind: structure}
+      reference: {kind: structure}
+    outputs:
+      output: {kind: table}
+  dislocations:
+    params:
+      structure: {kind: structure}
+    outputs:
+      total_line_length_angstrom: {unit: Å}
+      dislocation_density_per_m2: {unit: m^-2}
+      output: {kind: file}
+
+validity: >-
+  Structure identification classifies the arrangement of nearest neighbors: at
+  high temperature thermal vibrations misclassify some crystalline atoms (PTM is
+  the most robust), and atoms at surfaces, grain boundaries and defect cores are
+  "Other" by design. Wigner-Seitz analysis needs a reference crystal with the same
+  cell; it counts site occupancies, so it cannot tell which atom is the
+  interstitial or follow a cell that deforms strongly. DXA needs a crystal of the
+  given lattice around the dislocations; it finds lines with Burgers vectors of
+  the standard families of that lattice, and dislocations in heavily disordered
+  or amorphous regions are missed. Dislocation densities refer to the whole
+  simulation cell, including vacuum if there is any.
+
+golden:
+  - name: the 12 neighbors of a vacancy in fcc are not fcc (adaptive CNA)
+    function: structure_types
+    args: {structure: tests/data/Cu_fcc_vacancy.xyz}
+    expect:
+      counts.FCC: 243
+      counts.Other: 12
+      n_atoms: 255
+    reference: >-
+      Adaptive common neighbor analysis (Stukowski, MSMSE 20, 045021, 2012) assigns
+      FCC to atoms with 12 nearest neighbors forming 421 pairs. In a 256-atom fcc
+      crystal with one vacancy, the vacancy's 12 nearest neighbors have only 11
+      and are "Other"; the remaining 243 atoms are FCC.
+  - name: a perfect bcc crystal is all BCC (PTM)
+    function: structure_types
+    args: {structure: tests/data/Fe_bcc.xyz, method: ptm}
+    expect:
+      counts.BCC: 128
+      counts.Other: 0
+    reference: >-
+      Polyhedral template matching (Larsen, Schmidt, Schiotz, MSMSE 24, 055007,
+      2016): every atom of an ideal bcc lattice matches the BCC template with zero
+      deviation.
+  - name: an ideal hcp crystal is all HCP (adaptive CNA)
+    function: structure_types
+    args: {structure: tests/data/Mg_hcp.xyz}
+    expect:
+      counts.HCP: 96
+      counts.Other: 0
+    reference: Ideal hcp (c/a = sqrt(8/3)) has 12 nearest neighbors with 6 x 421 and 6 x 422 pairs, the HCP signature.
+  - name: diamond silicon is all cubic diamond
+    function: structure_types
+    args: {structure: tests/data/Si_diamond.xyz, method: diamond}
+    expect:
+      counts.Cubic diamond: 216
+      counts.Other: 0
+    reference: >-
+      Identify diamond structure (Maras et al., Comput. Phys. Commun. 205, 13,
+      2016): every atom of ideal cubic diamond (216-atom silicon cell) is cubic diamond.
+  - name: a Frenkel pair is one vacancy and one interstitial (Wigner-Seitz)
+    function: point_defects
+    args: {structure: tests/data/Cu_frenkel.xyz, reference: tests/data/Cu_fcc.xyz}
+    expect:
+      vacancies: 1
+      interstitials: 1
+      frenkel_pairs: 1
+      n_sites: 256
+    reference: >-
+      Wigner-Seitz cell occupancy: one atom of the 256-atom fcc crystal is moved
+      from its site to an octahedral interstitial position, leaving one empty site
+      and one doubly occupied site.
+  - name: DXA finds the screw dislocation with b = a/2 <110>
+    function: dislocations
+    args: {structure: tests/data/Cu_screw_dislocation.xyz, lattice: fcc}
+    expect:
+      n_segments: 1
+      total_line_length_angstrom: {approx: 10.22476, abs: 0.001}
+      length_by_family_angstrom.1/2<110>: {approx: 10.22476, abs: 0.001}
+      segments.0.burgers_magnitude_angstrom: {approx: 2.55619, abs: 0.001}
+      segments.0.character_deg: {approx: 0, abs: 1}
+    reference: >-
+      A straight screw dislocation built from the Volterra displacement field
+      u_z = b theta / 2 pi in fcc copper (a = 3.615 Å; tests/make_data.py): line
+      along [1-10] through a cell of 4 periods of a/2 [1-10] (10.22476 Å),
+      Burgers vector a/2 [1-10] of length a/sqrt(2) = 2.55619 Å, parallel to the
+      line (screw, 0 degrees).
+  - name: a missing file is refused
+    function: structure_types
+    args: {structure: tests/data/missing.xyz}
+    raises: "No such file"
+    reference: A file that does not exist must give a clear error.
