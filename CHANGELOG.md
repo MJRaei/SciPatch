@@ -83,6 +83,10 @@ All notable changes to this project are documented here. The format follows
   far they agree. Only models whose packages install together on Linux, macOS,
   and Windows are included: SevenNet and MatterSim need e3nn 0.5 (MACE pins
   0.4.4), and FAIRChem's PyTorch has no macOS (Apple silicon) build.
+- Onboarding covers repositories with a user interface (Gradio, Streamlit, Dash,
+  Flask, desktop programs): the tool calls the computation behind the
+  interface, with its form fields as typed parameters and its plots, tables,
+  and viewers as files and values, and leaves the interface packages out.
 - `motel.lock` replaces `requirements.lock`; an existing `requirements.lock` is
   still applied until the next `motel freeze`.
 - Tools on Windows: CHGNet (ML potentials, phonopy) installs from its prebuilt

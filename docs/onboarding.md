@@ -68,6 +68,19 @@ tool, `motel add . --link` uses the folder in place.
 
 The format is described in [Tool package format](tool-format.md).
 
+## Repositories with a user interface
+
+Many research repositories ship a web app (Gradio, Streamlit, Dash) or a desktop
+program. A tool exposes what the interface computes, never the interface: its
+functions call the code behind the buttons, with the form fields as typed
+parameters and the plots, tables, and viewers as files and values. The interface
+packages are left out of the environment. Computation written inside the
+interface's callbacks is moved into a function (saved as a patch). Desktop
+programs are used through their Python module, command line, or batch mode; a
+program that can only be driven by clicking cannot become a tool. Motel's
+dashboard (`motel ui`) gives every function a form, so people who prefer clicking
+still have one.
+
 ## Fixing the upstream code
 
 Research code often needs a small fix to install or run (a pinned dependency, a

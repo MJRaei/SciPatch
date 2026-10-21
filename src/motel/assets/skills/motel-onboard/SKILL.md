@@ -52,6 +52,16 @@ briefly:
 - heavy requirements: GPU, model weights, licensed software, compiled code, long
   runtimes, credentials.
 
+If the repository is an app with a user interface (Gradio, Streamlit, Dash,
+Flask, a Qt desktop program, notebook widgets), the tool exposes what the
+interface computes, never the interface: find the code its buttons and forms
+call, and plan functions around that (see "Repositories with a user interface"
+in [references/api-guidelines.md](references/api-guidelines.md)). Tell the user
+how each function reaches the computation (library call, command-line or batch
+mode, or code moved out of the interface). A program that can only be driven by
+clicking, with no Python module, command line, or batch mode, cannot become a
+tool: say so and stop.
+
 Wait for confirmation if anything is ambiguous.
 
 ### 2. Make the environment build
@@ -64,6 +74,10 @@ Edit `environment` in `motel.yaml` (see [references/manifest.md](references/mani
 - `source.install: true` installs the repository itself (editable). If it is not
   installable, set it to `false` and add what it needs to `packages`; `api.py`
   can then import from `source/` by adding it to `sys.path`.
+- Interface-only packages (gradio, streamlit, dash, PyQt, ipywidgets) are not
+  needed. Leave them out of `packages`; if installing the repository pulls them
+  in and they fail to build on some platform, set `source.install: false` and
+  list only what the computation imports.
 - Model weights or data → `post_install` commands.
 - API keys → declare each under `environment.secrets` with `name`,
   `description`, and `url` (where to get one); see references/manifest.md. Motel

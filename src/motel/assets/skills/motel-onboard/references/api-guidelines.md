@@ -104,6 +104,62 @@ def relax(
   scripts (`subprocess.run([...], cwd=os.environ["MOTEL_SOURCE_DIR"])`), load
   its data files, or add it to `sys.path`.
 
+**Repositories with a user interface**
+- Expose what the interface computes, not the interface. Find the handler
+  behind each control (Gradio `fn=`, Streamlit script body, Dash or Flask
+  callbacks and routes, Qt slots) and call the computation it reaches. Never
+  launch the app, start a server, or drive widgets.
+- Import the library module behind the app, not the app module: app modules
+  often build the interface or start a server when imported (`demo.launch()`,
+  top-level `st.title(...)`).
+- Map the controls to parameters, keeping the interface's defaults: text and
+  number fields → `str`/`float` (units in the docstring); dropdowns and radio
+  buttons → `Literal[...]`; sliders → numbers whose range the docstring states
+  and a `ValueError` enforces; file uploads → path strings.
+- Map the displays to outputs: plots → PNG files; tables → JSON values, or CSV
+  when long; 3D molecule or structure viewers → structure or molecule files
+  (declare their `kind`); downloads → files in the current directory.
+- Computation written inside a callback (common in Streamlit scripts): move it
+  into a function in `source/` and save that as a patch, or into a helper in
+  `api.py` if it is a few lines. A golden test then checks it against the
+  repository's documented example.
+- Desktop programs: use their Python module, command line, or batch mode (OVITO
+  through its `ovito` module, not the desktop app; a CLI through `subprocess`).
+- A web front end for a hosted service: call the service's API, with its key
+  declared under `environment.secrets`.
+- Example inputs the interface ships with make good golden-test inputs. The
+  expected values still need a named source (paper, README, test suite); a
+  number you only got by running the app must say exactly that.
+
+```python
+# source/app.py (the interface)
+def run(smiles, temperature):
+    result = model.predict(load(smiles), T=temperature)
+    return plot(result), result.table
+gr.Interface(run, [gr.Textbox(), gr.Slider(200, 1000, value=300)],
+             [gr.Plot(), gr.Dataframe()]).launch()
+
+# api.py (the tool): same computation, no gradio
+def predict(smiles: str, temperature_k: float = 300.0, plot: str = "result.png") -> dict:
+    """Predict the model's property table for a molecule at a temperature.
+
+    Args:
+        smiles: Molecule as SMILES.
+        temperature_k: Temperature in K, from 200 to 1000.
+        plot: Where to save the plot (PNG).
+
+    Returns:
+        The table the app displays, one dict per row, and the plot's path.
+    """
+    if not 200 <= temperature_k <= 1000:
+        raise ValueError("temperature_k must be between 200 and 1000 K.")
+    from mypackage import load, model, plot_result  # not `app`
+
+    result = model.predict(load(smiles), T=temperature_k)
+    plot_result(result).savefig(plot)
+    return {"rows": result.table.to_dict("records"), "plot": plot}
+```
+
 **Long jobs**
 - Mark slow functions `long_running: true` in `motel.yaml`.
 - Print progress (e.g. `step 120/5000, T = 598 K`): the latest lines are shown
