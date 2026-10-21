@@ -174,7 +174,7 @@ def resources_view(tool: InstalledTool) -> dict[str, Any]:
         view["functions"] = functions
     size = tool.state.env_size_mb if tool.state else None
     if size:
-        view["disk_space"] = f"{format_size(size)} for its environment (model files not included)"
+        view["disk_space"] = f"{format_size(size)} for its environment, plus files it downloads"
     return view
 
 

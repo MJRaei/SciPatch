@@ -94,12 +94,12 @@ def test_an_optional_gpu_is_used_only_when_the_user_allows_it() -> None:
     assert cuda_only.device == "cpu" and "would make it faster" in cuda_only.notes[0]
 
 
-def test_short_memory_is_a_warning_and_the_internet_a_note() -> None:
+def test_short_memory_is_a_warning() -> None:
     fit = assess(needs(memory_gb=32, network=True), NO_GPU, use_gpu=False)
     assert fit.warnings == [
         "32 GB of memory recommended; this computer has 8 GB (try smaller inputs first)"
     ]
-    assert fit.notes == ["needs an internet connection"]
+    assert fit.notes == []
     assert describe_needs(needs(gpu="optional", memory_gb=32, network=True)) == [
         "faster with an NVIDIA GPU (CUDA)",
         "32 GB of memory recommended",
@@ -145,7 +145,7 @@ def test_runs_get_a_device_and_gpu_only_functions_are_refused_without_one(
     resources = tool_view(motel.tool("trainer"))["resources"]
     assert resources["needs"] == ["faster with an NVIDIA GPU (CUDA)"]
     assert resources["functions"]["train"]["cannot_run_here"][0].startswith("needs an NVIDIA GPU")
-    assert resources["disk_space"].endswith("for its environment (model files not included)")
+    assert resources["disk_space"].endswith("for its environment, plus files it downloads")
 
     monkeypatch.setattr(hardware, "detect", lambda: NVIDIA)
     assert motel.run("trainer", "device", wait=60, use_cache=False).result == "cpu"

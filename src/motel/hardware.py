@@ -212,8 +212,6 @@ def assess(needs: Resources, machine: Machine, *, use_gpu: bool) -> Fit:
             f"{needs.memory_gb:g} GB of memory recommended; this computer has "
             f"{machine.memory_gb:g} GB (try smaller inputs first)"
         )
-    if needs.network:
-        fit.notes.append("needs an internet connection")
     return fit
 
 
