@@ -9,6 +9,7 @@ kJ/mol (and kcal/mol), lengths in nm.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import Any, Literal
@@ -42,7 +43,9 @@ def _platform(name: Platform) -> Any:
     available = {
         openmm.Platform.getPlatform(i).getName() for i in range(openmm.Platform.getNumPlatforms())
     }
-    for candidate in ("CUDA", "HIP", "CPU"):
+    # A GPU only when Motel chose one for this run (the user turned GPU use on).
+    gpu = os.environ.get("MOTEL_DEVICE") == "cuda"
+    for candidate in ("CUDA", "CPU") if gpu else ("CPU",):
         if candidate in available:
             return openmm.Platform.getPlatformByName(candidate)
     return openmm.Platform.getPlatformByName("Reference")
@@ -238,7 +241,8 @@ def energy(
         small_molecule_forcefield: "openff-2.3.0" (Sage; default), "openff-2.2.1",
             or "gaff-2.2.20".
         cutoff_nm: Nonbonded cutoff for periodic systems (PME), in nm.
-        platform: OpenMM platform; "auto" picks a GPU if available, otherwise CPU.
+        platform: OpenMM platform; "auto" uses an NVIDIA GPU (CUDA) if the user turned GPU
+            use on, otherwise the CPU.
 
     Returns:
         Total potential energy (kJ/mol and kcal/mol), energy by force term
@@ -520,7 +524,8 @@ def simulate(
         ph: pH for adding hydrogens to the biomolecule.
         cutoff_nm: Nonbonded cutoff in nm (PME for electrostatics).
         seed: Random seed for initial velocities.
-        platform: OpenMM platform; "auto" picks a GPU if available, otherwise CPU.
+        platform: OpenMM platform; "auto" uses an NVIDIA GPU (CUDA) if the user turned GPU
+            use on, otherwise the CPU.
 
     Returns:
         Number of atoms and waters, averages over production (temperature K,

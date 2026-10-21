@@ -37,6 +37,9 @@ environment:
                    "packmol=21.2.1; sys_platform != 'win32'"]
   channels: [conda-forge]
 
+resources:
+  gpu: optional  # OpenMM's CUDA platform when the user turns GPU use on
+
 entrypoint: api
 
 functions:
