@@ -1,0 +1,164 @@
+schema: 1
+name: raspa3
+version: 0.1.0
+title: Gas adsorption in zeolites and MOFs (RASPA3 Monte Carlo)
+summary: >-
+  Grand-canonical Monte Carlo with RASPA3 for gas adsorption in porous materials:
+  adsorption isotherms, uptake and selectivity from gas mixtures (e.g. CO2/N2 flue
+  gas), Henry coefficients, and heats of adsorption for CO2, N2, and methane in
+  bundled frameworks (silicalite/MFI, HKUST-1, MOF-5, CALF-20) or any CIF file.
+domains: [materials, chemistry]
+tags: [adsorption, isotherm, gcmc, monte-carlo, widom, henry-coefficient, selectivity, heat-of-adsorption,
+       mof, zeolite, porous, co2-capture, carbon-capture, methane-storage, natural-gas, flue-gas,
+       hkust-1, mof-5, silicalite, raspa]
+
+source:
+  homepage: https://iraspa.github.io/RASPA3/
+  paper: https://doi.org/10.1063/5.0226249
+  citation: >-
+    Y. A. Ran, S. Sharma, S. R. G. Balestra, Z. Li, S. Calero, T. J. H. Vlugt, R. Q.
+    Snurr, D. Dubbeldam, "RASPA3: A Monte Carlo code for computing adsorption and
+    diffusion in nanoporous materials and thermodynamics properties of fluids", J.
+    Chem. Phys. 161, 114106 (2024); force fields as reported by each function
+    (TraPPE, TraPPE-zeo, UFF, and those of the RASPA3 examples).
+  license: MIT
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["raspa3=3.0.29", "ase=3.29.0", "matplotlib=3.11.2"]
+  channels: [conda-forge]
+
+entrypoint: api
+
+functions:
+  adsorption_isotherm:
+    long_running: true
+    params:
+      temperature_k: {unit: K}
+      pressures_bar: {unit: bar}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  mixture_adsorption:
+    long_running: true
+    params:
+      pressure_bar: {unit: bar}
+      temperature_k: {unit: K}
+    outputs:
+      total_loading_mmol_per_g: {unit: mmol/g}
+  henry_coefficient:
+    long_running: true
+    params:
+      temperature_k: {unit: K}
+  materials: {}
+
+validity: >-
+  Rigid frameworks and classical force fields: results are as good as the
+  framework model. Methane in silicalite agrees with measurements within about
+  10%. CO2 in silicalite lies within the spread of measured isotherms (which
+  differ between samples by 20% or more), and N2 in silicalite is about half the
+  measured uptake. MOFs with generic UFF or DREIDING parameters typically agree
+  with experiments within 10-20%. Open metal sites (e.g. Cu in HKUST-1), framework
+  flexibility, defects, residual solvent, and cations in aluminosilicate zeolites
+  are not described; CIF files without partial charges underestimate CO2 and N2
+  uptake. Loadings are absolute (all molecules in the pores), which corresponds to
+  "total" uptake and exceeds the excess uptake that gravimetric experiments report
+  at high pressure. Inaccessible pockets are not blocked. Statistical errors come
+  with every value; increase cycles to reduce them.
+
+maturity: established
+
+golden:
+  - name: methane uptake in silicalite at 1 bar and 300 K
+    quick: true
+    function: adsorption_isotherm
+    args: {framework: MFI, adsorbate: methane, temperature_k: 300, pressures_bar: [1.0408],
+           cycles: 5000, initialization_cycles: 1000}
+    expect:
+      points.0.loading_mmol_per_g: {approx: 0.649, rel: 0.1}
+      points.0.fugacity_coefficient: {min: 0.99, max: 1.0}
+    reference: >-
+      H. B. Abdul-Rehman, M. A. Hasanain, K. F. Loughlin, Ind. Eng. Chem. Res. 29,
+      1525 (1990), Table I (Linde S-115 silicalite, 300 K): 0.649 mmol/g at 1.0408
+      bar (data via NIST ISODB). The model gives 0.643.
+    against: independent
+  - name: methane uptake in silicalite at 5 bar and 297 K
+    function: adsorption_isotherm
+    args: {framework: MFI, adsorbate: methane, temperature_k: 297, pressures_bar: [5.0822],
+           cycles: 3000, initialization_cycles: 1000}
+    expect:
+      points.0.loading_mmol_per_g: {approx: 1.599, rel: 0.1}
+      points.0.enthalpy_of_adsorption_kj_per_mol: {min: -23, max: -18}
+    reference: >-
+      F. R. Siperstein, A. L. Myers, AIChE J. 47, 1141 (2001), silicalite S115 at
+      297 K: 1.599 mmol/g at 5.0822 bar (data via NIST ISODB). The model gives 1.71
+      (7% high); Abdul-Rehman et al. (1990) measured 1.51 mmol/g at 5.54 bar and
+      300 K, where the model is 11% high.
+    against: independent
+  - name: CO2 uptake in silicalite at 1 bar and 300 K
+    function: adsorption_isotherm
+    args: {framework: MFI, adsorbate: CO2, temperature_k: 300, pressures_bar: [1.0],
+           cycles: 3000, initialization_cycles: 1000}
+    expect:
+      points.0.loading_mmol_per_g: {approx: 1.478, rel: 0.1}
+    reference: >-
+      B. Smit, CHIMIA 69, 248 (2015), Figure 3, experimental CO2 isotherm in
+      silicalite at 300 K: 1.48 mmol/g at 1 bar (data via NIST ISODB). The model
+      gives 1.52. Measured isotherms differ between samples: P. Li, F. H. Tezel, J.
+      Chem. Eng. Data 53, 2479 (2008) report 1.42 mmol/g at 313 K, where the model
+      gives 1.19.
+    against: independent
+  - name: Henry coefficient of methane in silicalite at 300 K
+    function: henry_coefficient
+    args: {framework: MFI, adsorbates: [methane], temperature_k: 300, cycles: 5000}
+    expect:
+      henry.0.henry_mmol_per_g_per_bar: {approx: 0.85, rel: 0.15}
+    reference: >-
+      The initial slope of the isotherm of Abdul-Rehman et al., Ind. Eng. Chem. Res.
+      29, 1525 (1990), Table I at 300 K: 0.068 mmol/g at 0.0803 bar and 0.168 mmol/g
+      at 0.1997 bar (0.85 and 0.84 mmol/g/bar). The model gives 0.78.
+    against: independent
+  - name: methane storage in HKUST-1 from a CIF file (UFF) at 35 bar
+    function: adsorption_isotherm
+    args: {framework: tests/data/HKUST-1.cif, adsorbate: methane, temperature_k: 298,
+           pressures_bar: [35.0], cycles: 3000, initialization_cycles: 1000}
+    expect:
+      points.0.loading_mmol_per_g: {approx: 11.38, rel: 0.15}
+      framework_force_field: {contains: UFF}
+      framework_charges: from the CIF
+    reference: >-
+      J. A. Mason, M. Veenstra, J. R. Long, Chem. Sci. 5, 32 (2014): total methane
+      uptake of HKUST-1 at 25 °C, 225 cm3(STP)/cm3 at 35 bar; Figure 3a gives 255.1
+      cm3(STP)/g (11.38 mmol/g) at 35 bar (data via NIST ISODB). Simulated absolute
+      loadings correspond to total uptake. The model gives 10.4 mmol/g (9% low);
+      earlier HKUST-1 samples took up less (184-220 cm3/cm3, as reviewed by Mason et
+      al.).
+    against: independent
+  - name: CO2 is selected over N2 from flue gas in silicalite
+    function: mixture_adsorption
+    args: {framework: MFI, mole_fractions: {CO2: 0.15, N2: 0.85}, pressure_bar: 1.0,
+           temperature_k: 300, cycles: 2000, initialization_cycles: 1000}
+    expect:
+      selectivity.CO2/N2: {min: 12, max: 28}
+      components.0.adsorbed_mole_fraction: {min: 0.6, max: 0.9}
+    reference: >-
+      Near the Henry regime the mixture selectivity equals the ratio of the Henry
+      coefficients, 18.2 for CO2/N2 in silicalite at 300 K with these models (Widom
+      insertion). The mixture simulation gives 18.5.
+  - name: bundled frameworks and adsorbates are listed
+    function: materials
+    expect:
+      frameworks.MFI.unit_cells: [2, 2, 2]
+      frameworks.Cu-BTC.unit_cells: [1, 1, 1]
+      adsorbates.models: [CO2, N2, methane]
+    reference: >-
+      The MFI cell (20.0 x 19.9 x 13.4 Angstrom) is doubled in each direction and the
+      cubic HKUST-1 cell (26.3 Angstrom) is used once, so the box is at least 24
+      Angstrom, twice the 12 Angstrom cutoff.
+    against: exact
+  - name: an unknown adsorbate is refused
+    function: adsorption_isotherm
+    args: {framework: MFI, adsorbate: xenon}
+    raises: "Unknown adsorbate"
+    reference: The tool supports CO2, N2, and methane and must say so.

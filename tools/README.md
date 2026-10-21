@@ -28,6 +28,7 @@ reproduce published or upstream-tested values on every build.
 | [pymatgen-structure](pymatgen-structure/) | materials | Linux, macOS, Windows | Space groups, standard cells, supercells, format conversion, XRD patterns, structure matching | established | pymatgen's XRD tests; olivine and diamond space groups |
 | [pyscf](pyscf/) | chemistry | Linux, macOS, Windows | Ab initio quantum chemistry: HF, DFT, MP2, CCSD(T) energies, optimization, frequencies and thermochemistry, excited states (TDDFT) | established | PySCF's test suite (water HF, B3LYP, MP2, CCSD(T), frequencies; CIS of HF); NIST CCCBDB |
 | [quantum-espresso](quantum-espresso/) | materials | Linux, macOS, Windows (WSL) | Plane-wave DFT with the verified SSSP pseudopotentials: energies, forces, stress, relaxation, equation of state, gaps, magnetism | established | Quantum ESPRESSO's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
+| [raspa3](raspa3/) | materials, chemistry | Linux, macOS, Windows | Gas adsorption in zeolites and MOFs by Monte Carlo (GCMC, Widom): isotherms, uptake and selectivity from mixtures such as CO2/N2 flue gas, Henry coefficients, heats of adsorption for CO2, N2, and methane, in bundled frameworks (silicalite, HKUST-1, MOF-5, CALF-20) or any CIF | established | Measured methane and CO2 isotherms in silicalite (Abdul-Rehman et al. 1990; Siperstein & Myers 2001; Smit 2015); methane storage in HKUST-1 (Mason et al. 2014) |
 | [rdkit](rdkit/) | chemistry | Linux, macOS, Windows | Similarity and substructure search, 3D conformers (ETKDG + MMFF94), standardization with InChI/InChIKey | established | RDKit's documentation (doctested similarities and searches); PubChem identifiers |
 | [structural-analogs](structural-analogs/) | materials | Linux, macOS, Windows | Materials Project compounds with the same crystal structure type as a material or structure file, with band gaps, formation energies, stability, and volumes, for estimating properties by analogy; from the mp-property-analogies hackathon project | experimental | Rock-salt and diamond-structure analogs (KCl for NaCl, Ge for Si); needs a free API key |
 | [synthesis-recipes](synthesis-recipes/) | materials, chemistry | Linux, macOS, Windows | Published synthesis recipes (41,300 text-mined solid-state and sol-gel recipes: precursors, reactions, temperatures, times, atmospheres, DOIs), similar Materials Project compositions, and suggested routes for new materials from their closest analogs; from the SKY hackathon agent | experimental | Exact composition-identity checks; recipe counts of the bundled dataset; NCA analog for a new NCA composition |
@@ -117,6 +118,11 @@ accepts.
 - **Alloys:** `pycalphad.solidification` (melting range, phases while cooling) →
   `pycalphad.equilibrium` at the heat-treatment temperature → `lammps` or
   `ml-potentials` for the stable phases' properties.
+- **Carbon capture and gas storage:** `raspa3.henry_coefficient` for each
+  candidate CIF (CO2/N2 selectivity at low pressure) →
+  `raspa3.mixture_adsorption` with flue gas (15% CO2, 85% N2) and
+  `raspa3.adsorption_isotherm` for the best ones (uptake between adsorption and
+  desorption pressures).
 - **Defects and plasticity:** `lammps.run_script` with your deformation or
   cascade input → `ovito.dislocations` (line length, Burgers vectors, density)
   and `ovito.point_defects` (vacancies, interstitials per frame).
@@ -140,8 +146,9 @@ Upstream code, potential files, and pseudopotentials are downloaded from their
 original sources at install time and are not redistributed here. Small test
 inputs taken from upstream projects (the LAMMPS benchmark input, the Vina 1IEP
 tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory,
-molecules of the MMFF94 validation suite, and MixSense's example spectra) keep
-their projects' licenses; each golden test names its source.
+molecules of the MMFF94 validation suite, MixSense's example spectra, and
+RASPA3's HKUST-1 structure) keep their projects' licenses; each golden test
+names its source.
 
 ## Adding a tool
 
