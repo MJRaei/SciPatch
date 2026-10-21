@@ -1,7 +1,8 @@
 name: Tools
 
-# Rebuild tool packages from scratch and run their golden tests: on every change
-# to a tool, and weekly for all tools, to catch upstream breakage early.
+# Rebuild tool packages from scratch and run their golden tests on Linux, macOS,
+# and Windows (where each tool's motel.lock says it can be installed): on every
+# change to a tool, and weekly for all tools, to catch upstream breakage early.
 on:
   pull_request:
     paths: ["tools/**"]
@@ -17,7 +18,7 @@ jobs:
     name: Select tools
     runs-on: ubuntu-latest
     outputs:
-      tools: ${{ steps.list.outputs.tools }}
+      matrix: ${{ steps.list.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,27 +32,20 @@ jobs:
           esac
           tools=$(echo "$changed" | cut -d/ -f2 | sort -u | while read -r t; do
             [ -n "$t" ] && [ -f "tools/$t/motel.yaml" ] && echo "$t"; done)
-          echo "tools=$(echo "$tools" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read().split()))')" >> "$GITHUB_OUTPUT"
+          echo "matrix=$(python3 .github/scripts/tool_matrix.py $tools)" >> "$GITHUB_OUTPUT"
 
   check:
     name: ${{ matrix.tool }} (${{ matrix.os }})
     needs: select
-    if: needs.select.outputs.tools != '[]'
+    if: needs.select.outputs.matrix != '{"include": []}'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      matrix:
-        tool: ${{ fromJSON(needs.select.outputs.tools) }}
-        os: [ubuntu-latest, macos-latest]
+      matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - id: manager
-        run: echo "conda=$(grep -q 'manager: conda' tools/${{ matrix.tool }}/motel.yaml && echo yes || echo no)" >> "$GITHUB_OUTPUT"
-      - if: steps.manager.outputs.conda == 'yes'
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          miniforge-version: latest
+      # conda tools need no setup: Motel downloads its own micromamba.
       - run: uv tool install --python 3.12 .
       - name: Build from scratch and run golden tests
         run: motel check tools/${{ matrix.tool }} --clean
