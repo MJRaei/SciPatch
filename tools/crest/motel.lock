@@ -2,6 +2,7 @@
  "lock_version": 1,
  "inputs": "f9fc3878aeebc83fe78b936100226fc6f9fce957fd268e828d85b33f11a40598",
  "tested_on": "osx-arm64",
+ "tested_size_mb": 255.0,
  "platforms": {
   "linux-64": {
    "conda": [
