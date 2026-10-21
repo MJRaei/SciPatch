@@ -1,0 +1,153 @@
+schema: 1
+name: quantum-espresso
+version: 0.1.0
+title: Plane-wave DFT for crystals (Quantum ESPRESSO)
+summary: >-
+  First-principles DFT for crystals with Quantum ESPRESSO (pw.x) and the
+  verified SSSP pseudopotential library: total energies, forces and stress,
+  relaxation of atoms and cell, equation of state (equilibrium volume, bulk
+  modulus), Fermi level, band gaps, and magnetization, with cutoffs set
+  automatically from SSSP's recommendations.
+domains: [materials]
+tags: [dft, density-functional-theory, plane-wave, pseudopotential, quantum-espresso, pwscf, sssp,
+       pbe, total-energy, relaxation, vc-relax, stress, bulk-modulus, equation-of-state,
+       lattice-constant, band-gap, fermi-level, magnetism, first-principles, ab-initio]
+
+source:
+  homepage: https://www.quantum-espresso.org
+  paper: https://doi.org/10.1088/1361-648X/aa8f79
+  citation: >-
+    P. Giannozzi et al., "Advanced capabilities for materials modelling with
+    Quantum ESPRESSO", J. Phys.: Condens. Matter 29, 465901 (2017); G. Prandini,
+    A. Marrazzo, I. E. Castelli, N. Mounet, N. Marzari, "Precision and efficiency in
+    solid-state pseudopotential calculations", npj Comput. Mater. 4, 72 (2018)
+    (SSSP; data doi:10.24435/materialscloud:f3-ym, CC BY 4.0).
+  license: GPL-2.0-or-later (Quantum ESPRESSO); CC-BY-4.0 (SSSP)
+
+environment:
+  manager: conda
+  python: "3.12"
+  # pw.x of the conda-forge qe 7.6 build links libelpa without depending on elpa.
+  conda_packages: ["qe=7.6", "elpa=2026.02.002=mpi_openmpi*", "ase=3.29.0", "matplotlib"]
+  channels: [conda-forge]
+  # SSSP 1.3.0 PBE efficiency from the Materials Cloud Archive, checksum-verified.
+  post_install:
+    - python fetch_sssp.py
+
+entrypoint: api
+
+functions:
+  scf:
+    params:
+      structure: {kind: structure}
+      pseudopotentials: {kind: file}
+      ecutwfc_ry: {unit: Ry}
+      ecutrho_ry: {unit: Ry}
+      kpoint_density: {unit: 1/Å}
+      smearing_ry: {unit: Ry}
+    outputs:
+      energy_ev: {unit: eV}
+      energy_per_atom_ev: {unit: eV/atom}
+      max_force_ev_per_angstrom: {unit: eV/Å}
+      stress_gpa: {unit: GPa}
+      fermi_level_ev: {unit: eV}
+      highest_occupied_level_ev: {unit: eV}
+      band_gap_ev: {unit: eV}
+      magnetic_moment_mu_b: {unit: μB}
+      input_file: {kind: file}
+      output_file: {kind: file}
+  relax:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      pseudopotentials: {kind: file}
+      ecutwfc_ry: {unit: Ry}
+      ecutrho_ry: {unit: Ry}
+      kpoint_density: {unit: 1/Å}
+      smearing_ry: {unit: Ry}
+      output: {kind: structure}
+    outputs:
+      energy_ev: {unit: eV}
+      energy_per_atom_ev: {unit: eV/atom}
+      volume_per_atom_angstrom3: {unit: Å³/atom}
+      stress_gpa: {unit: GPa}
+      relaxed_structure: {kind: structure}
+  equation_of_state:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      pseudopotentials: {kind: file}
+      ecutwfc_ry: {unit: Ry}
+      ecutrho_ry: {unit: Ry}
+      kpoint_density: {unit: 1/Å}
+      smearing_ry: {unit: Ry}
+      plot: {kind: image}
+    outputs:
+      volume_per_atom_angstrom3: {unit: Å³/atom}
+      energy_per_atom_ev: {unit: eV/atom}
+      bulk_modulus_gpa: {unit: GPa}
+      plot: {kind: image}
+
+validity: >-
+  Results depend on the functional (PBE with the default SSSP library), the
+  pseudopotentials, the cutoffs, and the k-point mesh. SSSP efficiency is
+  verified against all-electron calculations for elemental crystals; its
+  recommended cutoffs give converged energy differences and phonons for most
+  materials, but stresses and very fine energy differences may need higher
+  cutoffs. PBE overestimates lattice constants by about 1% and underestimates
+  band gaps by 30-50% (silicon about 0.6 eV vs 1.17 eV measured); strongly
+  correlated d- and f-electron materials need DFT+U or beyond, which this tool
+  does not set up. Spin-polarized runs start ferromagnetic. Calculations are
+  at 0 K without zero-point motion. pw.x runs on all cores of one computer
+  (MPI); cells beyond a few dozen atoms become slow.
+
+golden:
+  - name: silicon energy matches the Quantum ESPRESSO test suite
+    function: scf
+    args:
+      structure: tests/data/Si_10.20bohr.extxyz
+      pseudopotentials: [tests/data/Si.pz-vbc.UPF]
+      ecutwfc_ry: 12
+      kpts: [2, 2, 2]
+      gamma_centered: false
+      occupations: fixed
+    expect:
+      energy_ev: {approx: -214.895065, abs: 0.0005}
+      highest_occupied_level_ev: {approx: 5.5371, abs: 0.001}
+      output_file: {exists: true}
+    reference: >-
+      Quantum ESPRESSO test-suite/pw_scf/scf-kauto.in with its benchmark (qe-7.6
+      repository): Si diamond, celldm(1) = 10.20 bohr, Si.pz-vbc.UPF (from
+      pseudopotentials.quantum-espresso.org), ecutwfc 12 Ry, 2x2x2 k-points shifted
+      by 1 1 1: total energy -15.79449593 Ry (-214.895065 eV), highest occupied
+      level 5.5371 eV. This tool gives -214.895041 eV and 5.5365 eV with pw.x 7.6.
+  - name: silicon equation of state matches all-electron PBE (SSSP)
+    function: equation_of_state
+    args: {structure: tests/data/Si_5.475.extxyz, kpoint_density: 5}
+    expect:
+      volume_per_atom_angstrom3: {approx: 20.453, rel: 0.005}
+      bulk_modulus_gpa: {approx: 88.545, rel: 0.04}
+      plot: {exists: true}
+    timeout: 2400
+    reference: >-
+      Delta benchmark, WIEN2k 13.1 all-electron PBE reference (K. Lejaeghere et al.,
+      Science 351, aad3000 (2016); github.com/molmod/DeltaCodesDFT WIEN2k.txt at
+      commit f9b6693): Si V0 = 20.4530 Angstrom^3/atom, B0 = 88.545 GPa. With SSSP
+      (30/240 Ry) this tool gives 20.462 Angstrom^3/atom and 89.48 GPa.
+  - name: iron is a ferromagnet with the measured moment
+    function: scf
+    args: {structure: tests/data/Fe_bcc.extxyz, kpoint_density: 3, smearing_ry: 0.02}
+    expect:
+      magnetic_moment_mu_b: {approx: 2.22, abs: 0.15}
+      settings.spin_polarized: true
+    timeout: 2400
+    reference: >-
+      Saturation moment of bcc iron at 0 K, 2.22 mu_B per atom (C. Kittel,
+      Introduction to Solid State Physics, 8th ed., Ch. 11), at the all-electron PBE
+      volume (a = 2.8309 Angstrom); this tool gives 2.10 mu_B (PBE, 10x10x10
+      k-points). Spin polarization must switch on automatically.
+  - name: molecules without a periodic cell are refused
+    function: scf
+    args: {structure: tests/data/water.xyz}
+    raises: "has no periodic cell"
+    reference: Plane-wave DFT needs a periodic cell; molecules belong to pyscf or xtb.

@@ -20,6 +20,7 @@ reproduce published or upstream-tested values on every build.
 | [pymatgen-structure](pymatgen-structure/) | materials | Space groups, standard cells, supercells, format conversion, XRD patterns, structure matching | pymatgen's XRD tests; olivine and diamond space groups |
 | [matcalc](matcalc/) | materials | Elastic tensor and moduli, equation of state, thermal expansion and heat capacity (quasi-harmonic), formation energies, from universal potentials (TensorNet, M3GNet, CHGNet on MatPES) | matcalc's test suite (Li2O); all-electron PBE bulk modulus of Si |
 | [materials-project](materials-project/) | materials | Search known materials, stability (energy above hull), properties, and structures | Silicon (mp-149); needs a free API key |
+| [quantum-espresso](quantum-espresso/) | materials | Plane-wave DFT with the verified SSSP pseudopotentials: energies, forces, stress, relaxation, equation of state, gaps, magnetism | Quantum ESPRESSO's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
 | [rdkit](rdkit/) | chemistry | Similarity and substructure search, 3D conformers (ETKDG + MMFF94), standardization with InChI/InChIKey | RDKit's documentation (doctested similarities and searches); PubChem identifiers |
 | [xtb](xtb/) | chemistry | GFN2-xTB energies, optimization, frequencies, and thermochemistry for molecules, with implicit solvent | xtb's test suite (propyne; GBSA solvation) |
 
