@@ -1,0 +1,144 @@
+schema: 1
+name: rdkit
+version: 0.1.0
+title: Cheminformatics (RDKit)
+summary: >-
+  Cheminformatics for molecules with RDKit: similarity search with molecular
+  fingerprints (Morgan/ECFP, RDKit, atom pairs, torsions), substructure search
+  with SMARTS, 3D conformer generation and ranking (ETKDG with MMFF94), and
+  structure standardization (salts, charges, tautomers) with canonical SMILES,
+  InChI, and InChIKey. Works on single molecules, lists of SMILES, or SDF files.
+domains: [chemistry]
+tags: [cheminformatics, smiles, smarts, fingerprint, ecfp, morgan, tanimoto, similarity,
+       substructure, virtual-screening, conformer, conformer-search, etkdg, mmff, standardization,
+       tautomer, salt-stripping, inchi, inchikey, sdf, rdkit]
+
+source:
+  homepage: https://www.rdkit.org
+  paper: https://doi.org/10.5281/zenodo.591637
+  citation: >-
+    RDKit: Open-source cheminformatics (https://www.rdkit.org, release 2026.09.1);
+    S. Riniker and G. A. Landrum, "Better Informed Distance Geometry: Using What
+    We Know To Improve Conformation Generation", J. Chem. Inf. Model. 55,
+    2562-2574 (2015) (ETKDG); D. Rogers and M. Hahn, "Extended-Connectivity
+    Fingerprints", J. Chem. Inf. Model. 50, 742-754 (2010).
+  license: BSD-3-Clause
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["rdkit==2026.9.1"]
+
+entrypoint: api
+
+functions:
+  similarity_search:
+    params:
+      query: {kind: molecule}
+      molecules: {kind: molecule}
+  substructure_search:
+    params:
+      molecules: {kind: molecule}
+  conformers:
+    params:
+      molecule: {kind: molecule}
+      prune_rms: {unit: Å}
+      energy_window_kcal_mol: {unit: kcal/mol}
+      output: {kind: molecule}
+    outputs:
+      relative_energies_kcal_mol: {unit: kcal/mol}
+      lowest_energy_kcal_mol: {unit: kcal/mol}
+      conformers_file: {kind: molecule}
+  standardize:
+    params:
+      molecules: {kind: molecule}
+    outputs:
+      results: {description: "Per molecule: smiles, inchi, inchikey, formula, molecular_weight (g/mol)."}
+
+validity: >-
+  Fingerprint similarity measures shared substructures, not shared properties:
+  similar molecules often but not always have similar activity (activity
+  cliffs), and values depend strongly on the fingerprint type, so compare
+  similarities only within one fingerprint and metric (Tanimoto above about 0.4
+  with Morgan radius 2 is commonly considered similar for drug-like molecules).
+  Conformer energies come from the MMFF94 force field in the gas phase: they
+  rank conformers qualitatively (errors of about 1 kcal/mol) and ignore
+  solvent; use xtb or pyscf to refine important conformers. Conformer searches
+  are stochastic; increase n_conformers for flexible molecules (more than about
+  8 rotatable bonds) and check that the lowest energy is reproduced with
+  another seed. Standardization rules follow RDKit's MolStandardize defaults
+  and may not match a particular database's conventions.
+
+golden:
+  - name: Morgan similarity matches the RDKit documentation
+    function: similarity_search
+    args: {query: Cc1ccccc1, molecules: [Cc1ncccc1], radius: 2, counts: true, metric: dice}
+    expect:
+      results.0.similarity: {min: 0.55, max: 0.56}
+    reference: >-
+      RDKit 2026.09.1, Docs/Book/GettingStartedInPython.rst, "Morgan Fingerprints"
+      (doctest): Dice similarity of radius-2 count fingerprints of toluene and
+      2-methylpyridine is 0.55...
+  - name: RDKit fingerprint similarities match the RDKit documentation
+    function: similarity_search
+    args: {query: CCOC, molecules: [COC, CCO], fingerprint: rdkit}
+    expect:
+      results.0.smiles: CCO
+      results.0.similarity: {min: 0.6, max: 0.61}
+      results.1.similarity: {min: 0.4, max: 0.41}
+    reference: >-
+      RDKit 2026.09.1, GettingStartedInPython.rst, "RDKit (Topological)
+      Fingerprints" (doctest): Tanimoto(CCOC, CCO) = 0.6..., Tanimoto(CCOC, COC) =
+      0.4...; the more similar molecule is ranked first.
+  - name: substructure search matches the RDKit documentation
+    function: substructure_search
+    args: {pattern: "c[NH1]", molecules: tests/data/actives_5ht3.sdf}
+    expect:
+      n_molecules: 180
+      n_matched: 22
+    reference: >-
+      RDKit 2026.09.1, GettingStartedInPython.rst, "Substructure Searching"
+      (doctest): 22 molecules of Docs/Book/data/actives_5ht3.sdf match c[NH1].
+  - name: substructure atom indices match the RDKit documentation
+    function: substructure_search
+    args: {pattern: ccO, molecules: [c1ccccc1O]}
+    expect:
+      matches.0.atom_indices: [[0, 5, 6], [4, 5, 6]]
+    reference: >-
+      RDKit 2026.09.1, GettingStartedInPython.rst (doctest): phenol matches ccO at
+      atoms ((0, 5, 6), (4, 5, 6)).
+  - name: standardization gives the PubChem parent compounds
+    function: standardize
+    args:
+      molecules: ["CC(=O)[O-].[Na+]", "CC(=O)Oc1ccccc1C(=O)O", "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"]
+    expect:
+      results.0.inchikey: QTBSBXVTEAMEQO-UHFFFAOYSA-N
+      results.0.formula: C2H4O2
+      results.1.inchikey: BSYNRYMUTXBXSQ-UHFFFAOYSA-N
+      results.2.inchikey: RYYVLZVUVIJVGH-UHFFFAOYSA-N
+    reference: >-
+      PubChem: sodium acetate (CID 31372) has the parent compound acetic acid
+      (CID 176, QTBSBXVTEAMEQO-UHFFFAOYSA-N, C2H4O2); aspirin CID 2244
+      (BSYNRYMUTXBXSQ-UHFFFAOYSA-N); caffeine CID 2519 (RYYVLZVUVIJVGH-UHFFFAOYSA-N).
+  - name: butane has anti and gauche conformers, benzene one
+    function: conformers
+    args: {molecule: CCCC}
+    expect:
+      n_unique: 2
+      relative_energies_kcal_mol.1: {min: 0.5, max: 1.2}
+      conformers_file: {exists: true}
+    reference: >-
+      n-Butane has two distinct conformers, anti and gauche (the gauche pair are
+      mirror images); gauche lies above anti by roughly 0.6-0.9 kcal/mol in
+      experiments and standard texts. MMFF94 gives 0.78 kcal/mol here.
+  - name: rigid benzene has a single conformer
+    function: conformers
+    args: {molecule: c1ccccc1}
+    expect:
+      n_unique: 1
+    reference: Benzene is rigid; all embedded conformers must collapse into one.
+  - name: invalid SMILES are refused
+    function: similarity_search
+    args: {query: C1CC, molecules: [CCO]}
+    raises: "is not a valid SMILES"
+    reference: An unclosed ring is not valid SMILES and must give a clear error.
