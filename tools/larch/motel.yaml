@@ -1,0 +1,162 @@
+schema: 1
+name: larch
+version: 0.1.0
+title: X-ray absorption spectroscopy, XANES and EXAFS (xraylarch)
+summary: >-
+  Analyse X-ray absorption spectra with xraylarch: edge energy, edge step, and
+  normalized XANES; EXAFS chi(k) and Fourier transforms; FEFF scattering paths from a
+  crystal structure; shell fitting of EXAFS for bond distances, coordination numbers,
+  and Debye-Waller factors; and linear-combination fitting of XANES with reference
+  spectra for oxidation states or phase fractions.
+domains: [materials, chemistry]
+tags: [xas, xanes, exafs, xafs, x-ray-absorption, synchrotron, feff, feffit, edge-energy,
+       normalization, autobk, fourier-transform, coordination-number, bond-distance,
+       debye-waller, linear-combination-fitting, oxidation-state, speciation, larch]
+
+source:
+  homepage: https://xraypy.github.io/xraylarch/
+  paper: https://doi.org/10.1088/1742-6596/430/1/012007
+  citation: >-
+    M. Newville, "Larch: An Analysis Package for XAFS and Related Spectroscopies",
+    J. Phys.: Conf. Ser. 430, 012007 (2013); FEFF8: A. L. Ankudinov, B. Ravel, J. J.
+    Rehr, S. D. Conradson, Phys. Rev. B 58, 7565 (1998).
+  license: MIT (xraylarch); FEFF6L and FEFF8L as distributed with xraylarch
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["xraylarch==2026.3.1"]
+  # Some xraylarch dependencies (mkl_fft, pyFAI) have no Linux ARM wheels.
+  platforms: [linux-64, osx-arm64, osx-64, win-64]
+
+entrypoint: api
+
+functions:
+  normalize:
+    params:
+      spectrum: {kind: spectrum}
+      e0: {unit: eV}
+    outputs:
+      e0_ev: {unit: eV}
+      table: {kind: table}
+      plot: {kind: image}
+  exafs:
+    params:
+      spectrum: {kind: spectrum}
+      rbkg: {unit: Å}
+      kmin: {unit: 1/Å}
+      kmax: {unit: 1/Å}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  feff_paths:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      radius: {unit: Å}
+  fit_shells:
+    params:
+      spectrum: {kind: spectrum}
+      kmin: {unit: 1/Å}
+      kmax: {unit: 1/Å}
+      rmin: {unit: Å}
+      rmax: {unit: Å}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  linear_combination:
+    params:
+      spectrum: {kind: spectrum}
+      emin: {unit: eV}
+      emax: {unit: eV}
+    outputs:
+      plot: {kind: image}
+
+validity: >-
+  Results are only as good as the data: check energy calibration (a reference
+  foil), self-absorption in concentrated fluorescence samples, and glitches.
+  EXAFS fits are limited by the number of independent points (about 2 dk dR /
+  pi); keep variables below it, and remember that S0^2, coordination numbers, and
+  sigma^2 are strongly correlated (as are delta E0 and delta R). Distances are
+  typically accurate to about 0.01-0.02 Angstrom, coordination numbers to 10-20%.
+  FEFF uses muffin-tin potentials; near-edge (XANES) features are not reproduced
+  quantitatively by these paths. Linear-combination fits assume the sample is a
+  mixture of the given standards, measured at the same edge and resolution.
+  FEFF is an x86-64 program: on Apple silicon it runs through Rosetta 2.
+
+maturity: established
+
+golden:
+  - name: Larch's documented first-shell fit of copper foil
+    quick: true
+    function: fit_shells
+    args: {spectrum: tests/data/cu_metal_rt.xdi, paths: [tests/data/feffcu01.dat], kmin: 3,
+           kmax: 17, dk: 4, window: kaiser, rmin: 1.4, rmax: 3.0, kweight: 2, rbkg: 1.0}
+    expect:
+      s02.value: {approx: 0.9305631, rel: 0.005}
+      delta_e0_ev.value: {approx: 4.3577673, abs: 0.05}
+      shells.0.sigma2_angstrom2.value: {approx: 0.0086697, rel: 0.01}
+      shells.0.delta_r_angstrom.value: {approx: -0.0060167, abs: 0.001}
+      r_factor: {approx: 0.00272181, rel: 0.02}
+    reference: >-
+      xraylarch documentation, "Example 1: Simple fit to a first shell"
+      (examples/feffit/doc_feffit1.py, output doc/example_outputs/doc_feffit1.out;
+      also checked in tests/test_larchexamples_xafs.py): amp 0.9305631, del_e0
+      4.3577673 eV, sig2 0.0086697, del_r -0.0060167 Angstrom, r-factor 0.00272181.
+    against: upstream-tests
+  - name: the fitted Cu-Cu distance matches copper's crystal structure
+    function: fit_shells
+    args: {spectrum: tests/data/cu_metal_rt.xdi, paths: [tests/data/feffcu01.dat]}
+    expect:
+      shells.0.r_angstrom.value: {approx: 2.5562, abs: 0.02}
+    reference: >-
+      Copper is face-centred cubic with a = 3.61496 Angstrom (R. W. G. Wyckoff, Crystal
+      Structures, vol. 1, 1963; COD 9008468), so the nearest-neighbour distance is
+      a/sqrt 2 = 2.5562 Angstrom; EXAFS distances are accurate to about 0.02
+      Angstrom.
+    against: independent
+  - name: FEFF finds the fcc neighbour shells of copper
+    function: feff_paths
+    args: {structure: tests/data/Cu_wyckoff.cif, absorber: Cu, radius: 5.0}
+    expect:
+      single_scattering.0.reff_angstrom: {approx: 2.5562, abs: 0.0005}
+      single_scattering.0.degeneracy: 12
+      single_scattering.1.reff_angstrom: {approx: 3.61496, abs: 0.0005}
+      single_scattering.1.degeneracy: 6
+      single_scattering.2.reff_angstrom: {approx: 4.4274, abs: 0.0005}
+      single_scattering.2.degeneracy: 24
+    reference: >-
+      In an fcc lattice (a = 3.61496 Angstrom, Wyckoff 1963) the first three shells
+      hold 12, 6, and 24 atoms at a/sqrt 2 = 2.5562, a = 3.6150, and a sqrt(3/2) =
+      4.4274 Angstrom.
+    against: exact
+  - name: normalization recovers a known edge energy and step
+    function: normalize
+    args: {spectrum: tests/data/erf_edge.dat}
+    expect:
+      e0_ev: {approx: 7112.0, abs: 0.01}
+      edge_step: {approx: 1.5, rel: 0.002}
+    reference: >-
+      tests/data/erf_edge.dat is mu = 0.2 + 1e-4 (E - 7112) + 1.5 (1 + erf((E - 7112)/2))
+      / 2: the inflection point is at E0 = 7112 eV and the step between the pre- and
+      post-edge lines at E0 is 1.5.
+    against: exact
+  - name: linear-combination fitting recovers a 30/70 mixture
+    function: linear_combination
+    args: {spectrum: tests/data/fe_mixture_30_70.dat,
+           standards: [tests/data/feo_rt1.xdi, tests/data/fe2o3_rt1.xmu]}
+    expect:
+      weights.0.standard: feo_rt1.xdi
+      weights.0.weight: {approx: 0.30, abs: 0.005}
+      weights.1.weight: {approx: 0.70, abs: 0.005}
+      sum_of_weights: {approx: 1.0, abs: 1.0e-6}
+    reference: >-
+      tests/data/fe_mixture_30_70.dat is 0.3 x normalized FeO + 0.7 x normalized Fe2O3
+      (xraylarch example spectra feo_rt1.xdi and fe2o3_rt1.xmu); the fit must return
+      these weights.
+    against: exact
+  - name: a missing spectrum is refused
+    function: normalize
+    args: {spectrum: no-such-file.xdi}
+    raises: "not found"
+    reference: The tool must report the missing file.

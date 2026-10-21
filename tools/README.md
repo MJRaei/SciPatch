@@ -16,6 +16,7 @@ reproduce published or upstream-tested values on every build.
 | [gpaw](gpaw/) | materials | Linux, macOS, Windows (WSL) | DFT for crystals (plane waves, PAW): energies, forces, stress, relaxation, equation of state, band structures and gaps, magnetism | established | GPAW's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
 | [impedance](impedance/) | chemistry, materials, engineering | Linux, macOS, Windows | Electrochemical impedance spectroscopy: equivalent-circuit fitting (Randles, CPE, Warburg, transmission lines) of spectra from common potentiostats, circuit simulation, Lin-KK Kramers-Kronig validation | published | impedance.py's documented example fit and Lin-KK result; exact recovery of an analytic Randles spectrum; RC element at its characteristic frequency |
 | [lammps](lammps/) | materials | Linux, macOS, Windows (WSL) | Classical MD and 0 K crystal properties with EAM, SW, Tersoff, AIREBO, SNAP, ACE or any LAMMPS pair style: lattice constants, cohesive energies, elastic tensors, NVT/NPT dynamics; your own input scripts | established | NIST Interatomic Potentials Repository (Cu, Fe, Si: lattice, cohesive energy, C11/C12/C44); LAMMPS benchmark log; equipartition |
+| [larch](larch/) | materials, chemistry | Linux, macOS, Windows | X-ray absorption spectroscopy (xraylarch): edge energy and normalized XANES, EXAFS chi(k) and Fourier transforms, FEFF paths from a CIF, shell fitting (distances, coordination, Debye-Waller factors), linear-combination fitting with reference spectra | established | Larch's documented copper first-shell fit; Cu-Cu distance and FEFF fcc shells against copper's crystal structure; exact edge and mixture recoveries |
 | [materials-project](materials-project/) | materials | Linux, macOS, Windows | Search known materials, stability (energy above hull), properties, and structures | established | Silicon (mp-149); needs a free API key |
 | [mdanalysis](mdanalysis/) | chemistry, biology, materials | Linux, macOS, Windows | MD trajectory analysis (GROMACS, AMBER, CHARMM, LAMMPS, OpenMM, extended XYZ): RMSD, RMSF, radius of gyration, g(r) and coordination numbers, MSD and diffusion coefficients | established | MDAnalysis's test suite (adenylate kinase RMSD); fcc coordination shell; random-walk Einstein relation |
 | [ml-potentials](ml-potentials/) | materials, chemistry | Linux, macOS, Windows | Universal ML potentials (Orb-v3, MACE-MP/MPA, MACE-OFF, CHGNet, TensorNet/M3GNet) in one place: energies, forces, stresses, magnetic moments, relaxation, MD, elastic constants, equation of state, thermal expansion and heat capacity, formation energies, and side-by-side model comparison | published | The test suites of Orb (Cu), CHGNet (LiMnO₂ energy and relaxation), MACE (water), and matcalc (Li₂O); Si and Al lattice constants vs. experiment; all-electron PBE bulk modulus of Si |
@@ -132,6 +133,10 @@ accepts.
 - **Identify a structure:** `pymatgen-structure.symmetry` and `xrd_pattern`, then
   `compare` with candidates from `materials-project.get_structure`;
   `robocrys.describe` explains it in words (prototype, polyhedra, layers).
+- **X-ray absorption (XANES/EXAFS):** `larch.normalize` (edge energy, white
+  line) → `larch.linear_combination` with reference spectra (oxidation states,
+  phase fractions); `larch.feff_paths` on a candidate structure →
+  `larch.fit_shells` (distances, coordination numbers, disorder).
 - **X-ray experiments:** `xraylib.element_xray_data` (source lines and absorption
   edges) → `xraylib.attenuation` for sample thickness, filters, or shielding →
   `xraylib.identify_peak` for fluorescence peaks; `pymatgen-structure.xrd_pattern`
@@ -204,11 +209,12 @@ original sources at install time and are not redistributed here. Small test
 inputs taken from upstream projects (the LAMMPS benchmark input, the Vina 1IEP
 tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory,
 molecules of the MMFF94 validation suite, MixSense's example spectra,
-impedance.py's example spectrum, Psi4's test complexes, robocrystallographer's
-test structures, crystal structures from the Crystallography Open Database, IZA
-zeolite frameworks, RASPA3's HKUST-1 structure, PROPKA's 1HPX test structure, an
-OpenMS example spectrum, and a PVGIS typical year for Munich from the European
-Commission's JRC) keep their sources' terms; each golden test names its source.
+impedance.py's example spectrum, xraylarch's example XAFS spectra, Psi4's test
+complexes, robocrystallographer's test structures, crystal structures from the
+Crystallography Open Database, IZA zeolite frameworks, RASPA3's HKUST-1
+structure, PROPKA's 1HPX test structure, an OpenMS example spectrum, and a PVGIS
+typical year for Munich from the European Commission's JRC) keep their sources'
+terms; each golden test names its source.
 
 ## Adding a tool
 
