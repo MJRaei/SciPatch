@@ -1,0 +1,115 @@
+schema: 1
+name: phono3py
+version: 0.1.0
+title: Lattice thermal conductivity (phono3py)
+summary: >-
+  Lattice thermal conductivity of crystals from phonon-phonon scattering with
+  phono3py (relaxation-time approximation or full Boltzmann equation), as a
+  function of temperature, with optional isotope scattering. Force constants
+  come from your own DFT forces or from a universal machine-learned potential
+  computed on the fly for any crystal structure.
+domains: [materials]
+tags: [thermal-conductivity, lattice-thermal-conductivity, phonon, phonon-phonon-scattering,
+       anharmonic, third-order-force-constants, boltzmann-transport, rta, lbte, thermoelectric,
+       heat-transport, phono3py, ml-potential]
+
+source:
+  homepage: https://phonopy.github.io/phono3py/
+  paper: https://doi.org/10.1103/PhysRevB.91.094306
+  citation: >-
+    A. Togo, L. Chaput, I. Tanaka, "Distributions of phonon lifetimes in
+    Brillouin zones", Phys. Rev. B 91, 094306 (2015); A. Togo, "First-principles
+    Phonon Calculations with Phonopy and Phono3py", J. Phys. Soc. Jpn. 92, 012001
+    (2023). ML forces: T. W. Ko et al., npj Comput. Mater. 11, 253 (2025)
+    (MatGL) and A. D. Kaplan et al., arXiv:2503.04070 (2025) (MatPES).
+  license: BSD-3-Clause
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["phono3py==4.8.2", "phonopy==4.8.3", "matcalc==0.6.0", "matgl==4.1.0",
+             "pymatgen==2026.9.24", "ase==3.29.0", "matplotlib"]
+  post_install:
+    - python -c "import matcalc; matcalc.load_fp('TensorNet-MatPES-PBE-2025.2')"
+
+entrypoint: api
+
+functions:
+  thermal_conductivity:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      forces: {kind: file}
+      temperatures_k: {unit: K}
+      displacement: {unit: Å}
+      cutoff_pair_distance: {unit: Å}
+      plot: {kind: image}
+    outputs:
+      plot: {kind: image}
+
+validity: >-
+  The result is the phonon (lattice) contribution only; electrons carry most
+  of the heat in metals and a significant part in heavily doped
+  semiconductors. Only three-phonon (and optionally isotope) scattering is
+  included: no four-phonon, boundary, defect, or grain scattering, so values
+  are upper bounds for real (polycrystalline, impure) samples and can be too
+  high for strongly anharmonic materials at high temperature. RTA
+  underestimates kappa of very high-conductivity crystals (diamond, BAs); use
+  LBTE there. Kappa converges slowly with the q-point mesh and supercell size;
+  check convergence. With the ML potential, force constants inherit its
+  errors: universal potentials soften phonons and often underestimate kappa
+  (for silicon the default model gives about 15% less than PBEsol DFT; some
+  models, e.g. CHGNet, are far worse), so treat ML values as screening
+  estimates and confirm important ones with DFT forces.
+
+golden:
+  - name: silicon conductivity matches the phono3py test suite
+    function: thermal_conductivity
+    args:
+      structure: tests/data/phono3py_si_pbesol.yaml
+      forces: tests/data/FORCES_FC3_si_pbesol
+      temperatures_k: [300]
+      mesh: [9, 9, 9]
+    expect:
+      kappa.0.kappa_w_mk.0: {approx: 107.694, abs: 0.5}
+      kappa.0.kappa_w_mk.2: {approx: 107.694, abs: 0.5}
+      kappa.0.kappa_w_mk.3: {approx: 0, abs: 0.01}
+      n_force_calculations: 111
+    reference: >-
+      phono3py v4.8.2, test/conductivity/test_kappa_RTA.py::test_kappa_RTA_si (Si
+      2x2x2, PBEsol forces from VASP in the test suite, RTA, 9x9x9 mesh, 300 K):
+      kappa = 107.694 W/m/K for full and 107.794 for compact force constants
+      (tolerance 0.5). This tool gives 107.788.
+  - name: isotope scattering lowers silicon's conductivity as in the test suite
+    function: thermal_conductivity
+    args:
+      structure: tests/data/phono3py_si_pbesol.yaml
+      forces: tests/data/FORCES_FC3_si_pbesol
+      temperatures_k: [300]
+      mesh: [9, 9, 9]
+      isotope: true
+    expect:
+      kappa.0.kappa_average_w_mk: {approx: 97.296, abs: 0.5}
+    reference: >-
+      phono3py v4.8.2, test_kappa_RTA.py::test_kappa_RTA_si_iso: 97.296 W/m/K
+      (tolerance 0.5).
+  - name: the ML potential gives silicon's conductivity close to DFT
+    function: thermal_conductivity
+    args: {structure: tests/data/Si.json, temperatures_k: [300, 600]}
+    expect:
+      kappa.0.kappa_average_w_mk: {approx: 107.7, rel: 0.3}
+      kappa.1.kappa_average_w_mk: {min: 30, max: 65}
+      n_force_calculations: 111
+    timeout: 1800
+    reference: >-
+      Same physics as the DFT test above (PBEsol-DFT RTA kappa of 107.7 W/m/K at
+      300 K); the PBE-trained default model gives about 92 W/m/K, within the
+      30% tolerance expected of a universal potential. At 600 K, three-phonon
+      (Umklapp) scattering roughly halves kappa (kappa ~ 1/T); the model gives 44.
+  - name: displacement files without forces are refused
+    function: thermal_conductivity
+    args: {structure: tests/data/phono3py_si_pbesol.yaml}
+    raises: "needs its forces"
+    reference: >-
+      Third-order force constants cannot be built from displacements alone; the
+      matching FORCES_FC3 file is required.
