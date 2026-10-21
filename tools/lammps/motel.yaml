@@ -1,0 +1,168 @@
+schema: 1
+name: lammps
+version: 0.1.0
+title: Classical molecular dynamics (LAMMPS)
+summary: >-
+  Molecular dynamics and 0 K crystal properties with LAMMPS and classical or
+  machine-learned interatomic potentials (EAM, Stillinger-Weber, Tersoff, AIREBO,
+  SNAP, ACE, and any LAMMPS pair style): relaxed lattices, cohesive energies and
+  full elastic tensors, NVT/NPT/NVE dynamics for crystals, liquids and amorphous
+  solids, and your own LAMMPS input scripts.
+domains: [materials]
+tags: [molecular-dynamics, md, lammps, interatomic-potential, eam, embedded-atom, tersoff,
+       stillinger-weber, airebo, snap, ace, elastic-constants, bulk-modulus, lattice-constant,
+       cohesive-energy, thermal-expansion, npt, nvt, metals, semiconductors, input-script]
+
+source:
+  homepage: https://www.lammps.org
+  paper: https://doi.org/10.1016/j.cpc.2021.108171
+  citation: >-
+    A. P. Thompson et al., "LAMMPS - a flexible simulation tool for particle-based
+    materials modeling at the atomic, meso, and continuum scales", Comput. Phys.
+    Commun. 271, 108171 (2022). Cite the paper of each potential used (returned
+    with every result).
+  license: GPL-2.0-only (LAMMPS and its potential files)
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["lammps=2025.07.22=*mpi_mpich*", "mpich=5.0.2", "ase=3.29.0"]
+  channels: [conda-forge]
+  post_install:
+    - python fetch_potentials.py
+
+entrypoint: api
+
+functions:
+  list_potentials: {}
+  crystal_properties:
+    params:
+      structure: {kind: structure}
+      potential: {kind: file}
+    outputs:
+      energy_per_atom_ev: {unit: eV/atom}
+      cohesive_energy_ev_per_atom: {unit: eV/atom}
+      density_g_cm3: {unit: g/cm3}
+      bulk_modulus_gpa: {unit: GPa}
+      shear_modulus_gpa: {unit: GPa}
+      relaxed_structure: {kind: structure}
+  simulate:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      potential: {kind: file}
+      temperature_k: {unit: K}
+      pressure_gpa: {unit: GPa}
+      timestep_fs: {unit: fs}
+    outputs:
+      average_temperature_k: {unit: K}
+      average_pressure_gpa: {unit: GPa}
+      average_potential_energy_ev_per_atom: {unit: eV/atom}
+      average_volume_per_atom_angstrom3: {unit: Å^3/atom}
+      average_density_g_cm3: {unit: g/cm3}
+      trajectory: {kind: trajectory}
+      final_structure: {kind: structure}
+  run_script:
+    long_running: true
+    params:
+      script: {kind: file}
+      files: {kind: file}
+    outputs:
+      log: {kind: file}
+
+validity: >-
+  Results are exactly as good as the interatomic potential: each was fitted to
+  particular properties (lattice constants, cohesive energies, elastic constants,
+  defect energies, or DFT data) and can be far off for others; the Tersoff (1988)
+  Si(B) potential (Si.tersoff), for example, gives a relaxed C44 of 10 GPa against
+  80 GPa measured.
+  State the potential and its paper with every number, and check it against
+  experiment or DFT for the property at hand. Cohesive energies are meaningful for
+  classical potentials; machine-learned ones (SNAP, ACE) are fitted to DFT total
+  energies, and their isolated-atom energy lies outside the training data.
+  Elastic constants are at 0 K, in the LAMMPS frame (a along x); use conventional
+  cells for crystal-axis values. MD is classical (no zero-point motion; heat
+  capacities are Dulong-Petit below the Debye temperature) and short runs or small
+  cells give noisy averages: check that averages do not drift with run length.
+  ReaxFF force fields need real units and charge equilibration and are run with
+  run_script.
+
+golden:
+  - name: Cu (Foiles EAM) lattice, cohesive energy and elastic constants
+    function: crystal_properties
+    args: {structure: tests/data/Cu_fcc.cif, potential: Cu_u3.eam}
+    expect:
+      lattice.a_angstrom: {approx: 3.615, abs: 0.0001}
+      cohesive_energy_ev_per_atom: {approx: 3.54, abs: 0.0001}
+      elastic_constants_gpa.C11: {approx: 167.265, rel: 0.001}
+      elastic_constants_gpa.C12: {approx: 124.153, rel: 0.001}
+      elastic_constants_gpa.C44: {approx: 76.447, rel: 0.001}
+      mechanically_stable: true
+    reference: >-
+      NIST Interatomic Potentials Repository, computed properties of
+      1986--Foiles-S-M--Cu--LAMMPS--ipr1 (the same Cu_u3.eam file): fcc a =
+      3.6150 Å, E_coh = -3.5400 eV/atom, C11 = 167.265, C12 = 124.153, C44 =
+      76.447 GPa (iprPy, 0 K). Foiles, Baskes and Daw (Phys. Rev. B 33, 7983,
+      1986) fitted a0 = 3.615 Å and Esub = 3.54 eV; the LAMMPS bench log
+      (bench/log.15Jul25.eam.fixed.g++.1) gives -113280 eV for 32000 atoms at a = 3.615 Å.
+  - name: Si (Stillinger-Weber) lattice, cohesive energy and relaxed elastic constants
+    function: crystal_properties
+    args: {structure: tests/data/Si_diamond.cif, potential: Si.sw}
+    expect:
+      lattice.a_angstrom: {approx: 5.43095, abs: 0.0001}
+      cohesive_energy_ev_per_atom: {approx: 4.3366, abs: 0.0001}
+      elastic_constants_gpa.C11: {approx: 151.424, rel: 0.001}
+      elastic_constants_gpa.C12: {approx: 76.422, rel: 0.001}
+      elastic_constants_gpa.C44: {approx: 56.449, rel: 0.001}
+    reference: >-
+      NIST Interatomic Potentials Repository, computed properties of
+      1985--Stillinger-F-H--Si--LAMMPS--ipr1 (same parameters as Si.sw): diamond
+      a = 5.43095 Å, E_coh = -4.3366 eV/atom (= -2 epsilon), C11 = 151.424, C12 =
+      76.422, C44 = 56.449 GPa. C44 includes the internal relaxation of the two
+      sublattices, so it checks that atoms are relaxed in the strained cells.
+  - name: bcc Fe (Mendelev EAM, eam/fs) lattice, cohesive energy and elastic constants
+    function: crystal_properties
+    args: {structure: tests/data/Fe_bcc.cif, potential: Fe_mm.eam.fs}
+    expect:
+      lattice.a_angstrom: {approx: 2.85532, abs: 0.0001}
+      cohesive_energy_ev_per_atom: {approx: 4.12244, abs: 0.0001}
+      elastic_constants_gpa.C11: {approx: 244.307, rel: 0.001}
+      elastic_constants_gpa.C12: {approx: 145.324, rel: 0.001}
+      elastic_constants_gpa.C44: {approx: 116.350, rel: 0.001}
+    reference: >-
+      NIST Interatomic Potentials Repository, computed properties of
+      2003--Mendelev-M-I--Fe-2--LAMMPS--ipr1 (file Fe_2.eam.fs, identical data to
+      LAMMPS's Fe_mm.eam.fs): bcc a = 2.85532 Å, E_coh = -4.12244 eV/atom, C11 =
+      244.307, C12 = 145.324, C44 = 116.350 GPa.
+  - name: the LAMMPS Lennard-Jones benchmark reproduces its reference log
+    function: run_script
+    args: {script: tests/data/in.lj}
+    expect:
+      runs.0.first.E_pair: {approx: -6.7733681, abs: 0.0000001}
+      runs.0.first.Press: {approx: -5.0197073, abs: 0.0000001}
+      runs.0.last.TotEng: {approx: -4.6223613, abs: 0.0001}
+      runs.0.last.Temp: {approx: 0.7574531, abs: 0.001}
+    reference: >-
+      LAMMPS stable_22Jul2025, bench/in.lj and bench/log.15Jul25.lj.fixed.g++.1:
+      step 0 E_pair = -6.7733681, Press = -5.0197073; step 100 Temp = 0.7574531,
+      TotEng = -4.6223613 (32000 atoms, Lennard-Jones melt, NVE).
+  - name: a classical solid has its equipartition potential energy (Cu, 100 K)
+    function: simulate
+    args: {structure: tests/data/Cu_fcc.cif, potential: Cu_u3.eam, ensemble: nvt,
+           temperature_k: 100, steps: 20000, equilibration_steps: 5000}
+    expect:
+      average_temperature_k: {approx: 100, rel: 0.02}
+      average_potential_energy_ev_per_atom: {approx: -3.527074, abs: 0.0005}
+      n_frames: 201
+    timeout: 900
+    reference: >-
+      Classical equipartition: in a nearly harmonic solid the mean potential
+      energy lies (3/2) kB T above the static lattice energy, 0.012926 eV/atom at
+      100 K, so E_pot = -3.54 + 0.012926 eV/atom for this potential (static energy
+      -3.54 eV/atom, Foiles et al. 1986; NIST). Anharmonic corrections at 100 K
+      (about 0.1 of the melting point) are well below the tolerance.
+  - name: a potential that lacks an element is refused
+    function: crystal_properties
+    args: {structure: tests/data/Si_diamond.cif, potential: Cu_mishin1.eam.alloy}
+    raises: "covers Cu; the structure also has Si"
+    reference: The Mishin Cu potential has no Si parameters; it must not run silently.

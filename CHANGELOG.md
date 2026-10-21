@@ -10,7 +10,7 @@ All notable changes to this project are documented here. The format follows
 
 - Tool collection in `tools/`: CHGNet, MACE, phonopy, phono3py,
   pymatgen-diffusion, pymatgen-structure, Materials Project, GPAW, Quantum
-  ESPRESSO, matcalc, xTB, CREST, PySCF, RDKit, OpenMM, and Cantera, each with
+  ESPRESSO, matcalc, xTB, CREST, PySCF, RDKit, OpenMM, Cantera, and LAMMPS, each with
   golden tests against upstream test suites, reference databases, or
   established physics, and a CI workflow that rebuilds changed tools from scratch.
 - Catalogs: `motel catalog add <git-url>` adds a collection of tools; install
