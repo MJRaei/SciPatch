@@ -1,0 +1,89 @@
+{
+ "lock_version": 1,
+ "inputs": "82302384b9b11f773669d3d4889708be8c4e2c6aa5515c58e17b32909fcc00ba",
+ "tested_on": "osx-arm64",
+ "platforms": {
+  "linux-64": {
+   "conda": [],
+   "pip": [
+    "ase==3.29.0",
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "numpy==2.5.4",
+    "ovito==3.16.1",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyparsing==3.3.3",
+    "pyside6-essentials==6.11.2",
+    "python-dateutil==2.9.0.post0",
+    "scipy==1.18.1",
+    "shiboken6==6.11.2",
+    "six==1.17.0",
+    "traits==7.2.0",
+    "typing-extensions==4.16.0"
+   ],
+   "note": "PyPI versions differ from the tested platform: ovito 3.16.1 (tested 3.16.1.post1)"
+  },
+  "linux-aarch64": {
+   "conda": [],
+   "pip": [],
+   "unavailable": "ovito 3.16.1 has no prebuilt package for Linux (ARM) (Python 3.13)"
+  },
+  "osx-arm64": {
+   "conda": [],
+   "pip": [
+    "ase==3.29.0",
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "numpy==2.5.4",
+    "ovito==3.16.1.post1",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pip==26.2.1",
+    "pyparsing==3.3.3",
+    "pyside6-essentials==6.11.2",
+    "python-dateutil==2.9.0.post0",
+    "scipy==1.18.1",
+    "shiboken6==6.11.2",
+    "six==1.17.0",
+    "traits==7.2.0",
+    "typing-extensions==4.16.0"
+   ]
+  },
+  "osx-64": {
+   "conda": [],
+   "pip": [],
+   "unavailable": "ovito 3.16.1.post1 has no prebuilt package for macOS (Intel) (Python 3.13)"
+  },
+  "win-64": {
+   "conda": [],
+   "pip": [
+    "ase==3.29.0",
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "numpy==2.5.4",
+    "ovito==3.16.1",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyparsing==3.3.3",
+    "pyside6-essentials==6.11.2",
+    "python-dateutil==2.9.0.post0",
+    "scipy==1.18.1",
+    "shiboken6==6.11.2",
+    "six==1.17.0",
+    "traits==7.2.0",
+    "typing-extensions==4.16.0"
+   ],
+   "note": "PyPI versions differ from the tested platform: ovito 3.16.1 (tested 3.16.1.post1)"
+  }
+ }
+}

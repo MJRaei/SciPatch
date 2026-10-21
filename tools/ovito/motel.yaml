@@ -29,7 +29,8 @@ source:
 
 environment:
   manager: uv
-  python: "3.12"
+  # Python 3.13: OVITO 3.16.1 has Windows wheels for 3.11, 3.13 and 3.14, not 3.12.
+  python: "3.13"
   # The 3.16.1 macOS wheel lacks a library; 3.16.1.post1 (macOS only) fixes it.
   # OVITO publishes no wheels for Intel Macs.
   packages: ["ovito==3.16.1.post1; sys_platform == 'darwin'",
