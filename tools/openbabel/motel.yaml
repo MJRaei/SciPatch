@@ -1,0 +1,155 @@
+schema: 1
+name: openbabel
+version: 0.1.0
+title: Chemical file conversion and force fields (Open Babel)
+summary: >-
+  Convert molecules and crystal structures between more than 100 chemical file
+  formats (SDF, MOL2, PDB, XYZ, CIF, Gaussian, ORCA, GAMESS, CML, SMILES, InChI,
+  ...), get canonical SMILES, InChI and InChIKeys, add hydrogens for a given pH,
+  generate 3D coordinates, compute and minimize MMFF94, UFF and GAFF force-field
+  energies, and assign partial charges (Gasteiger, MMFF94, EEM, QEq).
+domains: [chemistry]
+tags: [file-conversion, chemical-formats, sdf, mol2, pdb, xyz, cif, smiles, inchi, inchikey,
+       protonation, ph, hydrogens, 3d-coordinates, force-field, mmff94, uff, gaff,
+       minimization, partial-charges, gasteiger, eem, qeq, open-babel, cheminformatics]
+
+source:
+  homepage: https://openbabel.org
+  paper: https://doi.org/10.1186/1758-2946-3-33
+  citation: >-
+    N. M. O'Boyle, M. Banck, C. A. James, C. Morley, T. Vandermeersch, G. R.
+    Hutchison, "Open Babel: An open chemical toolbox", J. Cheminform. 3, 33 (2011);
+    MMFF94: T. A. Halgren, J. Comput. Chem. 17, 490-519 (1996); UFF: A. K. Rappe et
+    al., J. Am. Chem. Soc. 114, 10024 (1992).
+  license: GPL-2.0-only
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["openbabel=3.2.1", "numpy=2.5.4"]
+  channels: [conda-forge]
+
+entrypoint: api
+
+functions:
+  list_formats: {}
+  identifiers:
+    params:
+      molecule: {kind: molecule}
+    outputs:
+      molecular_weight: {unit: g/mol}
+  convert:
+    params:
+      molecule: {kind: molecule}
+      output: {kind: file}
+    outputs:
+      output: {kind: molecule}
+  energy:
+    params:
+      molecule: {kind: molecule}
+    outputs:
+      energy_kcal_mol: {unit: kcal/mol}
+  minimize:
+    params:
+      molecule: {kind: molecule}
+      convergence: {unit: kcal/mol}
+    outputs:
+      output: {kind: molecule}
+  partial_charges:
+    params:
+      molecule: {kind: molecule}
+    outputs:
+      charges: {unit: e}
+      dipole_debye: {unit: D}
+
+validity: >-
+  MMFF94 energies are checked against Halgren's official MMFF94 validation suite
+  (753 molecules): Open Babel 3.2.1 reproduces the reference total energies within
+  0.01 kcal/mol for 699 molecules and within 0.1 kcal/mol for 734, but differs by
+  more than 1 kcal/mol for 7 (up to 47 kcal/mol, from atom typing of unusual
+  aromatic and polyhalogenated structures). Force-field energies are only
+  meaningful as differences between conformers of the same molecule with the same
+  force field; they are not heats of formation and cannot be compared across
+  force fields. UFF covers all elements but is crude for organic conformational
+  energies. Protonation for a given pH uses simple group rules, not computed pKa
+  values: check ionizable groups with pKa near the pH. Generated 3D structures are
+  single, quickly optimized conformers, not global minima. Gasteiger and other
+  empirical charges are approximations; dipole moments from them are rough.
+
+golden:
+  - name: MMFF94 energy of a validation-suite anion (AMHTAR01)
+    function: energy
+    args: {molecule: tests/data/AMHTAR01.mol2}
+    expect:
+      molecules.0.energy_kcal_mol: {approx: 66.18011, abs: 0.001}
+      molecules.0.terms_kcal_mol.electrostatic: {approx: 45.53613, abs: 0.005}
+      molecules.0.terms_kcal_mol.van_der_waals: {approx: 9.77884, abs: 0.005}
+      molecules.0.terms_kcal_mol.angle_bending: {approx: 6.83749, abs: 0.005}
+      molecules.0.coordinates_generated: false
+    reference: >-
+      MMFF94 validation suite (T. A. Halgren, Merck; CCL archive,
+      server.ccl.net/cca/data/MMFF94), MMFF94_opti.log, OPTIMOL energies at the
+      geometry of MMFF94_dative.mol2: total 66.18011, electrostatic 45.53613, net
+      vdW 9.77884, angle bending 6.83749 kcal/mol.
+  - name: MMFF94 energy of a validation-suite dianion (DEFLEF)
+    function: energy
+    args: {molecule: tests/data/DEFLEF.mol2}
+    expect:
+      molecules.0.energy_kcal_mol: {approx: -296.27657, abs: 0.001}
+      molecules.0.terms_kcal_mol.torsion: {approx: 29.05751, abs: 0.005}
+      molecules.0.terms_kcal_mol.electrostatic: {approx: -380.64089, abs: 0.005}
+    reference: >-
+      MMFF94 validation suite, MMFF94_opti.log (OPTIMOL): DEFLEF total -296.27657,
+      torsion 29.05751, electrostatic -380.64089 kcal/mol.
+  - name: MMFF94 energy of a validation-suite organophosphorus compound (VOJJIN)
+    function: energy
+    args: {molecule: tests/data/VOJJIN.mol2}
+    expect:
+      molecules.0.energy_kcal_mol: {approx: -8.99563, abs: 0.001}
+    reference: MMFF94 validation suite, MMFF94.energies (OPTIMOL and BatchMin agree) -8.99563 kcal/mol.
+  - name: MMFF94 partial charges match the reference implementation
+    function: partial_charges
+    args: {molecule: tests/data/AMHTAR01.mol2, method: mmff94}
+    expect:
+      charges.4: {approx: -0.9, abs: 0.0005}
+      charges.6: {approx: 0.659, abs: 0.0005}
+      charges.9: {approx: 0.906, abs: 0.0005}
+      charges.14: {approx: 0.5, abs: 0.0005}
+      total_charge: {approx: -1.0, abs: 0.001}
+    reference: >-
+      MMFF94 validation suite, MMFF94_opti.log, AMHTAR01 partial charges: O5
+      -0.900 (O2CM), C1 0.659 (COO), C4 0.906 (CO2M), H5 0.500 (HOCO); the ion
+      carries a total charge of -1.
+  - name: caffeine identifiers match PubChem
+    function: identifiers
+    args: {molecule: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"}
+    expect:
+      molecules.0.inchikey: RYYVLZVUVIJVGH-UHFFFAOYSA-N
+      molecules.0.formula: C8H10N4O2
+      molecules.0.molecular_weight: {approx: 194.19, abs: 0.01}
+      molecules.0.exact_mass: {approx: 194.08037558, abs: 0.00001}
+    reference: >-
+      PubChem CID 2519 (caffeine): C8H10N4O2, molecular weight 194.19 g/mol, exact
+      mass 194.08037557, InChIKey RYYVLZVUVIJVGH-UHFFFAOYSA-N.
+  - name: glycine is a zwitterion at pH 7.4
+    function: convert
+    args: {molecule: "NCC(=O)O", output: glycine.smi, hydrogens: ph, ph: 7.4}
+    expect:
+      molecules.0.canonical_smiles: "[O-]C(=O)C[NH3+]"
+    reference: >-
+      Glycine pKa values 2.34 (carboxylic acid) and 9.60 (ammonium) (CRC Handbook);
+      at pH 7.4 both groups are ionized and glycine is the zwitterion.
+  - name: rock salt unit cell has four formula units
+    function: convert
+    args: {molecule: tests/data/NaCl.cif, output: NaCl.xyz, fill_unit_cell: true}
+    expect:
+      molecules.0.n_atoms: 8
+      molecules.0.formula: Cl4Na4
+    reference: >-
+      NaCl (rock salt, Fm-3m, Z = 4): the conventional cell holds 4 Na and 4 Cl;
+      the CIF lists only the two symmetry-unique sites.
+  - name: invalid SMILES are refused with the reason
+    function: identifiers
+    args: {molecule: "C1CC"}
+    raises: "unmatched ring bonds"
+    reference: An unclosed ring is not valid SMILES and must give a clear error.
