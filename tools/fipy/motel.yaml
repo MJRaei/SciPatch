@@ -1,0 +1,189 @@
+schema: 1
+name: fipy
+version: 0.1.0
+title: Diffusion and phase-field microstructure (FiPy)
+summary: >-
+  Solve diffusion and microstructure problems with NIST's FiPy: concentration
+  profiles through slabs, cylinders, and spheres (carburizing and nitriding, dopant
+  drive-in, diffusion couples, drying, outgassing) with constant, Arrhenius, or
+  concentration-dependent diffusivity, case depths and treatment times; and spinodal
+  decomposition and coarsening of binary mixtures (Cahn-Hilliard).
+domains: [materials, chemistry]
+tags: [diffusion, fick, carburizing, nitriding, case-depth, diffusion-couple, outgassing, drying,
+       arrhenius, phase-field, cahn-hilliard, spinodal-decomposition, coarsening, microstructure,
+       finite-volume, fipy]
+
+source:
+  homepage: https://pages.nist.gov/fipy/
+  paper: https://doi.org/10.1109/MCSE.2009.52
+  citation: >-
+    J. E. Guyer, D. Wheeler, J. A. Warren, "FiPy: Partial Differential Equations
+    with Python", Comput. Sci. Eng. 11(3), 6-15 (2009); Cahn-Hilliard model: J. W.
+    Cahn, J. E. Hilliard, J. Chem. Phys. 28, 258 (1958) and J. W. Cahn, Acta Metall.
+    9, 795 (1961).
+  license: NIST public domain (17 U.S.C. 105)
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["fipy==4.0.3"]
+
+entrypoint: api
+
+functions:
+  diffusion_1d:
+    params:
+      length_m: {unit: m}
+      times_s: {unit: s}
+      diffusivity_m2_s: {unit: m2/s}
+      d0_m2_s: {unit: m2/s}
+      activation_energy_kj_mol: {unit: kJ/mol}
+      temperature_c: {unit: °C}
+      positions_m: {unit: m}
+      target_position_m: {unit: m}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  spinodal_decomposition:
+    params:
+      barrier_j_m3: {unit: J/m3}
+      gradient_energy_j_m: {unit: J/m}
+      mobility_m5_j_s: {unit: m5/(J s)}
+    outputs:
+      plot: {kind: image}
+      field: {kind: table}
+
+validity: >-
+  diffusion_1d solves Fick's second law in one dimension with the given
+  diffusivity: no phase changes (carbides, oxides), stress, convection, or
+  trapping, and boundary concentrations are held exactly (real carburizing
+  atmospheres approach them gradually). Profiles agree with analytic solutions to
+  about 0.2% at the default grid. spinodal_decomposition uses the symmetric
+  quartic free energy W c^2 (1 - c)^2 with constant mobility and no elastic
+  energy, in a 2D periodic box; it shows how decomposition and coarsening proceed
+  and their length and time scales, but a real alloy's microstructure also
+  depends on its actual free energy, elastic misfit, and anisotropy. Growth
+  rates during the first stage are approximate (time steps grow with time).
+
+maturity: established
+
+golden:
+  - name: Callister's carburizing example (time to reach 0.80 wt% C at 0.5 mm)
+    quick: true
+    function: diffusion_1d
+    args: {length_m: 0.005, diffusivity_m2_s: 1.6e-11, initial_concentration: 0.25, left: 1.20,
+           target_concentration: 0.80, target_position_m: 0.0005}
+    expect:
+      target.time_s: {approx: 25400, rel: 0.01}
+    reference: >-
+      W. D. Callister, Materials Science and Engineering: An Introduction, 7th ed.
+      (Wiley, 2007), Example Problem 5.2: steel with 0.25 wt% C, surface held at 1.20
+      wt% C at 950 °C, D = 1.6e-11 m2/s, semi-infinite; 0.80 wt% C is reached at 0.5 mm
+      after 25,400 s (7.1 h).
+    against: independent
+  - name: Arrhenius diffusivity of carbon in austenite
+    function: diffusion_1d
+    args: {length_m: 0.005, times_s: [100], d0_m2_s: 2.3e-5, activation_energy_kj_mol: 148,
+           temperature_c: 900, left: 1.0}
+    expect:
+      diffusivity_m2_s: {approx: 5.9e-12, rel: 0.01}
+    reference: >-
+      Callister, 7th ed., Table 5.2: C in gamma-Fe, D0 = 2.3e-5 m2/s, Qd = 148 kJ/mol,
+      D = 5.9e-12 m2/s at 900 °C.
+    against: independent
+  - name: a diffusion couple follows the error-function solution
+    function: diffusion_1d
+    args: {length_m: 0.002, times_s: [3600], diffusivity_m2_s: 1.0e-12, initial_concentration: 1.0,
+           right_initial_concentration: 0.0, positions_m: [0.001, 0.00112]}
+    expect:
+      times.0.concentration_at.0.concentration: {approx: 0.5, abs: 1.0e-6}
+      times.0.concentration_at.1.concentration: {approx: 0.0786496, rel: 0.005}
+    reference: >-
+      For two semi-infinite bodies at 1 and 0, c = (1 - erf(x / 2 sqrt(D t))) / 2 about
+      the interface (J. Crank, The Mathematics of Diffusion, 2nd ed., 1975, ch. 2); at
+      x = 2 sqrt(D t) = 0.12 mm (D = 1e-12 m2/s, t = 1 h), c = (1 - erf 1) / 2 =
+      0.0786496.
+    against: exact
+  - name: a sphere loses solute as Crank's series solution predicts
+    function: diffusion_1d
+    args: {length_m: 0.001, times_s: [1000], diffusivity_m2_s: 1.0e-10, geometry: sphere,
+           initial_concentration: 1.0, right: 0.0}
+    expect:
+      times.0.fraction_to_equilibrium: {approx: 0.770479, rel: 0.003}
+    reference: >-
+      Sphere of radius a with its surface held at a new concentration (Crank, The
+      Mathematics of Diffusion, 2nd ed., ch. 6): M_t / M_inf = 1 - (6 / pi^2) sum
+      exp(-D n^2 pi^2 t / a^2) / n^2; for D t / a^2 = 0.1 this is 0.770479.
+    against: exact
+  - name: a cylinder loses solute as Crank's series solution predicts
+    function: diffusion_1d
+    args: {length_m: 0.001, times_s: [1000], diffusivity_m2_s: 1.0e-10, geometry: cylinder,
+           initial_concentration: 1.0, right: 0.0}
+    expect:
+      times.0.fraction_to_equilibrium: {approx: 0.605824, rel: 0.003}
+    reference: >-
+      Infinite cylinder of radius a with its surface held at a new concentration
+      (Crank, ch. 5): M_t / M_inf = 1 - sum 4 / (a^2 alpha_n^2) exp(-D alpha_n^2 t), with
+      J0(a alpha_n) = 0; for D t / a^2 = 0.1 this is 0.605824.
+    against: exact
+  - name: a constant surface flux into a sphere conserves mass exactly
+    function: diffusion_1d
+    args: {length_m: 0.001, times_s: [1000], diffusivity_m2_s: 1.0e-9, geometry: sphere,
+           right_flux: 2.0}
+    expect:
+      times.0.amount: {approx: 0.0251327412, rel: 1.0e-6}
+    reference: >-
+      A flux J into a sphere of radius a for time t adds J t 4 pi a^2 = 2 x 1000 x 4 pi
+      (1e-3)^2 = 0.0251327 (concentration x m3).
+    against: exact
+  - name: spinodal decomposition selects Cahn's fastest-growing wavelength (c0 = 0.5)
+    function: spinodal_decomposition
+    args: {mean_composition: 0.5, time: 20, size: 64, cells: 64, snapshots: 1}
+    expect:
+      fastest_growing_wavelength: {approx: 8.885766, rel: 1.0e-6}
+      snapshots.0.characteristic_length: {approx: 8.885766, rel: 0.05}
+    reference: >-
+      Linear stability of the Cahn-Hilliard equation (J. W. Cahn, Acta Metall. 9, 795
+      (1961)): perturbations grow at R(k) = -M k^2 (f'' + kappa k^2), fastest at k^2 =
+      -f''/(2 kappa); for f = W c^2 (1 - c)^2 at c0 = 0.5, f'' = -W, so lambda = 2 pi
+      sqrt(2) l = 8.8858 l.
+    against: exact
+  - name: the selected wavelength grows nearer the spinodal (c0 = 0.3)
+    function: spinodal_decomposition
+    args: {mean_composition: 0.3, time: 30, size: 96, cells: 96, snapshots: 1}
+    expect:
+      inside_spinodal: true
+      snapshots.0.characteristic_length: {approx: 12.32234, rel: 0.05}
+    reference: >-
+      Cahn (1961) linear theory: at c0 = 0.3, f'' = 2 W (1 - 6 c0 (1 - c0)) = -0.52 W, so
+      lambda = 2 pi sqrt(2 / 0.52) l = 12.322 l.
+    against: exact
+  - name: a mixture outside the spinodal does not decompose
+    function: spinodal_decomposition
+    args: {mean_composition: 0.15, time: 200, size: 32, cells: 32, snapshots: 1}
+    expect:
+      inside_spinodal: false
+      decomposed: false
+      snapshots.0.composition_std: {max: 0.001}
+    reference: >-
+      The spinodal of f = W c^2 (1 - c)^2 lies at c = (3 -/+ sqrt 3) / 6 = 0.2113 and
+      0.7887; at c0 = 0.15, f'' > 0, so all small fluctuations decay (Cahn 1961).
+    against: exact
+  - name: the separated phases reach the equilibrium compositions
+    function: spinodal_decomposition
+    args: {mean_composition: 0.5, time: 2000, size: 64, cells: 64, snapshots: 1}
+    expect:
+      decomposed: true
+      snapshots.0.phase_compositions.0: {approx: 0.0, abs: 0.03}
+      snapshots.0.phase_compositions.1: {approx: 1.0, abs: 0.03}
+      snapshots.0.fraction_c_above_half: {approx: 0.5, abs: 0.03}
+    reference: >-
+      The common tangent of the symmetric double well W c^2 (1 - c)^2 touches at c = 0
+      and 1, so coarsened domains approach these compositions, in equal amounts for c0
+      = 0.5 (lever rule).
+    against: exact
+  - name: two diffusivities at once are refused
+    function: diffusion_1d
+    args: {length_m: 0.001, times_s: [10], diffusivity_m2_s: 1.0e-12, d0_m2_s: 1.0e-5}
+    raises: "Give exactly one of"
+    reference: The tool must ask for a single diffusivity.

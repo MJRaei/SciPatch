@@ -17,7 +17,7 @@ All notable changes to this project are documented here. The format follows
   materials from papers (from ARIA), structural analogs in the Materials Project
   (from mp-property-analogies), pycalphad, PyBaMM, RASPA3, AiZynthFinder,
   CoolProp, pvlib, Reaktoro, PROPKA, PyXtal, thermo, pyOpenMS, xraylib, Zeo++,
-  and impedance.py, each with golden tests against upstream test suites,
+  impedance.py, and FiPy, each with golden tests against upstream test suites,
   reference databases, or established physics, and a CI workflow that rebuilds
   changed tools from scratch.
 - Maturity levels: every tool is `established`, `published`, or `experimental`
