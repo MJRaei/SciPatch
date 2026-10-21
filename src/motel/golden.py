@@ -147,11 +147,16 @@ def _accepted_types(name: str) -> set[str]:
 
 
 def resolve_paths(args: dict[str, Any], base_dir: Path) -> dict[str, Any]:
-    """Make relative paths in golden-test arguments absolute, relative to the package."""
-    resolved: dict[str, Any] = {}
-    for key, value in args.items():
-        if isinstance(value, str) and not Path(value).is_absolute() and (base_dir / value).exists():
-            resolved[key] = str((base_dir / value).resolve())
-        else:
-            resolved[key] = value
-    return resolved
+    """Make relative paths in golden-test arguments (and in lists of them) absolute.
+
+    Paths are relative to the package; values that are not existing files are kept.
+    """
+    return {key: _resolve(value, base_dir) for key, value in args.items()}
+
+
+def _resolve(value: Any, base_dir: Path) -> Any:
+    if isinstance(value, list):
+        return [_resolve(item, base_dir) for item in value]
+    if isinstance(value, str) and not Path(value).is_absolute() and (base_dir / value).exists():
+        return str((base_dir / value).resolve())
+    return value

@@ -60,9 +60,7 @@ def test_exists_checks_files(tmp_path: Path) -> None:
 def test_resolve_paths_only_touches_existing_relative_files(tmp_path: Path) -> None:
     (tmp_path / "data").mkdir()
     (tmp_path / "data" / "Cu.cif").write_text("x")
-    resolved = golden.resolve_paths({"structure": "data/Cu.cif", "element": "Cu", "n": 3}, tmp_path)
-    assert resolved == {
-        "structure": str((tmp_path / "data" / "Cu.cif").resolve()),
-        "element": "Cu",
-        "n": 3,
-    }
+    args = {"structure": "data/Cu.cif", "element": "Cu", "n": 3, "files": ["data/Cu.cif", "CO"]}
+    resolved = golden.resolve_paths(args, tmp_path)
+    cif = str((tmp_path / "data" / "Cu.cif").resolve())
+    assert resolved == {"structure": cif, "element": "Cu", "n": 3, "files": [cif, "CO"]}
