@@ -71,6 +71,19 @@ def _git(directory: Path, *args: str, strip: bool = True) -> str:
     return completed.stdout.strip() if strip else completed.stdout
 
 
+def _git_bytes(directory: Path, *args: str) -> bytes:
+    """Output of a git command as bytes (diffs keep CRLF line endings and binary data)."""
+    completed = subprocess.run(
+        [git_executable(), *_GIT_IDENTITY, "-C", str(directory), *args],
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        message = completed.stderr.decode("utf-8", errors="replace").strip()
+        raise BuildError(f"git {' '.join(args)} failed: {message}")
+    return completed.stdout
+
+
 def resolve_remote_ref(repo: str, ref: str | None = None) -> str:
     """Commit id that ``ref`` (default: the remote's HEAD) points to."""
     if ref and re.fullmatch(r"[0-9a-f]{40}", ref):
@@ -224,13 +237,13 @@ class SourceCheckout:
         if not self.unsaved_changes():
             return None
         _git(self.directory, "add", "--all")
-        diff = _git(self.directory, "diff", "--cached", "--binary", "HEAD", strip=False)
+        diff = _git_bytes(self.directory, "diff", "--cached", "--binary", "HEAD")
         patches_dir.mkdir(parents=True, exist_ok=True)
         numbers = [int(m.group()) for p in patch_files(patches_dir.parent)
                    if (m := re.match(r"\d+", p.name))]  # fmt: skip
         slug = re.sub(r"[^a-z0-9]+", "-", label.lower()).strip("-") or "changes"
         path = patches_dir / f"{max(numbers, default=0) + 1:04d}-{slug[:50]}.patch"
-        path.write_text(diff, encoding="utf-8")
+        path.write_bytes(diff)
         _git(self.directory, "commit", "--quiet", "-m", f"motel patch: {path.name}")
 
         metadata = self._read_metadata() or {}

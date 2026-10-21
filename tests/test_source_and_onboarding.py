@@ -84,7 +84,8 @@ def test_checkout_applies_and_saves_patches(tmp_path: Path, upstream_repo: tuple
     # Edit the source, then save the edit as a patch.
     (package / "source" / "DATA.txt").write_text("patched\n \n")
     (package / "source" / "NEW.txt").write_text("new file\n")
-    assert sorted(checkout.unsaved_changes()) == ["DATA.txt", "NEW.txt"]
+    (package / "source" / "WINDOWS.txt").write_bytes(b"crlf\r\nlines\r\n")
+    assert sorted(checkout.unsaved_changes()) == ["DATA.txt", "NEW.txt", "WINDOWS.txt"]
     patch = checkout.save_patch(package / "patches", "Fix the data file!")
     assert patch is not None
     assert patch.name == "0001-fix-the-data-file.patch"
@@ -98,6 +99,7 @@ def test_checkout_applies_and_saves_patches(tmp_path: Path, upstream_repo: tuple
     assert fresh.patches == ["0001-fix-the-data-file.patch"]
     assert (package / "source" / "DATA.txt").read_text() == "patched\n \n"
     assert (package / "source" / "NEW.txt").read_text() == "new file\n"
+    assert (package / "source" / "WINDOWS.txt").read_bytes() == b"crlf\r\nlines\r\n"
 
 
 @requires_git
