@@ -11,10 +11,9 @@ tags: [ml-potential, universal-potential, interatomic-potential, relaxation, ene
        forces, stress, magnetic-moment, magmom, molecular-dynamics, md, pymatgen, crystal,
        battery, stability]
 
+# CHGNet 0.4.2 from its prebuilt PyPI wheels (github.com/CederGroupHub/chgnet, tag v0.4.2):
+# building the repository compiles a C extension, which needs a compiler on Windows.
 source:
-  repo: "https://github.com/CederGroupHub/chgnet"
-  ref: "8d04abc467630b30cd8349c2fe12eeab10f62171"   # tag v0.4.2
-  install: true
   paper: "https://doi.org/10.1038/s42256-023-00716-3"
   citation: >-
     B. Deng, P. Zhong, K. Jun, J. Riebesell, K. Han, C. J. Bartel, G. Ceder,
@@ -26,7 +25,7 @@ source:
 environment:
   manager: uv
   python: "3.12"
-  packages: []
+  packages: ["chgnet==0.4.2"]
 
 entrypoint: api
 
