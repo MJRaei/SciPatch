@@ -14,6 +14,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import warnings
 from pathlib import Path
 from typing import Any, Literal
@@ -127,13 +128,16 @@ def _run_pw(
             atoms.set_initial_magnetic_moments([_MAGNETIC.get(s, 0.0) for s in symbols])
     else:
         atoms.set_initial_magnetic_moments(None)
+    # Wave functions are large and never kept: write them to the system's temporary
+    # folder (on the Linux file system even when the run folder is on Windows, in WSL).
+    scratch = tempfile.mkdtemp(prefix="motel-qe-")
     input_data = {
         "control": {
             "calculation": calculation,
             "tprnfor": True,
             "tstress": True,
             "pseudo_dir": "pseudo",
-            "outdir": "tmp",
+            "outdir": scratch,
         },
         "system": system,
         "electrons": {"conv_thr": 1e-9 * len(atoms), "mixing_beta": 0.4},
@@ -152,13 +156,15 @@ def _run_pw(
     command = _pw_command(mesh)
     print(f"Running pw.x ({calculation}, {mesh} k-points, {wfc} Ry)...", flush=True)
     environment = {**os.environ, "OMP_NUM_THREADS": "1"} if command[0] == "mpirun" else None
-    completed = subprocess.run(command, capture_output=True, text=True, env=environment)
+    try:
+        completed = subprocess.run(command, capture_output=True, text=True, env=environment)
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
     output = completed.stdout + completed.stderr
     Path("pw.out").write_text(output)
     if "JOB DONE" not in output:
         tail = "\n".join(output.splitlines()[-20:])
         raise RuntimeError(f"pw.x failed (exit code {completed.returncode}):\n{tail}")
-    shutil.rmtree("tmp", ignore_errors=True)  # wave functions: large and not needed
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         result = read("pw.out", format="espresso-out", index=-1)
