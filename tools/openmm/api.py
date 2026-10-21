@@ -71,9 +71,20 @@ def _forcefield(
     return field
 
 
+#: openmmforcefields, AmberTools (AM1-BCC charges), and Packmol have no Windows builds.
+_NO_SMALL_MOLECULES = (
+    "Small molecules need openmmforcefields and AmberTools (for AM1-BCC charges), which "
+    "have no Windows builds: run this on Linux or macOS, or in WSL on Windows. Proteins, "
+    "nucleic acids, and water work on Windows too."
+)
+
+
 def _generator(molecules: list[Any], name: str) -> Any:
     """OpenMM template generator that parameterizes small molecules (AM1-BCC charges)."""
-    from openmmforcefields.generators import GAFFTemplateGenerator, SMIRNOFFTemplateGenerator
+    try:
+        from openmmforcefields.generators import GAFFTemplateGenerator, SMIRNOFFTemplateGenerator
+    except ImportError as exc:
+        raise ValueError(_NO_SMALL_MOLECULES) from exc
 
     kind = GAFFTemplateGenerator if name.startswith("gaff") else SMIRNOFFTemplateGenerator
     return kind(molecules=molecules, forcefield=name).generator
@@ -596,11 +607,14 @@ def liquid(
         volume (cm^3/mol), mean temperature, number of atoms, and the trajectory,
         final structure, and log paths.
     """
+    import shutil
     import subprocess
 
     from openff.toolkit import Molecule, Topology
     from openmm import Vec3, app, unit
 
+    if shutil.which("packmol") is None:
+        raise ValueError("Liquids are packed with Packmol. " + _NO_SMALL_MOLECULES)
     if not 20 <= n_molecules <= 5000:
         raise ValueError("Use between 20 and 5000 molecules.")
     try:
