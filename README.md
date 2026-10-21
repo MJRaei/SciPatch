@@ -87,11 +87,15 @@ reports the result with its limitations and citation.
 
 Built in: **ase-emt** (fast approximate simulations of metals) and
 **rdkit-descriptors** (molecular properties from SMILES). The
-[tool collection](tools/README.md) adds **CHGNet** and **MACE** (machine-learned
-potentials), **phonopy** (phonons and stability), **pymatgen-diffusion** (ion
-transport from MD), **pymatgen-structure** (symmetry, supercells, XRD), the
-**Materials Project** database, and **xTB** (quantum chemistry for molecules).
-Every tool reproduces published or upstream-tested values before it installs.
+[tool collection](tools/README.md) adds, for materials, **CHGNet** and **MACE**
+(machine-learned potentials), **GPAW** (DFT for crystals), **matcalc** (elastic
+and thermal properties), **phonopy** (phonons and stability),
+**pymatgen-diffusion** (ion transport from MD), **pymatgen-structure**
+(symmetry, supercells, XRD), and the **Materials Project** database; and for
+chemistry, **PySCF** (ab initio quantum chemistry), **xTB** (fast semiempirical
+quantum chemistry), **RDKit** (cheminformatics), and **OpenMM** (molecular
+dynamics). Every tool reproduces published or upstream-tested values before it
+installs.
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),
 Codex, or Gemini CLI. See [Turning a repository into a tool](docs/onboarding.md),

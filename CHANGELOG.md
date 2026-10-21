@@ -9,9 +9,10 @@ All notable changes to this project are documented here. The format follows
 ### Added
 
 - Tool collection in `tools/`: CHGNet, MACE, phonopy, pymatgen-diffusion,
-  pymatgen-structure, Materials Project, and xTB, each with golden tests against
-  upstream test suites or established physics, and a CI workflow that rebuilds
-  changed tools from scratch.
+  pymatgen-structure, Materials Project, xTB, PySCF, GPAW, matcalc, OpenMM, and
+  RDKit, each with golden tests against upstream test suites, reference
+  databases, or established physics, and a CI workflow that rebuilds changed
+  tools from scratch.
 - Catalogs: `motel catalog add <git-url>` adds a collection of tools; install
   them by name with `motel add <name>`.
 - `motel freeze` pins the exact package versions a tool was tested with
