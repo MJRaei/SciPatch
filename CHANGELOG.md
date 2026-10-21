@@ -61,7 +61,9 @@ All notable changes to this project are documented here. The format follows
 - Tools on Windows: CHGNet installs from its prebuilt PyPI wheels (its source
   build needs a compiler); OVITO uses Python 3.13 (it has no Windows wheels for
   3.12); OpenMM simulates biomolecules and water on Windows and explains that
-  small molecules need AmberTools, which has no Windows build.
+  small molecules need AmberTools, which has no Windows build; AutoDock Vina runs
+  the `vina` program on every platform (its Python bindings are Linux and macOS
+  only), on Windows the official release's executable, checked at install.
 
 ### Fixed
 

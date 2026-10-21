@@ -2,19 +2,62 @@
 
 Receptors are given as PDB files with hydrogens (converted to rigid PDBQT with
 Open Babel) or as prepared PDBQT files. Ligands are given as SMILES (a 3D
-conformer is generated) or SDF/MOL/MOL2 files, and prepared with Meeko. Affinities
-are Vina scores in kcal/mol; distances are in Angstrom.
+conformer is generated) or SDF/MOL/MOL2 files, and prepared with Meeko. Docking
+runs the ``vina`` program (the same on every platform; Vina's Python bindings
+exist only for Linux and macOS). Affinities are Vina scores in kcal/mol;
+distances are in Angstrom.
 """
 
 from __future__ import annotations
 
+import re
+import shutil
+import subprocess
 import tempfile
 from pathlib import Path
 from typing import Literal
 
-import numpy as np
-
 Scoring = Literal["vina", "vinardo"]
+
+
+def _vina(arguments: list[str]) -> str:
+    """Run the vina program and return what it printed."""
+    program = shutil.which("vina")
+    if program is None:
+        raise RuntimeError(
+            "The vina program is missing; reinstall the tool (motel add vina --force)."
+        )
+    completed = subprocess.run([program, *arguments], capture_output=True, text=True, check=False)
+    if completed.returncode != 0:
+        detail = (completed.stderr or completed.stdout).strip()[-1500:]
+        raise ValueError(f"Vina failed: {detail}")
+    return completed.stdout
+
+
+def _box_arguments(center: list[float], size: list[float]) -> list[str]:
+    names = ("center_x", "center_y", "center_z", "size_x", "size_y", "size_z")
+    return [
+        arg
+        for name, value in zip(names, [*center, *size], strict=True)
+        for arg in (f"--{name}", f"{value:.4f}")
+    ]
+
+
+def _score_terms(text: str) -> dict[str, float]:
+    """The energy terms printed by ``vina --score_only``, kcal/mol."""
+    labels = {
+        "affinity": r"Estimated Free Energy of Binding",
+        "intermolecular": r"\(1\) Final Intermolecular Energy",
+        "ligand_internal": r"^\s+Ligand",
+        "torsional": r"\(3\) Torsional Free Energy",
+    }
+    terms = {}
+    for key, label in labels.items():
+        match = re.search(label + r"\s*:\s*(-?\d+\.\d+)", text, re.MULTILINE)
+        if match is None:
+            raise RuntimeError(f"Unexpected output from vina --score_only:\n{text[-800:]}")
+        terms[key] = float(match.group(1))
+    return terms
 
 
 def _receptor(path: str, output: str) -> str:
@@ -169,20 +212,31 @@ def dock(
         the box, the receptor PDBQT used, and the output file.
     """
     from rdkit import Chem
-    from vina import Vina
 
     if exhaustiveness < 1 or n_poses < 1:
         raise ValueError("exhaustiveness and n_poses must be positive.")
     box_center, box_size = _box(center, size or [20.0, 20.0, 20.0], box_from_ligand, padding)
     receptor_pdbqt = _receptor(receptor, "receptor.pdbqt")
     molecule, generated = _rdkit_ligand(ligand, seed)
-    engine = Vina(sf_name=scoring, cpu=cpu, seed=seed, verbosity=0)
-    engine.set_receptor(rigid_pdbqt_filename=receptor_pdbqt)
-    engine.set_ligand_from_string(_ligand_pdbqt(molecule))
-    engine.compute_vina_maps(center=box_center, box_size=box_size)
-    engine.dock(exhaustiveness=exhaustiveness, n_poses=max(20, n_poses))
-    pdbqt = engine.poses(n_poses=n_poses, energy_range=energy_range)
-    energies = np.asarray(engine.energies(n_poses=n_poses, energy_range=energy_range))
+    with tempfile.TemporaryDirectory(prefix="motel-vina-") as scratch:
+        ligand_file = Path(scratch) / "ligand.pdbqt"
+        ligand_file.write_text(_ligand_pdbqt(molecule))
+        result_file = Path(scratch) / "poses.pdbqt"
+        _vina(
+            [
+                "--receptor", receptor_pdbqt, "--ligand", str(ligand_file),
+                *_box_arguments(box_center, box_size), "--scoring", scoring,
+                "--exhaustiveness", str(exhaustiveness), "--num_modes", str(n_poses),
+                "--energy_range", str(energy_range), "--seed", str(seed), "--cpu", str(cpu),
+                "--out", str(result_file), "--verbosity", "0",
+            ]
+        )  # fmt: skip
+        pdbqt = result_file.read_text()
+    energies = [
+        float(line.split()[3])
+        for line in pdbqt.splitlines()
+        if line.startswith("REMARK VINA RESULT")
+    ]
     poses = _poses(pdbqt)
     reference = None
     if reference_ligand:
@@ -200,13 +254,13 @@ def dock(
         best = best or pose
         row = {
             "rank": rank,
-            "affinity_kcal_mol": float(energy[0]),
+            "affinity_kcal_mol": energy,
             "rmsd_from_best_angstrom": 0.0 if rank == 1 else _rmsd(pose, best),
         }
         if reference is not None:
             row["rmsd_to_reference_angstrom"] = _rmsd(pose, reference)
         pose.SetProp("_Name", f"pose {rank}")
-        pose.SetProp("vina_affinity_kcal_mol", f"{energy[0]:.3f}")
+        pose.SetProp("vina_affinity_kcal_mol", f"{energy:.3f}")
         writer.write(pose)
         rows.append(row)
     writer.close()
@@ -248,7 +302,6 @@ def score(
         correction, and with optimize the heavy-atom RMSD the pose moved.
     """
     from rdkit import Chem
-    from vina import Vina
 
     molecule, generated = _rdkit_ligand(ligand, 0)
     if generated:
@@ -256,35 +309,30 @@ def score(
     coordinates = molecule.GetConformer().GetPositions()
     low, high = coordinates.min(axis=0), coordinates.max(axis=0)
     receptor_pdbqt = _receptor(receptor, "receptor.pdbqt")
-    engine = Vina(sf_name=scoring, cpu=1, verbosity=0)
-    engine.set_receptor(rigid_pdbqt_filename=receptor_pdbqt)
-    engine.set_ligand_from_string(_ligand_pdbqt(molecule))
-    engine.compute_vina_maps(
-        center=((low + high) / 2).tolist(), box_size=(high - low + 2 * padding).tolist()
-    )
+    box = _box_arguments(((low + high) / 2).tolist(), (high - low + 2 * padding).tolist())
+    common = ["--receptor", receptor_pdbqt, *box, "--scoring", scoring, "--cpu", "1"]
     moved = None
-    if optimize:
-        engine.optimize()
-        with tempfile.TemporaryDirectory(prefix="motel-vina-") as tmp:
-            optimized = Path(tmp) / "pose.pdbqt"
-            engine.write_pose(str(optimized), overwrite=True)
-            pose = _poses(optimized.read_text())
-        moved = _rmsd(pose, molecule)
-    else:
+    with tempfile.TemporaryDirectory(prefix="motel-vina-") as scratch:
+        scored_file = Path(scratch) / "ligand.pdbqt"
+        scored_file.write_text(_ligand_pdbqt(molecule))
         pose = molecule
-    energies = np.asarray(engine.score())
-    pose.SetProp("vina_affinity_kcal_mol", f"{energies[0]:.3f}")
+        if optimize:
+            optimized = Path(scratch) / "optimized.pdbqt"
+            _vina([*common, "--ligand", str(scored_file), "--local_only", "--out", str(optimized)])
+            pose = _poses(optimized.read_text())
+            moved = _rmsd(pose, molecule)
+            scored_file = optimized
+        terms = _score_terms(_vina([*common, "--ligand", str(scored_file), "--score_only"]))
+    pose.SetProp("vina_affinity_kcal_mol", f"{terms['affinity']:.3f}")
     writer = Chem.SDWriter(output)
     writer.write(pose)
     writer.close()
     return {
         "scoring": scoring,
-        # score() returns: total, ligand-receptor, flex-receptor, other, flex intra,
-        # ligand intra, rotatable-bond correction, ligand intra of the unbound pose.
-        "affinity_kcal_mol": float(energies[0]),
-        "intermolecular_kcal_mol": float(energies[1]),
-        "ligand_internal_kcal_mol": float(energies[5]),
-        "rotatable_bond_correction_kcal_mol": float(energies[6]),
+        "affinity_kcal_mol": terms["affinity"],
+        "intermolecular_kcal_mol": terms["intermolecular"],
+        "ligand_internal_kcal_mol": terms["ligand_internal"],
+        "rotatable_bond_correction_kcal_mol": terms["torsional"],
         "optimized": optimize,
         "rmsd_moved_angstrom": moved,
         "receptor_pdbqt": receptor_pdbqt,

@@ -25,11 +25,16 @@ source:
 environment:
   manager: conda
   python: "3.12"
-  conda_packages: ["vina=1.2.7", "openbabel=3.2.1", "rdkit=2026.03.1", "gemmi=0.7.5", "scipy=1.18.1"]
+  # The tool runs the vina program: conda-forge's on Linux and macOS, and on Windows
+  # (no conda-forge build) the official release's executable, fetched at install.
+  conda_packages: ["vina=1.2.7; sys_platform != 'win32'", "openbabel=3.2.1", "rdkit=2026.03.1",
+                   "gemmi=0.7.5", "scipy=1.18.1"]
   channels: [conda-forge]
   # Meeko from PyPI: the conda-forge package requires ProDy, which has no Python 3.12
   # build on conda-forge for all platforms; Meeko prepares ligands without it.
   packages: ["meeko==0.8.0"]
+  post_install:
+    - python fetch_vina.py
 
 entrypoint: api
 

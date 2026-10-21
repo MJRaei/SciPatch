@@ -32,7 +32,7 @@ command. Typical causes:
   code has no build for it, so the tool's `motel.lock` marks it unsupported and
   names what is missing; `motel info <tool>` lists the platforms it runs on. On
   Windows, codes that exist only for Linux (GPAW, Quantum ESPRESSO, CREST,
-  LAMMPS, AutoDock Vina) can be used from Linux under WSL (`wsl --install`).
+  LAMMPS) can be used from Linux under WSL (`wsl --install`).
 - **No internet connection**: environments download Python and packages.
 - **A package can't be built**: it may need a compiler or system library.
   Tools that need compiled scientific software should use
