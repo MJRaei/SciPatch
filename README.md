@@ -110,7 +110,8 @@ quantum chemistry), **CREST** (conformers, protomers, tautomers), **RDKit**
 compounds), **Open Babel** (chemical file formats, force fields), **OpenMM**
 (molecular dynamics), **PROPKA** (protein pKa and protonation states),
 **MDAnalysis** (trajectory analysis), **NMR mixtures** (mole fractions from
-crude 1H NMR), **AutoDock Vina** (docking), **peptide assembly** (self-assembly
+crude 1H NMR), **pyOpenMS** (mass spectrometry: exact masses, isotope patterns,
+peptides), **AutoDock Vina** (docking), **peptide assembly** (self-assembly
 conditions from similar peptides), **Cantera** (combustion chemistry and
 thermodynamics), **CoolProp** (properties of fluids, refrigerants, and humid
 air), **thermo** (chemical properties and vapor-liquid equilibrium),

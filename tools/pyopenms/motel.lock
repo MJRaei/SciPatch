@@ -1,0 +1,86 @@
+{
+ "lock_version": 1,
+ "inputs": "cb8ac970c0b9dc1b4d5be46915680ba2a5ef5ec20ab4ff742e107b7d42cfb360",
+ "tested_on": "osx-arm64",
+ "tested_size_mb": 262.9,
+ "platforms": {
+  "linux-64": {
+   "conda": [],
+   "pip": [
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "nanobind-backend==1.0.0",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyopenms==3.6.0",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "six==1.17.0"
+   ]
+  },
+  "linux-aarch64": {
+   "conda": [],
+   "pip": [
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "nanobind-backend==1.0.0",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyopenms==3.6.0",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "six==1.17.0"
+   ]
+  },
+  "osx-arm64": {
+   "conda": [],
+   "pip": [
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "nanobind-backend==1.0.0",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pip==26.2.2",
+    "pyopenms==3.6.0",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "six==1.17.0"
+   ]
+  },
+  "osx-64": {
+   "conda": [],
+   "pip": [],
+   "unavailable": "pyopenms 3.6.0 has no prebuilt package for macOS (Intel) (Python 3.12)"
+  },
+  "win-64": {
+   "conda": [],
+   "pip": [
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "nanobind-backend==1.0.0",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyopenms==3.6.0",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "six==1.17.0"
+   ]
+  }
+ }
+}

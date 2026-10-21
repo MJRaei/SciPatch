@@ -1,0 +1,143 @@
+schema: 1
+name: pyopenms
+version: 0.1.0
+title: Mass spectrometry calculations (pyOpenMS)
+summary: >-
+  Mass spectrometry with pyOpenMS: exact monoisotopic and average masses and m/z of
+  molecules and modified peptides, isotope patterns, enzymatic digestion of
+  proteins into peptides, theoretical b/y (and a, c, x, z) fragment ions for MS/MS,
+  and summaries of mzML data files.
+domains: [chemistry, biology]
+tags: [mass-spectrometry, ms, proteomics, peptide, protein, digestion, trypsin, fragment-ions,
+       ms-ms, isotope-pattern, exact-mass, monoisotopic, mz, mzml, analytical-chemistry, openms]
+
+source:
+  homepage: https://pyopenms.readthedocs.io
+  paper: https://doi.org/10.1002/pmic.201300246
+  citation: >-
+    H. L. Röst, U. Schmitt, R. Aebersold, L. Malmström, "pyOpenMS: A Python-based
+    interface to the OpenMS mass-spectrometry algorithm library", Proteomics 14,
+    74-77 (2014); J. Pfeuffer et al., "OpenMS 3 enables reproducible analysis of
+    large-scale mass spectrometry data", Nat. Methods 21, 365-367 (2024).
+  license: BSD-3-Clause
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["pyopenms==3.6.0", "matplotlib==3.11.2"]
+
+entrypoint: api
+
+functions:
+  mass:
+    outputs:
+      monoisotopic_mass_da: {unit: Da}
+      average_mass_da: {unit: Da}
+  isotope_pattern:
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  digest:
+    params:
+      protein: {kind: file}
+    outputs:
+      table: {kind: table}
+  enzymes: {}
+  fragment_ions:
+    outputs:
+      table: {kind: table}
+  mzml_summary:
+    params:
+      file: {kind: spectrum}
+
+validity: >-
+  Masses and isotope patterns follow from OpenMS's element masses and natural
+  isotope abundances (exact to about 1e-5 Da; real samples can deviate in
+  isotopic composition). Digestion applies each enzyme's cleavage rule only: real
+  digests miss sites, cleave non-specifically, and are affected by modifications.
+  Fragment ions are an unweighted ladder (no intensities) for the chosen ion
+  series; real spectra contain additional ion types, internal fragments, and
+  noise. Modifications must be given in OpenMS/Unimod notation.
+
+maturity: established
+
+golden:
+  - name: the exact mass and m/z of angiotensin II
+    quick: true
+    function: mass
+    args: {peptide: DRVYIHPF, charges: [1, 2]}
+    expect:
+      formula: C50H71N13O12
+      monoisotopic_mass_da: {approx: 1045.534515, abs: 1.0e-4}
+      ions.0.mz: {approx: 1046.541791, abs: 1.0e-4}
+      ions.1.mz: {approx: 523.774534, abs: 1.0e-4}
+    reference: >-
+      Summing AME2020 atomic masses (H 1.00782503223, C 12, N 14.00307400443, O
+      15.99491461957 u) over the residues of angiotensin II (DRVYIHPF, C50H71N13O12)
+      plus water gives 1045.534515 Da; adding the proton mass (CODATA 2018,
+      1.007276466621 u) gives [M+H]+ 1046.541791, the standard calibrant value
+      1046.5418.
+    against: exact
+  - name: the isotope pattern of Cl2 follows natural chlorine abundances
+    function: isotope_pattern
+    args: {formula: Cl2}
+    expect:
+      peaks: {length: 3}
+      peaks.0.probability: {approx: 0.573958, abs: 1.0e-5}
+      peaks.1.probability: {approx: 0.367284, abs: 1.0e-5}
+      peaks.2.probability: {approx: 0.058758, abs: 1.0e-5}
+      peaks.1.mass_da: {approx: 71.934755, abs: 1.0e-4}
+    reference: >-
+      IUPAC isotopic composition of chlorine: 35Cl 75.76%, 37Cl 24.24%; two atoms give
+      the binomial pattern 0.7576^2 = 0.57396, 2 x 0.7576 x 0.2424 = 0.36728, and
+      0.2424^2 = 0.05876 for 35Cl2, 35Cl37Cl, and 37Cl2.
+    against: exact
+  - name: trypsin cuts after K and R, but not before P
+    function: digest
+    args: {protein: PEPTIDEKAAAARPGGGKLLR, missed_cleavages: 1}
+    expect:
+      peptides: {length: 5}
+      peptides.0.peptide: PEPTIDEK
+      peptides.1.peptide: PEPTIDEKAAAARPGGGK
+      peptides.1.missed_cleavages: 1
+      peptides.2.peptide: AAAARPGGGK
+      peptides.4.peptide: LLR
+      peptides.4.start: 19
+    reference: >-
+      Trypsin's specificity (cleavage C-terminal to Lys and Arg except before Pro; J.
+      V. Olsen, S.-E. Ong, M. Mann, Mol. Cell. Proteomics 3, 608 (2004)) splits
+      PEPTIDEK|AAAARPGGGK|LLR (the R-P bond is not cut); with one missed cleavage, the
+      joined pairs are added.
+    against: exact
+  - name: b and y fragment ions of a tryptic peptide
+    function: fragment_ions
+    args: {peptide: PEPTIDEK}
+    expect:
+      ions.0.ion: y1+
+      ions.0.mz: {approx: 147.112804, abs: 1.0e-4}
+      ions.1.ion: b2+
+      ions.1.mz: {approx: 227.102633, abs: 1.0e-4}
+      ions: {length: 13}
+    reference: >-
+      From AME2020 atomic masses: y1 of a C-terminal lysine is K residue + H2O + H+ =
+      147.112804, and b2 of PE is the two residues + H+ = 227.102633; an 8-residue
+      peptide has 7 b and 7 y ions, of which b1 is conventionally omitted (13).
+    against: exact
+  - name: an mzML file is summarized as it declares itself
+    function: mzml_summary
+    args: {file: tests/data/peakpicker_tutorial_1_picked.mzML}
+    expect:
+      spectra: 1
+      spectra_per_ms_level: {"1": 1}
+      peaks: 94
+      retention_time_s: [384.0, 384.0]
+    reference: >-
+      OpenMS example data share/OpenMS/examples/peakpicker_tutorial_1_picked.mzML: its
+      spectrumList has count="1", an MS level 1 spectrum at scan start time 384 s with
+      defaultArrayLength="94".
+    against: exact
+  - name: an invalid peptide is refused
+    function: mass
+    args: {peptide: PEP1TIDE}
+    raises: "Cannot read the peptide"
+    reference: Digits are not amino acids; the tool must say so.

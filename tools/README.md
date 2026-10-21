@@ -30,6 +30,7 @@ reproduce published or upstream-tested values on every build.
 | [pycalphad](pycalphad/) | materials | Linux, macOS, Windows | Alloy thermodynamics (CALPHAD): stable phases and their compositions, liquidus, solidus, and phase fractions during solidification, binary phase diagrams; COST507 light alloys and other published databases, or your own TDB | established | ITS-90 melting point of Al; Al-Si eutectic (Murray & McAlister 1984); Pb-Sn solder eutectic |
 | [pymatgen-diffusion](pymatgen-diffusion/) | materials | Linux, macOS, Windows | Diffusivity, ionic conductivity, Haven ratio, and Arrhenius fits from MD trajectories | published | pymatgen-analysis-diffusion's test suite (LGPS at 600 K) |
 | [pymatgen-structure](pymatgen-structure/) | materials | Linux, macOS, Windows | Space groups, standard cells, supercells, format conversion, XRD patterns, structure matching | established | pymatgen's XRD tests; olivine and diamond space groups |
+| [pyopenms](pyopenms/) | chemistry, biology | Linux, macOS, Windows | Mass spectrometry: exact masses and m/z of molecules and modified peptides, isotope patterns, enzymatic digestion of proteins, theoretical fragment ions for MS/MS, mzML summaries | established | Exact masses from AME2020 atomic masses (angiotensin II), IUPAC chlorine isotope abundances, trypsin's cleavage rule, b/y ion masses, an OpenMS example mzML |
 | [pyscf](pyscf/) | chemistry | Linux, macOS, Windows | Ab initio quantum chemistry: HF, DFT, MP2, CCSD(T) energies, optimization, frequencies and thermochemistry, excited states (TDDFT) | established | PySCF's test suite (water HF, B3LYP, MP2, CCSD(T), frequencies; CIS of HF); NIST CCCBDB |
 | [pyxtal](pyxtal/) | materials, chemistry | Linux, macOS, Windows | Crystal structure generation by symmetry: random crystals of a composition in chosen or random space groups, molecular crystals from built-in molecules or SMILES, Wyckoff tables, compatible space groups; starting points for crystal structure prediction | established | International Tables: rock salt and diamond as the only fits in Fm-3m and Fd-3m, the Wyckoff positions of Fm-3m, a P2_1/c molecular crystal |
 | [quantum-espresso](quantum-espresso/) | materials | Linux, macOS, Windows (WSL) | Plane-wave DFT with the verified SSSP pseudopotentials: energies, forces, stress, relaxation, equation of state, gaps, magnetism | established | Quantum ESPRESSO's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
@@ -165,6 +166,9 @@ accepts.
   reference spectrum or `nmr-mixtures.predict_spectrum` →
   `nmr-mixtures.quantify_mixture` on the crude 1H NMR (yield, selectivity,
   isomer ratio) → `nmr-mixtures.reaction_kinetics` for spectra over time.
+- **Mass spectrometry:** `pyopenms.mass` and `pyopenms.isotope_pattern` for the
+  expected ions → compare with the measured spectrum; for proteins
+  `pyopenms.digest` → `pyopenms.fragment_ions` for the peptides of interest.
 - **Chemical files:** `openbabel.convert` and `openbabel.identifiers` move
   molecules between programs and formats and give InChIKeys for lookups.
 
@@ -178,9 +182,9 @@ original sources at install time and are not redistributed here. Small test
 inputs taken from upstream projects (the LAMMPS benchmark input, the Vina 1IEP
 tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory,
 molecules of the MMFF94 validation suite, MixSense's example spectra, RASPA3's
-HKUST-1 structure, PROPKA's 1HPX test structure, and a PVGIS typical year for
-Munich from the European Commission's JRC) keep their sources' terms; each
-golden test names its source.
+HKUST-1 structure, PROPKA's 1HPX test structure, an OpenMS example spectrum, and
+a PVGIS typical year for Munich from the European Commission's JRC) keep their
+sources' terms; each golden test names its source.
 
 ## Adding a tool
 
