@@ -1,0 +1,139 @@
+from __future__ import annotations
+
+import zipfile
+from pathlib import Path
+
+import pytest
+
+from motel import frontmatter
+from motel.models import FunctionInfo, ToolState
+from motel.paths import MotelPaths
+from motel.registry import InstalledTool, Registry
+from motel.schema import type_label
+from motel.skills import (
+    DESCRIPTION_LIMIT,
+    MARKER_FILE,
+    SkillManager,
+    _cell,
+    _demote_headings,
+    bundled_skills,
+    render_tool_skill,
+)
+
+
+@pytest.fixture
+def installed_tool(tmp_path: Path) -> InstalledTool:
+    paths = MotelPaths.from_env().ensure()
+    package = paths.tools / "chgnet"
+    package.mkdir(parents=True)
+    (package / "motel.yaml").write_text(
+        "name: chgnet\nsummary: Relax crystals with a universal ML potential.\n"
+        "validity: Trained on PBE data.\n"
+        "source: {repo: 'https://github.com/x/chgnet', ref: v1, license: BSD-3-Clause, "
+        "citation: 'Deng et al. (2023)'}\n"
+    )
+    (package / "SKILL.md").write_text(
+        "---\nname: chgnet\ndescription: Use for fast pre-relaxation before DFT.\n---\n"
+        "# Recipes\n\nRelax first, then compare with DFT.\n"
+    )
+    (package / "references").mkdir()
+    (package / "references" / "paper.md").write_text("notes")
+    state = ToolState(
+        status="ready",
+        installed_from="test",
+        source_commit="abc123def4567890",
+        functions=[
+            FunctionInfo(
+                name="relax",
+                summary="Relax a structure.",
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "structure": {
+                            "type": "string",
+                            "x-kind": "structure",
+                            "description": "CIF | POSCAR",
+                        },
+                        "fmax": {"type": "number", "default": 0.05, "x-unit": "eV/Å"},
+                    },
+                    "required": ["structure"],
+                },
+            )
+        ],
+    )
+    Registry(paths).save_state("chgnet", state)
+    return Registry(paths).get("chgnet")
+
+
+def test_tool_skill_is_valid_and_complete(installed_tool: InstalledTool) -> None:
+    files = render_tool_skill(installed_tool)
+    text = str(files["SKILL.md"])
+    meta = frontmatter.read(text)
+    assert meta["name"] == "motel-chgnet"
+    assert meta["description"].startswith("Use for fast pre-relaxation before DFT.")
+    assert "Runs locally through Motel" in meta["description"]
+    assert len(meta["description"]) <= DESCRIPTION_LIMIT
+    assert meta["license"] == "BSD-3-Clause"
+    assert all(isinstance(v, str) for v in meta["metadata"].values())
+    assert "motel run chgnet relax structure=... --json" in text
+    assert "| `structure` | structure | *required* | CIF \\| POSCAR |" in text
+    assert "| `fmax` | number [eV/Å] | `0.05` |" in text
+    assert "### Recipes" in text  # package headings are nested under "Usage notes"
+    assert "Trained on PBE data." in text
+    assert "https://github.com/x/chgnet @ `abc123def456`" in text
+    assert files["references/paper.md"] == b"notes"
+
+
+def test_bundled_skills_have_valid_frontmatter() -> None:
+    skills = bundled_skills()
+    assert {"motel", "motel-onboard"} <= set(skills)
+    for name, files in skills.items():
+        meta = frontmatter.read(
+            files["SKILL.md"].decode()
+            if isinstance(files["SKILL.md"], bytes)
+            else files["SKILL.md"]
+        )
+        assert meta["name"] == name
+        assert 0 < len(meta["description"]) <= DESCRIPTION_LIMIT
+
+
+def test_sync_writes_updates_and_removes_only_managed_skills(
+    installed_tool: InstalledTool, tmp_path: Path
+) -> None:
+    manager = SkillManager(Registry(installed_tool.paths))
+    target = tmp_path / "skills"
+    (target / "my-own-skill").mkdir(parents=True)
+    (target / "my-own-skill" / "SKILL.md").write_text("mine")
+    (target / "motel-onboard").mkdir()  # same name as a bundled skill, but not ours
+    (target / "motel-onboard" / "SKILL.md").write_text("user's version")
+    (target / "motel-stale").mkdir()
+    (target / "motel-stale" / MARKER_FILE).write_text("{}")
+
+    report = manager.sync(target)
+    assert set(report.written) == {"motel", "motel-chgnet"}
+    assert report.skipped == ["motel-onboard"]
+    assert report.removed == ["motel-stale"]
+    assert (target / "my-own-skill" / "SKILL.md").read_text() == "mine"
+    assert (target / "motel-onboard" / "SKILL.md").read_text() == "user's version"
+    assert (target / "motel-chgnet" / "references" / "paper.md").exists()
+    assert (target / "motel-chgnet" / MARKER_FILE).exists()
+
+    assert SkillManager.remove_all(target) == ["motel", "motel-chgnet"]
+    assert sorted(p.name for p in target.iterdir()) == ["motel-onboard", "my-own-skill"]
+
+
+def test_export_as_zip(installed_tool: InstalledTool, tmp_path: Path) -> None:
+    manager = SkillManager(Registry(installed_tool.paths))
+    paths = manager.export(tmp_path / "out", as_zip=True)
+    archive = next(p for p in paths if p.name == "motel-chgnet.zip")
+    with zipfile.ZipFile(archive) as zipped:
+        assert "motel-chgnet/SKILL.md" in zipped.namelist()
+        assert MARKER_FILE not in " ".join(zipped.namelist())
+
+
+def test_headings_are_nested_and_pipes_escaped() -> None:
+    assert _cell(type_label({"enum": ["fcc", "bcc"]})) == "fcc\\|bcc"
+    assert _demote_headings("## A\ntext\n### B\n```\n# not a heading\n```") == (
+        "### A\ntext\n#### B\n```\n# not a heading\n```"
+    )
+    assert _demote_headings("no headings") == "no headings"
