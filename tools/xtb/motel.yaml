@@ -1,0 +1,134 @@
+schema: 1
+name: xtb
+version: 0.1.0
+title: Semiempirical quantum chemistry (xTB, GFN2)
+summary: >-
+  Fast quantum-chemical calculations for molecules with the GFN2-xTB tight-binding
+  method: energies, HOMO-LUMO gaps, dipole moments and partial charges, geometry
+  optimization, vibrational frequencies, and thermochemistry, in the gas phase or
+  implicit solvent. Molecules can be given as SMILES or structure files.
+domains: [chemistry]
+tags: [quantum-chemistry, semiempirical, tight-binding, gfn2-xtb, xtb, geometry-optimization,
+       frequencies, ir, thermochemistry, free-energy, homo-lumo-gap, partial-charges, dipole,
+       solvation, smiles, conformer]
+
+source:
+  homepage: https://xtb-docs.readthedocs.io
+  paper: https://doi.org/10.1021/acs.jctc.8b01176
+  citation: >-
+    C. Bannwarth, S. Ehlert, S. Grimme, "GFN2-xTB: An Accurate and Broadly
+    Parametrized Self-Consistent Tight-Binding Quantum Chemical Method with
+    Multipole Electrostatics and Density-Dependent Dispersion Contributions",
+    J. Chem. Theory Comput. 15, 1652-1671 (2019); program: C. Bannwarth et al.,
+    WIREs Comput. Mol. Sci. 11, e1493 (2021).
+  license: LGPL-3.0-or-later
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["xtb=6.7.1"]
+  channels: [conda-forge]
+  packages: ["rdkit==2026.9.1"]
+  variables:
+    OMP_STACKSIZE: "1G"
+    OMP_MAX_ACTIVE_LEVELS: "1"
+
+entrypoint: api
+
+functions:
+  single_point:
+    params:
+      molecule: {kind: molecule}
+    outputs:
+      energy_hartree: {unit: Eh}
+      energy_ev: {unit: eV}
+      homo_lumo_gap_ev: {unit: eV}
+      dipole_debye: {unit: D}
+  optimize:
+    params:
+      molecule: {kind: molecule}
+    outputs:
+      energy_hartree: {unit: Eh}
+      optimized_structure: {kind: molecule}
+  frequencies:
+    params:
+      molecule: {kind: molecule}
+    outputs:
+      frequencies_cm1: {unit: cm⁻¹}
+      ir_intensities_km_mol: {unit: km/mol}
+      zero_point_energy_hartree: {unit: Eh}
+      enthalpy_hartree: {unit: Eh}
+      free_energy_hartree: {unit: Eh}
+
+validity: >-
+  GFN2-xTB is a semiempirical tight-binding method parameterized for elements up
+  to radon: geometries of organic and main-group molecules are usually close to
+  DFT, but reaction and conformer energies carry errors of a few kcal/mol, and
+  unusual bonding, transition-metal electronic structure, and excited states are
+  out of scope. HOMO-LUMO gaps are qualitative (not band gaps or optical gaps).
+  Frequencies are harmonic and typically deviate from experiment by tens of
+  cm⁻¹ (water's stretches are underestimated by up to ~100 cm⁻¹).
+  Thermochemistry uses the modified rigid-rotor harmonic-oscillator model at
+  298.15 K and 1 atm. Implicit solvation (ALPB/GBSA) misses specific
+  solute-solvent interactions such as explicit hydrogen bonds. Results from a
+  SMILES depend on the generated 3D conformer; for flexible molecules, compare
+  several seeds or use a conformer search. Use DFT for publication-quality
+  energetics.
+
+golden:
+  - name: propyne energy and gap match the xtb test suite
+    function: single_point
+    args: {molecule: tests/data/propyne.coord}
+    expect:
+      energy_hartree: {approx: -8.3824793849585, abs: 0.000001}
+      homo_lumo_gap_ev: {approx: 7.0005867526665, abs: 0.00001}
+    reference: >-
+      xtb v6.7.1, test/unit/test_gfn2.f90::test_gfn2_api (GFN2-xTB, propyne
+      geometry from the test, in Bohr): E = -8.3824793849585 Eh, gap 7.0005867526665 eV.
+  - name: GBSA water solvation matches the xtb test suite
+    function: single_point
+    args: {molecule: tests/data/nh3_p_cn3.coord, solvent: h2o, solvation_model: gbsa}
+    expect:
+      energy_hartree: {approx: -22.002501380096, abs: 0.000001}
+      homo_lumo_gap_ev: {approx: 3.408607724814, abs: 0.00005}
+    reference: >-
+      xtb v6.7.1, test/unit/test_gfn2.f90::test_gfn2gbsa_api (H3N-P(CN)3 in GBSA
+      water): E = -22.002501380096 Eh, gap 3.408607724814 eV.
+  - name: water has three real vibrations
+    function: frequencies
+    args: {molecule: tests/data/water.coord, optimize_first: false}
+    expect:
+      frequencies_cm1: {length: 3}
+      frequencies_cm1.0: {approx: 1538.90, abs: 2}
+      frequencies_cm1.1: {approx: 3642.67, abs: 2}
+      frequencies_cm1.2: {approx: 3651.17, abs: 2}
+      imaginary_frequencies: 0
+    reference: >-
+      Geometry from xtb's test_gfn2_hessian; frequencies are a regression value
+      for xtb 6.7.1 (GFN2). Experimental gas-phase fundamentals are about 1595,
+      3657, and 3756 cm⁻¹.
+  - name: ammonium from SMILES gets its charge and nine vibrations
+    function: frequencies
+    args: {molecule: "[NH4+]"}
+    expect:
+      charge: 1
+      frequencies_cm1: {length: 9}
+      imaginary_frequencies: 0
+    reference: >-
+      The formal charge (+1) is taken from the SMILES; a nonlinear molecule with
+      N = 5 atoms has 3N - 6 = 9 vibrational modes.
+  - name: linear CO2 has four vibrations
+    function: frequencies
+    args: {molecule: "O=C=O"}
+    expect:
+      frequencies_cm1: {length: 4}
+      imaginary_frequencies: 0
+    reference: A linear molecule has 3N - 5 vibrational modes; for CO2, 4.
+  - name: ethanol optimizes from SMILES
+    function: optimize
+    args: {molecule: CCO}
+    expect:
+      converged: true
+      formula: C2H6O
+      optimized_structure: {exists: true}
+    reference: Geometry optimization from an RDKit-generated conformer must converge.
