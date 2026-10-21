@@ -1,0 +1,154 @@
+schema: 1
+name: atombridge
+version: 0.1.0
+title: Lattices from electron micrographs and paper figures (AtomBridge)
+summary: >-
+  From STEM/TEM images and papers toward crystal structures, with AtomBridge's
+  analysis: measure the two in-plane lattice vectors of an atomic-resolution
+  micrograph (atom-column detection and neighbour-vector clustering, with a Fourier
+  fallback) and write the 2D cell; extract a paper's figures with captions and flag
+  the electron micrographs; and check a structure for overlapping atoms.
+domains: [materials]
+tags: [stem, tem, haadf, hrtem, micrograph, lattice-constant, image-analysis, fft, figure-extraction,
+       pdf, caption, overlap-check, structure-validation, hackathon]
+
+source:
+  repo: https://github.com/dpalmer-anl/AtomBridge
+  ref: a1e9ce1579546d146e071540a4522e7b872f56b7
+  install: false
+  homepage: https://github.com/dpalmer-anl/AtomBridge
+  citation: >-
+    AtomBridge, STEM/TEM to CIF (D. Palmer et al., hackathon project, 2025),
+    github.com/dpalmer-anl/AtomBridge.
+  license: MIT
+
+environment:
+  manager: uv
+  python: "3.12"
+  # OpenCV 4.13+ wheels need macOS 14 on Intel Macs; 4.12 covers older ones.
+  packages: ["opencv-python-headless==4.14.0.94; sys_platform != 'darwin' or platform_machine != 'x86_64'",
+             "opencv-python-headless==4.12.0.88; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+             "scikit-learn==1.9.1", "scikit-image==0.26.0", "pymupdf==1.28.2", "pillow==13.0.0",
+             "ase==3.29.0"]
+
+entrypoint: api
+
+functions:
+  measure_lattice:
+    params:
+      image: {kind: image}
+      nm_per_pixel: {unit: nm/px}
+      cif: {kind: structure}
+    outputs:
+      a_nm: {unit: nm}
+      b_nm: {unit: nm}
+      gamma_deg: {unit: °}
+      cif: {kind: structure}
+  extract_figures:
+    params:
+      pdf: {kind: file}
+  check_structure:
+    params:
+      structure: {kind: structure}
+      cutoff_angstrom: {unit: Å}
+
+validity: >-
+  Lattice measurement assumes a periodic image of distinct, bright atom columns
+  (HAADF-like; invert dark-column HRTEM images first) and an accurate scale: the
+  result scales directly with nm_per_pixel, and drift, distortion, defocus, and
+  lattice fringes that are not atom columns bias it. It gives the projected 2D
+  lattice of the zone axis imaged, not the 3D cell, and does not identify the
+  phase. Expect a few percent accuracy on good images. Figure extraction finds
+  embedded raster images; vector graphics and figures spanning merged regions
+  may be missed or split, and the micrograph flag is a keyword heuristic. The
+  overlap check only reports pairs closer than the cutoff.
+
+maturity: experimental
+
+golden:
+  - name: a square lattice of known spacing is measured exactly
+    quick: true
+    function: measure_lattice
+    args: {image: tests/data/square_lattice_20px.png, nm_per_pixel: 0.02}
+    expect:
+      a_nm: {approx: 0.4, rel: 0.01}
+      b_nm: {approx: 0.4, rel: 0.01}
+      gamma_deg: {approx: 90.0, abs: 1.0}
+    reference: >-
+      tests/data/square_lattice_20px.png has Gaussian atom columns every 20 pixels on
+      a square lattice; at 0.02 nm per pixel that is a = b = 0.4 nm, gamma = 90°.
+    against: exact
+  - name: a rotated triangular lattice (graphene-like spacing)
+    function: measure_lattice
+    args: {image: tests/data/triangular_lattice_16px.png, nm_per_pixel: 0.0154}
+    expect:
+      a_nm: {approx: 0.2464, rel: 0.01}
+      b_nm: {approx: 0.2464, rel: 0.01}
+      gamma_deg: {approx: 120.0, abs: 1.0}
+    reference: >-
+      tests/data/triangular_lattice_16px.png has columns 16 pixels apart at 120°,
+      rotated by 10°; at 0.0154 nm per pixel, a = b = 0.2464 nm (graphene's lattice
+      constant).
+    against: exact
+  - name: a noisy, rotated rectangular lattice in a crop
+    function: measure_lattice
+    args: {image: tests/data/rectangular_lattice_noisy.png, nm_per_pixel: 0.02, crop: [20, 20, 200, 200]}
+    expect:
+      a_nm: {approx: 0.30, rel: 0.02}
+      b_nm: {approx: 0.50, rel: 0.02}
+      gamma_deg: {approx: 90.0, abs: 1.5}
+    reference: >-
+      tests/data/rectangular_lattice_noisy.png: a 15 x 25 pixel rectangular lattice
+      rotated by -20° with Gaussian noise (sigma 5% of the peak); at 0.02 nm per
+      pixel, 0.30 x 0.50 nm at 90°.
+    against: exact
+  - name: the wurtzite ZnO lattice from AtomBridge's example HRTEM image
+    function: measure_lattice
+    args: {image: source/circle_detection/zno.png, nm_per_pixel: 0.0465116, crop: [100, 205, 160, 95],
+           cif: null}
+    expect:
+      a_nm: {approx: 0.3250, rel: 0.07}
+      b_nm: {approx: 0.3250, rel: 0.07}
+      gamma_deg: {approx: 120.0, abs: 4.0}
+    reference: >-
+      AtomBridge's circle_detection/zno.png (a ZnO nanocrystal along [001]; 2 nm
+      scale bar = 43 pixels, so 0.0465 nm per pixel). Wurtzite ZnO has a hexagonal
+      in-plane lattice with a = 0.32494 nm (K. Kihara, G. Donnay, Can. Mineral. 23,
+      647 (1985); the image's annotated (100) spacing, 0.28 nm, is a sqrt 3 / 2). The
+      tolerance covers the scale bar (about 2%) and the image quality.
+    against: independent
+  - name: figures, captions, and the micrograph flag from a PDF
+    function: extract_figures
+    args: {pdf: tests/data/two_figures.pdf}
+    expect:
+      count: 2
+      micrographs: 1
+      figures.0.page: 1
+      figures.0.micrograph: true
+      figures.0.caption: {contains: "HAADF-STEM image of graphene"}
+      figures.1.page: 2
+      figures.1.micrograph: false
+      figures.1.caption: {contains: "Powder XRD pattern"}
+    reference: >-
+      tests/data/two_figures.pdf was written with PyMuPDF: page 1 holds a lattice
+      image captioned "Figure 1. HAADF-STEM image of graphene ...", page 2 a line
+      plot captioned "Figure 2. Powder XRD pattern ...".
+    against: exact
+  - name: a planted overlap in rock salt is caught
+    function: check_structure
+    args: {structure: tests/data/NaCl_with_overlap.extxyz}
+    expect:
+      passed: false
+      min_distance_angstrom: {approx: 0.3, abs: 1.0e-4}
+      overlapping_pairs.0.atoms: [0, 8]
+      shortest_by_elements_angstrom.Cl-Cl: {approx: 3.98848, abs: 1.0e-4}
+    reference: >-
+      NaCl (a = 5.64056 Angstrom, Wyckoff 1963, COD 9008678) with one extra Na atom
+      placed 0.3 Angstrom from the Na at the origin: the only pair below 0.5
+      Angstrom is atoms 0 and 8; Cl-Cl stays a / sqrt 2 = 3.98848 Angstrom.
+    against: exact
+  - name: a file that is not an image is refused
+    function: measure_lattice
+    args: {image: tests/data/two_figures.pdf, nm_per_pixel: 0.02}
+    raises: "is not an image file"
+    reference: The tool must refuse input that is not an image.
