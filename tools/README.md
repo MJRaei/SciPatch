@@ -32,6 +32,7 @@ reproduce published or upstream-tested values on every build.
 | [pyscf](pyscf/) | chemistry | Linux, macOS, Windows | Ab initio quantum chemistry: HF, DFT, MP2, CCSD(T) energies, optimization, frequencies and thermochemistry, excited states (TDDFT) | established | PySCF's test suite (water HF, B3LYP, MP2, CCSD(T), frequencies; CIS of HF); NIST CCCBDB |
 | [quantum-espresso](quantum-espresso/) | materials | Linux, macOS, Windows (WSL) | Plane-wave DFT with the verified SSSP pseudopotentials: energies, forces, stress, relaxation, equation of state, gaps, magnetism | established | Quantum ESPRESSO's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
 | [raspa3](raspa3/) | materials, chemistry | Linux, macOS, Windows | Gas adsorption in zeolites and MOFs by Monte Carlo (GCMC, Widom): isotherms, uptake and selectivity from mixtures such as CO2/N2 flue gas, Henry coefficients, heats of adsorption for CO2, N2, and methane, in bundled frameworks (silicalite, HKUST-1, MOF-5, CALF-20) or any CIF | established | Measured methane and CO2 isotherms in silicalite (Abdul-Rehman et al. 1990; Siperstein & Myers 2001; Smit 2015); methane storage in HKUST-1 (Mason et al. 2014) |
+| [reaktoro](reaktoro/) | chemistry, earth science, engineering | | Aqueous and geochemical equilibrium with the PHREEQC databases: speciation of water analyses (pH, ionic strength, species, mineral saturation indices), mineral solubility and precipitation, water open to air or CO2, solubility versus temperature, Pitzer brines | established | PHREEQC 3 manual examples: gypsum in pure water, calcite open to atmospheric CO2, seawater speciation |
 | [rdkit](rdkit/) | chemistry | Linux, macOS, Windows | Similarity and substructure search, 3D conformers (ETKDG + MMFF94), standardization with InChI/InChIKey | established | RDKit's documentation (doctested similarities and searches); PubChem identifiers |
 | [structural-analogs](structural-analogs/) | materials | Linux, macOS, Windows | Materials Project compounds with the same crystal structure type as a material or structure file, with band gaps, formation energies, stability, and volumes, for estimating properties by analogy; from the mp-property-analogies hackathon project | experimental | Rock-salt and diamond-structure analogs (KCl for NaCl, Ge for Si); needs a free API key |
 | [synthesis-recipes](synthesis-recipes/) | materials, chemistry | Linux, macOS, Windows | Published synthesis recipes (41,300 text-mined solid-state and sol-gel recipes: precursors, reactions, temperatures, times, atmospheres, DOIs), similar Materials Project compositions, and suggested routes for new materials from their closest analogs; from the SKY hackathon agent | experimental | Exact composition-identity checks; recipe counts of the bundled dataset; NCA analog for a new NCA composition |
@@ -128,6 +129,9 @@ accepts.
 - **Solar PV:** `pvlib.pvgis_weather` (typical year for the site) →
   `pvlib.pv_energy` for a few tilts and orientations (kWh/kWp, monthly profile)
   → `pvlib.solar_position` at critical dates to check shading.
+- **Water chemistry and scaling:** `reaktoro.speciate` on the water analysis
+  (saturation indices) → `reaktoro.mineral_equilibrium` for how much calcite or
+  gypsum would precipitate → `reaktoro.solubility_curve` for heated sections.
 - **Carbon capture and gas storage:** `raspa3.henry_coefficient` for each
   candidate CIF (CO2/N2 selectivity at low pressure) →
   `raspa3.mixture_adsorption` with flue gas (15% CO2, 85% N2) and

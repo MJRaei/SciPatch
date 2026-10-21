@@ -1,0 +1,128 @@
+schema: 1
+name: reaktoro
+version: 0.1.0
+title: Aqueous and geochemical equilibrium (Reaktoro with PHREEQC databases)
+summary: >-
+  Chemical equilibrium of water with Reaktoro and the PHREEQC databases: speciation
+  of a water analysis (pH, ionic strength, species, saturation indices of minerals),
+  mineral solubility and dissolution or precipitation, water open to air or other
+  gases at fixed partial pressures, solubility versus temperature, and brines with
+  the Pitzer model.
+domains: [chemistry, earth-science, engineering]
+tags: [geochemistry, aqueous, speciation, ph, saturation-index, solubility, mineral, calcite, gypsum,
+       scaling, carbonate, water-chemistry, groundwater, seawater, brine, pitzer, phreeqc, co2, reaktoro]
+
+source:
+  homepage: https://reaktoro.org
+  paper: https://doi.org/10.1515/pac-2016-1107
+  citation: >-
+    A. M. M. Leal, D. A. Kulik, W. R. Smith, M. O. Saar, "An overview of computational
+    methods for chemical equilibrium and kinetic calculations for geochemical and
+    reactive transport modeling", Pure Appl. Chem. 89, 597-643 (2017); Reaktoro,
+    https://reaktoro.org; thermodynamic databases from PHREEQC (D. L. Parkhurst, C. A.
+    J. Appelo, USGS Techniques and Methods 6-A43, 2013).
+  license: LGPL-2.1
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["reaktoro=2.13.0", "matplotlib=3.11.2"]
+  channels: [conda-forge]
+
+entrypoint: api
+
+functions:
+  speciate:
+    params:
+      temperature_c: {unit: °C}
+      pressure_bar: {unit: bar}
+      density_kg_l: {unit: kg/L}
+    outputs:
+      ionic_strength_mol_per_kg: {unit: mol/kg}
+  mineral_equilibrium:
+    params:
+      temperature_c: {unit: °C}
+      pressure_bar: {unit: bar}
+  solubility_curve:
+    long_running: true
+    params:
+      t_min_c: {unit: °C}
+      t_max_c: {unit: °C}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  minerals: {}
+
+validity: >-
+  Equilibrium only: no kinetics, so minerals that react slowly (quartz, dolomite,
+  many silicates) may be far from their computed equilibrium in nature, and
+  supersaturated results do not mean that a mineral precipitates. The
+  Debye-Hückel/WATEQ activity models of phreeqc, wateq4f, minteq.v4, and llnl are
+  reliable to an ionic strength of about 0.5-1 mol/kg (seawater is about 0.7);
+  use the Pitzer model for brines. Equilibrium constants outside 0-100 °C are
+  extrapolated from 25 °C data in most databases (llnl covers 0-300 °C).
+  Results depend on the database: constants are revised between releases (for
+  example, sodium-carbonate complexes in phreeqc.dat), which can shift carbonate
+  saturation indices by about 0.1. Redox elements need the right valence in the
+  input (e.g. Fe as Fe+2); no surface complexation or ion exchange.
+
+maturity: established
+
+golden:
+  - name: gypsum in pure water (PHREEQC example 2)
+    quick: true
+    function: mineral_equilibrium
+    args: {minerals: [Gypsum, Anhydrite]}
+    expect:
+      element_molalities.Ca: {approx: 0.01508, rel: 0.01}
+      pH: {approx: 7.066, abs: 0.01}
+      ionic_strength_mol_per_kg: {approx: 0.04183, rel: 0.01}
+      saturation_indices.Anhydrite: {approx: -0.30, abs: 0.01}
+      minerals.Gypsum.dissolved_mmol: {approx: -985.5, rel: 0.001}
+      minerals.Anhydrite.present: false
+    reference: >-
+      D. L. Parkhurst, C. A. J. Appelo, Description of input and examples for PHREEQC
+      version 3, USGS Techniques and Methods 6-A43 (2013), example 2, table 13: 1 mol
+      each of gypsum and anhydrite with 1 kg of water at 25 °C; anhydrite dissolves
+      and 0.9855 mol of gypsum forms, Ca = S = 1.508e-2 mol/kg, pH 7.066, ionic
+      strength 4.183e-2, SI(anhydrite) = -0.30.
+    against: independent
+  - name: calcite in water open to atmospheric CO2 (PHREEQC example 5)
+    function: mineral_equilibrium
+    args: {minerals: [Calcite], gases: {CO2(g): 0.000320428}}
+    expect:
+      pH: {approx: 8.27, abs: 0.01}
+      minerals.Calcite.dissolved_mmol: {approx: 0.50, abs: 0.01}
+      element_molalities.C: {approx: 0.00099, abs: 0.00001}
+    reference: >-
+      PHREEQC version 3 manual (Parkhurst and Appelo 2013), example 5, table 20, first
+      step (no oxygen added): pure water with calcite at a CO2 partial pressure of
+      10^-3.5 atm (3.204e-4 bar) has pH 8.27; 0.50 mmol of calcite and 0.49 mmol of
+      CO2 dissolve (0.99 mmol/kg of carbon).
+    against: independent
+  - name: seawater speciation (PHREEQC example 1)
+    function: speciate
+    args:
+      solutes: {Ca: 1.066e-2, Mg: 5.507e-2, Na: 4.854e-1, K: 1.058e-2, Cl: 5.657e-1,
+                SO4: 2.926e-2, C: 2.257e-3, Si: 7.382e-5}
+      ph: 8.22
+    expect:
+      ionic_strength_mol_per_kg: {approx: 0.6745, rel: 0.002}
+      water_activity: {approx: 0.981, abs: 0.001}
+      saturation_indices.Gypsum: {approx: -0.64, abs: 0.01}
+      saturation_indices.Halite: {approx: -2.48, abs: 0.01}
+    reference: >-
+      PHREEQC version 3 manual, example 1, table 11: seawater of Nordstrom et al.
+      (1979) at pH 8.22 and 25 °C (molalities as listed there) has ionic strength
+      0.6745, water activity 0.981, SI(gypsum) = -0.64, and SI(halite) = -2.48.
+      Carbonate minerals are not compared: the phreeqc.dat in Reaktoro has revised
+      sodium-carbonate complexes (NaHCO3 1.7e-4 instead of 6.2e-4 mol/kg), which
+      raises SI(calcite) from the manual's 0.68 to 0.77.
+    against: independent
+  - name: a strongly unbalanced analysis without pH is refused
+    function: speciate
+    args: {solutes: {Na: 1.0}}
+    raises: "out of charge balance"
+    reference: >-
+      Without a measured pH the pH follows from electroneutrality, which an analysis
+      of sodium alone cannot satisfy.
