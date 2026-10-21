@@ -20,6 +20,7 @@ from motel.onboarding import (
     prepare_workspace,
     scaffold,
 )
+from motel.platforms import label as platform_label
 from motel.source import resolve_remote_ref
 
 patch_app = typer.Typer(help="Save fixes to a tool's upstream source as patch files.")
@@ -147,10 +148,16 @@ def check(
         for warning in outcome.warnings:
             console.print(f"  [yellow]![/] {escape(warning)}")
         skipped = [result for result in outcome.golden if result.skipped]
-        if skipped:
+        need_secrets = [r for r in skipped if (r.error or "").startswith("skipped: needs")]
+        if need_secrets:
             console.print(
-                f"\n[yellow]{len(skipped)} golden test(s) skipped[/] because a secret is missing; "
-                "set it with [cyan]motel secret set NAME[/] to run them."
+                f"\n[yellow]{len(need_secrets)} golden test(s) skipped[/] because a secret is "
+                "missing; set it with [cyan]motel secret set NAME[/] to run them."
+            )
+        if len(skipped) > len(need_secrets):
+            console.print(
+                f"\n[dim]{len(skipped) - len(need_secrets)} golden test(s) run only on other "
+                "platforms.[/]"
             )
         if not outcome.tests_passed:
             console.print("\n[red]Golden tests failed[/] (see above).")
@@ -184,13 +191,26 @@ def exec_command(
 def freeze(
     directory: Annotated[Path, typer.Argument(help="Tool package folder.")] = Path(),
 ) -> None:
-    """Pin the exact package versions a tool was tested with (writes requirements.lock).
+    """Pin the exact packages a tool was tested with, for every platform (writes motel.lock).
 
-    Do this before sharing a tool, so others build exactly what you tested.
+    Also resolves Linux, macOS, and Windows without installing anything, and records
+    where the tool cannot be installed and why. Do this before sharing a tool.
     """
-    lock, count, env_dir = get_motel().freeze(str(directory))
-    console.print(f"[green]✓[/] Pinned {count} packages in {escape(str(lock))}")
-    console.print(f"  [dim]from {escape(str(env_dir))}[/]")
+    result = get_motel().freeze(str(directory))
+    console.print(f"[green]✓[/] Wrote {escape(str(result.path))}")
+    console.print(f"  [dim]tested environment: {escape(str(result.env_dir))}[/]")
+    for name, entry in result.platforms.items():
+        label = platform_label(name)
+        if entry.unavailable:
+            console.print(f"  [red]✗[/] {label}: {escape(entry.unavailable)}")
+            continue
+        count = len(entry.conda) + len(entry.pip)
+        tested = " [dim](tested here)[/]" if name == result.tested_on else ""
+        console.print(f"  [green]✓[/] {label}: {count} packages pinned{tested}")
+        if entry.note:
+            console.print(f"    [yellow]{escape(entry.note)}[/]")
+    for warning in result.warnings:
+        console.print(f"  [yellow]![/] {escape(warning)}")
     folder = escape(str(directory))
     console.print(f"  Verify the pinned build: [cyan]motel check {folder} --clean[/]")
 

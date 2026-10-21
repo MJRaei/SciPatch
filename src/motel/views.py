@@ -12,7 +12,9 @@ from pathlib import Path
 from typing import Any
 
 from motel.app import Match
+from motel.lock import platform_summary
 from motel.models import RunRecord, RunStatus, utcnow
+from motel.platforms import label as platform_label
 from motel.registry import InstalledTool
 from motel.runtime.executor import RESPONSE_FILE, STDOUT_FILE, tail
 from motel.search import describe_inputs
@@ -146,6 +148,7 @@ def tool_view(tool: InstalledTool) -> dict[str, Any]:
             }
             for secret in manifest.environment.secrets
         ],
+        "platforms": _platforms_view(tool.package_dir),
         "usage_notes": tool.guide(),
         "validity": manifest.validity,
         "citation": {
@@ -156,6 +159,14 @@ def tool_view(tool: InstalledTool) -> dict[str, Any]:
             "license": source.license,
         },
     }
+
+
+def _platforms_view(package_dir: Path) -> dict[str, str] | None:
+    """Where the tool can be installed: "available", or the reason it cannot."""
+    summary = platform_summary(package_dir)
+    if summary is None:
+        return None
+    return {platform_label(name): reason or "available" for name, reason in summary.items()}
 
 
 def secrets_view(tools: Iterable[InstalledTool], stored: Iterable[str]) -> list[dict[str, Any]]:

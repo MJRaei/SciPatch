@@ -18,11 +18,10 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
+from motel import platforms
 from motel.errors import ManifestError
 
 MANIFEST_FILENAME = "motel.yaml"
-#: Exact package versions a tool was tested with (written by ``motel freeze``).
-LOCK_FILENAME = "requirements.lock"
 SCHEMA_VERSION = 1
 
 #: Tool names become folder names, skill names (``motel-<name>``) and CLI words.
@@ -119,12 +118,34 @@ class Environment(_Model):
         description="Secrets (e.g. API keys) the tool receives as environment variables: "
         "names, or objects with name, description, and url.",
     )
+    platforms: list[str] | None = Field(
+        None,
+        description="Platforms the tool supports (default: every platform its packages "
+        "exist for), e.g. [linux-64, osx-arm64].",
+    )
 
     @field_validator("python")
     @classmethod
     def _check_python(cls, value: str) -> str:
         if not _PYTHON_VERSION.match(value):
             raise ValueError(f"'{value}' is not a Python version like '3.11'")
+        return value
+
+    @field_validator("conda_packages")
+    @classmethod
+    def _check_markers(cls, value: list[str]) -> list[str]:
+        for requirement in value:
+            platforms.split_marker(requirement)  # raises on an invalid marker
+        return value
+
+    @field_validator("platforms")
+    @classmethod
+    def _check_platforms(cls, value: list[str] | None) -> list[str] | None:
+        unknown = [name for name in value or [] if name not in platforms.PLATFORMS]
+        if unknown:
+            raise ValueError(
+                f"unknown platform(s) {', '.join(unknown)}; use {', '.join(platforms.PLATFORMS)}"
+            )
         return value
 
     @field_validator("secrets", mode="before")
@@ -186,6 +207,19 @@ class GoldenTest(_Model):
         description="The call must fail with an error message containing this text "
         "(for checking that invalid inputs are refused).",
     )
+    platforms: list[str] | None = Field(
+        None,
+        description="Run only on these platforms, e.g. when a package the test needs "
+        "does not exist everywhere (see environment markers).",
+    )
+
+    @field_validator("platforms")
+    @classmethod
+    def _check_platforms(cls, value: list[str] | None) -> list[str] | None:
+        unknown = [name for name in value or [] if name not in platforms.PLATFORMS]
+        if unknown:
+            raise ValueError(f"unknown platform(s) {', '.join(unknown)}")
+        return value
 
 
 class Manifest(_Model):

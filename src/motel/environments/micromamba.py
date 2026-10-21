@@ -17,6 +17,8 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
+from motel import platforms
+
 VERSION = "2.9.0-0"
 _URL = (
     "https://github.com/mamba-org/micromamba-releases/releases/download/{version}/micromamba-{name}"
@@ -38,16 +40,8 @@ class DownloadError(Exception):
 
 def platform_name() -> str | None:
     """micromamba's name for this platform, or None if there is no release for it."""
-    system, machine = platform.system(), platform.machine().lower()
-    names = {
-        ("Darwin", "arm64"): "osx-arm64",
-        ("Darwin", "x86_64"): "osx-64",
-        ("Linux", "x86_64"): "linux-64",
-        ("Linux", "aarch64"): "linux-aarch64",
-        ("Linux", "arm64"): "linux-aarch64",
-        ("Windows", "amd64"): "win-64",
-    }
-    return names.get((system, machine))
+    name = platforms.current()
+    return name if name in _SHA256 else None
 
 
 def enabled() -> bool:

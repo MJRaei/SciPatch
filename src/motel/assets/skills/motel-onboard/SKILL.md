@@ -153,7 +153,7 @@ paper), say exactly that. Matchers: `approx`
 ### 7. Verify and install
 
 ```bash
-motel freeze .          # pin the exact package versions you tested (requirements.lock)
+motel freeze .          # pin the tested packages for every platform (motel.lock)
 motel check . --clean   # rebuild from the pinned repo + patches + lock; golden tests must pass
 motel add .             # install into Motel (use --link while still iterating)
 motel run <name> <function> key=value --json
@@ -170,7 +170,7 @@ results, patches and why they were needed, and the caveats.
 | `motel check DIR [--clean] [--skip-tests]` | build, inspect functions, run golden tests |
 | `motel exec DIR -- CMD ...` | run a command inside the package's environment |
 | `motel patch save DIR -m "why"` | save edits in `DIR/source` as a patch file |
-| `motel freeze DIR` | pin tested package versions into `requirements.lock` |
+| `motel freeze DIR` | pin tested packages for every platform into `motel.lock` |
 | `motel add DIR [--link] [--force]` | install the package |
 | `motel info NAME` | what agents will see |
 | `motel run NAME FUNCTION k=v --json` | try a function |

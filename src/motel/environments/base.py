@@ -9,7 +9,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from motel.errors import BuildError
-from motel.manifest import LOCK_FILENAME, Environment
+from motel.lock import BuildPins
+from motel.manifest import Environment
 from motel.reporting import Reporter
 from motel.runtime.executor import environment_bin_dirs, environment_python, tail
 
@@ -71,22 +72,38 @@ class BuildLog:
             )
 
 
-def pip_arguments(spec: Environment, package_dir: Path, source_dir: Path | None) -> list[str]:
-    """Arguments for ``pip install``: packages, requirements, the source, and the lock.
+def pip_arguments(
+    spec: Environment,
+    package_dir: Path,
+    source_dir: Path | None,
+    constraints: Path | None = None,
+) -> list[str]:
+    """Arguments for ``pip install``: packages, requirements, the source, and constraints.
 
-    The lock (``requirements.lock``) is applied as *constraints*: every package it
-    lists is pinned, while packages it doesn't mention (such as platform-specific
-    GPU libraries) still resolve, so one lock works across operating systems.
+    The pinned versions from ``motel.lock`` are applied as *constraints*: every
+    package listed is pinned, while packages it doesn't mention still resolve.
     """
     args: list[str] = list(spec.packages)
     if spec.requirements:
         args += ["-r", str(package_dir / spec.requirements)]
     if source_dir is not None:
         args += ["--editable", str(source_dir)]
-    lock = package_dir / LOCK_FILENAME
-    if args and lock.is_file():
-        args += ["--constraint", str(lock)]
+    if args and constraints is not None:
+        args += ["--constraint", str(constraints)]
     return args
+
+
+def constraints_file(pins: BuildPins | None, env_dir: Path) -> Path | None:
+    """A constraints file with the pinned PyPI versions for this build, if any."""
+    if pins is None:
+        return None
+    if pins.legacy_constraints is not None:
+        return pins.legacy_constraints
+    if not pins.pip:
+        return None
+    path = env_dir / ".motel-constraints.txt"
+    path.write_text("".join(f"{pin}\n" for pin in pins.pip), encoding="utf-8")
+    return path
 
 
 def activated_environment(env_dir: Path, variables: dict[str, str] | None = None) -> dict[str, str]:
@@ -120,11 +137,13 @@ class EnvironmentBackend(ABC):
         package_dir: Path,
         source_dir: Path | None,
         log: BuildLog,
+        pins: BuildPins | None = None,
     ) -> None:
         """Build the environment from scratch at ``env_dir``.
 
         ``source_dir`` is the upstream checkout to install (editable) into the
         environment, or ``None`` when there is nothing to install from source.
+        ``pins`` are the exact versions from ``motel.lock`` for this platform.
         """
 
     def python(self, env_dir: Path) -> Path:

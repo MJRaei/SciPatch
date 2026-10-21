@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
+import json
 import stat
 from pathlib import Path
 
 import pytest
 
+from motel import platforms
 from motel.app import Motel
 from motel.errors import MotelError, RunError
-from motel.manifest import LOCK_FILENAME, Secret
+from motel.lock import LOCK_FILENAME
+from motel.manifest import Secret
 from motel.secrets import SecretStore
 
 from .conftest import ManifestFactory, requires_uv
@@ -100,19 +103,21 @@ def test_install_asks_for_missing_secrets_before_building(
 
 @pytest.mark.integration
 @requires_uv
-def test_freeze_pins_versions_and_triggers_a_rebuild(
+def test_freeze_pins_every_platform_and_triggers_a_rebuild(
     motel: Motel, make_package: ManifestFactory
 ) -> None:
     package = make_package(functions=["add"])
     with pytest.raises(MotelError, match="no built environment"):
         motel.freeze(str(package))
     first = motel.check(package, run_tests=False)
-    lock, count, env_dir = motel.freeze(str(package))
-    assert lock == package / LOCK_FILENAME
-    assert env_dir == package / ".motel" / "env"
-    text = lock.read_text()
-    assert text.startswith("# Exact versions this tool was tested with")
-    assert count == len([line for line in text.splitlines() if not line.startswith("#")])
-    assert "pip==" in text  # seeded into every environment
+    result = motel.freeze(str(package))
+    assert result.path == package / LOCK_FILENAME
+    assert result.env_dir == package / ".motel" / "env"
+    data = json.loads(result.path.read_text())
+    here = platforms.current()
+    assert data["tested_on"] == here
+    assert set(data["platforms"]) == set(platforms.PLATFORMS)
+    assert here is not None
+    assert any(pin.startswith("pip==") for pin in data["platforms"][here]["pip"])
     second = motel.check(package, run_tests=False)
     assert second.env_fingerprint != first.env_fingerprint  # the lock is part of the build

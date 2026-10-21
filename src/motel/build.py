@@ -28,10 +28,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from motel import golden
+from motel import golden, platforms
 from motel.environments import BuildLog, get_backend
 from motel.errors import BuildError
-from motel.manifest import LOCK_FILENAME, Manifest
+from motel.lock import LEGACY_LOCK_FILENAME, LOCK_FILENAME, pins_for_build
+from motel.manifest import Manifest
 from motel.models import FunctionInfo, GoldenResult
 from motel.reporting import Reporter
 from motel.runtime import executor
@@ -95,7 +96,9 @@ def build(
 ) -> BuildOutcome:
     """Build and verify a tool package. Raises :class:`BuildError` on failure."""
     log = BuildLog(layout.log_path, reporter)
-    warnings: list[str] = []
+    # Before anything is downloaded: can this platform build the tool at all?
+    pins = pins_for_build(manifest, layout.package_dir)
+    warnings: list[str] = list(pins.warnings)
 
     # 1. Source
     source_commit: str | None = None
@@ -136,6 +139,7 @@ def build(
             package_dir=layout.package_dir,
             source_dir=source_install_dir,
             log=log,
+            pins=pins,
         )
         write_env_fingerprint(layout.env_dir, fingerprint)
     else:
@@ -224,7 +228,21 @@ def run_golden_tests(
     manifest: Manifest, runtime: ToolRuntime, package_dir: Path, reporter: Reporter
 ) -> list[GoldenResult]:
     results = []
+    here = platforms.current()
     for test in manifest.golden:
+        if test.platforms and here not in test.platforms:
+            reporter.detail(f"golden test '{test.name}' skipped on {platforms.label(here)}")
+            results.append(
+                GoldenResult(
+                    name=test.name,
+                    function=test.function,
+                    passed=False,
+                    skipped=True,
+                    error=f"skipped: not run on {platforms.label(here)}",
+                    reference=test.reference,
+                )
+            )
+            continue
         missing = [n for n in test.requires if n not in runtime.secrets and not os.environ.get(n)]
         if missing:
             reporter.warn(f"golden test '{test.name}' skipped: needs {', '.join(missing)}")
@@ -295,8 +313,9 @@ def environment_fingerprint(
     for relative in (spec.requirements, spec.conda_file):
         if relative:
             material[relative] = _file_hash(package_dir / relative)
-    if (package_dir / LOCK_FILENAME).is_file():
-        material[LOCK_FILENAME] = _file_hash(package_dir / LOCK_FILENAME)
+    for lock_file in (LOCK_FILENAME, LEGACY_LOCK_FILENAME):
+        if (package_dir / lock_file).is_file():
+            material[lock_file] = _file_hash(package_dir / lock_file)
     blob = json.dumps(material, sort_keys=True).encode()
     return hashlib.sha256(blob).hexdigest()
 

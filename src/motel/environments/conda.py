@@ -14,17 +14,23 @@ from __future__ import annotations
 
 import os
 import shutil
+from collections.abc import Callable
 from pathlib import Path
 
+import yaml
+
+from motel import platforms
 from motel.environments import micromamba
 from motel.environments.base import (
     BuildLog,
     EnvironmentBackend,
     activated_environment,
+    constraints_file,
     pip_arguments,
 )
 from motel.environments.uv import find_uv, install_python_packages
 from motel.errors import BuildError
+from motel.lock import BuildPins
 from motel.manifest import Environment
 from motel.paths import MotelPaths
 
@@ -69,12 +75,54 @@ def find_conda(home: Path | None = None) -> str | None:
     return None
 
 
+INSTALL_HINT = (
+    "Install Miniforge (https://conda-forge.org/download/) or micromamba, "
+    "then run 'motel doctor' again."
+)
+
+
+def conda_frontend(note: Callable[[str], None] = lambda _: None) -> tuple[str, dict[str, str]]:
+    """The conda front end to run, and the process environment to run it with.
+
+    Plain conda is replaced by Motel's own micromamba (downloaded on first use),
+    which is faster and immune to broken conda configurations.
+    """
+    home = MotelPaths.from_env().home
+    conda = find_conda(home)
+    if (conda is None or Path(conda).name.startswith("conda")) and micromamba.enabled():
+        try:
+            conda = str(micromamba.ensure(home))
+            note(f"Using micromamba {micromamba.VERSION} (managed by Motel)")
+        except micromamba.DownloadError as exc:
+            note(f"{exc} Using conda instead.")
+    if conda is None:
+        raise BuildError("conda (or mamba/micromamba) is not installed.", hint=INSTALL_HINT)
+    env = dict(os.environ)
+    if conda == str(micromamba.executable(home)):
+        env["MAMBA_ROOT_PREFIX"] = str(micromamba.root_prefix(home))
+    return conda, env
+
+
+def channels_of(spec: Environment, package_dir: Path) -> list[str]:
+    """The channels to install from: the environment file's, or the manifest's."""
+    if spec.conda_file:
+        data = yaml.safe_load((package_dir / spec.conda_file).read_text(encoding="utf-8")) or {}
+        listed = data.get("channels") if isinstance(data, dict) else None
+        if listed:
+            return [str(channel) for channel in listed]
+    return list(spec.channels)
+
+
+def channel_arguments(channels: list[str]) -> list[str]:
+    """Only these channels: a user's own conda configuration (often with Anaconda's
+    defaults channel) must not change, or slow down, a tool's environment."""
+    arguments = [arg for channel in channels for arg in ("-c", channel)]
+    return ["--override-channels", *arguments] if arguments else []
+
+
 class CondaBackend(EnvironmentBackend):
     name = "conda"
-    install_hint = (
-        "Install Miniforge (https://conda-forge.org/download/) or micromamba, "
-        "then run 'motel doctor' again."
-    )
+    install_hint = INSTALL_HINT
 
     def is_available(self) -> bool:
         return find_conda() is not None or micromamba.enabled()
@@ -87,33 +135,19 @@ class CondaBackend(EnvironmentBackend):
         package_dir: Path,
         source_dir: Path | None,
         log: BuildLog,
+        pins: BuildPins | None = None,
     ) -> None:
-        home = MotelPaths.from_env().home
-        conda = find_conda(home)
-        if (conda is None or Path(conda).name.startswith("conda")) and micromamba.enabled():
-            try:
-                conda = str(micromamba.ensure(home))
-                log.note(f"Using micromamba {micromamba.VERSION} (managed by Motel)")
-            except micromamba.DownloadError as exc:
-                log.note(f"{exc} Using conda instead.")
-        if conda is None:
-            raise BuildError(
-                "conda (or mamba/micromamba) is not installed.", hint=self.install_hint
-            )
-        tool_env = None
-        if conda == str(micromamba.executable(home)):
-            tool_env = {**os.environ, "MAMBA_ROOT_PREFIX": str(micromamba.root_prefix(home))}
+        conda, tool_env = conda_frontend(log.note)
         if env_dir.exists():
             shutil.rmtree(env_dir)
         env_dir.parent.mkdir(parents=True, exist_ok=True)
 
         is_micromamba = Path(conda).name.startswith("micromamba")
-        # Only the manifest's channels: a user's own conda configuration (often with
-        # Anaconda's defaults channel) must not change, or slow down, a tool's environment.
-        channels = [arg for channel in spec.channels for arg in ("-c", channel)]
-        if channels:
-            channels.insert(0, "--override-channels")
-        if spec.conda_file:
+        if pins is not None and pins.conda:
+            # Exactly the packages the tool was tested with (motel.lock).
+            channels = channel_arguments(channels_of(spec, package_dir))
+            command = [conda, "create", "-y", "-p", str(env_dir), *channels, *pins.conda]
+        elif spec.conda_file:
             file = str(package_dir / spec.conda_file)
             command = (
                 [conda, "create", "-y", "-p", str(env_dir), "-f", file]
@@ -121,7 +155,9 @@ class CondaBackend(EnvironmentBackend):
                 else [conda, "env", "create", "-p", str(env_dir), "-f", file]
             )
         else:
-            packages = [f"python={spec.python}", *spec.conda_packages]
+            wanted = platforms.for_this_platform(spec.conda_packages, spec.python)
+            packages = [f"python={spec.python}", *wanted]
+            channels = channel_arguments(spec.channels)
             command = [conda, "create", "-y", "-p", str(env_dir), *channels, *packages]
         hint = "Check the names in environment.conda_packages, channels, or conda_file."
         try:
@@ -154,6 +190,7 @@ class CondaBackend(EnvironmentBackend):
                 "The conda environment has no Python interpreter.",
                 hint="Add 'python' to the dependencies in your environment file.",
             )
+        constraints = constraints_file(pins, env_dir)
         uv = find_uv()
         if uv is not None:
             install_python_packages(
@@ -164,9 +201,10 @@ class CondaBackend(EnvironmentBackend):
                 package_dir=package_dir,
                 source_dir=source_dir,
                 log=log,
+                constraints=constraints,
             )
         else:
-            self._pip_install(python, spec, env_dir, package_dir, source_dir, log)
+            self._pip_install(python, spec, env_dir, package_dir, source_dir, log, constraints)
         self.run_post_install(spec, env_dir=env_dir, package_dir=package_dir, log=log)
 
     @staticmethod
@@ -177,8 +215,9 @@ class CondaBackend(EnvironmentBackend):
         package_dir: Path,
         source_dir: Path | None,
         log: BuildLog,
+        constraints: Path | None,
     ) -> None:
-        args = pip_arguments(spec, package_dir, source_dir)
+        args = pip_arguments(spec, package_dir, source_dir, constraints)
         if args:
             log.run(
                 [str(python), "-m", "pip", "install", *args],

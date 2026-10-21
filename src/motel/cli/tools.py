@@ -19,8 +19,11 @@ from motel.cli._app import PANEL_MANAGE, PANEL_USE, app, get_motel, reporter_of
 from motel.cli.console import console, print_json
 from motel.errors import MotelError
 from motel.keypage import KeyPage
+from motel.lock import platform_summary, unavailable_here
 from motel.manifest import Secret
 from motel.models import FunctionInfo
+from motel.platforms import current as current_platform
+from motel.platforms import label as platform_label
 from motel.registry import InstalledTool
 from motel.schema import type_label
 from motel.search import describe_inputs
@@ -159,6 +162,13 @@ def info(
     )
     if state and state.error:
         lines.append(f"[red]Last error:[/] {escape(state.error)}")
+    summary = platform_summary(installed.package_dir)
+    if summary:
+        supported = [platform_label(name) for name, reason in summary.items() if not reason]
+        lines.append(f"Runs on: {', '.join(supported) or 'no platform'}")
+        for name, reason in summary.items():
+            if reason:
+                lines.append(f"  [dim]Not on {platform_label(name)}: {escape(reason)}[/]")
     available = installed.runtime.secrets
     for secret in manifest.environment.secrets:
         status = (
@@ -253,6 +263,7 @@ def catalog_list(
                     "summary": e.manifest.summary,
                     "domains": e.manifest.domains,
                     "installed": e.manifest.name in installed,
+                    "unavailable_here": unavailable_here(e.folder),
                 }
                 for e in entries
             ]
@@ -262,12 +273,23 @@ def catalog_list(
     table.add_column("Name", style="bold")
     table.add_column("Catalog")
     table.add_column("Summary", overflow="fold")
+    unavailable = 0
     for entry in entries:
         name = entry.manifest.name + (" [green]✓[/]" if entry.manifest.name in installed else "")
-        table.add_row(name, entry.catalog, escape(short(entry.manifest.summary)))
+        reason = unavailable_here(entry.folder)
+        summary = escape(short(entry.manifest.summary))
+        if reason:
+            unavailable += 1
+            name = f"[dim]{name} ✗[/]"
+            summary = (
+                f"[dim]{summary}\nNot for {platform_label(current_platform())}: {escape(reason)}[/]"
+            )
+        table.add_row(name, entry.catalog, summary)
     console.print(table)
     console.print(
-        "\n[green]✓[/] installed.  Install one with [cyan]motel add <name>[/]; "
+        "\n[green]✓[/] installed"
+        + ("  ✗ cannot be installed on this computer" if unavailable else "")
+        + ".  Install one with [cyan]motel add <name>[/]; "
         "add a collection with [cyan]motel catalog add <git-url>[/]."
     )
 

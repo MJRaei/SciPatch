@@ -20,6 +20,7 @@ from typing import Any
 from motel.build import BuildOutcome, runtime_for
 from motel.clients import APPS, AppIntegration, ConnectionStore, get_app, server_command
 from motel.errors import MotelError
+from motel.freeze import FreezeResult
 from motel.history import RunStore
 from motel.installer import Installer, dev_layout
 from motel.manifest import MANIFEST_FILENAME, load_manifest
@@ -107,7 +108,7 @@ class Motel:
     def save_patch(self, target: str, label: str) -> Path | None:
         return self.installer.save_patch(target, label)
 
-    def freeze(self, target: str) -> tuple[Path, int, Path]:
+    def freeze(self, target: str) -> FreezeResult:
         return self.installer.freeze(target)
 
     def exec(self, target: str, command: list[str]) -> int:

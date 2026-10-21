@@ -28,6 +28,7 @@ classifiers = [
 ]
 dependencies = [
     "mcp>=2.3,<3",
+    "packaging>=23",
     "pydantic>=2.7,<3",
     "pyyaml>=6.0",
     "rich>=13.7",

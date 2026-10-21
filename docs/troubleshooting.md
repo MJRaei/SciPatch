@@ -28,6 +28,11 @@ The error shows the last lines of the build log and the log's location
 (`~/.motel/logs/build-<name>.log`). Run again with `--verbose` to see each
 command. Typical causes:
 
+- **"cannot be installed on Windows"** (or another platform): the scientific
+  code has no build for it, so the tool's `motel.lock` marks it unsupported and
+  names what is missing; `motel info <tool>` lists the platforms it runs on. On
+  Windows, codes that exist only for Linux (GPAW, Quantum ESPRESSO, CREST,
+  LAMMPS, AutoDock Vina) can be used from Linux under WSL (`wsl --install`).
 - **No internet connection**: environments download Python and packages.
 - **A package can't be built**: it may need a compiler or system library.
   Tools that need compiled scientific software should use

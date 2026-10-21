@@ -13,9 +13,11 @@ from motel.environments.base import (
     BuildLog,
     EnvironmentBackend,
     activated_environment,
+    constraints_file,
     pip_arguments,
 )
 from motel.errors import BuildError
+from motel.lock import BuildPins
 from motel.manifest import Environment
 
 
@@ -41,6 +43,7 @@ class UvBackend(EnvironmentBackend):
         package_dir: Path,
         source_dir: Path | None,
         log: BuildLog,
+        pins: BuildPins | None = None,
     ) -> None:
         uv = find_uv()
         if uv is None:
@@ -61,6 +64,7 @@ class UvBackend(EnvironmentBackend):
             package_dir=package_dir,
             source_dir=source_dir,
             log=log,
+            constraints=constraints_file(pins, env_dir),
         )
         self.run_post_install(spec, env_dir=env_dir, package_dir=package_dir, log=log)
 
@@ -74,13 +78,14 @@ def install_python_packages(
     package_dir: Path,
     source_dir: Path | None,
     log: BuildLog,
+    constraints: Path | None = None,
 ) -> None:
     """Install PyPI packages, a requirements file, and the upstream source.
 
     The source is installed *editable*: edits and patches in the checkout take
     effect without rebuilding, and no stale cached wheel can shadow them.
     """
-    args = pip_arguments(spec, package_dir, source_dir)
+    args = pip_arguments(spec, package_dir, source_dir, constraints)
     if not args:
         return
     log.run(

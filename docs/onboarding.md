@@ -100,7 +100,8 @@ Add `--verbose` to see each command as it runs.
 
 ## Sharing a tool
 
-1. Pin what you tested: `motel freeze .` writes `requirements.lock`, then
+1. Pin what you tested: `motel freeze .` writes `motel.lock` (exact versions for
+   every platform, and where the tool cannot be installed), then
    `motel check . --clean` confirms the pinned build still passes.
 2. Put the package folder in a git repository (the scaffold's `.gitignore`
    already excludes `source/` and `.motel/`). A **collection** of tools is a

@@ -109,12 +109,31 @@ packages (like the featured `ase-emt`).
 | `packages` | PyPI requirement strings, e.g. `["numpy<2", "torch==2.5.1"]`. |
 | `requirements` | Path to a requirements file in the package. |
 | `conda_packages`, `channels`, `conda_file` | Conda only. |
+| `platforms` | Platforms the tool supports, if fewer than its packages allow: `linux-64`, `linux-aarch64`, `osx-arm64`, `osx-64`, `win-64`. Usually left out; `motel freeze` finds where the packages exist. |
 | `post_install` | Shell commands run in the activated environment after installing (e.g. downloading model weights). |
 | `variables` | Environment variables set for every run. |
 | `secrets` | Secrets the tool needs, such as API keys: names (`[MP_API_KEY]`) or, better, objects with `name`, `description`, and `url` (where to get one), so Motel can ask for them clearly. Each tool receives only the secrets it declares, as environment variables. See [API keys](#api-keys). |
 
 The environment is rebuilt only when something that affects it changes: this
 section, the source commit, the patches, the lock file, or the referenced files.
+
+#### Different packages on different platforms
+
+Any entry of `packages` or `conda_packages` can end with a
+[PEP 508 environment marker](https://packaging.python.org/en/latest/specifications/dependency-specifiers/#environment-markers),
+so it is installed only where it applies:
+
+```yaml
+environment:
+  manager: conda
+  conda_packages: ["openmm=8.6.1", "ambertools=23.3; sys_platform != 'win32'"]
+  packages: ["ovito==3.16.1.post1; sys_platform == 'darwin'",
+             "ovito==3.16.1; sys_platform != 'darwin'"]
+```
+
+Useful markers: `sys_platform` (`linux`, `darwin`, `win32`), `platform_machine`
+(`x86_64`, `arm64`, `aarch64`, `AMD64`), `python_version`. A function that needs
+a package missing on some platform should say so in its error message.
 
 #### API keys
 
@@ -140,13 +159,31 @@ tool packages, run records, or the chat with an AI app. A user can provide one:
 
 An environment variable with the same name takes precedence, which suits CI.
 
-### `requirements.lock`
+### `motel.lock`
 
-The exact package versions a tool was tested with, written by `motel freeze`
-from a working build. It is applied as **constraints**: every package it lists is
-pinned, while packages it doesn't list (such as platform-specific GPU libraries)
-still resolve, so one lock works on macOS and Linux. Freeze every tool you share,
-so others build what you tested.
+The exact packages a tool was tested with, for every platform, written by
+`motel freeze` after `motel check` passes:
+
+- the platform you tested on gets the packages of that working environment;
+- Linux (x86-64 and ARM), macOS (Apple silicon and Intel), and Windows are
+  resolved without installing anything: conda packages by a dry-run solve for
+  that platform, PyPI packages by uv using only prebuilt wheels (pure-Python
+  packages published only as source are allowed). The tested versions are kept
+  wherever they exist; otherwise the lock says which versions differ;
+- a platform where a package does not exist, or would have to be compiled, is
+  marked unavailable with the reason, e.g. "conda-forge has no Windows build of
+  crest =2.12".
+
+Builds install exactly the locked conda packages and use the locked PyPI
+versions as constraints. On a platform marked unavailable, `motel add` stops at
+once with the reason, `motel catalog` shows the tool as not installable there,
+and CI skips it. `motel info` lists where a tool runs.
+
+The lock records a hash of the environment section; when you change the
+requested packages, it is out of date and is not applied until you test and
+freeze again. Freeze every tool you share, so others build what you tested.
+Older packages may still have a `requirements.lock` (one list of PyPI versions);
+it is applied as before until the next `motel freeze` replaces it.
 
 ### `functions`
 
@@ -185,6 +222,7 @@ the relevant caveats.
 | `timeout` | Seconds (default 900). |
 | `requires` | Secrets the test needs, e.g. `[MP_API_KEY]`. Without them the test is skipped, not failed, so the tool still installs. |
 | `raises` | Text the call's error message must contain: the test passes only if the call *fails* this way. Use it to prove that inputs outside the tool's validity are refused, e.g. `raises: "no reliable parameters for Fe"`. |
+| `platforms` | Run only on these platforms (e.g. `[linux-64, osx-arm64, osx-64]`), for tests that need a package some platform lacks. Elsewhere the test is skipped. Pair it with a test for the other platforms that checks the function explains what is missing. |
 
 Each check is a literal (numbers are compared to within about 1e-9) or a matcher:
 

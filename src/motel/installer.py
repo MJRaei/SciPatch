@@ -13,10 +13,10 @@ from motel import __version__
 from motel.build import BuildLayout, BuildOutcome, build, run_golden_tests
 from motel.catalogs import CatalogStore
 from motel.environments import BuildLog
-from motel.environments.uv import UvBackend, find_uv
 from motel.errors import BuildError, MotelError, ToolExistsError, ToolNotFoundError
+from motel.freeze import FreezeResult
+from motel.freeze import freeze as freeze_platforms
 from motel.manifest import (
-    LOCK_FILENAME,
     MANIFEST_FILENAME,
     Manifest,
     Secret,
@@ -25,6 +25,7 @@ from motel.manifest import (
 )
 from motel.models import ToolState, utcnow
 from motel.paths import MotelPaths
+from motel.platforms import label as platform_label
 from motel.registry import InstalledTool, Registry
 from motel.reporting import Reporter
 from motel.runtime.executor import environment_python
@@ -313,13 +314,12 @@ class Installer:
         log = BuildLog(self.paths.logs / "patch.log", self.reporter)
         return SourceCheckout(source_dir, log).save_patch(package_dir / "patches", label)
 
-    def freeze(self, target: str) -> tuple[Path, int, Path]:
-        """Pin the package versions of a built environment into the package's lock file.
+    def freeze(self, target: str) -> FreezeResult:
+        """Pin the packages of a tested environment, and resolve every other platform.
 
         ``target`` is a tool package folder (the one you share). Versions come
         from its development build (``motel check``), or else from the installed
-        tool of the same name. Returns the lock path, the number of pinned
-        packages, and the environment they were read from.
+        tool of the same name; other platforms are resolved without installing.
         """
         package_dir = Path(target).expanduser().resolve()
         if not (package_dir / MANIFEST_FILENAME).is_file():
@@ -328,43 +328,31 @@ class Installer:
                 hint="Freeze the folder you share, e.g. 'motel freeze tools/chgnet'.",
             )
         manifest = load_manifest(package_dir)
-        candidates = [dev_layout(package_dir).env_dir, self.paths.envs / manifest.name]
-        env_dir = next((d for d in candidates if environment_python(d).exists()), None)
-        if env_dir is None:
+        installed = self.paths.envs / manifest.name
+        layouts = [
+            (dev_layout(package_dir).env_dir, dev_layout(package_dir).source_dir),
+            (installed, self.paths.sources / manifest.name),
+        ]
+        found = next(
+            ((env, source) for env, source in layouts if environment_python(env).exists()), None
+        )
+        if found is None:
             raise MotelError(
                 f"'{manifest.name}' has no built environment to read versions from.",
                 hint=f"Build and test it first with 'motel check {target}'.",
             )
-        uv = find_uv()
-        if uv is None:
-            raise BuildError("uv is not installed.", hint=UvBackend.install_hint)
-        python = environment_python(env_dir)
-        frozen = subprocess.run(
-            [uv, "pip", "freeze", "--python", str(python), "--exclude-editable"],
-            capture_output=True,
-            text=True,
-            check=True,
-        ).stdout
-        pins = sorted(
-            (line for line in frozen.splitlines() if line and " @ file://" not in line),
-            key=str.lower,
+        env_dir, source_root = found
+        source = manifest.source
+        source_dir = (
+            source_root / (source.subdirectory or "") if source.repo and source.install else None
         )
-        describe_python = "import platform as p; print(p.python_version(), p.system(), p.machine())"
-        about = subprocess.run(
-            [str(python), "-c", describe_python],
-            capture_output=True,
-            text=True,
-            check=False,
-        ).stdout.strip()
-        lock = package_dir / LOCK_FILENAME
-        lock.write_text(
-            "# Exact versions this tool was tested with, written by 'motel freeze'.\n"
-            f"# Built with Python {about}. Applied as constraints when building the\n"
-            "# environment; packages not listed here resolve normally.\n"
-            + "".join(f"{pin}\n" for pin in pins),
-            encoding="utf-8",
+        return freeze_platforms(
+            manifest,
+            package_dir,
+            env_dir,
+            source_dir,
+            progress=lambda name: self.reporter.detail(f"Resolving for {platform_label(name)}"),
         )
-        return lock, len(pins), env_dir
 
     def _secrets_for(self, manifest: Manifest) -> dict[str, str]:
         return SecretStore(self.paths.secrets).resolve(manifest.environment.secret_names)

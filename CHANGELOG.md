@@ -16,8 +16,20 @@ All notable changes to this project are documented here. The format follows
   workflow that rebuilds changed tools from scratch.
 - Catalogs: `motel catalog add <git-url>` adds a collection of tools; install
   them by name with `motel add <name>`.
-- `motel freeze` pins the exact package versions a tool was tested with
-  (`requirements.lock`, applied as constraints).
+- `motel freeze` pins the exact packages a tool was tested with and resolves it
+  for every platform (Linux x86-64 and ARM, macOS Apple silicon and Intel,
+  Windows) without installing anything, into `motel.lock`: exact conda packages
+  and PyPI versions per platform, or the reason the tool cannot be installed
+  there (e.g. "conda-forge has no Windows build of crest =2.12"). Builds install
+  exactly the locked packages; on an unsupported platform `motel add` stops at
+  once with the reason. `motel info` lists where a tool runs, and `motel catalog`
+  marks tools that cannot be installed on this computer.
+- Package entries, conda ones included, can carry PEP 508 environment markers
+  (`"ambertools=23.3; sys_platform != 'win32'"`) to differ between platforms;
+  `environment.platforms` restricts a tool to some platforms, and golden tests can
+  run only on some (`platforms:`).
+- Tools CI runs on Linux, macOS, and Windows, choosing for each tool the runners
+  its `motel.lock` supports; Motel's own Windows tests are now required.
 - Secrets for tools that call online services; each tool receives only the
   secrets it declares, which can name what they are and where to get one.
   `motel add` asks for missing keys (hidden), the dashboard has a Keys page, and
@@ -41,6 +53,15 @@ All notable changes to this project are documented here. The format follows
   of MD trajectories, with golden tests reproducing the upstream test suite.
 - CHGNet example: MD prints progress and reports `n_frames` and
   `frame_interval_fs`; guidance on `fmax` for cell relaxation.
+
+### Changed
+
+- `motel.lock` replaces `requirements.lock`; an existing `requirements.lock` is
+  still applied until the next `motel freeze`.
+- Tools on Windows: CHGNet installs from its prebuilt PyPI wheels (its source
+  build needs a compiler); OVITO uses Python 3.13 (it has no Windows wheels for
+  3.12); OpenMM simulates biomolecules and water on Windows and explains that
+  small molecules need AmberTools, which has no Windows build.
 
 ### Fixed
 

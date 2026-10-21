@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pytest
 
+from motel import platforms
 from motel.app import Motel
 from motel.errors import BuildError, InvalidArgumentsError, RunError, ToolExistsError
 from motel.installer import dev_layout
@@ -342,3 +343,21 @@ def test_golden_tests_can_require_a_clear_error(
     failures = {result.name: result.failures for result in outcome.golden}
     assert "got ValueError: boom" in failures["wrong message"][0]
     assert "but it succeeded" in failures["does not fail"][0]
+
+
+def test_golden_tests_can_be_limited_to_some_platforms(
+    motel: Motel, make_package: ManifestFactory
+) -> None:
+    here = platforms.current()
+    elsewhere = next(name for name in platforms.PLATFORMS if name != here)
+    golden = [
+        {"name": "here", "function": "add", "args": {"a": 1}, "expect": {"sum": 2},
+         "platforms": [here]},
+        {"name": "elsewhere", "function": "add", "args": {"a": 1}, "expect": {"sum": 99},
+         "platforms": [elsewhere]},
+    ]  # fmt: skip
+    outcome = motel.check(make_package(functions=["add"], golden=golden))
+    results = {result.name: result for result in outcome.golden}
+    assert results["here"].passed
+    assert results["elsewhere"].skipped and not results["elsewhere"].passed
+    assert outcome.tests_passed
