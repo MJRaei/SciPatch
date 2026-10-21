@@ -78,6 +78,7 @@ class ToolState(BaseModel):
     python_version: str | None = None
     env_manager: str = "uv"
     env_fingerprint: str = ""
+    env_size_mb: float | None = None
     source_commit: str | None = None
     functions: list[FunctionInfo] = Field(default_factory=list)
     golden: list[GoldenResult] = Field(default_factory=list)
@@ -99,6 +100,7 @@ class ToolState(BaseModel):
             (count("skipped: needs"), "skipped (missing secrets)"),
             (count("skipped: not run at install"), "more run with 'motel test'"),
             (count("skipped: not run on"), "for other platforms"),
+            (count("skipped: this computer lacks"), "need hardware this computer lacks"),
         ]
         return ", ".join([summary, *(f"{n} {text}" for n, text in reasons if n)])
 

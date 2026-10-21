@@ -11,15 +11,17 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from motel import maturity
+from motel import hardware, maturity
 from motel.app import Match
 from motel.catalogs import CatalogEntry, CatalogStore
-from motel.lock import platform_summary, runs_in_wsl, unavailable_here
+from motel.lock import format_size, platform_summary, runs_in_wsl, tested_size, unavailable_here
+from motel.manifest import Resources
 from motel.models import RunRecord, RunStatus, utcnow
 from motel.platforms import label as platform_label
 from motel.registry import InstalledTool
 from motel.runtime.executor import RESPONSE_FILE, STDOUT_FILE, tail
 from motel.search import describe_inputs
+from motel.settings import Settings
 
 MAX_LIST_ITEMS = 100
 MAX_STRING = 4000
@@ -127,7 +129,7 @@ def run_view(
 
 def match_view(match: Match) -> dict[str, Any]:
     function = match.function
-    return {
+    view = {
         "tool": match.tool.name,
         "function": function.name,
         "summary": function.summary or match.tool.manifest.summary,
@@ -136,12 +138,63 @@ def match_view(match: Match) -> dict[str, Any]:
         "maturity": match.tool.maturity,
         "score": match.hit.score,
     }
+    needs = match.tool.manifest.resources_for(function.name)
+    if words := hardware.describe_needs(needs):
+        view["needs"] = words
+        fit = _fit(needs, match.tool)
+        if fit.blockers:
+            view["cannot_run_here"] = fit.blockers
+        elif fit.warnings:
+            view["warnings"] = fit.warnings
+    return view
+
+
+def _fit(needs: Resources, tool: InstalledTool) -> hardware.Fit:
+    return hardware.assess(needs, hardware.detect(), use_gpu=Settings(tool.paths.config).use_gpu)
+
+
+def resources_view(tool: InstalledTool) -> dict[str, Any]:
+    """What a tool needs, what this computer has, and how they fit (per function if different)."""
+    manifest = tool.manifest
+    needs = manifest.resources_for()
+    view: dict[str, Any] = {
+        "needs": hardware.describe_needs(needs) or ["nothing beyond a CPU"],
+        "this_computer": hardware.detect().summary(),
+        **_fit_view(_fit(needs, tool)),
+    }
+    functions = {}
+    for function in tool.functions:
+        own = manifest.resources_for(function.name)
+        if own != needs:
+            functions[function.name] = {
+                "needs": hardware.describe_needs(own),
+                **_fit_view(_fit(own, tool)),
+            }
+    if functions:
+        view["functions"] = functions
+    size = tool.state.env_size_mb if tool.state else None
+    if size:
+        view["disk_space"] = f"{format_size(size)} for its environment (model files not included)"
+    return view
+
+
+def _fit_view(fit: hardware.Fit) -> dict[str, Any]:
+    view: dict[str, Any] = {"device": fit.device}
+    if fit.blockers:
+        view["cannot_run_here"] = fit.blockers
+    if fit.warnings:
+        view["warnings"] = fit.warnings
+    if fit.notes:
+        view["notes"] = fit.notes
+    return view
 
 
 def installable_view(entry: CatalogEntry) -> dict[str, Any]:
     """A catalog tool that is not installed yet, as find_tools suggests it."""
     manifest = entry.manifest
-    reason = unavailable_here(entry.folder)
+    needs = manifest.resources_for()
+    reason = unavailable_here(entry.folder) or hardware.install_blocker(needs)
+    size = tested_size(entry.folder)
     return {
         "tool": manifest.name,
         "title": manifest.display_title,
@@ -150,6 +203,8 @@ def installable_view(entry: CatalogEntry) -> dict[str, Any]:
         "maturity": manifest.maturity,
         "installable_here": reason is None,
         **({"why_not": reason} if reason else {}),
+        **({"needs": words} if (words := hardware.describe_needs(needs)) else {}),
+        **({"download_size": size} if size else {}),
     }
 
 
@@ -180,6 +235,7 @@ def tool_view(tool: InstalledTool, alternatives: list[str] | None = None) -> dic
         "version": manifest.version,
         "status": tool.status,
         "maturity": maturity_view(tool, alternatives),
+        "resources": resources_view(tool),
         "golden_tests": state.golden_summary if state else "not built",
         "functions": [
             {

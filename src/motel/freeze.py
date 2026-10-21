@@ -24,6 +24,7 @@ from motel import platforms
 from motel.environments.conda import channel_arguments, channels_of, conda_frontend
 from motel.environments.uv import UvBackend, find_uv
 from motel.errors import BuildError
+from motel.hardware import folder_size_mb
 from motel.lock import Lock, PlatformLock, inputs_hash, save
 from motel.manifest import Environment, Manifest
 from motel.runtime.executor import environment_python
@@ -122,7 +123,12 @@ def freeze(
             entries[name] = _resolve_platform(
                 name, spec, package_dir, requirements, host_conda, host_pip, uv, run, has_wheels
             )
-    lock = Lock(inputs=inputs_hash(manifest, package_dir), tested_on=host, platforms=entries)
+    lock = Lock(
+        inputs=inputs_hash(manifest, package_dir),
+        tested_on=host,
+        tested_size_mb=folder_size_mb(env_dir),
+        platforms=entries,
+    )
     return FreezeResult(save(package_dir, lock), host, entries, env_dir, warnings)
 
 

@@ -22,6 +22,12 @@ environment:
   python: "$python"
   packages: []         # extra PyPI requirements, e.g. ["numpy<2", "torch>=2.2"]
 
+# What it needs from the computer; leave it out if a CPU is enough.
+# resources:
+#   gpu: optional      # none | optional (faster with one) | required
+#   memory_gb: 8       # memory recommended for typical inputs
+#   network: false     # true if it calls a web service
+
 entrypoint: api        # the module whose public functions are exposed
 
 # Optional per-function settings:

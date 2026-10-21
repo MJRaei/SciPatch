@@ -178,6 +178,36 @@ class Environment(_Model):
         return self
 
 
+class Resources(_Model):
+    """What a tool, or one of its functions, needs from the computer.
+
+    Unset fields of a function's ``resources`` are taken from the tool's.
+    """
+
+    gpu: Literal["none", "optional", "required"] | None = Field(
+        None, description="'none' (default), 'optional' (faster with one), or 'required'."
+    )
+    gpu_types: list[Literal["cuda", "mps"]] | None = Field(
+        None,
+        description="GPUs it can use: 'cuda' (NVIDIA) and 'mps' (Apple silicon). Default: cuda.",
+    )
+    gpu_memory_gb: float | None = Field(None, gt=0, description="GPU memory it needs, in GB.")
+    memory_gb: float | None = Field(
+        None, gt=0, description="Memory (RAM) recommended for typical inputs, in GB."
+    )
+    network: bool | None = Field(
+        None, description="Needs an internet connection, e.g. to call a web service."
+    )
+
+    def over(self, base: Resources) -> Resources:
+        """These settings, with unset fields taken from ``base``."""
+        return Resources.model_validate({**base.model_dump(), **self.model_dump(exclude_none=True)})
+
+
+#: What a tool needs when its manifest says nothing.
+DEFAULT_RESOURCES = Resources(gpu="none", gpu_types=["cuda"], network=False)
+
+
 class ValueInfo(_Model):
     """Extra meaning for one parameter or output, beyond its Python type."""
 
@@ -194,6 +224,9 @@ class FunctionOptions(_Model):
     )
     cache: bool = Field(True, description="Reuse results of identical earlier calls.")
     timeout: float | None = Field(None, gt=0, description="Seconds before a waiting call gives up.")
+    resources: Resources = Field(
+        default_factory=Resources, description="What this function needs, if not the tool's."
+    )
     params: dict[str, ValueInfo] = Field(default_factory=dict)
     outputs: dict[str, ValueInfo] = Field(default_factory=dict)
 
@@ -266,6 +299,9 @@ class Manifest(_Model):
     authors: list[str] = Field(default_factory=list)
     source: Source = Field(default_factory=Source)
     environment: Environment = Field(default_factory=Environment)
+    resources: Resources = Field(
+        default_factory=Resources, description="What the tool needs from the computer."
+    )
     entrypoint: str = Field("api", description="Python module that defines the functions.")
     functions: dict[str, FunctionOptions] | None = Field(
         None, description="Functions to expose. Omit to expose every public function."
@@ -358,6 +394,11 @@ class Manifest(_Model):
         if self.functions and function in self.functions:
             return self.functions[function]
         return FunctionOptions()
+
+    def resources_for(self, function: str | None = None) -> Resources:
+        """What the tool, or one of its functions, needs, with defaults filled in."""
+        tool = self.resources.over(DEFAULT_RESOURCES)
+        return tool if function is None else self.options_for(function).resources.over(tool)
 
     @property
     def exported_names(self) -> list[str] | None:

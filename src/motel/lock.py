@@ -47,6 +47,8 @@ class Lock(BaseModel):
     lock_version: int = LOCK_VERSION
     inputs: str
     tested_on: str | None = None
+    #: Disk space of the environment on ``tested_on``, as a guide before installing.
+    tested_size_mb: float | None = None
     platforms: dict[str, PlatformLock]
 
     def supported(self) -> list[str]:
@@ -155,6 +157,22 @@ def platform_summary(package_dir: Path) -> dict[str, str | None] | None:
     if lock is None:
         return None
     return {name: entry.unavailable for name, entry in lock.platforms.items()}
+
+
+def tested_size(package_dir: Path) -> str | None:
+    """'about 2.1 GB on macOS (Apple silicon)': the locked environment's size, if measured."""
+    try:
+        lock = load(package_dir)
+    except BuildError:
+        return None
+    if lock is None or lock.tested_size_mb is None:
+        return None
+    where = f" on {platforms.label(lock.tested_on)}" if lock.tested_on else ""
+    return f"about {format_size(lock.tested_size_mb)}{where}"
+
+
+def format_size(size_mb: float) -> str:
+    return f"{size_mb / 1024:.1f} GB" if size_mb >= 1024 else f"{size_mb:.0f} MB"
 
 
 def runs_in_wsl(summary: dict[str, str | None]) -> bool:

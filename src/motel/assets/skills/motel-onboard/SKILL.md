@@ -83,6 +83,11 @@ Edit `environment` in `motel.yaml` (see [references/manifest.md](references/mani
   in and they fail to build on some platform, set `source.install: false` and
   list only what the computation imports.
 - Model weights or data → `post_install` commands.
+- GPU, large memory, or an internet connection → declare them under
+  `resources` (see [references/manifest.md](references/manifest.md)), per
+  function where they differ. Motel refuses what this computer cannot run and
+  tells agents about the rest. Give a `device` parameter the default `"auto"`,
+  meaning `os.environ.get("MOTEL_DEVICE", "cpu")`.
 - API keys → declare each under `environment.secrets` with `name`,
   `description`, and `url` (where to get one); see references/manifest.md. Motel
   asks the user for it on install, on the dashboard, or through a one-time local

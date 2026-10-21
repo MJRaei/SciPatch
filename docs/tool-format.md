@@ -184,6 +184,10 @@ Linux packages but no Windows ones is built and run inside WSL with its locked
 Linux packages (and CI checks it there); write such tools so they need nothing
 but their environment and the files they are given.
 
+The lock also records how much disk space the environment took on the
+platform it was tested on, so people and agents know the download size before
+installing.
+
 The lock records a hash of the environment section; when you change the
 requested packages, it is out of date and is not applied until you test and
 freeze again. Freeze every tool you share, so others build what you tested.
@@ -202,6 +206,7 @@ only some, with settings:
 | `long_running` | Calls return immediately with a run id; agents poll for the result. |
 | `cache` | Reuse results of identical calls (default `true`; turn off for stochastic functions without a seed). |
 | `timeout` | Seconds. |
+| `resources` | What this function needs, if it differs from the tool (see `resources` below). |
 | `params.<name>` | `kind`, `unit`, `description` for a parameter. |
 | `outputs.<key>` | `kind`, `unit`, `description` for a key of the returned dict. |
 
@@ -209,6 +214,36 @@ only some, with settings:
 POSCAR, extended XYZ path), `molecule` (SMILES or SDF/MOL/XYZ path),
 `trajectory`, `spectrum`, `table`, `image`, `file`, `directory`. Relative paths
 in parameters with a file-like kind are resolved from the caller's folder.
+
+### `resources`
+
+What the tool needs from the computer. Leave it out when a CPU, a little memory,
+and no internet connection are enough.
+
+```yaml
+resources:
+  gpu: optional            # none (default) | optional (faster with one) | required
+  gpu_types: [cuda]        # cuda (NVIDIA, the default) and/or mps (Apple silicon)
+  gpu_memory_gb: 16        # GPU memory it needs
+  memory_gb: 8             # memory (RAM) recommended for typical inputs
+  network: false           # true if it calls a web service
+functions:
+  train:
+    resources: {gpu: required, memory_gb: 32}   # a function can need more (or less)
+```
+
+Motel compares this with the computer (`motel doctor` shows what it found):
+
+- A tool that **requires** a GPU the computer lacks is not installed (catalogs
+  and agents see why); a function that requires one is refused with the reason
+  before it starts, and its golden tests are skipped there.
+- Short memory, a GPU smaller than needed, and needing the internet are shown
+  to agents and people (`describe_tool`, `motel info`) before they run anything.
+- Each run is told which device to use in the environment variable
+  `MOTEL_DEVICE`: `cuda`, `mps`, or `cpu`. Tools that require a GPU always get
+  one; tools that are only faster with one use it when the user allows it
+  (`motel config gpu on`), and the CPU otherwise. Golden tests run on the CPU
+  unless the tool requires a GPU, so their values stay reproducible.
 
 ### `validity`
 
@@ -310,6 +345,9 @@ def relax(
   return their relative paths; Motel returns them as absolute paths.
 - Raise `ValueError` with a clear message for bad input. The message is shown
   to the user and the agent.
+- A `device` parameter should default to `"auto"`, meaning the device Motel
+  chose: `os.environ.get("MOTEL_DEVICE", "cpu")`. Then the user's GPU setting
+  applies, and golden tests stay on the CPU.
 - No prompts, windows, or `plt.show()`. Printing is fine; it goes to the run's
   log. While a long job runs, its latest printed lines are shown to agents and
   users (`latest_output`), so print progress such as `step 120/5000`.

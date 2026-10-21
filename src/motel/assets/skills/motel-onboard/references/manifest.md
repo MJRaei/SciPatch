@@ -40,6 +40,13 @@ environment:
       description: Materials Project API key
       url: https://next-gen.materialsproject.org/api   # where to get one
 
+resources:                        # what it needs from the computer (all optional)
+  gpu: optional                   # none (default) | optional | required
+  gpu_types: [cuda]               # cuda (NVIDIA, default) and/or mps (Apple silicon)
+  gpu_memory_gb: null             # GPU memory needed
+  memory_gb: 8                    # RAM recommended for typical inputs
+  network: false                  # true if it calls a web service
+
 entrypoint: api                   # module that defines the functions
 
 functions:                        # optional; omit to expose all public functions
@@ -47,6 +54,7 @@ functions:                        # optional; omit to expose all public function
     long_running: false           # true: agents start it in the background
     cache: true                   # reuse results of identical calls
     timeout: null                 # seconds
+    resources: {}                 # what this function needs, if not the tool's
     params:
       structure: {kind: structure}
       fmax: {unit: eV/Å}

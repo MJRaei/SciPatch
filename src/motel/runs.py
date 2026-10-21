@@ -20,6 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from motel import hardware
 from motel.errors import InvalidArgumentsError, MissingSecretsError, RunError, RunNotFoundError
 from motel.history import RunStore, new_run_id
 from motel.models import FunctionInfo, RunRecord, RunStatus, utcnow
@@ -28,6 +29,7 @@ from motel.registry import InstalledTool
 from motel.runtime import executor
 from motel.runtime.results import absolutize_paths, list_output_files, looks_like_path
 from motel.schema import matches, normalize, type_label
+from motel.settings import Settings
 
 #: Parameter kinds whose values are file or folder paths.
 PATH_KINDS = frozenset(
@@ -69,6 +71,16 @@ class RunManager:
                 hint=f"Rebuild it with 'motel rebuild {tool.name}'.",
             )
         info = tool.function(function)
+        fit = hardware.assess(
+            tool.manifest.resources_for(function),
+            hardware.detect(),
+            use_gpu=Settings(self.paths.config).use_gpu,
+        )
+        if fit.blockers:
+            raise RunError(
+                f"'{tool.name}.{function}' cannot run on this computer: {'; '.join(fit.blockers)}.",
+                hint="Run it on a computer that has what it needs.",
+            )
         runtime = tool.runtime
         missing = [s for s in tool.manifest.environment.secrets if s.name not in runtime.secrets]
         if missing:
@@ -103,7 +115,11 @@ class RunManager:
             arguments,
             workdir=workdir,
             run_dir=run_dir,
-            extra_env={"MOTEL_RUN_ID": run_id, "MOTEL_RUN_DIR": str(run_dir)},
+            extra_env={
+                "MOTEL_RUN_ID": run_id,
+                "MOTEL_RUN_DIR": str(run_dir),
+                "MOTEL_DEVICE": fit.device,
+            },
         )
         record.pid = process.pid
         self.store.insert(record)

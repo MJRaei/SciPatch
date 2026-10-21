@@ -14,10 +14,12 @@ from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 
+from motel import hardware
 from motel.catalogs import DEFAULT_PATH, CatalogStore
 from motel.cli._app import PANEL_MANAGE, PANEL_USE, app, get_motel, reporter_of
 from motel.cli.console import console, print_json
 from motel.errors import MotelError
+from motel.hardware import install_blocker
 from motel.keypage import KeyPage
 from motel.lock import platform_summary, runs_in_wsl, unavailable_here
 from motel.manifest import Secret
@@ -29,10 +31,12 @@ from motel.registry import InstalledTool
 from motel.schema import type_label
 from motel.search import describe_inputs
 from motel.secrets import check_name
+from motel.settings import SETTINGS, Settings
 from motel.views import (
     installable_view,
     match_view,
     maturity_view,
+    resources_view,
     secrets_view,
     tool_summary_view,
     tool_view,
@@ -157,7 +161,9 @@ def find(
     if available:
         console.print("[bold]Not installed yet[/] (install with [cyan]motel add <name>[/]):")
         for entry in available:
-            reason = unavailable_here(entry.folder)
+            reason = unavailable_here(entry.folder) or install_blocker(
+                entry.manifest.resources_for()
+            )
             note = f" [dim](not for this computer: {escape(reason)})[/]" if reason else ""
             level = maturity_label(entry.manifest.maturity)
             console.print(
@@ -220,6 +226,7 @@ def info(
     if state and state.error:
         lines.append(f"[red]Last error:[/] {escape(state.error)}")
     lines.extend(_maturity_lines(installed, alternatives))
+    lines.extend(_resource_lines(installed))
     summary = platform_summary(installed.package_dir)
     if summary:
         supported = [platform_label(name) for name, reason in summary.items() if not reason]
@@ -282,6 +289,21 @@ def _maturity_lines(tool: InstalledTool, alternatives: list[str] | None) -> list
     return lines
 
 
+def _resource_lines(tool: InstalledTool) -> list[str]:
+    view = resources_view(tool)
+    lines = [f"Needs: {escape(', '.join(view['needs']))}"]
+    if "disk_space" in view:
+        lines[0] += f" · uses {escape(view['disk_space'])}"
+    for key, style in (("cannot_run_here", "red"), ("warnings", "yellow"), ("notes", "dim")):
+        lines.extend(f"  [{style}]{escape(text)}[/]" for text in view.get(key, []))
+    for name, function in view.get("functions", {}).items():
+        needs = ", ".join(function["needs"]) or "nothing beyond a CPU"
+        lines.append(f"  [dim]{name}: {escape(needs)}[/]")
+        for key, style in (("cannot_run_here", "red"), ("warnings", "yellow")):
+            lines.extend(f"    [{style}]{escape(text)}[/]" for text in function.get(key, []))
+    return lines
+
+
 def _print_function(tool: str, function: FunctionInfo) -> None:
     console.print()
     title = f"[bold cyan]{function.name}[/]"
@@ -337,7 +359,8 @@ def catalog_list(
                     "domains": e.manifest.domains,
                     "maturity": e.manifest.maturity,
                     "installed": e.manifest.name in installed,
-                    "unavailable_here": unavailable_here(e.folder),
+                    "unavailable_here": unavailable_here(e.folder)
+                    or install_blocker(e.manifest.resources_for()),
                 }
                 for e in entries
             ]
@@ -351,7 +374,7 @@ def catalog_list(
     unavailable = 0
     for entry in entries:
         name = entry.manifest.name + (" [green]✓[/]" if entry.manifest.name in installed else "")
-        reason = unavailable_here(entry.folder)
+        reason = unavailable_here(entry.folder) or install_blocker(entry.manifest.resources_for())
         summary = escape(short(entry.manifest.summary))
         if reason:
             unavailable += 1
@@ -541,6 +564,32 @@ def maturity_command(
         installed = motel.tool(tool)
     for line in _maturity_lines(installed, None):
         console.print(line)
+
+
+@app.command("config", rich_help_panel=PANEL_MANAGE)
+def config_command(
+    name: Annotated[str | None, typer.Argument(help="Setting, e.g. gpu.")] = None,
+    value: Annotated[str | None, typer.Argument(help="New value: on or off.")] = None,
+) -> None:
+    """Show or change settings for this computer, e.g. [cyan]motel config gpu on[/]."""
+    settings = Settings(get_motel().paths.config)
+    if name is None:
+        for key, (_default, meaning) in SETTINGS.items():
+            console.print(f"[bold]{key}[/] {_on_off(settings.get(key))}  [dim]{meaning}[/]")
+        console.print(f"\nThis computer: {escape(hardware.detect().summary())}")
+        return
+    if name not in SETTINGS:
+        raise MotelError(f"No setting named '{name}'.", hint=f"Settings: {', '.join(SETTINGS)}.")
+    if value is not None:
+        choice = value.strip().lower()
+        if choice not in ("on", "off", "true", "false", "yes", "no"):
+            raise MotelError(f"'{value}' is not on or off.")
+        settings.set(name, choice in ("on", "true", "yes"))
+    console.print(f"[bold]{name}[/] {_on_off(settings.get(name))}  [dim]{SETTINGS[name][1]}[/]")
+
+
+def _on_off(value: object) -> str:
+    return "[green]on[/]" if value else "off"
 
 
 @secret_app.command("set")

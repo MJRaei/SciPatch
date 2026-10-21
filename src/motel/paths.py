@@ -79,6 +79,11 @@ class MotelPaths:
         return self.home / "secrets.json"
 
     @property
+    def config(self) -> Path:
+        """The user's settings (``motel config``)."""
+        return self.home / "config.json"
+
+    @property
     def maturity(self) -> Path:
         """Maturity levels the user lowered on this computer."""
         return self.home / "maturity.json"

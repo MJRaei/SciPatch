@@ -396,6 +396,7 @@ def _state_from(outcome: BuildOutcome, manager: str, *, origin: str, linked: boo
         python_version=outcome.python_version,
         env_manager=manager,
         env_fingerprint=outcome.env_fingerprint,
+        env_size_mb=outcome.env_size_mb,
         source_commit=outcome.source_commit,
         functions=outcome.functions,
         golden=outcome.golden,

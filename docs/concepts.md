@@ -48,6 +48,13 @@ similar matches, and experimental tools come with a caution to say so and
 cross-check their numbers. You can lower a tool's level on your computer with
 `motel maturity <tool> experimental`.
 
+Tools also declare what they need from the computer (**resources**: a GPU,
+memory, an internet connection). Motel compares that with the computer before
+installing a tool and before each run: a tool that requires a missing GPU is not
+installed, shortfalls such as low memory are shown to agents before a large
+run, and each run is told which device to use. GPUs speed up tools only when
+you allow it (`motel config gpu on`); tools that require one always use it.
+
 ## 2. Rooms: isolated environments
 
 Every tool gets its own environment, built with uv (PyPI packages) or conda

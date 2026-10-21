@@ -35,6 +35,10 @@ command. Typical causes:
   LAMMPS) run inside WSL: if the message says WSL is not set up, open PowerShell
   as administrator, run `wsl --install`, restart, finish setting up Ubuntu, and
   install the tool again. `motel doctor` shows whether WSL is ready.
+- **"needs an NVIDIA GPU (CUDA); this computer has none"**: the tool cannot run
+  without one, so it is not installed. `motel doctor` shows the GPUs Motel
+  found; NVIDIA GPUs are detected with `nvidia-smi`, which comes with the
+  NVIDIA driver.
 - **No internet connection**: environments download Python and packages.
 - **A package can't be built**: it may need a compiler or system library.
   Tools that need compiled scientific software should use
@@ -63,6 +67,16 @@ The run folder (`~/.motel/runs/<run-id>/`) contains `stdout.log` and
 Runs continue in the background when you stop waiting (Ctrl+C in the terminal,
 or when an AI app's wait ends). Check on them with `motel runs`, and stop one
 with `motel runs cancel <run-id>`.
+
+If the tool is faster on a GPU (`motel info <tool>` says so under "Needs") and
+your computer has a suitable one, let tools use it with `motel config gpu on`.
+It is off by default so that results are reproducible.
+
+## A run fails or crawls on a large input
+
+`motel info <tool>` shows the memory a tool recommends next to what your
+computer has. Try a smaller input first (fewer atoms, a shorter trajectory, a
+smaller basis set), then scale up.
 
 ## A tool shows as "broken"
 

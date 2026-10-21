@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from motel import golden, platforms, wsl
+from motel import golden, hardware, platforms, wsl
 from motel.environments import BuildLog, get_backend
 from motel.environments.inside_wsl import WslBackend
 from motel.errors import BuildError
@@ -67,6 +67,7 @@ class BuildOutcome:
     source_commit: str | None = None
     python_version: str | None = None
     env_fingerprint: str = ""
+    env_size_mb: float | None = None
     warnings: list[str] = field(default_factory=list)
     unsaved_source_changes: list[str] = field(default_factory=list)
 
@@ -115,6 +116,14 @@ def build(
     # Before anything is downloaded: can this platform build the tool at all?
     pins, distro = _pins_for_this_computer(manifest, layout.package_dir)
     warnings: list[str] = list(pins.warnings)
+    fit = hardware.assess(manifest.resources_for(), hardware.detect(), use_gpu=False)
+    if fit.blockers and run_tests:
+        raise BuildError(
+            f"'{manifest.name}' {'; '.join(fit.blockers)}, so its golden tests cannot run here.",
+            hint="Install it on a computer that has one ('--skip-tests' builds it without "
+            "checking it).",
+        )
+    warnings.extend(fit.blockers)
 
     # 1. Source
     source_commit: str | None = None
@@ -164,6 +173,7 @@ def build(
         write_env_fingerprint(layout.env_dir, fingerprint)
     else:
         reporter.detail("Environment is up to date")
+    env_size_mb = None if distro is not None else hardware.folder_size_mb(layout.env_dir)
 
     # 3. Introspection
     reporter.step("Inspecting the tool's functions")
@@ -200,6 +210,7 @@ def build(
         source_commit=source_commit,
         python_version=description.python_version,
         env_fingerprint=fingerprint,
+        env_size_mb=env_size_mb,
         warnings=warnings,
         unsaved_source_changes=unsaved,
     )
@@ -302,6 +313,7 @@ def run_golden_tests(
 ) -> list[GoldenResult]:
     results = []
     here = platforms.current()
+    machine = hardware.detect()
     for test in manifest.golden:
         if only is not None and test not in only:
             results.append(
@@ -328,6 +340,21 @@ def run_golden_tests(
                 )
             )
             continue
+        # Golden tests run on the CPU, for reproducible values, unless a GPU is required.
+        fit = hardware.assess(manifest.resources_for(test.function), machine, use_gpu=False)
+        if fit.blockers:
+            reporter.detail(f"golden test '{test.name}' skipped: {'; '.join(fit.blockers)}")
+            results.append(
+                GoldenResult(
+                    name=test.name,
+                    function=test.function,
+                    passed=False,
+                    skipped=True,
+                    error=f"skipped: this computer lacks what it needs ({'; '.join(fit.blockers)})",
+                    reference=test.reference,
+                )
+            )
+            continue
         missing = [n for n in test.requires if n not in runtime.secrets and not os.environ.get(n)]
         if missing:
             reporter.warn(f"golden test '{test.name}' skipped: needs {', '.join(missing)}")
@@ -346,7 +373,13 @@ def run_golden_tests(
             run_dir = Path(scratch)
             args = golden.resolve_paths(test.args, package_dir)
             response = executor.call_sync(
-                runtime, test.function, args, workdir=run_dir, run_dir=run_dir, timeout=test.timeout
+                runtime,
+                test.function,
+                args,
+                workdir=run_dir,
+                run_dir=run_dir,
+                timeout=test.timeout,
+                extra_env={"MOTEL_DEVICE": fit.device},
             )
             # Check while output files still exist (``exists`` matchers look at them).
             failure = response.get("error") or {}

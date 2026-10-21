@@ -9,13 +9,17 @@ import subprocess
 from dataclasses import dataclass
 from typing import Literal
 
-from motel import __version__, platforms, wsl
+from motel import __version__, hardware, platforms, wsl
 from motel.app import Motel
 from motel.environments import micromamba
 from motel.environments.conda import CondaBackend, find_conda
 from motel.environments.uv import UvBackend, find_uv
 from motel.models import RunStatus
 from motel.onboarding import available_agents
+from motel.settings import Settings
+
+#: Free disk space below which installing tools is likely to fail (environments take GBs).
+LOW_DISK_GB = 10
 
 Level = Literal["ok", "warn", "fail"]
 
@@ -52,6 +56,8 @@ def run_checks(motel: Motel) -> list[Check]:
             None if writable else f"Make {home} writable, or set MOTEL_HOME to another folder.",
         )
     )
+
+    checks.append(_computer(motel))
 
     uv = find_uv()
     checks.append(
@@ -179,3 +185,26 @@ def run_checks(motel: Motel) -> list[Check]:
         )
     )
     return checks
+
+
+def _computer(motel: Motel) -> Check:
+    """Cores, memory, GPUs, free disk space, and whether tools may use the GPU."""
+    machine = hardware.detect()
+    free_gb = shutil.disk_usage(motel.paths.home).free / 1024**3
+    detail = f"{machine.summary()}; {free_gb:.0f} GB free disk"
+    fix = None
+    if machine.gpus:
+        on = Settings(motel.paths.config).use_gpu
+        detail += f"; GPU use {'on' if on else 'off'}"
+        kinds = {gpu.kind for gpu in machine.gpus}
+        faster = [
+            tool.name
+            for tool in motel.tools()
+            for needs in [tool.manifest.resources_for()]
+            if needs.gpu == "optional" and kinds & set(needs.gpu_types or [])
+        ]
+        if faster and not on:
+            fix = f"{', '.join(faster)} can run on this GPU: 'motel config gpu on'."
+    if free_gb < LOW_DISK_GB:
+        return Check("Computer", "warn", detail, "Free disk space: tool environments take GBs.")
+    return Check("Computer", "ok", detail, fix)

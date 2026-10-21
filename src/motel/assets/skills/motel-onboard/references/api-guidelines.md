@@ -88,8 +88,10 @@ def relax(
 
 **Behaviour**
 - Deterministic where possible: fix random seeds, or expose `seed: int = 0`.
-  Default to the CPU when GPU results differ slightly (expose `device` as an
-  option), so golden tests and cached results stay reproducible.
+- GPUs: expose `device: Literal["auto", "cpu", "cuda"] = "auto"`, where "auto"
+  means `os.environ.get("MOTEL_DEVICE", "cpu")`: Motel sets it from the tool's
+  `resources` and the user's setting, and keeps golden tests on the CPU so
+  their values stay reproducible.
 - No interactive input, GUI windows, or `plt.show()`; save figures as PNG.
 - Raise `ValueError` with a helpful message for invalid input. The message
   reaches the agent.

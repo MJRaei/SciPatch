@@ -208,9 +208,10 @@ def call_sync(
     workdir: Path,
     run_dir: Path,
     timeout: float | None = None,
+    extra_env: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Run a call to completion and return the shim's response (used by golden tests)."""
-    process = launch(runtime, function, args, workdir=workdir, run_dir=run_dir)
+    process = launch(runtime, function, args, workdir=workdir, run_dir=run_dir, extra_env=extra_env)
     try:
         process.wait(timeout=timeout)
     except subprocess.TimeoutExpired:

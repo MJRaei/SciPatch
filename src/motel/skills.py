@@ -23,7 +23,7 @@ import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from motel import __version__, frontmatter, maturity
+from motel import __version__, frontmatter, hardware, maturity
 from motel.models import FunctionInfo
 from motel.registry import InstalledTool, Registry
 from motel.schema import type_label
@@ -230,6 +230,8 @@ def render_tool_skill(tool: InstalledTool) -> SkillFiles:
         sections.append("## Usage notes\n\n" + _demote_headings(guide))
     if manifest.validity:
         sections.append("## Before trusting a result\n\n" + manifest.validity.strip())
+    if needs := _needs(tool):
+        sections.append(needs)
     sections.append(_provenance(tool))
 
     files: SkillFiles = {"SKILL.md": frontmatter.render(metadata, "\n\n".join(sections))}
@@ -332,6 +334,32 @@ def _demote_headings(markdown: str, top: int = 3) -> str:
             line = "#" * shift + line
         result.append(line)
     return "\n".join(result)
+
+
+def _needs(tool: InstalledTool) -> str | None:
+    """What the tool needs from the computer (GPU, memory, internet), if anything special."""
+    manifest = tool.manifest
+    overall = manifest.resources_for()
+    lines = []
+    if words := hardware.describe_needs(overall):
+        lines.append(f"- The tool: {', '.join(words)}.")
+    for function in tool.functions:
+        own = manifest.resources_for(function.name)
+        if own != overall:
+            words = hardware.describe_needs(own) or ["nothing beyond a CPU"]
+            lines.append(f"- `{function.name}`: {', '.join(words)}.")
+    if not lines:
+        return None
+    return "\n".join(
+        [
+            "## What it needs",
+            "",
+            *lines,
+            "",
+            f"`motel info {tool.name}` (MCP: `describe_tool`) shows how this fits the computer, "
+            "with warnings to pass on before a large run; runs that cannot work here are refused.",
+        ]
+    )
 
 
 def _provenance(tool: InstalledTool) -> str:

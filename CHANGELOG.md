@@ -25,6 +25,17 @@ All notable changes to this project are documented here. The format follows
   better-established tools for cross-checks, also in their skills. `motel list`,
   `motel info`, `motel catalog`, and the dashboard show the level, and
   `motel maturity <tool> <level>` lowers it on your computer.
+- Hardware needs: tools declare `resources` in `motel.yaml` (a GPU that is
+  optional or required, GPU memory, memory, an internet connection), per
+  function where they differ. Motel detects the computer's cores, memory, and
+  GPUs (NVIDIA through `nvidia-smi`, Apple silicon), refuses to install a tool
+  that requires a missing GPU and refuses such runs with the reason, and shows
+  agents and people how each tool's needs fit this computer (`describe_tool`,
+  `find_tools`, `motel info`, skills). Each run gets `MOTEL_DEVICE` (`cuda`,
+  `mps`, or `cpu`); tools that are only faster on a GPU use it when the user
+  allows it with the new `motel config gpu on`, and golden tests stay on the
+  CPU. `motel doctor` shows the computer, and `motel.lock` records the
+  environment's size, shown before installing.
 - Onboarding: the agent proposes a maturity level for the user to confirm, says
   what each golden test is checked against, and reports anything in the code a
   user should know before running it (network access, writes outside the run

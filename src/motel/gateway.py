@@ -32,6 +32,7 @@ from pydantic import Field
 from motel import __version__
 from motel.app import Motel
 from motel.errors import MissingSecretsError, MotelError
+from motel.hardware import install_blocker
 from motel.installs import BackgroundInstalls
 from motel.keypage import LINK_LIFETIME_SECONDS, KeyPage
 from motel.lock import unavailable_here
@@ -49,11 +50,13 @@ Recommended workflow:
 1. search_history: an earlier run may already answer the question.
 2. find_tools with a plain-language description of what you need. If the best
    match is listed under "not_installed", ask the user whether to install it,
-   naming its maturity level and catalog (installs download packages, often
-   hundreds of MB, and take minutes); if they agree, call install_tool and call
-   it again until it reports "ready".
+   naming its maturity level, catalog, and download_size (installs download
+   packages, often hundreds of MB, and take minutes); if they agree, call
+   install_tool and call it again until it reports "ready".
 3. describe_tool before the first use: parameters and units, usage notes,
-   validity limits, maturity, and how to cite.
+   validity limits, maturity, resources (GPU, memory, internet, and how they
+   fit this computer), and how to cite. Tell the user about any warning before
+   a large run, and start with a small input when memory is short.
 4. run_tool. If it returns status "running", call get_run later with the run_id.
 5. Report numbers with units, the tool and run id, the citation, and any
    validity caveat. Outputs that are files are returned as absolute paths and
@@ -269,7 +272,7 @@ def build_server(motel: Motel) -> MCPServer:
                 hint="Use a name from find_tools. The user can add new tools with "
                 "'motel onboard <repository-url>'.",
             )
-        reason = unavailable_here(entry.folder)
+        reason = unavailable_here(entry.folder) or install_blocker(entry.manifest.resources_for())
         if reason:
             raise MotelError(f"'{tool}' cannot be installed on this computer: {reason}")
         install = installs.start(tool)

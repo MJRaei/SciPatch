@@ -31,7 +31,10 @@ Otherwise use the **`motel` command line** with `--json`.
    minutes), then `motel add <tool>` (MCP: `install_tool`, called again until it
    reports `ready`).
 3. **Read it before running it.** `motel info <tool> --json` (MCP: `describe_tool`)
-   gives parameters with units, usage notes, validity limits, and the citation.
+   gives parameters with units, usage notes, validity limits, the citation, and
+   `resources`: what the tool needs (GPU, memory, internet) and how that fits
+   this computer. Pass any warning on to the user before a large run, and try a
+   small input first when memory is short.
 4. **Run it.**
    `motel run <tool> <function> key=value ... --json` (MCP: `run_tool`).
    - Values are read as JSON when possible: `fmax=0.02`, `elements='["Cu","Au"]'`,
@@ -88,3 +91,4 @@ cross-check key numbers with an established tool that covers the task
 | `motel runs [--tool T] [--search Q] --json` | recent runs, newest first |
 | `motel runs show <run-id> --json` | status, result, files, and error of one run |
 | `motel runs cancel <run-id>` | stop a running job |
+| `motel doctor` | what this computer has (cores, memory, GPU) and what is missing |

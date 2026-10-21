@@ -55,7 +55,7 @@ _SOFTWARE_RECORD = re.compile(r"zenodo|10\.5281/|figshare|10\.6084/", re.I)
 
 def rank(level: str) -> int:
     """0 for established, 1 for published, 2 for experimental."""
-    return LEVELS.index(level)  # type: ignore[arg-type]
+    return LEVELS.index(level)
 
 
 def effective(declared: str, lowered: str | None) -> str:
@@ -84,7 +84,7 @@ def evidence(manifest: Manifest) -> str:
     parts = [f"{kind}: {manifest.source.paper}" if kind else "no publication"]
     checks = [test for test in manifest.golden if test.raises is None]
     if checks:
-        counts = Counter(test.against for test in checks if test.against)
+        counts = Counter(str(test.against) for test in checks if test.against)
         kinds = [
             f"{counts[key]} against {label}"
             for key, label in _AGAINST_LABELS.items()
