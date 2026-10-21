@@ -108,9 +108,10 @@ shapes), **PyXtal** (random crystal structures for structure prediction),
 **xraylarch** (XANES and EXAFS analysis), **synthesis recipes** (precursors and
 temperatures from papers, routes for new materials), **doping knowledge** (what
 papers report about doping layered materials), **AtomBridge** (lattice spacings
-from STEM/TEM images and paper figures), **structural analogs** (same-structure
-compounds for estimates by analogy), and the **Materials Project** database; and
-for chemistry, **PySCF** (ab initio quantum chemistry), **Psi4** (why and how
+from STEM/TEM images and paper figures), **CLUE** (metal or not, explained by
+counterfactual compounds), **structural analogs** (same-structure compounds for
+estimates by analogy), and the **Materials Project** database; and for
+chemistry, **PySCF** (ab initio quantum chemistry), **Psi4** (why and how
 strongly molecules bind: SAPT, CCSD(T)/CBS), **xTB** (fast semiempirical quantum
 chemistry), **CREST** (conformers, protomers, tautomers), **RDKit**
 (cheminformatics), **AiZynthFinder** (synthesis routes from purchasable

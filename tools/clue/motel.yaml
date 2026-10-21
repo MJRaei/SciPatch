@@ -1,0 +1,162 @@
+schema: 1
+name: clue
+version: 0.1.0
+title: Metallicity predictions explained by crystal counterfactuals (CLUE)
+summary: >-
+  CLUE (Crystal Learning for Understandable Explanations): predict whether a crystal
+  is metallic with a random forest trained on JARVIS-DFT, measure crystal similarity
+  (element mover's distance, symmetry-orbit SOAP descriptors, volume per atom), and
+  find counterfactuals, similar Materials Project compounds the model classifies the
+  other way, so their differences explain the prediction.
+domains: [materials]
+tags: [explainable-ai, counterfactual, metallicity, metal, insulator, classification, random-forest,
+       similarity, elmd, soap, materials-project, jarvis, hackathon]
+
+source:
+  repo: https://github.com/epatyukova/llm2025-hackathon-CLUE
+  ref: 02e3e1c87fa406e4181473f71e44933ad47450bd
+  install: false
+  homepage: https://github.com/epatyukova/llm2025-hackathon-CLUE
+  citation: >-
+    CLUE: Crystal Learning for Understandable Explanations (E. Patyukova, 2025 LLM
+    Hackathon for Applications in Materials Science and Chemistry),
+    github.com/epatyukova/llm2025-hackathon-CLUE; training data: K. Choudhary et
+    al., npj Comput. Mater. 6, 173 (2020) (JARVIS); composition distance: C. J.
+    Hargreaves et al., Chem. Mater. 32, 10610 (2020) (ElMD); SOAP: L. Himanen et
+    al., Comput. Phys. Commun. 247, 106949 (2020) (DScribe).
+  license: >-
+    MIT, as declared in the repository's pyproject.toml (it has no LICENSE file);
+    Materials Project data, CC BY 4.0.
+
+environment:
+  manager: uv
+  python: "3.12"
+  # Versions from CLUE's poetry.lock: the model was pickled with scikit-learn 1.7.2,
+  # and its features come from matminer 0.9.3 (which needs SciPy < 1.17).
+  # The Materials Project is queried over its REST API (requests).
+  packages: ["scikit-learn==1.7.2", "matminer==0.9.3", "pymatgen==2025.6.14", "dscribe==2.1.1",
+             "ElMD==0.5.15", "numpy==1.26.4", "scipy==1.16.1", "pandas==2.3.2", "numba==0.59.1",
+             "setuptools==80.10.2", "requests==2.34.2"]
+  # DScribe (SOAP descriptors) has no Linux ARM wheels.
+  platforms: [linux-64, osx-arm64, osx-64, win-64]
+  secrets:
+    - name: MP_API_KEY
+      description: Materials Project API key (for counterfactuals only)
+      url: https://next-gen.materialsproject.org/api
+
+entrypoint: api
+
+functions:
+  predict_metallicity:
+    params:
+      structure: {kind: structure}
+  similarity:
+    params:
+      structure_a: {kind: structure}
+      structure_b: {kind: structure}
+  counterfactuals:
+    long_running: true
+    resources: {network: true}
+    params:
+      structure: {kind: structure}
+
+validity: >-
+  The classifier is a random forest trained on DFT (OptB88vdW) metallicity labels
+  of JARVIS-DFT 3D crystals, with 92% reported test accuracy: semilocal DFT
+  underestimates band gaps, so small-gap semiconductors and correlated oxides can
+  be labelled metallic, and compositions far from the training data are
+  unreliable. Counterfactuals explain the model, not the physics: they show what
+  the model associates with metallicity, which may differ from the true cause.
+  Candidate searches depend on the current Materials Project database and take
+  minutes for common elements. CLUE's element neighbour scale (called a Pettifor
+  scale in its code) holds Pauling-type electronegativities; the composition
+  distance uses the modified Pettifor scale.
+
+maturity: experimental
+
+golden:
+  - name: MgF2 is non-metallic, as in CLUE's own example output
+    quick: true
+    function: predict_metallicity
+    args: {structure: source/data/cif_files/MgF2.cif}
+    expect:
+      is_metal: false
+      prediction: non-metal
+    reference: >-
+      CLUE repository, outputs/Mg2 F4_explaination.txt: "The target sample Mg2F4
+      (MgF2) is predicted non-metallic (property = 0)".
+    against: upstream-tests
+  - name: KB is metallic, as in CLUE's own example output
+    function: predict_metallicity
+    args: {structure: source/data/cif_files/KB.cif}
+    expect:
+      is_metal: true
+    reference: >-
+      CLUE repository, outputs/K4 B4_counterfactuals.csv: the counterfactuals of KB
+      are all predicted non-metallic (property 0), so KB itself is predicted metallic.
+    against: upstream-tests
+  - name: copper is predicted to be a metal
+    function: predict_metallicity
+    args: {structure: tests/data/Cu.cif}
+    expect:
+      is_metal: true
+      metal_vote_fraction: {min: 0.5}
+    reference: >-
+      Copper (fcc, a = 3.61496 Angstrom; Wyckoff 1963, COD 9008468) is a metal.
+    against: independent
+  - name: rock salt is predicted non-metallic
+    function: predict_metallicity
+    args: {structure: tests/data/NaCl.cif}
+    expect:
+      is_metal: false
+      metal_vote_fraction: {max: 0.5}
+    reference: >-
+      NaCl (Wyckoff 1963, COD 9008678) is an insulator with a band gap of about 8.5
+      eV.
+    against: independent
+  - name: a supercell is identical to its parent
+    function: similarity
+    args: {structure_a: tests/data/NaCl.cif, structure_b: tests/data/NaCl_2x2x2.cif}
+    expect:
+      composition_distance_elmd: {approx: 0.0, abs: 1.0e-9}
+      structure_similarity: {approx: 1.0, abs: 1.0e-6}
+      volume_similarity: {approx: 1.0, abs: 1.0e-9}
+      total_similarity: {approx: 1.0, abs: 1.0e-6}
+    reference: >-
+      A 2x2x2 supercell has the same composition, the same symmetry orbits with the
+      same SOAP environments, and the same volume per atom, so every similarity is 1.
+    against: exact
+  - name: the element mover's distance between CaTiO3 and SrTiO3
+    function: similarity
+    args: {structure_a: tests/data/CaTiO3_from_SrTiO3.cif, structure_b: tests/data/SrTiO3.cif}
+    expect:
+      composition_distance_elmd: {approx: 0.2, abs: 1.0e-6}
+      volume_similarity: {approx: 1.0, abs: 1.0e-9}
+    reference: >-
+      ElMD documentation (README, Usage): ElMD("CaTiO3").elmd("SrTiO3") = 0.2 on the
+      modified Pettifor scale; the test CaTiO3 is SrTiO3 with Ca on the Sr site, so the
+      volume per atom is identical.
+    against: upstream-tests
+  - name: MgF2's counterfactuals match CLUE's own example output
+    function: counterfactuals
+    args: {structure: source/data/cif_files/MgF2.cif}
+    requires: [MP_API_KEY]
+    expect:
+      sample.prediction: non-metal
+      counterfactuals.0.formula: MgF3
+      counterfactuals.0.total_similarity: {approx: 0.7299, abs: 0.002}
+      counterfactuals.1.formula: MgZrF6
+      counterfactuals.1.total_similarity: {approx: 0.5951, abs: 0.002}
+      counterfactuals.2.total_similarity: {approx: 0.4639, abs: 0.002}
+    reference: >-
+      CLUE repository, outputs/Mg2 F4_counterfactuals.csv: MgF3 (mp-1185862, total
+      similarity 0.7299), MgZrF6 (mp-1025460, 0.5951), Mg3HfO4 (mp-1099258, 0.4639),
+      all predicted metallic. The Materials Project has since renamed its ids and may
+      add compounds over time.
+    against: upstream-tests
+    timeout: 1800
+  - name: a missing structure file is refused
+    function: predict_metallicity
+    args: {structure: no-such-file.cif}
+    raises: "not found"
+    reference: The tool must report the missing file.

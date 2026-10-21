@@ -19,10 +19,11 @@ All notable changes to this project are documented here. The format follows
   CoolProp, pvlib, Reaktoro, PROPKA, PyXtal, thermo, pyOpenMS, xraylib, Zeo++,
   impedance.py, FiPy, robocrystallographer, Psi4, xraylarch, surfaces (pymatgen
   and WulffPack), lattices from electron micrographs (from the AtomBridge
-  hackathon project), and Opentrons protocol checks and chemical safety (from
-  the Catalyze hackathon project), each with golden tests against upstream test
-  suites, reference databases, or established physics, and a CI workflow that
-  rebuilds changed tools from scratch.
+  hackathon project), Opentrons protocol checks and chemical safety (from the
+  Catalyze hackathon project), and explained metallicity predictions (from the
+  CLUE hackathon project), each with golden tests against upstream test suites,
+  reference databases, or established physics, and a CI workflow that rebuilds
+  changed tools from scratch.
 - Maturity levels: every tool is `established`, `published`, or `experimental`
   (the default), declared as `maturity` in `motel.yaml`, and refused when the
   evidence is missing (a publication, and golden tests whose new `against`
