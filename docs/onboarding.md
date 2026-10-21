@@ -61,7 +61,8 @@ Then repeat this loop until it is right:
 3. **Experiment** inside the environment: `motel exec . -- python`.
 4. **Write functions** in `api.py`; `motel check .` lists them and warns about
    missing type hints or docs.
-5. **Add golden tests** to `motel.yaml`.
+5. **Add golden tests** to `motel.yaml`. Input files go in `tests/data/`, or
+   come from the project itself as `source/<path in the repository>`.
 
 Then `motel check . --clean` and `motel add .`. While iterating on an installed
 tool, `motel add . --link` uses the folder in place.

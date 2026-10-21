@@ -165,8 +165,10 @@ publication), `upstream-tests` (the project's test suite or documentation),
 `exact` (an analytical result, sum rule, symmetry, or count), or `regression`
 (a value this tool produced). Agents see this summary to judge the evidence.
 
-Copy the input files into `tests/data/` (golden tests must not point into
-`source/`, which lives elsewhere once the tool is installed). Set the tolerance
+Put small input files in `tests/data/`. To use the project's own example files
+without copying them (large files, or files you should not redistribute), write
+the path as `source/<path in the repository>`: it refers to the tool's source
+checkout wherever that lives, while developing and once installed. Set the tolerance
 from the precision the paper reports; explain unusual tolerances in `reference`. Also add a test
 proving that an input outside the tool's validity is refused, with
 `raises: "<text of the error message>"` instead of `expect`. Never invent a

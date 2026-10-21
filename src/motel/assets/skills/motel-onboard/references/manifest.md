@@ -94,6 +94,10 @@ publication), `upstream-tests` (the project's test suite or documentation),
 `exact` (an analytical result, sum rule, symmetry, or count), or `regression`
 (this tool's own earlier output). Refusal tests (`raises`) have no `against`.
 
+File paths in `args` are relative to the package folder (`tests/data/Si.cif`);
+`source/...` refers to the repository checkout (the project's own example files),
+before and after installing.
+
 Patches: every `*.patch` or `*.diff` file in `patches/` is applied to the
 checkout in name order. Create them with `motel patch save . -m "reason"`.
 
