@@ -1,0 +1,214 @@
+schema: 1
+name: pyscf
+version: 0.1.0
+title: Ab initio quantum chemistry (PySCF)
+summary: >-
+  Accurate quantum chemistry for molecules with PySCF: Hartree-Fock, DFT with
+  hundreds of functionals, MP2, and coupled cluster CCSD(T) energies; dipole
+  moments, orbital energies and charges; geometry optimization; vibrational
+  frequencies and thermochemistry; and excited states (TDDFT, UV-Vis). Molecules
+  can be given as SMILES, structure files, or coordinates.
+domains: [chemistry]
+tags: [quantum-chemistry, ab-initio, dft, hartree-fock, mp2, ccsd, ccsd(t), coupled-cluster,
+       tddft, excited-states, uv-vis, absorption, geometry-optimization, frequencies,
+       thermochemistry, free-energy, homo-lumo-gap, dipole, basis-set, b3lyp, pyscf, smiles]
+
+source:
+  homepage: https://pyscf.org
+  paper: https://doi.org/10.1063/5.0006074
+  citation: >-
+    Q. Sun et al., "Recent developments in the PySCF program package",
+    J. Chem. Phys. 153, 024109 (2020); Q. Sun et al., "PySCF: the Python-based
+    simulations of chemistry framework", WIREs Comput. Mol. Sci. 8, e1340 (2018).
+    Geometry optimization: L.-P. Wang and C. Song, "Geometry optimization made
+    simple with translation and rotation coordinates", J. Chem. Phys. 144, 214108
+    (2016) (geomeTRIC).
+  license: Apache-2.0
+
+environment:
+  manager: conda
+  python: "3.11"
+  # conda-forge's PySCF is built with OpenMP (multithreaded); the macOS wheels on PyPI are not.
+  conda_packages: ["pyscf=2.14.0", "geometric=1.1.1"]
+  channels: [conda-forge]
+  packages: ["rdkit==2026.9.1"]
+
+entrypoint: api
+
+functions:
+  single_point:
+    params:
+      molecule: {kind: molecule}
+      orbitals_file: {kind: file}
+    outputs:
+      energy_hartree: {unit: Eh}
+      energy_ev: {unit: eV}
+      scf_energy_hartree: {unit: Eh}
+      correlation_energy_hartree: {unit: Eh}
+      triples_correction_hartree: {unit: Eh}
+      homo_ev: {unit: eV}
+      lumo_ev: {unit: eV}
+      homo_lumo_gap_ev: {unit: eV}
+      dipole_debye: {unit: D}
+      mulliken_charges: {unit: e}
+      orbitals_file: {kind: file}
+  optimize:
+    long_running: true
+    params:
+      molecule: {kind: molecule}
+      output: {kind: molecule}
+    outputs:
+      energy_hartree: {unit: Eh}
+      homo_lumo_gap_ev: {unit: eV}
+      dipole_debye: {unit: D}
+      optimized_structure: {kind: molecule}
+  frequencies:
+    long_running: true
+    params:
+      molecule: {kind: molecule}
+      temperature_k: {unit: K}
+      pressure_pa: {unit: Pa}
+    outputs:
+      frequencies_cm1: {unit: cm⁻¹}
+      energy_hartree: {unit: Eh}
+      zero_point_energy_hartree: {unit: Eh}
+      energy_0k_hartree: {unit: Eh}
+      enthalpy_hartree: {unit: Eh}
+      free_energy_hartree: {unit: Eh}
+      entropy_hartree_per_k: {unit: Eh/K}
+      heat_capacity_hartree_per_k: {unit: Eh/K}
+      optimized_structure: {kind: molecule}
+  excited_states:
+    params:
+      molecule: {kind: molecule}
+    outputs:
+      excitation_energies_ev: {unit: eV}
+      wavelengths_nm: {unit: nm}
+
+validity: >-
+  Results are exact for the chosen method and basis set; the choice is what
+  limits accuracy. Hartree-Fock lacks electron correlation (bond energies and
+  barriers are poor). DFT quality depends on the functional: typical errors are
+  2-5 kcal/mol for reaction energies with hybrids like B3LYP or PBE0, larger for
+  barriers, charge transfer, and multireference cases (bond breaking, many
+  transition-metal complexes, diradicals). No dispersion correction (D3/D4) is
+  applied, so non-covalent binding and conformer energies from most functionals
+  are unreliable; use a functional with built-in dispersion such as wb97x-v, or
+  xtb for large systems. "b3lyp" is libxc's B3LYP with the VWN-RPA correlation
+  (as in Gaussian); ORCA and Turbomole use VWN5 ("b3lyp5" here), which shifts
+  absolute energies, so compare only energies computed the same way. MP2 and CCSD(T) need correlation-consistent basis sets (cc-pVTZ or
+  larger) to approach the basis-set limit, and CCSD(T) scales as N^7: practical
+  only for small molecules (roughly up to 10-15 heavy atoms with cc-pVDZ). Small
+  basis sets (sto-3g, 6-31g) are for testing. Calculations are in the gas phase
+  (no solvent model). Frequencies are harmonic (typically 3-5% above experiment
+  for hybrid DFT, about 10% for HF); thermochemistry uses the rigid-rotor
+  harmonic-oscillator model and ideal gas. TDDFT excitation energies are
+  typically within 0.2-0.5 eV for valence states, but charge-transfer and
+  Rydberg states need range-separated functionals and diffuse basis sets.
+
+golden:
+  - name: Hartree-Fock water matches the PySCF test suite
+    function: single_point
+    args: {molecule: tests/data/water.xyz, method: hf, basis: cc-pvdz}
+    expect:
+      energy_hartree: {approx: -76.026765673119627, abs: 0.0000001}
+      dipole_debye: {approx: 2.0584447549532596, abs: 0.0001}
+      n_basis_functions: 24
+      orbitals_file: {exists: true}
+    reference: >-
+      PySCF v2.14.0, pyscf/scf/test/test_rhf.py: test_scf, E(RHF/cc-pVDZ) =
+      -76.026765673119627 Eh (9 decimals), and test_analyze, |dipole| =
+      2.0584447549532596 D, for water at the test's geometry (tests/data/water.xyz).
+  - name: B3LYP water matches the PySCF test suite
+    function: single_point
+    args: {molecule: tests/data/water.xyz, method: b3lyp, basis: 6-31g}
+    expect:
+      energy_hartree: {approx: -76.384928891413438, abs: 0.00005}
+    reference: >-
+      PySCF v2.14.0, pyscf/dft/test/test_h2o.py::test_nr_b3lypg: E(B3LYP/6-31G) =
+      -76.384928891413438 Eh for the same water geometry, on a (50, 194) grid; the
+      default grid used here differs by about 0.00002 Eh. "b3lyp" and "b3lypg" are
+      the same functional in PySCF (libxc's B3LYP, with VWN-RPA).
+  - name: MP2 water matches the PySCF test suite
+    function: single_point
+    args: {molecule: tests/data/water.xyz, method: mp2, basis: cc-pvdz}
+    expect:
+      correlation_energy_hartree: {approx: -0.204019967288338, abs: 0.0000001}
+      energy_hartree: {approx: -76.230785640407965, abs: 0.0000002}
+    reference: >-
+      PySCF v2.14.0, pyscf/mp/test/test_mp2.py::test_mp2: E_corr(MP2/cc-pVDZ, all
+      electrons) = -0.204019967288338 Eh for the same water geometry; the total is
+      that plus the RHF energy above.
+  - name: CCSD(T) water matches the PySCF test suite
+    function: single_point
+    args: {molecule: tests/data/water.xyz, method: ccsd(t), basis: 6-31g}
+    expect:
+      correlation_energy_hartree: {approx: -0.13539788638119823, abs: 0.000001}
+      triples_correction_hartree: {approx: -0.0009964234049929792, abs: 0.0000001}
+    reference: >-
+      PySCF v2.14.0, pyscf/cc/test/test_rccsd.py: test_incore_complete,
+      E_corr(CCSD/6-31G) = -0.13539788638119823 Eh (7 decimals), and test_ccsd_t,
+      E(T) = -0.0009964234049929792 Eh (8 decimals), for the same water geometry.
+  - name: water frequencies and zero-point energy match the PySCF test suite
+    function: frequencies
+    args: {molecule: tests/data/water.xyz, method: hf, basis: sto-3g, optimize_first: false}
+    expect:
+      frequencies_cm1: {length: 3}
+      frequencies_cm1.0: {approx: 2044.5497, abs: 0.01}
+      frequencies_cm1.1: {approx: 4486.6572, abs: 0.01}
+      frequencies_cm1.2: {approx: 4788.2700, abs: 0.01}
+      energy_0k_hartree: {approx: -74.93727546, abs: 0.000001}
+      imaginary_frequencies: 0
+    reference: >-
+      PySCF v2.14.0, pyscf/hessian/test/test_thermo.py::test_thermo (HF/STO-3G
+      water at the same geometry): frequencies 2044.5497, 4486.6572, 4788.2700
+      cm⁻¹ (3 decimals) and E(0 K) = -74.93727546 Eh (7 decimals).
+  - name: excited states of HF match the PySCF test suite
+    function: excited_states
+    args: {molecule: tests/data/hf.xyz, method: hf, basis: 6-31g, tda: true, n_states: 5}
+    expect:
+      excitation_energies_ev.0: {approx: 11.90276464, abs: 0.0001}
+      excitation_energies_ev.1: {approx: 11.90276464, abs: 0.0001}
+      excitation_energies_ev.2: {approx: 16.86036434, abs: 0.0001}
+    reference: >-
+      PySCF v2.14.0, pyscf/tdscf/test/test_tdrhf.py::test_tda_singlet (CIS/6-31G of
+      hydrogen fluoride, H at 0.917 Angstrom): 11.90276464, 11.90276464, 16.86036434
+      eV (5 decimals, converted with 27.2114 eV/Eh; this tool uses CODATA's
+      27.211386, a 0.00001 eV difference).
+  - name: water optimizes to the CCCBDB Hartree-Fock minimum
+    function: optimize
+    args: {molecule: O, method: hf, basis: sto-3g}
+    expect:
+      converged: true
+      energy_hartree: {approx: -74.965901, abs: 0.000002}
+      optimized_structure: {exists: true}
+    reference: >-
+      NIST CCCBDB, Release 22 (May 2022), H2O at HF/STO-3G: optimized energy
+      -74.965901 Eh, r(OH) 0.9894 Angstrom, angle 100.027 degrees (this tool gives
+      0.9894 Angstrom and 100.02 degrees).
+  - name: optimized water has the CCCBDB Hartree-Fock frequencies
+    function: frequencies
+    args: {molecule: O, method: hf, basis: sto-3g}
+    expect:
+      imaginary_frequencies: 0
+      frequencies_cm1.0: {approx: 2170, abs: 1}
+      frequencies_cm1.1: {approx: 4140, abs: 1}
+      frequencies_cm1.2: {approx: 4391, abs: 1}
+    reference: >-
+      NIST CCCBDB, Release 22 (May 2022), H2O at HF/STO-3G: unscaled harmonic
+      frequencies 2170, 4140, 4391 cm⁻¹ (rounded to integers) at the optimized geometry.
+  - name: a radical needs its unpaired electron
+    function: single_point
+    args: {molecule: tests/data/oh.xyz, method: hf, basis: sto-3g}
+    raises: "cannot have 0 unpaired electrons"
+    reference: >-
+      Hydroxyl has 9 electrons, so a closed-shell (0 unpaired electrons)
+      calculation is impossible; the tool must say so instead of failing inside PySCF.
+  - name: radicals from SMILES get their unpaired electron
+    function: single_point
+    args: {molecule: "[OH]", method: hf, basis: sto-3g}
+    expect:
+      unpaired_electrons: 1
+      charge: 0
+      formula: HO
+    reference: The SMILES [OH] has one radical electron, so the doublet is used.

@@ -10,6 +10,7 @@ reproduce published or upstream-tested values on every build.
 | [chgnet](chgnet/) | materials | Energies, forces, stresses, magnetic moments, relaxation, and MD with the CHGNet universal potential | CHGNet's test suite (LiMnO₂ energy and relaxation) |
 | [mace](mace/) | materials, chemistry | The same with MACE-MP (89 elements) and MACE-OFF (organic molecules) | MACE's test suite (water); Si and Al lattice constants vs. experiment |
 | [phonopy](phonopy/) | materials | Phonon bands and DOS, dynamical stability, vibrational free energy and heat capacity | Dulong-Petit limit; Γ-point symmetry of silicon |
+| [pyscf](pyscf/) | chemistry | Ab initio quantum chemistry: HF, DFT, MP2, CCSD(T) energies, optimization, frequencies and thermochemistry, excited states (TDDFT) | PySCF's test suite (water HF, B3LYP, MP2, CCSD(T), frequencies; CIS of HF); NIST CCCBDB |
 | [pymatgen-diffusion](pymatgen-diffusion/) | materials | Diffusivity, ionic conductivity, Haven ratio, and Arrhenius fits from MD trajectories | pymatgen-analysis-diffusion's test suite (LGPS at 600 K) |
 | [pymatgen-structure](pymatgen-structure/) | materials | Space groups, standard cells, supercells, format conversion, XRD patterns, structure matching | pymatgen's XRD tests; olivine and diamond space groups |
 | [materials-project](materials-project/) | materials | Search known materials, stability (energy above hull), properties, and structures | Silicon (mp-149); needs a free API key |
@@ -55,8 +56,10 @@ accepts.
   `pymatgen-diffusion.arrhenius_fit` (activation energy, room-temperature value).
 - **Identify a structure:** `pymatgen-structure.symmetry` and `xrd_pattern`, then
   `compare` with candidates from `materials-project.get_structure`.
-- **Molecules:** `xtb.optimize` from SMILES → `xtb.frequencies` (minimum? free
-  energy) → `mace.predict` with an `off23` model as a second opinion.
+- **Molecules:** `xtb.optimize` from SMILES (fast pre-optimization) →
+  `pyscf.optimize` and `pyscf.frequencies` with DFT (minimum? free energy) →
+  `pyscf.single_point` with a larger basis or `ccsd(t)` for the final energy;
+  `pyscf.excited_states` for UV-Vis.
 
 ## Licenses
 
