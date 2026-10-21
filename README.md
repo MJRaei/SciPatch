@@ -120,12 +120,13 @@ CCSD(T)/CBS), **xTB** (fast semiempirical quantum chemistry), **CREST**
 **PROPKA** (protein pKa and protonation states), **MDAnalysis** (trajectory
 analysis), **NMR mixtures** (mole fractions from crude 1H NMR), **pyOpenMS**
 (mass spectrometry: exact masses, isotope patterns, peptides), **AutoDock Vina**
-(docking), **Catalyze** (Opentrons protocol simulation, GHS hazards), **peptide
-assembly** (self-assembly conditions from similar peptides), **Cantera**
-(combustion chemistry and thermodynamics), **CoolProp** (properties of fluids,
-refrigerants, and humid air), **thermo** (chemical properties and vapor-liquid
-equilibrium), **Reaktoro** (water chemistry and mineral solubility), and
-**pvlib** (sun position and solar PV energy). Every tool reproduces published or
+(docking), **UMA-Dock** (docking scored by machine-learned potentials),
+**Catalyze** (Opentrons protocol simulation, GHS hazards), **peptide assembly**
+(self-assembly conditions from similar peptides), **Cantera** (combustion
+chemistry and thermodynamics), **CoolProp** (properties of fluids, refrigerants,
+and humid air), **thermo** (chemical properties and vapor-liquid equilibrium),
+**Reaktoro** (water chemistry and mineral solubility), and **pvlib** (sun
+position and solar PV energy). Every tool reproduces published or
 upstream-tested values before it installs.
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),

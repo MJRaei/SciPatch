@@ -1,0 +1,116 @@
+diff --git a/code/UMADock/UMADock.py b/code/UMADock/UMADock.py
+index 3f92434..c772a9b 100644
+--- a/code/UMADock/UMADock.py
++++ b/code/UMADock/UMADock.py
+@@ -29,7 +29,6 @@ from ase.md import MDLogger
+ import pandas as pd
+ import matplotlib.pyplot as plt
+ import numpy as np
+-from fairchem.core import FAIRChemCalculator, pretrained_mlip
+ 
+ from rdkit import Chem
+ from rdkit.Chem import AllChem
+@@ -59,6 +58,8 @@ def build_calculator(model="uma", device="cpu", mace_dtype="float64"):
+     """
+     key = (model or "uma").lower().replace("-", "_")
+     if key in ("uma",):
++        # imported here so the other scorers work without fairchem installed
++        from fairchem.core import FAIRChemCalculator, pretrained_mlip
+         name = os.environ.get("UMADOCK_UMA_MODEL", "uma-s-1p1")  # fairchem renamed uma-s-1
+         predictor = pretrained_mlip.get_predict_unit(name, device=device)
+         return FAIRChemCalculator(predictor, task_name="omol")
+diff --git a/code/UMADock/prep_binding_site.py b/code/UMADock/prep_binding_site.py
+index 6df1702..40ca092 100644
+--- a/code/UMADock/prep_binding_site.py
++++ b/code/UMADock/prep_binding_site.py
+@@ -207,6 +207,43 @@ def _select_residues(topology, pos_ang, ligand_resname, cutoff, chain=None):
+     return selected, lig_pts, chain
+ 
+ 
++def _resseq(res):
++    """Sort key for a residue id: its number, then any insertion code ("100A")."""
++    digits = "".join(ch for ch in res.id if ch.isdigit() or ch == "-")
++    try:
++        return (int(digits), res.id)
++    except ValueError:
++        return (0, res.id)
++
++
++def _fill_gaps(selected, max_gap):
++    """Add the protein residues in gaps of up to ``max_gap`` between selected ones.
++
++    Capping both sides of a short gap puts the NME cap of one residue and the ACE
++    cap of the next into the space of the missing residue(s), with overlapping
++    atoms (0.6-0.9 A apart for a one-residue gap); the real residues are used
++    instead, as in QM cluster models.
++    """
++    if max_gap <= 0 or not selected:
++        return selected
++    chosen = {id(r) for r in selected}
++    extra = []
++    by_chain = {}
++    for res in selected:
++        by_chain.setdefault(res.chain, []).append(res)
++    for chain, residues in by_chain.items():
++        numbered = {}
++        for res in chain.residues():
++            if res.name in PROTEIN_RES and res.id.lstrip("-").isdigit():
++                numbered[int(res.id)] = res
++        numbers = sorted(int(r.id) for r in residues if r.id.lstrip("-").isdigit())
++        for a, b in zip(numbers, numbers[1:]):
++            between = range(a + 1, b)
++            if 0 < len(between) <= max_gap and all(n in numbered for n in between):
++                extra += [numbered[n] for n in between if id(numbered[n]) not in chosen]
++    return selected + extra
++
++
+ def _select_metals(topology, pos_ang, lig_pts, cutoff):
+     """Structural metal ions (``SUPPORTED_METAL_RESNAMES``) with a heavy atom
+     within ``cutoff`` A of a ligand heavy atom.
+@@ -307,7 +344,7 @@ def build_cluster(topology, pos_ang, selected):
+     for res in selected:
+         chains.setdefault(res.chain.id, []).append(res)
+     for c in chains:
+-        chains[c].sort(key=lambda r: r.id)
++        chains[c].sort(key=_resseq)  # numerically: "86" before "106"
+ 
+     new_top = app.Topology()
+     new_positions = []           # angstrom
+@@ -478,6 +515,7 @@ def prepare_binding_site(
+     chain: str | None = None,
+     keep_metals: bool = True,
+     constrain_metals: bool = False,
++    fill_gaps: int = 2,
+ ):
+     """Build a UMA-Dock binding-site cluster from any PDB + ligand residue name.
+ 
+@@ -517,6 +555,9 @@ def prepare_binding_site(
+             of a pose's energy comes from ligand movement vs. metal drift, or if
+             you don't trust the MLIP's metal geometry enough to let it move). No
+             effect if ``keep_metals=False`` or no metal is within ``cutoff``.
++        fill_gaps: also include the residues in gaps of up to this many residues
++            between selected ones, instead of capping both sides (whose caps would
++            overlap). Default 2; 0 reproduces the original selection.
+ 
+     Returns:
+         bs_object dict (file_location, name, charge, spin, constraints, size)
+@@ -543,6 +584,11 @@ def prepare_binding_site(
+     print(f"[prep-site] {len(selected)} protein residues within {cutoff} A of "
+           f"ligand {ligand_resname!r} on chain {resolved_chain} "
+           f"({len(lig_pts)} ligand heavy atoms)")
++    filled = _fill_gaps(selected, fill_gaps)
++    if len(filled) > len(selected):
++        print(f"[prep-site] added {len(filled) - len(selected)} residue(s) in gaps of "
++              f"up to {fill_gaps} between selected residues")
++    selected = filled
+ 
+     selected_metals = _select_metals(topology, pos_ang, lig_pts, cutoff) if keep_metals else []
+     if selected_metals:
+@@ -636,6 +682,7 @@ def prepare_binding_site(
+         "spin": spin,
+         "constraints": constraints,
+         "size": size,
++        "residues": [f"{r.name}{r.id}" for r in sorted(selected, key=_resseq)],
+     }
+ 
+ 

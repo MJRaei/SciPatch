@@ -1,0 +1,125 @@
+schema: 1
+name: umadock
+version: 0.1.0
+title: Docking scored by machine-learned potentials (UMA-Dock)
+summary: >-
+  Dock a small molecule into a protein binding site and score it with a
+  machine-learned interatomic potential (AIMNet2 or MACE-OMOL-0), with UMA-Dock:
+  cut a capped, protonated binding-site cluster from any PDB around a crystal ligand,
+  place RDKit conformers, optimize the best poses, and combine the interaction energy
+  with ligand strain and desolvation into a binding energy.
+domains: [chemistry, biology]
+tags: [docking, binding-energy, protein-ligand, mlip, aimnet2, mace, binding-site, cluster-model,
+       pdbfixer, conformers, hackathon]
+
+source:
+  repo: https://github.com/MauricioCafiero/UMADock
+  ref: 8b3b34ab340fa7686bff7fd6928e0c53eefae7a0
+  install: false
+  homepage: https://github.com/MauricioCafiero/UMADock
+  citation: >-
+    UMA-Dock (M. Cafiero, hackathon project, 2025-2026),
+    github.com/MauricioCafiero/UMADock; AIMNet2: D. M. Anstine, R. Zubatyuk, O.
+    Isayev, Chem. Sci. 16, 10228 (2025); MACE-OMOL-0: I. Batatia et al., NeurIPS 35,
+    11423 (2022) and D. S. Levine et al., arXiv:2505.08762 (2025) (OMol25); site
+    repair: P. Eastman et al., OpenMM and PDBFixer.
+  license: >-
+    MIT (UMA-Dock, AIMNet2 code); MACE-OMOL-0 weights, Academic Software License
+    (non-commercial use only).
+
+environment:
+  manager: uv
+  python: "3.12"
+  # PyTorch and RDKit have no Intel macOS wheels.
+  platforms: [linux-64, linux-aarch64, osx-arm64, win-64]
+  packages: ["openmm==8.6.1", "pdbfixer==1.12.0", "rdkit==2026.9.1", "ase==3.29.0", "torch==2.14.1",
+             "aimnet==0.2.0", "mace-torch==0.3.16", "py3Dmol==2.5.5", "pandas==3.0.6",
+             "matplotlib==3.11.2", "numpy==2.5.4"]
+  post_install:
+    # Download the AIMNet2 model now, so docking works offline.
+    - python -c "from aimnet.calculators import AIMNet2Calculator; AIMNet2Calculator('aimnet2-2025', device='cpu')"
+
+resources:
+  gpu: optional
+
+entrypoint: api
+
+functions:
+  prepare_site:
+    params:
+      pdb: {kind: structure}
+      cutoff_angstrom: {unit: Å}
+    outputs:
+      site: {kind: file}
+      cluster_xyz: {kind: molecule}
+  dock:
+    long_running: true
+    params:
+      site: {kind: file}
+    outputs:
+      best_binding_kcal_mol: {unit: kcal/mol}
+      best_complex_xyz: {kind: molecule}
+
+validity: >-
+  The binding energy is an electronic energy for one optimized pose in a small
+  gas-phase cluster of the pocket (residues near a crystal ligand, alpha carbons
+  fixed), corrected for ligand strain and an explicit desolvation estimate; it
+  omits entropy, the rest of the protein, and conformational sampling of the
+  pocket, so it ranks ligands for one site rather than predicting affinities, and
+  different potentials give different magnitudes (UMA-Dock reports -35, -24, and
+  -5 kcal/mol for paracetamol in SULT1A3 with UMA, AIMNet2, and MACE-OMOL-0).
+  Poses come from random placement, so results vary with the seed and number of
+  tries. The site must be defined by a crystal ligand. AIMNet2 covers H, B, C, N,
+  O, F, Si, P, S, Cl, As, Se, Br, and I only (no metals). On a CPU a run takes
+  tens of minutes.
+
+maturity: experimental
+
+golden:
+  - name: UMA-Dock's documented SULT1A3 pocket (original selection)
+    quick: true
+    function: prepare_site
+    args: {pdb: source/data/pdbs/2A3R.pdb, ligand_resname: LDP, chain: A, fill_gaps: 0, name: SULT1A3}
+    expect:
+      atoms: 275
+      charge: -1
+      fixed_atoms: 10
+    reference: >-
+      UMA-Dock README ("Prepare a binding site", 2A3R chain A, ligand LDP, 4 Angstrom,
+      pH 7) and data/sites/SULT1A3.meta.json: 275 atoms, 10 residues, net charge -1,
+      10 alpha-carbon constraints.
+    against: upstream-tests
+  - name: filling the one-residue gaps removes overlapping cap atoms
+    function: prepare_site
+    args: {pdb: source/data/pdbs/2A3R.pdb, ligand_resname: LDP, chain: A, name: SULT1A3}
+    expect:
+      overlapping_pairs_below_0_9_angstrom: 0
+      min_interatomic_distance_angstrom: {min: 0.9}
+      fixed_atoms: 12
+      residues: {contains: LYS147}
+    reference: >-
+      No two atoms of a sound structure are closer than 0.9 Angstrom (the shortest
+      bonds, O-H, are 0.96 Angstrom). In the original selection GLU146 and ALA148 are
+      kept but not residue 147, so the NME and ACE caps placed on either side overlap
+      (atoms 0.5-0.9 Angstrom apart); keeping the two gap residues (12 residues, 12
+      fixed alpha carbons) removes the overlap.
+    against: exact
+  - name: paracetamol binds favourably in the SULT1A3 pocket (AIMNet2)
+    function: dock
+    args: {smiles: "CC(=O)Nc1ccc(O)cc1", site: tests/data/SULT1A3_site/SULT1A3.json, conformers: 3,
+           tries: 200, seed: 1}
+    expect:
+      best_binding_kcal_mol: {max: 0.0}
+      conformers: {length: 3}
+    reference: >-
+      UMA-Dock README ("Validated result: paracetamol / SULT1A3", 3 conformers x 200
+      tries): all three scorers give a negative (favourable) electronic binding
+      energy, AIMNet2 -23.74 kcal/mol. The magnitude depends on the scorer, sampling,
+      and the site (here with the gap residues filled), so only the sign is checked.
+    against: upstream-tests
+    timeout: 3600
+  - name: an unknown ligand residue is refused
+    function: prepare_site
+    args: {pdb: source/data/pdbs/2A3R.pdb, ligand_resname: XYZ}
+    raises: "no ligand residue named"
+    reference: The tool must report that the ligand that defines the site is missing.

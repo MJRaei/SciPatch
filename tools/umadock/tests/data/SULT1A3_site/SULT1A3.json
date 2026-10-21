@@ -1,0 +1,47 @@
+{
+  "file_location": "SULT1A3.xyz",
+  "name": "SULT1A3",
+  "charge": 0,
+  "spin": 1,
+  "constraints": [
+    8,
+    39,
+    66,
+    98,
+    122,
+    144,
+    155,
+    184,
+    216,
+    231,
+    253,
+    263
+  ],
+  "size": 284,
+  "residues": [
+    "PHE24",
+    "PRO47",
+    "PHE81",
+    "ASP86",
+    "LYS106",
+    "SER107",
+    "HIS108",
+    "PHE142",
+    "GLU146",
+    "LYS147",
+    "ALA148",
+    "HIS149"
+  ],
+  "pdb": "2A3R.pdb",
+  "ligand_resname": "LDP",
+  "chain": "A",
+  "cutoff_angstrom": 4.0,
+  "ph": 7.0,
+  "fill_gaps": 2,
+  "elements": [
+    "C",
+    "H",
+    "N",
+    "O"
+  ]
+}

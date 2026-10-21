@@ -21,7 +21,8 @@ All notable changes to this project are documented here. The format follows
   and WulffPack), lattices from electron micrographs (from the AtomBridge
   hackathon project), Opentrons protocol checks and chemical safety (from the
   Catalyze hackathon project), explained metallicity predictions (from the CLUE
-  hackathon project), and narrated science videos (from the AtomicShorts
+  hackathon project), narrated science videos (from the AtomicShorts hackathon
+  project), and docking scored by machine-learned potentials (from the UMA-Dock
   hackathon project), each with golden tests against upstream test suites,
   reference databases, or established physics, and a CI workflow that rebuilds
   changed tools from scratch.
