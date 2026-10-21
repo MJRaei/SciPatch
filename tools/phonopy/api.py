@@ -107,11 +107,15 @@ def phonons(
     if displacement_angstrom <= 0:
         raise ValueError("displacement_angstrom must be positive.")
     if supercell is None:
-        supercell = [max(1, math.ceil(MIN_SUPERCELL_LENGTH / length)) for length in atoms.cell.lengths()]
+        supercell = [
+            max(1, math.ceil(MIN_SUPERCELL_LENGTH / length)) for length in atoms.cell.lengths()
+        ]
     if len(supercell) != 3 or any(int(n) != n or n < 1 for n in supercell):
         raise ValueError("supercell must be three positive integers, e.g. [2, 2, 2].")
 
-    phonon = Phonopy(_phonopy_atoms(atoms), supercell_matrix=np.diag(supercell), primitive_matrix="auto")
+    phonon = Phonopy(
+        _phonopy_atoms(atoms), supercell_matrix=np.diag(supercell), primitive_matrix="auto"
+    )
     phonon.generate_displacements(distance=displacement_angstrom)
     displaced = phonon.supercells_with_displacements
     force_field = _calculator(calculator, device)

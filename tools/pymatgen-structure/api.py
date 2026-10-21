@@ -19,7 +19,7 @@ def _read(path: str):
 
     try:
         return Structure.from_file(path)
-    except Exception:  # noqa: BLE001 - try ASE's readers next
+    except Exception:  # try ASE's readers next
         from ase.io import read
         from pymatgen.io.ase import AseAtomsAdaptor
 

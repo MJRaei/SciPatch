@@ -104,9 +104,7 @@ def relax(
         raise ValueError("fmax must be positive (eV/Å).")
     crystal = _structure(structure)
     optimizer = StructOptimizer(model=_model(model), use_device=_device(device))
-    result = optimizer.relax(
-        crystal, fmax=fmax, steps=steps, relax_cell=relax_cell, verbose=False
-    )
+    result = optimizer.relax(crystal, fmax=fmax, steps=steps, relax_cell=relax_cell, verbose=False)
     final = result["final_structure"]
     trajectory = result["trajectory"]
     final.to(filename=output)

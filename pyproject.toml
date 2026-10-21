@@ -90,6 +90,8 @@ ignore = [
 # The shim runs inside tool environments on Python 3.8+, so it keeps old idioms.
 "src/motel/runtime/shim.py" = ["UP", "PTH", "S110", "S112"]
 "src/motel/catalog/**" = ["UP", "PTH", "N"]
+# Tool packages follow the conventions of the scientific code they wrap (α, μ in docstrings).
+"tools/**" = ["PTH", "N", "RUF002"]
 
 [tool.ruff.format]
 docstring-code-format = true

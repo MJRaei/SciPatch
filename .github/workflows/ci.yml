@@ -19,8 +19,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync --locked
-      - run: uv run ruff check src tests
-      - run: uv run ruff format --check src tests
+      - run: uv run ruff check src tests tools
+      - run: uv run ruff format --check src tests tools
       - run: uv run mypy
 
   test:

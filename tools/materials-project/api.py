@@ -63,6 +63,12 @@ def _summary(doc) -> dict:
     }
 
 
+def _hull_order(material: dict) -> float:
+    """Sort key: energy above the hull, unknown values last."""
+    value = material["energy_above_hull_ev_per_atom"]
+    return float("inf") if value is None else value
+
+
 def search(
     formula: str | None = None,
     chemsys: str | None = None,
@@ -107,9 +113,7 @@ def search(
             chunk_size=max_results,
         )
         version = rester.get_database_version()
-    materials = sorted((_summary(doc) for doc in docs), key=lambda m: (
-        m["energy_above_hull_ev_per_atom"] if m["energy_above_hull_ev_per_atom"] is not None else 1e9
-    ))  # fmt: skip
+    materials = sorted((_summary(doc) for doc in docs), key=_hull_order)
     return {"database_version": version, "n_results": len(materials), "materials": materials}
 
 
