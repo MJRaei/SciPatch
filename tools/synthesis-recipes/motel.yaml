@@ -1,0 +1,136 @@
+schema: 1
+name: synthesis-recipes
+version: 0.1.0
+title: Synthesis recipes from similar materials (SKY)
+summary: >-
+  Published synthesis recipes for inorganic materials (precursors, reactions,
+  temperatures, times, atmospheres; 41,300 text-mined solid-state and sol-gel
+  recipes), the Materials Project compositions most similar to a formula, and
+  suggested routes for new materials from similar materials with known recipes.
+domains: [materials, chemistry]
+tags: [synthesis, synthesis-planning, recipes, precursors, solid-state, sol-gel, calcination,
+       sintering, annealing, temperature, text-mining, literature, similarity, magpie,
+       composition, materials-project, inorganic, retrosynthesis, sky]
+
+source:
+  repo: https://github.com/hspark1212/synthesis-agent
+  ref: 672a67db6df8652a5855ebe5f5600cce230f2077
+  install: false
+  homepage: https://github.com/hspark1212/synthesis-agent
+  citation: >-
+    SKY, Synthesis Knowledge Yield agent (hackathon project, 2025),
+    github.com/hspark1212/synthesis-agent; recipes: O. Kononova et al., "Text-mined
+    dataset of inorganic materials synthesis recipes", Sci. Data 6, 203 (2019), as
+    served by the Materials Project; composition features: L. Ward et al., npj
+    Comput. Mater. 2, 16028 (2016) (Magpie) and Comput. Mater. Sci. 152, 60 (2018)
+    (matminer).
+  license: >-
+    MIT, as stated in the repository's README (it has no LICENSE file); recipe data
+    from the Materials Project, CC BY 4.0.
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["matminer==0.10.1", "pymatgen==2026.9.24", "h5py==3.16.0",
+             "scikit-learn==1.9.1", "numpy==2.5.4"]
+
+resources:
+  memory_gb: 2  # the recipes and composition index take about 1 GB while a call runs
+
+entrypoint: api
+
+functions:
+  similar_materials:
+    outputs:
+      similar: {description: "Nearest compositions; distance in standardized Magpie feature units"}
+  recipes:
+    outputs:
+      highest_temperature_c: {unit: °C}
+  suggest_routes:
+    outputs:
+      routes: {description: "Source materials with recipes, nearest composition first"}
+
+validity: >-
+  Recipes are text-mined from paper abstracts and experimental sections, and the
+  extraction makes mistakes: precursors can be missed or misread (e.g. "LiHO" for
+  LiOH, a metal named in a hydroxide procedure), and temperatures or times can be
+  attached to the wrong step. Treat a recipe as a pointer to its paper (DOI) and
+  check the paper before planning an experiment. The data covers solid-state and
+  sol-gel syntheses reported up to about 2019-2020 and matches targets by reduced
+  formula, so doped and non-stoichiometric variants are separate entries.
+  Similarity is between compositions only (Magpie elemental statistics), not
+  structures or phases: polymorphs share one entry, and a similar composition
+  does not mean the same synthesis will work. Suggested routes are starting
+  points from analogous chemistry, not predictions that the target forms; the
+  thermodynamic stability of the target is a separate question (use
+  materials-project or ml-potentials).
+
+maturity: experimental
+
+golden:
+  - name: a material with recipes is its own first route
+    quick: true
+    function: suggest_routes
+    args: {formula: LiCoO2, count: 2}
+    expect:
+      routes.0.source: LiCoO2
+      routes.0.distance: {approx: 0.0, abs: 1.0e-6}
+      routes.0.add_elements: {length: 0}
+    reference: >-
+      Identical compositions have identical Magpie features, so a target that has
+      recipes is at distance 0 from itself. (This test also builds the index of
+      recipe targets once, at install.)
+    against: exact
+  - name: a formula is its own nearest Materials Project composition
+    function: similar_materials
+    args: {formula: Fe2O3, count: 3}
+    expect:
+      similar.0.formula: Fe2O3
+      similar.0.distance: {approx: 0.0, abs: 1.0e-6}
+      similar.1.distance: {min: 1.0e-6}
+    reference: >-
+      Identical compositions have identical Magpie features; polymorphs share one
+      entry, so the next formula is a different composition.
+    against: exact
+  - name: LiCoO2 solid-state recipes summarize to Co3O4 + Li2CO3 at about 850 C
+    function: recipes
+    args: {formula: LiCoO2, synthesis_type: solid-state, limit: 2}
+    expect:
+      total: 113
+      common_precursors.0.precursors: Co3O4 + Li2CO3
+      common_precursors.0.recipes: 45
+      highest_temperature_c.median: {approx: 850.0, abs: 0.1}
+    reference: >-
+      Counts in the bundled text-mined dataset (synthesis-agent at commit 672a67d):
+      113 distinct solid-state LiCoO2 recipes, 45 of them from Co3O4 + Li2CO3, with
+      a median highest heating temperature of 850 C over the 85 recipes that state
+      one. This checks that the tool reads and summarizes the data, not the data.
+    against: regression
+  - name: a composition is matched however it is written
+    function: recipes
+    args: {formula: Li2CoMn3O8}
+    expect:
+      formula: Li2Mn3CoO8
+      total: 12
+    reference: >-
+      The bundled dataset has 12 distinct recipes for this composition: 10 written
+      LiMn1.5Co0.5O4 and 2 written Li2CoMn3O8 (same atomic fractions; pymatgen
+      writes the reduced formula as Li2Mn3CoO8).
+    against: regression
+  - name: a new NCA composition gets its routes from commercial NCA
+    function: suggest_routes
+    args: {formula: LiNi0.85Co0.1Al0.05O2, count: 2}
+    expect:
+      routes.0.source: Li1Al0.05Co0.15Ni0.8O2
+      routes.0.distance: {min: 0.01, max: 0.5}
+      routes.0.add_elements: {length: 0}
+      routes.0.remove_elements: {length: 0}
+    reference: >-
+      LiNi0.85Co0.1Al0.05O2 has no recipes of its own; the nearest composition with
+      recipes is LiNi0.8Co0.15Al0.05O2, the standard NCA cathode composition, with
+      the same elements in slightly different amounts.
+  - name: text that is not a chemical formula is refused
+    function: recipes
+    args: {formula: Xq2O3}
+    raises: "is not a chemical formula"
+    reference: Xq is not an element; the tool must say so rather than return nothing.

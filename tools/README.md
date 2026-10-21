@@ -24,6 +24,7 @@ reproduce published or upstream-tested values on every build.
 | [pyscf](pyscf/) | chemistry | Linux, macOS, Windows | Ab initio quantum chemistry: HF, DFT, MP2, CCSD(T) energies, optimization, frequencies and thermochemistry, excited states (TDDFT) | established | PySCF's test suite (water HF, B3LYP, MP2, CCSD(T), frequencies; CIS of HF); NIST CCCBDB |
 | [quantum-espresso](quantum-espresso/) | materials | Linux, macOS, Windows (WSL) | Plane-wave DFT with the verified SSSP pseudopotentials: energies, forces, stress, relaxation, equation of state, gaps, magnetism | established | Quantum ESPRESSO's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
 | [rdkit](rdkit/) | chemistry | Linux, macOS, Windows | Similarity and substructure search, 3D conformers (ETKDG + MMFF94), standardization with InChI/InChIKey | established | RDKit's documentation (doctested similarities and searches); PubChem identifiers |
+| [synthesis-recipes](synthesis-recipes/) | materials, chemistry | Linux, macOS, Windows | Published synthesis recipes (41,300 text-mined solid-state and sol-gel recipes: precursors, reactions, temperatures, times, atmospheres, DOIs), similar Materials Project compositions, and suggested routes for new materials from their closest analogs; from the SKY hackathon agent | experimental | Exact composition-identity checks; recipe counts of the bundled dataset; NCA analog for a new NCA composition |
 | [vina](vina/) | chemistry, biology | Linux, macOS, Windows | Protein-ligand docking: receptor and ligand preparation (SMILES or SDF), ranked poses with Vina/Vinardo scores, RMSD to a known pose, rescoring and local optimization | established | Vina's 1IEP tutorial (imatinib redocked within 2 Å, -13.2 kcal/mol), from the crystal ligand and from SMILES |
 | [xtb](xtb/) | chemistry | Linux, macOS, Windows | GFN2-xTB energies, optimization, frequencies, and thermochemistry for molecules, with implicit solvent | established | xtb's test suite (propyne; GBSA solvation) |
 
@@ -85,6 +86,10 @@ accepts.
   `ml-potentials.molecular_dynamics` at several temperatures
   (several ps each) → `pymatgen-diffusion.analyze_trajectory` →
   `pymatgen-diffusion.arrhenius_fit` (activation energy, room-temperature value).
+- **How to make it?** `materials-project.details` (is the target stable?) →
+  `synthesis-recipes.recipes` (precursors and temperatures from papers) or, for
+  a new composition, `synthesis-recipes.suggest_routes` (closest analogs with
+  recipes) → read the cited papers before going to the lab.
 - **Identify a structure:** `pymatgen-structure.symmetry` and `xrd_pattern`, then
   `compare` with candidates from `materials-project.get_structure`.
 - **Molecules:** `xtb.optimize` from SMILES (fast pre-optimization) →

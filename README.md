@@ -97,11 +97,12 @@ model comparison), **GPAW** and **Quantum ESPRESSO** (DFT for crystals),
 **LAMMPS** (classical MD), **OVITO** (crystal structure, defects, dislocations),
 **phonopy** (phonons and stability), **phono3py** (thermal conductivity),
 **pymatgen-diffusion** (ion transport from MD), **pymatgen-structure**
-(symmetry, supercells, XRD), and the **Materials Project** database; and for
-chemistry, **PySCF** (ab initio quantum chemistry), **xTB** (fast semiempirical
-quantum chemistry), **CREST** (conformers, protomers, tautomers), **RDKit**
-(cheminformatics), **Open Babel** (chemical file formats, force fields),
-**OpenMM** (molecular dynamics), **MDAnalysis** (trajectory analysis),
+(symmetry, supercells, XRD), **synthesis recipes** (precursors and temperatures
+from papers, routes for new materials), and the **Materials Project** database;
+and for chemistry, **PySCF** (ab initio quantum chemistry), **xTB** (fast
+semiempirical quantum chemistry), **CREST** (conformers, protomers, tautomers),
+**RDKit** (cheminformatics), **Open Babel** (chemical file formats, force
+fields), **OpenMM** (molecular dynamics), **MDAnalysis** (trajectory analysis),
 **AutoDock Vina** (docking), and **Cantera** (combustion chemistry and
 thermodynamics). Every tool reproduces published or upstream-tested values
 before it installs.
