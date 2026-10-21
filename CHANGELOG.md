@@ -17,9 +17,9 @@ All notable changes to this project are documented here. The format follows
   materials from papers (from ARIA), structural analogs in the Materials Project
   (from mp-property-analogies), pycalphad, PyBaMM, RASPA3, AiZynthFinder,
   CoolProp, pvlib, Reaktoro, PROPKA, PyXtal, thermo, pyOpenMS, xraylib, Zeo++,
-  impedance.py, FiPy, and robocrystallographer, each with golden tests against
-  upstream test suites, reference databases, or established physics, and a CI
-  workflow that rebuilds changed tools from scratch.
+  impedance.py, FiPy, robocrystallographer, and Psi4, each with golden tests
+  against upstream test suites, reference databases, or established physics, and
+  a CI workflow that rebuilds changed tools from scratch.
 - Maturity levels: every tool is `established`, `published`, or `experimental`
   (the default), declared as `maturity` in `motel.yaml`, and refused when the
   evidence is missing (a publication, and golden tests whose new `against`

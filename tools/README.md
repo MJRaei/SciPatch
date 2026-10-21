@@ -27,6 +27,7 @@ reproduce published or upstream-tested values on every build.
 | [phono3py](phono3py/) | materials | Linux, macOS, Windows | Lattice thermal conductivity vs temperature (RTA or full Boltzmann), from DFT forces or a universal ML potential | established | phono3py's test suite (Si with PBEsol forces, with and without isotopes) |
 | [phonopy](phonopy/) | materials | Linux, macOS, Windows | Phonon bands and DOS, dynamical stability, vibrational free energy and heat capacity | established | Dulong-Petit limit; Γ-point symmetry of silicon |
 | [propka](propka/) | biology, chemistry | Linux, macOS, Windows | Protein pKa values and protonation states (PROPKA 3): pKa of every titratable group, protonation and charge at a chosen pH, net charge and isoelectric point, charge and folding free energy versus pH, comparison with measured values | established | NMR pKa values of lysozyme (Bartik et al. 1994, via PKAD-2); PROPKA's own regression test (HIV-1 protease with inhibitor); lysozyme disulfides and charge |
+| [psi4](psi4/) | chemistry, materials | Linux, macOS, Windows | Intermolecular interaction energies: SAPT decomposition (electrostatics, exchange, induction, dispersion; open shell too), counterpoise-corrected HF, MP2, CCSD(T), DFT-D3, or CCSD(T)/CBS composites; S22 and S66 benchmark complexes | established | Psi4's own SAPT0 tests (water dimer, S22 ethene-ethyne, open-shell LiH); the S66 water dimer's CCSD(T)/CBS benchmark reproduced with the same recipe |
 | [pvlib](pvlib/) | engineering | Linux, macOS, Windows | Solar energy: sun position (NREL SPA), sunrise and sunset, clear-sky irradiance, typical-year weather for any land location (PVGIS), and annual and monthly energy of fixed-tilt PV systems (PVWatts model: specific yield, capacity factor, performance ratio) | established | NREL SPA worked example; US Naval Observatory sunrise and sunset; PVGIS's own PV calculator for Munich; horizontal-plane identity |
 | [pybamm](pybamm/) | materials, chemistry, engineering | Linux, macOS, Windows | Lithium-ion cells with physics-based models (Doyle-Fuller-Newman, single-particle): discharge curves, capacity and energy, rate capability, heating, CC-CV and other cycling protocols, with published cell parameters (LG M50 21700 and others) | established | LG M50 specification (18.2 Wh, ≥ 4.85 Ah, 3.63 V) at C/5; exact charge conservation over a CC-CV cycle |
 | [pycalphad](pycalphad/) | materials | Linux, macOS, Windows | Alloy thermodynamics (CALPHAD): stable phases and their compositions, liquidus, solidus, and phase fractions during solidification, binary phase diagrams; COST507 light alloys and other published databases, or your own TDB | established | ITS-90 melting point of Al; Al-Si eutectic (Murray & McAlister 1984); Pb-Sn solder eutectic |
@@ -187,6 +188,9 @@ accepts.
 - **Mass spectrometry:** `pyopenms.mass` and `pyopenms.isotope_pattern` for the
   expected ions → compare with the measured spectrum; for proteins
   `pyopenms.digest` → `pyopenms.fragment_ions` for the peptides of interest.
+- **Why do two molecules bind?** `crest.conformer_search` or `xtb.optimize` on
+  the complex → `psi4.sapt` (electrostatics, exchange, induction, dispersion) →
+  `psi4.interaction_energy` with DFT-D3 or, for small complexes, CCSD(T)/CBS.
 - **Chemical files:** `openbabel.convert` and `openbabel.identifiers` move
   molecules between programs and formats and give InChIKeys for lookups.
 
@@ -200,11 +204,11 @@ original sources at install time and are not redistributed here. Small test
 inputs taken from upstream projects (the LAMMPS benchmark input, the Vina 1IEP
 tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory,
 molecules of the MMFF94 validation suite, MixSense's example spectra,
-impedance.py's example spectrum, robocrystallographer's test structures, crystal
-structures from the Crystallography Open Database, IZA zeolite frameworks,
-RASPA3's HKUST-1 structure, PROPKA's 1HPX test structure, an OpenMS example
-spectrum, and a PVGIS typical year for Munich from the European Commission's
-JRC) keep their sources' terms; each golden test names its source.
+impedance.py's example spectrum, Psi4's test complexes, robocrystallographer's
+test structures, crystal structures from the Crystallography Open Database, IZA
+zeolite frameworks, RASPA3's HKUST-1 structure, PROPKA's 1HPX test structure, an
+OpenMS example spectrum, and a PVGIS typical year for Munich from the European
+Commission's JRC) keep their sources' terms; each golden test names its source.
 
 ## Adding a tool
 

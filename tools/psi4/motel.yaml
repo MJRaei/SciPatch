@@ -1,0 +1,131 @@
+schema: 1
+name: psi4
+version: 0.1.0
+title: Intermolecular interactions (Psi4)
+summary: >-
+  Interaction energies between two molecules with Psi4: SAPT energy decomposition
+  into electrostatics, exchange, induction, and dispersion (closed and open shell);
+  counterpoise-corrected supermolecular energies at HF, MP2, CCSD(T), DFT-D3, or
+  complete-basis-set composite levels; and the S22 and S66 benchmark complexes with
+  their reference CCSD(T)/CBS energies.
+domains: [chemistry, materials]
+tags: [interaction-energy, sapt, energy-decomposition, noncovalent, hydrogen-bond, pi-stacking,
+       dispersion, counterpoise, bsse, ccsd(t), cbs, mp2, dft-d3, s22, s66, host-guest, psi4]
+
+source:
+  homepage: https://psicode.org
+  paper: https://doi.org/10.1063/5.0006002
+  citation: >-
+    D. G. A. Smith et al., "Psi4 1.4: Open-source software for high-throughput
+    quantum chemistry", J. Chem. Phys. 152, 184108 (2020); SAPT levels: T. M. Parker
+    et al., J. Chem. Phys. 140, 094106 (2014); S22: P. Jurecka et al., Phys. Chem.
+    Chem. Phys. 8, 1985 (2006), S22B energies: M. S. Marshall et al., J. Chem. Phys.
+    135, 194102 (2011); S66: J. Rezac, K. E. Riley, P. Hobza, J. Chem. Theory Comput.
+    7, 2427 (2011).
+  license: LGPL-3.0 (Psi4); LGPL-3.0 (s-dftd3, gCP)
+
+environment:
+  manager: conda
+  python: "3.12"
+  # dftd3-python and gcp-correction provide -D3 dispersion and the -3c methods.
+  conda_packages: ["psi4=1.11", "dftd3-python=1.6.0", "gcp-correction=2.3.2"]
+  channels: [conda-forge]
+
+resources:
+  memory_gb: 4
+
+entrypoint: api
+
+functions:
+  sapt:
+    long_running: true
+    params:
+      dimer: {kind: molecule}
+      memory_gb: {unit: GB}
+  interaction_energy:
+    long_running: true
+    params:
+      dimer: {kind: molecule}
+      memory_gb: {unit: GB}
+  benchmark_dimers:
+    params:
+      output: {kind: molecule}
+
+validity: >-
+  Interaction energies are for the given rigid geometries (no relaxation,
+  vibrational zero-point, or temperature effects), in the gas phase. Accuracy
+  depends on the level: SAPT0/jun-cc-pVDZ is fast and relies on error
+  cancellation (Parker et al. 2014), so larger basis sets do not improve it;
+  SAPT2+ levels in aug-cc-pVDZ or larger are more accurate but much slower;
+  supermolecular MP2 overbinds pi-stacked complexes; counterpoise-corrected
+  CCSD(T)/CBS composites are the benchmark standard. SAPT components depend on
+  level and basis, so compare decompositions only at the same level. Cost grows
+  steeply with size: SAPT0 and DFT-D3 suit complexes of tens of atoms, CCSD(T)
+  only small ones.
+
+maturity: established
+
+golden:
+  - name: SAPT0 water dimer matches Psi4's own test
+    quick: true
+    function: sapt
+    args: {dimer: tests/data/water_dimer.xyz, basis: aug-cc-pVDZ, freeze_core: false,
+           options: {e_convergence: 1.0e-8, d_convergence: 1.0e-8}}
+    expect:
+      components.electrostatics.hartree: {approx: -0.01337793703, abs: 1.0e-6}
+      components.exchange.hartree: {approx: 0.01121567840, abs: 1.0e-6}
+      components.induction.hartree: {approx: -0.00352435852, abs: 1.0e-6}
+      components.dispersion.hartree: {approx: -0.00289879691, abs: 1.0e-6}
+      dominant_attraction: electrostatics
+    reference: >-
+      Psi4 test suite, tests/sapt-compare (SAPT0/aug-cc-pVDZ water dimer, all
+      electrons): electrostatics -0.01337793703, exchange 0.01121567840, induction
+      -0.00352435852, dispersion -0.00289879691 hartree.
+    against: upstream-tests
+  - name: SAPT0 ethene-ethyne (S22 complex 16) matches Psi4's tutorial test
+    function: sapt
+    args: {dimer: tests/data/ethene_ethyne.xyz, options: {df_basis_elst: jun-cc-pVDZ-RI}}
+    expect:
+      components.electrostatics.hartree: {approx: -0.003378388762, abs: 1.0e-6}
+      components.exchange.hartree: {approx: 0.003704416103, abs: 1.0e-6}
+      components.induction.hartree: {approx: -0.000889316601, abs: 1.0e-6}
+      components.dispersion.hartree: {approx: -0.001672292164, abs: 1.0e-6}
+      total.hartree: {approx: -0.002235581423, abs: 1.0e-6}
+    reference: >-
+      Psi4 test suite, tests/tu5-sapt (SAPT0/jun-cc-pVDZ, frozen core,
+      jun-cc-pVDZ-RI electrostatics fitting basis): -0.003378388762, 0.003704416103,
+      -0.000889316601, -0.001672292164; total -0.002235581423 hartree.
+    against: upstream-tests
+  - name: open-shell SAPT0 (Li and H doublets) matches Psi4's test
+    function: sapt
+    args: {dimer: tests/data/LiH_doublets.xyz, basis: aug-cc-pVDZ, fragment_a_atoms: 1,
+           multiplicity_a: 2, multiplicity_b: 2, freeze_core: false,
+           options: {basis_guess: 3-21g, guess: sad, scf_type: mem_df,
+                     e_convergence: 1.0e-12, d_convergence: 1.0e-12}}
+    expect:
+      components.electrostatics.hartree: {approx: -0.00812748122, abs: 1.0e-6}
+      components.exchange.hartree: {approx: 0.04066764554, abs: 1.0e-6}
+      components.induction.hartree: {approx: -0.01571323800, abs: 1.0e-6}
+      components.dispersion.hartree: {approx: -0.00265456046, abs: 1.0e-6}
+      total.hartree: {approx: 0.01417236585, abs: 1.0e-6}
+    reference: >-
+      Psi4 test suite, tests/sapt9 (UHF-based SAPT0/aug-cc-pVDZ, Li and H doublets 2
+      Angstrom apart): total 0.01417236585 hartree.
+    against: upstream-tests
+  - name: the S66 water dimer reproduces its CCSD(T)/CBS benchmark
+    function: interaction_energy
+    args: {benchmark: S66-1, method: "mp2/aug-cc-pv[tq]z + D:ccsd(t)/aug-cc-pvdz"}
+    expect:
+      interaction_energy.kcal_mol: {approx: -4.918, abs: 0.02}
+      counterpoise_corrected: true
+    reference: >-
+      J. Rezac, K. E. Riley, P. Hobza, J. Chem. Theory Comput. 7, 2427 (2011), S66
+      complex 1 (water dimer): -4.918 kcal/mol, from counterpoise-corrected MP2/CBS
+      (aug-cc-pVTZ and aug-cc-pVQZ) plus a CCSD(T) correction in aug-cc-pVDZ, the
+      same recipe as computed here.
+    against: independent
+  - name: a call without a complex is refused
+    function: sapt
+    args: {}
+    raises: "Give either dimer"
+    reference: The tool must ask for a geometry or a benchmark complex.

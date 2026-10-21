@@ -108,8 +108,9 @@ lines), **synthesis recipes** (precursors and temperatures from papers, routes
 for new materials), **doping knowledge** (what papers report about doping
 layered materials), **structural analogs** (same-structure compounds for
 estimates by analogy), and the **Materials Project** database; and for
-chemistry, **PySCF** (ab initio quantum chemistry), **xTB** (fast semiempirical
-quantum chemistry), **CREST** (conformers, protomers, tautomers), **RDKit**
+chemistry, **PySCF** (ab initio quantum chemistry), **Psi4** (why and how
+strongly molecules bind: SAPT, CCSD(T)/CBS), **xTB** (fast semiempirical quantum
+chemistry), **CREST** (conformers, protomers, tautomers), **RDKit**
 (cheminformatics), **AiZynthFinder** (synthesis routes from purchasable
 compounds), **Open Babel** (chemical file formats, force fields), **OpenMM**
 (molecular dynamics), **PROPKA** (protein pKa and protonation states),
