@@ -1,0 +1,89 @@
+schema: 1
+name: phonopy
+version: 0.1.0
+title: Phonons and thermal properties (phonopy)
+summary: >-
+  Phonon band structures, densities of states, dynamical stability, and
+  vibrational thermodynamics (free energy, entropy, heat capacity) of crystals,
+  using phonopy with forces from the CHGNet universal potential or EMT.
+domains: [materials]
+tags: [phonons, phonon-band-structure, phonon-dos, dynamical-stability, imaginary-modes,
+       thermal-properties, heat-capacity, free-energy, entropy, vibrational, raman, phonopy, chgnet]
+
+source:
+  homepage: https://phonopy.github.io/phonopy/
+  paper: https://doi.org/10.1088/1361-648X/acd831
+  citation: >-
+    A. Togo, L. Chaput, T. Tadano, I. Tanaka, "Implementation strategies in
+    phonopy and phono3py", J. Phys.: Condens. Matter 35, 353001 (2023); A. Togo,
+    I. Tanaka, "First principles phonon calculations in materials science",
+    Scr. Mater. 108, 1-5 (2015); forces from CHGNet: B. Deng et al., Nat. Mach.
+    Intell. 5, 1031-1041 (2023).
+  license: BSD-3-Clause
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["phonopy==4.8.3", "seekpath==2.2.2", "chgnet==0.4.2", "ase==3.29.0"]
+
+entrypoint: api
+
+functions:
+  phonons:
+    params:
+      structure: {kind: structure}
+      displacement_angstrom: {unit: Å}
+      temperatures_k: {unit: K}
+    outputs:
+      gamma_frequencies_thz: {unit: THz}
+      gamma_frequencies_cm1: {unit: cm⁻¹}
+      min_frequency_thz: {unit: THz}
+      max_frequency_thz: {unit: THz}
+      zero_point_energy_kj_mol: {unit: kJ/mol}
+      band_plot: {kind: image}
+      dos_plot: {kind: image}
+      parameters: {kind: file}
+
+validity: >-
+  Harmonic phonons from finite displacements: no anharmonic effects, thermal
+  expansion, or phonon-phonon scattering, so thermal properties are reliable
+  well below melting and the heat capacity approaches the Dulong-Petit limit at
+  high temperature. Accuracy is set by the force model. Universal ML potentials
+  such as CHGNet systematically soften the potential-energy surface and
+  underestimate phonon frequencies, often by 10-20% (silicon's Γ optical mode is
+  12.9 THz with CHGNet against 15.6 THz measured); see Deng et al., npj Comput.
+  Mater. 11, 9 (2025), doi:10.1038/s41524-024-01500-6. Use the results for
+  dynamical stability screening and trends, and DFT phonons for quantitative
+  frequencies. EMT applies only to Al, Cu, Ag, Au, Ni, Pd, Pt. The structure must
+  be relaxed with the same force model, otherwise residual forces distort the
+  result. Small imaginary frequencies (above -0.05 THz) near Γ are treated as
+  numerical noise.
+
+golden:
+  - name: Cu heat capacity reaches the Dulong-Petit limit (EMT)
+    function: phonons
+    args: {structure: tests/data/Cu_fcc_primitive.cif, calculator: emt, temperatures_k: [1500]}
+    expect:
+      dynamically_stable: true
+      thermal.0.heat_capacity_per_atom_j_k_mol: {approx: 24.943, rel: 0.01}
+    reference: >-
+      Dulong-Petit law: the harmonic heat capacity tends to 3R = 24.943 J/(K mol)
+      per atom far above the Debye temperature (about 343 K for copper). The
+      structure is fcc Cu at EMT's equilibrium lattice constant (3.590 Å, from
+      the ase-emt tool).
+  - name: Si is stable, with zero acoustic and degenerate optical modes at Γ (CHGNet)
+    function: phonons
+    args: {structure: tests/data/Si_diamond.cif}
+    expect:
+      dynamically_stable: true
+      n_primitive_atoms: 2
+      gamma_frequencies_thz.0: {approx: 0.0, abs: 0.01}
+      gamma_frequencies_thz.2: {approx: 0.0, abs: 0.01}
+      gamma_frequencies_thz.3: {approx: 12.94, abs: 0.05}
+      gamma_frequencies_thz.5: {approx: 12.94, abs: 0.05}
+    reference: >-
+      Acoustic sum rule (three zero-frequency modes at Γ) and the triply
+      degenerate optical mode of the diamond structure. 12.94 THz is a regression
+      value for CHGNet 0.3.0 at the experimental lattice constant; the measured
+      Raman frequency is about 15.6 THz (520 cm⁻¹), illustrating the systematic
+      softening noted under validity.
