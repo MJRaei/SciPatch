@@ -1,0 +1,91 @@
+schema: 1
+name: materials-project
+version: 0.1.0
+title: Materials Project database
+summary: >-
+  Look up known inorganic materials in the Materials Project database: search by
+  formula, elements, or chemical system; thermodynamic stability (energy above
+  the convex hull) and formation energy; band gap, density, magnetism, and
+  elastic moduli; and download crystal structures.
+domains: [materials]
+tags: [database, materials-project, mp-api, convex-hull, stability, energy-above-hull,
+       formation-energy, band-gap, crystal-structure, cif, known-materials, dft]
+
+source:
+  homepage: https://next-gen.materialsproject.org
+  paper: https://doi.org/10.1063/1.4812323
+  citation: >-
+    A. Jain et al., "Commentary: The Materials Project: A materials genome
+    approach to accelerating materials innovation", APL Mater. 1, 011002 (2013);
+    data access through the mp-api client. Cite the database version reported
+    with each result.
+  license: BSD-3-Clause (client); Materials Project data under CC BY 4.0
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["mp-api==0.46.5"]
+  secrets: [MP_API_KEY]
+
+entrypoint: api
+
+functions:
+  search:
+    outputs:
+      energy_above_hull_ev_per_atom: {unit: eV/atom}
+      formation_energy_ev_per_atom: {unit: eV/atom}
+      band_gap_ev: {unit: eV}
+  details:
+    outputs:
+      energy_above_hull_ev_per_atom: {unit: eV/atom}
+      band_gap_ev: {unit: eV}
+      bulk_modulus_vrh_gpa: {unit: GPa}
+  get_structure:
+    outputs:
+      structure: {kind: structure}
+
+validity: >-
+  Materials Project values are DFT calculations (mostly PBE/PBE+U, with r2SCAN
+  for part of the database), not measurements: band gaps are typically
+  underestimated (silicon's 1.12 eV gap is about 0.6 eV), lattice constants are
+  ~1% too large, and energies above the hull carry roughly 20-50 meV/atom of
+  uncertainty, so slightly unstable materials (< 50 meV/atom) may still be
+  synthesizable. Values change between database versions; report the version
+  returned with each result. Energies computed with other methods (including
+  ML potentials) are only comparable with MP's after the same compatibility
+  corrections. Requires an internet connection and a free API key.
+
+golden:
+  - name: silicon's only stable phase is diamond (mp-149)
+    function: search
+    args: {formula: Si, stable_only: true}
+    requires: [MP_API_KEY]
+    expect:
+      materials.0.material_id: mp-149
+      materials.0.space_group_number: 227
+      materials.0.energy_above_hull_ev_per_atom: {approx: 0.0, abs: 0.000001}
+    reference: >-
+      Diamond-structure silicon (Fd-3m, No. 227) is the ground state of Si and
+      has Materials Project ID mp-149.
+  - name: silicon's computed band gap is a PBE gap
+    function: details
+    args: {material_id: mp-149}
+    requires: [MP_API_KEY]
+    expect:
+      formula: Si
+      band_gap_ev: {min: 0.4, max: 0.9}
+      is_stable: true
+    reference: >-
+      PBE underestimates silicon's experimental 1.12 eV gap; Materials Project
+      reports about 0.6 eV, so a value between 0.4 and 0.9 eV is expected.
+  - name: the conventional silicon cell has 8 atoms
+    function: get_structure
+    args: {material_id: mp-149}
+    requires: [MP_API_KEY]
+    expect:
+      n_sites: 8
+      structure: {exists: true}
+      lattice.a_angstrom: {approx: 5.47, rel: 0.02}
+    reference: >-
+      Conventional diamond cell: 8 atoms; PBE lattice constant about 5.47 Å
+      (experiment 5.431 Å).
