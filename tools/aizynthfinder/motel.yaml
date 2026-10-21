@@ -1,0 +1,133 @@
+schema: 1
+name: aizynthfinder
+version: 0.1.0
+title: Retrosynthesis planning (AiZynthFinder)
+summary: >-
+  Plan synthesis routes for a molecule back to purchasable starting materials with
+  AiZynthFinder: a template network trained on US patent reactions and a Monte Carlo
+  tree search, with the 17.4 million purchasable compounds of ZINC or your own
+  inventory as the stock; also one-step precursor suggestions and stock lookups.
+domains: [chemistry]
+tags: [retrosynthesis, synthesis-planning, route, synthetic-route, reaction, precursors, starting-materials,
+       purchasable, zinc, uspto, reaction-templates, mcts, medicinal-chemistry, drug, smiles, aizynthfinder]
+
+source:
+  homepage: https://github.com/MolecularAI/aizynthfinder
+  paper: https://doi.org/10.1186/s13321-020-00472-1
+  citation: >-
+    S. Genheden, A. Thakkar, V. Chadimová, J.-L. Reymond, O. Engkvist, E. Bjerrum,
+    "AiZynthFinder: a fast, robust and flexible open-source software for
+    retrosynthetic planning", J. Cheminform. 12, 70 (2020); L. Saigiridharan et al.,
+    "AiZynthFinder 4.0: developments based on learnings from 3 years of industrial
+    application", J. Cheminform. 16, 57 (2024). USPTO models: doi:10.5281/zenodo.7797465
+    and doi:10.5281/zenodo.7341155; ZINC stock: doi:10.6084/m9.figshare.12334577.
+  license: MIT (software and ZINC stock); CC-BY-4.0 (USPTO models and templates)
+
+environment:
+  manager: uv
+  python: "3.12"
+  # pyarrow 26 needs NumPy 2, but AiZynthFinder pins NumPy below 2.
+  packages: ["aizynthfinder==4.4.1", "pyarrow==25.0.0"]
+  # The public USPTO models and the ZINC stock (about 790 MB), checksum-verified.
+  post_install:
+    - python fetch_data.py
+
+resources:
+  memory_gb: 2
+
+entrypoint: api
+
+functions:
+  retrosynthesis:
+    long_running: true
+    params:
+      time_limit_s: {unit: s}
+    outputs:
+      search_time_s: {unit: s}
+      routes_file: {kind: file}
+  single_step: {}
+  in_stock: {}
+
+validity: >-
+  Routes come from reaction templates extracted from US patents (USPTO, up to 2016)
+  and ranked by a neural network; they are suggestions, not validated procedures.
+  Templates encode the reacting centre only: regio- and chemoselectivity,
+  protecting groups, stereochemistry, reagents, conditions, and yields are not
+  checked, so a route can be infeasible in the lab. Reaction classes that are rare
+  in patents are proposed less often. "Solved" means every starting material is in
+  the stock: ZINC lists compounds that were purchasable in April 2020, not current
+  prices or availability. The search is heuristic: more iterations can find other
+  or shorter routes, and an unsolved search does not prove that no route exists.
+
+maturity: established
+
+golden:
+  - name: paracetamol is made by acetylating 4-aminophenol
+    quick: true
+    function: retrosynthesis
+    args: {target: CC(=O)Nc1ccc(O)cc1, max_routes: 3}
+    expect:
+      solved: true
+      routes.0.solved: true
+      routes.0.steps: 1
+      routes.0.reactions.0.reactants: [CC(=O)OC(C)=O, Nc1ccc(O)cc1]
+      routes.0.starting_materials.0.available_in: [zinc]
+    reference: >-
+      The standard synthesis of paracetamol acetylates 4-aminophenol with acetic
+      anhydride; I. Parveen et al., J. Chem. Educ. 100, 3955 (2023) review it for
+      teaching laboratories.
+    against: independent
+  - name: aspirin comes from salicylic acid and acetic anhydride
+    function: single_step
+    args: {target: CC(=O)Oc1ccccc1C(=O)O, max_suggestions: 3}
+    expect:
+      suggestions.0.precursors.0.smiles: CC(=O)OC(C)=O
+      suggestions.0.precursors.1.smiles: O=C(O)c1ccccc1O
+      suggestions.0.feasibility: {min: 0.9}
+      suggestions.1.precursors.0.smiles: CC(=O)Cl
+    reference: >-
+      J. A. Olmsted, "Synthesis of Aspirin: A General Chemistry Experiment", J. Chem.
+      Educ. 75, 1261 (1998): salicylic acid acetylated with acetic anhydride. Acetyl
+      chloride is the common alternative acylating agent.
+    against: independent
+  - name: lidocaine in two steps from 2,6-dimethylaniline (own stock only)
+    function: retrosynthesis
+    args:
+      target: CCN(CC)CC(=O)Nc1c(C)cccc1C
+      use_zinc: false
+      custom_stock: [Cc1cccc(C)c1N, O=C(Cl)CCl, CCNCC]
+    expect:
+      solved: true
+      routes.1.solved: true
+      routes.1.steps: 2
+      routes.1.reactions.0.reactants: [O=C(Cl)CCl, Cc1cccc(C)c1N]
+      routes.1.reactions.0.product: Cc1cccc(C)c1NC(=O)CCl
+      routes.1.reactions.1.reactants: [Cc1cccc(C)c1NC(=O)CCl, CCNCC]
+    reference: >-
+      T. J. Reilly, "The Preparation of Lidocaine", J. Chem. Educ. 76, 1557 (1999):
+      2,6-dimethylaniline is acylated with chloroacetyl chloride, and the
+      alpha-chloroamide is aminated with diethylamine. The top-ranked route
+      combines both steps into one three-component template.
+    against: independent
+  - name: purchasable and custom stock lookups
+    function: in_stock
+    args:
+      molecules: [Nc1ccc(O)cc1, CC(=O)OC(C)=O, FC(F)(c1ccc2ccccc2c1)C(F)(F)C(Cl)(Br)I]
+      custom_stock: [Nc1ccc(O)cc1]
+    expect:
+      molecules.0.inchi_key: PLIKAWJENQZMHA-UHFFFAOYSA-N
+      molecules.0.available_in: [zinc, custom]
+      molecules.1.available_in: [zinc]
+      molecules.2.available_in: []
+      zinc_compounds: 17422831
+    reference: >-
+      The ZINC stock file published with AiZynthFinder (doi:10.6084/m9.figshare.12334577,
+      MD5-verified) holds 17,422,831 InChIKeys, including 4-aminophenol (InChIKey
+      PLIKAWJENQZMHA-UHFFFAOYSA-N, PubChem) and acetic anhydride; the halogenated
+      naphthalene is made up.
+    against: exact
+  - name: an invalid SMILES is refused
+    function: retrosynthesis
+    args: {target: not-a-molecule}
+    raises: "Could not parse"
+    reference: The tool must reject input that is not a molecule instead of searching.

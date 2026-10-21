@@ -105,12 +105,13 @@ about doping layered materials), **structural analogs** (same-structure
 compounds for estimates by analogy), and the **Materials Project** database; and
 for chemistry, **PySCF** (ab initio quantum chemistry), **xTB** (fast
 semiempirical quantum chemistry), **CREST** (conformers, protomers, tautomers),
-**RDKit** (cheminformatics), **Open Babel** (chemical file formats, force
-fields), **OpenMM** (molecular dynamics), **MDAnalysis** (trajectory analysis),
-**NMR mixtures** (mole fractions from crude 1H NMR), **AutoDock Vina**
-(docking), **peptide assembly** (self-assembly conditions from similar
-peptides), and **Cantera** (combustion chemistry and thermodynamics). Every tool
-reproduces published or upstream-tested values before it installs.
+**RDKit** (cheminformatics), **AiZynthFinder** (synthesis routes from
+purchasable compounds), **Open Babel** (chemical file formats, force fields),
+**OpenMM** (molecular dynamics), **MDAnalysis** (trajectory analysis), **NMR
+mixtures** (mole fractions from crude 1H NMR), **AutoDock Vina** (docking),
+**peptide assembly** (self-assembly conditions from similar peptides), and
+**Cantera** (combustion chemistry and thermodynamics). Every tool reproduces
+published or upstream-tested values before it installs.
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),
 Codex, or Gemini CLI. See [Turning a repository into a tool](docs/onboarding.md),

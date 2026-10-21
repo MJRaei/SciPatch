@@ -7,6 +7,7 @@ reproduce published or upstream-tested values on every build.
 
 | Tool | Field | Runs on | What it does | Maturity | Checked against |
 |---|---|---|---|---|---|
+| [aizynthfinder](aizynthfinder/) | chemistry | Linux, macOS, Windows | Retrosynthesis: ranked routes from purchasable starting materials (17.4 million ZINC compounds) or your own inventory, with each reaction step and route images; one-step precursor suggestions with feasibility; purchasability lookups | established | Textbook syntheses of paracetamol, aspirin (Olmsted 1998), and lidocaine in two steps (Reilly 1999); the published ZINC stock |
 | [cantera](cantera/) | chemistry, engineering | Linux, macOS, Windows | Combustion chemistry: equilibrium, adiabatic flame temperatures, laminar flame speeds, ignition delays, species thermodynamics | established | NASA CEA flame temperatures; NIST-JANAF heat capacities; methane-air flame speed vs experiment |
 | [crest](crest/) | chemistry | Linux, macOS, Windows (WSL) | Conformer search with Boltzmann populations, protonation and deprotonation sites, tautomers (GFN2-xTB) | established | Butane anti/gauche; pyridine, acetic acid, and keto-enol chemistry (NIST enthalpies) |
 | [doping-knowledge](doping-knowledge/) | materials | Linux, macOS, Windows | What papers report about doping and intercalation of 2D and layered materials: 440 studies (dopants, methods, conditions, sites, phase transitions, property changes) and 1,443 cause-effect relationships with the authors' mechanisms, extracted by an LLM; from the ARIA hackathon project | experimental | Li-intercalated WTe2 record vs its paper (Wang et al. 2022); counts and a quoted mechanism from the knowledge base |
@@ -130,6 +131,10 @@ accepts.
   `vina.dock` (redock the crystal ligand first to validate the box) →
   `openmm.simulate` with the best pose as `small_molecules` →
   `mdanalysis.rmsd` on `start.pdb` + `trajectory.dcd` (does the pose stay?).
+- **How to make it (molecules)?** `aizynthfinder.retrosynthesis` (routes back to
+  purchasable compounds, or `custom_stock` with what is on the shelf) →
+  `aizynthfinder.single_step` for alternatives at a difficult step → look up
+  conditions for each step before lab work.
 - **What did my reaction give?** For each expected species, a measured
   reference spectrum or `nmr-mixtures.predict_spectrum` →
   `nmr-mixtures.quantify_mixture` on the crude 1H NMR (yield, selectivity,
