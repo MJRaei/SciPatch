@@ -35,6 +35,11 @@ from motel.search import SearchHit, ToolIndex, catalog_document
 from motel.secrets import SecretStore
 from motel.skills import SkillManager, SyncReport
 
+#: How closely another tool must match a tool's description (relative to the tool
+#: itself) to be suggested for cross-checking it; 0.25 keeps, e.g., mdanalysis for
+#: pymatgen-diffusion but not cantera for an NMR tool.
+ALTERNATIVE_RELEVANCE = 0.25
+
 
 @dataclass(frozen=True)
 class Match:
@@ -96,23 +101,29 @@ class Motel:
         return [(entries[hit.tool], hit.score) for hit in index.search(query, limit=limit)]
 
     def stronger_alternatives(self, tool: InstalledTool, limit: int = 3) -> list[str]:
-        """Installed tools of a higher maturity level that cover similar ground."""
-        others = [
-            other
+        """Installed tools of a higher maturity level that cover the same ground.
+
+        A tool qualifies when it matches the tool's own description at least
+        ``ALTERNATIVE_RELEVANCE`` times as well as the tool itself does, so that
+        loosely related tools are not suggested for cross-checks.
+        """
+        candidates = {
+            other.name: other
             for other in self.tools()
             if other.usable and rank(other.maturity) < rank(tool.maturity)
-        ]
-        if not others:
+        }
+        if not candidates or not tool.functions:
             return []
+        candidates[tool.name] = tool
         manifest = tool.manifest
         query = " ".join([manifest.summary, *manifest.domains, *manifest.tags])
-        hits = ToolIndex(others).search(query, limit=100)
-        best = hits[0].score if hits else 0.0
-        names: list[str] = []
-        for hit in hits:
-            if hit.score >= 0.3 * best and hit.tool not in names:
-                names.append(hit.tool)
-        return names[:limit]
+        relevance: dict[str, float] = {}
+        for hit in ToolIndex(list(candidates.values())).search(query, limit=1000):
+            score = hit.score / WEIGHTS[candidates[hit.tool].maturity]  # undo the ranking boost
+            relevance[hit.tool] = max(relevance.get(hit.tool, 0.0), score)
+        own = relevance.pop(tool.name, 0.0)
+        close = [name for name, score in relevance.items() if score >= ALTERNATIVE_RELEVANCE * own]
+        return sorted(close, key=lambda name: -relevance[name])[:limit] if own else []
 
     def lower_maturity(self, name: str, level: str | None) -> InstalledTool:
         """Lower a tool's maturity level on this computer; None restores the declared one."""
