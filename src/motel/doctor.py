@@ -11,6 +11,7 @@ from typing import Literal
 
 from motel import __version__
 from motel.app import Motel
+from motel.environments import micromamba
 from motel.environments.conda import CondaBackend, find_conda
 from motel.environments.uv import UvBackend, find_uv
 from motel.models import RunStatus
@@ -72,16 +73,25 @@ def run_checks(motel: Motel) -> list[Check]:
     )
 
     conda = find_conda()
-    checks.append(
-        Check("conda", "ok", conda)
-        if conda
-        else Check(
-            "conda",
-            "warn",
-            "not found (only needed for tools that use conda packages)",
-            CondaBackend.install_hint,
+    if conda:
+        checks.append(Check("conda", "ok", conda))
+    elif micromamba.enabled():
+        checks.append(
+            Check(
+                "conda",
+                "ok",
+                f"Motel will download micromamba {micromamba.VERSION} when a tool needs it",
+            )
         )
-    )
+    else:
+        checks.append(
+            Check(
+                "conda",
+                "warn",
+                "not found (only needed for tools that use conda packages)",
+                CondaBackend.install_hint,
+            )
+        )
 
     on_path = shutil.which("motel")
     checks.append(

@@ -4,6 +4,10 @@ Use ``manager: conda`` for tools that need conda-forge packages (compiled
 chemistry and simulation codes such as OpenMM, xtb, or LAMMPS builds). PyPI
 packages listed in ``environment.packages`` are installed on top with uv when
 available, otherwise with the environment's own pip.
+
+The user's own micromamba or mamba is used if there is one; otherwise Motel
+uses its own micromamba (downloaded and verified on first need, see
+``micromamba.py``), and plain conda only as a fallback.
 """
 
 from __future__ import annotations
@@ -12,6 +16,7 @@ import os
 import shutil
 from pathlib import Path
 
+from motel.environments import micromamba
 from motel.environments.base import (
     BuildLog,
     EnvironmentBackend,
@@ -21,6 +26,7 @@ from motel.environments.base import (
 from motel.environments.uv import find_uv, install_python_packages
 from motel.errors import BuildError
 from motel.manifest import Environment
+from motel.paths import MotelPaths
 
 _COMMON_LOCATIONS = (
     "~/miniforge3/bin/conda",
@@ -34,16 +40,28 @@ _COMMON_LOCATIONS = (
 )
 
 
-def find_conda() -> str | None:
-    """Locate micromamba, mamba, or conda (in that order of preference)."""
-    for variable in ("MAMBA_EXE", "CONDA_EXE"):
-        value = os.environ.get(variable)
-        if value and Path(value).exists():
-            return value
-    for name in ("micromamba", "mamba", "conda"):
+def find_conda(home: Path | None = None) -> str | None:
+    """Locate a conda front end that is already installed.
+
+    In order of preference: the user's micromamba or mamba, Motel's own
+    micromamba, then conda.
+    """
+    value = os.environ.get("MAMBA_EXE")
+    if value and Path(value).exists():
+        return value
+    for name in ("micromamba", "mamba"):
         found = shutil.which(name)
         if found:
             return found
+    managed = micromamba.installed(home or MotelPaths.from_env().home)
+    if managed is not None:
+        return str(managed)
+    value = os.environ.get("CONDA_EXE")
+    if value and Path(value).exists():
+        return value
+    found = shutil.which("conda")
+    if found:
+        return found
     for candidate in _COMMON_LOCATIONS:
         path = Path(candidate).expanduser()
         if path.exists():
@@ -59,7 +77,7 @@ class CondaBackend(EnvironmentBackend):
     )
 
     def is_available(self) -> bool:
-        return find_conda() is not None
+        return find_conda() is not None or micromamba.enabled()
 
     def create(
         self,
@@ -70,11 +88,21 @@ class CondaBackend(EnvironmentBackend):
         source_dir: Path | None,
         log: BuildLog,
     ) -> None:
-        conda = find_conda()
+        home = MotelPaths.from_env().home
+        conda = find_conda(home)
+        if (conda is None or Path(conda).name.startswith("conda")) and micromamba.enabled():
+            try:
+                conda = str(micromamba.ensure(home))
+                log.note(f"Using micromamba {micromamba.VERSION} (managed by Motel)")
+            except micromamba.DownloadError as exc:
+                log.note(f"{exc} Using conda instead.")
         if conda is None:
             raise BuildError(
                 "conda (or mamba/micromamba) is not installed.", hint=self.install_hint
             )
+        tool_env = None
+        if conda == str(micromamba.executable(home)):
+            tool_env = {**os.environ, "MAMBA_ROOT_PREFIX": str(micromamba.root_prefix(home))}
         if env_dir.exists():
             shutil.rmtree(env_dir)
         env_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -97,7 +125,13 @@ class CondaBackend(EnvironmentBackend):
             command = [conda, "create", "-y", "-p", str(env_dir), *channels, *packages]
         hint = "Check the names in environment.conda_packages, channels, or conda_file."
         try:
-            log.run(command, title="Creating the conda environment", cwd=package_dir, hint=hint)
+            log.run(
+                command,
+                title="Creating the conda environment",
+                cwd=package_dir,
+                env=tool_env,
+                hint=hint,
+            )
         except BuildError as exc:
             # A common broken setup: conda is configured for the libmamba solver, but
             # the plugin is missing. The built-in classic solver still works.

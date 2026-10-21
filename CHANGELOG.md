@@ -26,6 +26,10 @@ All notable changes to this project are documented here. The format follows
   run continues once the key is saved; others show the link. Without a terminal,
   `motel secret set` opens the page in the browser, for agents that use the
   command line.
+- conda tools no longer need a working conda: Motel downloads a pinned
+  micromamba (checked against its SHA-256) into `~/.motel/bin` the first time a
+  conda tool is built, and prefers it to plain conda (`MOTEL_SYSTEM_CONDA=1`
+  opts out). `motel doctor` reports which one is used.
 - Golden tests can require secrets (skipped when missing) or require a clear
   error (`raises:`) for inputs outside a tool's validity.
 - Arguments are checked against each function's types before a run starts.

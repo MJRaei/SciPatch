@@ -41,7 +41,12 @@ be trusted.
 
 Every tool gets its own environment, built with uv (PyPI packages) or conda
 (conda-forge packages). Tools that need different versions of NumPy, PyTorch, or
-anything else live side by side.
+anything else live side by side. Conda environments are created with your own
+micromamba or mamba if you have one, otherwise with a micromamba that Motel
+downloads once, checks against a pinned checksum, and keeps in `~/.motel/bin`;
+your own conda installation and settings are never touched. Set
+`MOTEL_SYSTEM_CONDA=1` to use your conda instead. Only the channels in the tool's
+manifest are used, so a tool's environment is the same on every computer.
 
 Motel never imports tool code into its own process. To call a function it starts
 the tool's own Python interpreter with a tiny standard-library-only *shim*, which

@@ -44,8 +44,10 @@ motel setup
 
 The setup:
 
-1. **Checks requirements**: uv, git, and optionally conda. Anything missing is
-   shown with the command that fixes it.
+1. **Checks requirements**: uv and git. Anything missing is shown with the
+   command that fixes it. You don't need conda: for tools that use conda
+   packages, Motel downloads its own micromamba (and checks it) the first time
+   one is installed.
 2. **Connects your AI apps**: it finds Claude Desktop, Claude Code, Codex,
    Cursor, and Gemini CLI on your computer and asks before connecting each one.
 3. **Offers an example tool**: `ase-emt`, which simulates simple metals in

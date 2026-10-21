@@ -32,6 +32,10 @@ command. Typical causes:
 - **A package can't be built**: it may need a compiler or system library.
   Tools that need compiled scientific software should use
   `environment.manager: conda`.
+- **conda is slow or fails to solve** (for example "non-default solver backend
+  (libmamba) but it was not recognized"): your conda's solver plugin is broken.
+  Motel uses its own micromamba unless `MOTEL_SYSTEM_CONDA` is set; to repair
+  your conda, run `conda install -n base -c conda-forge conda-libmamba-solver`.
 - **Golden tests fail**: the tool installed but doesn't reproduce its reference
   results on your computer. The message says which value differed. Install
   anyway with `motel add <tool> --allow-failing-tests` if you understand why.
