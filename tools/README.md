@@ -43,6 +43,7 @@ reproduce published or upstream-tested values on every build.
 | [vina](vina/) | chemistry, biology | Linux, macOS, Windows | Protein-ligand docking: receptor and ligand preparation (SMILES or SDF), ranked poses with Vina/Vinardo scores, RMSD to a known pose, rescoring and local optimization | established | Vina's 1IEP tutorial (imatinib redocked within 2 Å, -13.2 kcal/mol), from the crystal ligand and from SMILES |
 | [xraylib](xraylib/) | materials, physics, engineering | Linux, macOS, Windows | X-ray interactions: mass attenuation (photoelectric, Compton, Rayleigh) of elements, formulas, and NIST materials, transmission and half-value layers, absorption edges, emission lines and wavelengths, fluorescence yields, XRF/EDS peak identification | established | NIST attenuation tables (lead, water, lead K edge); NIST X-ray transition energies (Cu K-alpha1, Deslattes et al. 2003) |
 | [xtb](xtb/) | chemistry | Linux, macOS, Windows | GFN2-xTB energies, optimization, frequencies, and thermochemistry for molecules, with implicit solvent | established | xtb's test suite (propyne; GBSA solvation) |
+| [zeopp](zeopp/) | materials, chemistry | Linux, macOS, Windows (WSL) | Pore geometry of zeolites, MOFs, and cages: largest included and free (pore-limiting) sphere diameters overall and along each axis, channel dimensionality, and the surface area and pore volume available to a probe | established | IZA Database of Zeolite Structures (MFI, LTA, FAU pore diameters); exact geometry of a simple cubic lattice of spheres |
 
 **Maturity** tells AI agents how far to trust a tool: *established* (mature,
 widely used code, checked against independent references or exact results),
@@ -57,8 +58,9 @@ names what is missing where a tool cannot be installed. On Windows, OpenMM
 handles proteins, nucleic acids, and water; its small-molecule features need
 AmberTools, which has no Windows build; AutoDock Vina uses the official
 Windows executable. **Windows (WSL)**: codes without Windows builds (CREST,
-GPAW, LAMMPS, Quantum ESPRESSO, as their own documentation recommends) run
-inside WSL with the same Linux packages; set it up once with `wsl --install`.
+GPAW, LAMMPS, and Quantum ESPRESSO, as their own documentation recommends, and
+Zeo++) run inside WSL with the same Linux packages; set it up once with
+`wsl --install`.
 
 Two more tools ship inside Motel itself: `ase-emt` (fast approximate
 simulations of metals) and `rdkit-descriptors` (molecular properties from
@@ -148,8 +150,9 @@ accepts.
 - **Water chemistry and scaling:** `reaktoro.speciate` on the water analysis
   (saturation indices) → `reaktoro.mineral_equilibrium` for how much calcite or
   gypsum would precipitate → `reaktoro.solubility_curve` for heated sections.
-- **Carbon capture and gas storage:** `raspa3.henry_coefficient` for each
-  candidate CIF (CO2/N2 selectivity at low pressure) →
+- **Carbon capture and gas storage:** `zeopp.pore_geometry` (do CO2 and N2 fit
+  through the windows?) → `raspa3.henry_coefficient` for each candidate CIF
+  (CO2/N2 selectivity at low pressure) →
   `raspa3.mixture_adsorption` with flue gas (15% CO2, 85% N2) and
   `raspa3.adsorption_isotherm` for the best ones (uptake between adsorption and
   desorption pressures).
@@ -186,10 +189,10 @@ Upstream code, potential files, and pseudopotentials are downloaded from their
 original sources at install time and are not redistributed here. Small test
 inputs taken from upstream projects (the LAMMPS benchmark input, the Vina 1IEP
 tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory,
-molecules of the MMFF94 validation suite, MixSense's example spectra, RASPA3's
-HKUST-1 structure, PROPKA's 1HPX test structure, an OpenMS example spectrum, and
-a PVGIS typical year for Munich from the European Commission's JRC) keep their
-sources' terms; each golden test names its source.
+molecules of the MMFF94 validation suite, MixSense's example spectra, IZA
+zeolite frameworks, RASPA3's HKUST-1 structure, PROPKA's 1HPX test structure, an
+OpenMS example spectrum, and a PVGIS typical year for Munich from the European
+Commission's JRC) keep their sources' terms; each golden test names its source.
 
 ## Adding a tool
 

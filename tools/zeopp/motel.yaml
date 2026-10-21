@@ -1,0 +1,115 @@
+schema: 1
+name: zeopp
+version: 0.1.0
+title: Pore geometry of porous materials (Zeo++)
+summary: >-
+  Geometric analysis of zeolites, MOFs, and other porous frameworks: largest
+  included and largest free (pore-limiting) sphere diameters overall and along each
+  axis, channel count and dimensionality for a probe, and the surface area and pore
+  volume available to that probe; for screening before adsorption simulations.
+domains: [materials, chemistry]
+tags: [porous, pore-size, pore-limiting-diameter, largest-cavity-diameter, surface-area, pore-volume,
+       void-fraction, zeolite, mof, channel, accessibility, voronoi, zeo++, screening]
+
+source:
+  homepage: https://www.zeoplusplus.org
+  paper: https://doi.org/10.1016/j.micromeso.2011.08.020
+  citation: >-
+    T. F. Willems, C. H. Rycroft, M. Kazi, J. C. Meza, M. Haranczyk, "Algorithms and
+    tools for high-throughput geometry-based analysis of crystalline porous
+    materials", Microporous Mesoporous Mater. 149, 134-141 (2012); Zeo++ as packaged
+    by LSMO-EPFL (zeopp-lsmo 0.4.7).
+  license: BSD-3-Clause (Zeo++, Lawrence Berkeley National Laboratory)
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["zeopp-lsmo=0.4.7", "ase=3.29.0"]
+  channels: [conda-forge]
+
+entrypoint: api
+
+functions:
+  pore_geometry:
+    params:
+      structure: {kind: structure}
+      probe_radius: {unit: Å}
+    outputs:
+      largest_included_sphere_angstrom: {unit: Å}
+      largest_free_sphere_angstrom: {unit: Å}
+
+validity: >-
+  Purely geometric: atoms are hard spheres with fixed radii, so results depend on
+  the radius set (CCDC van der Waals radii by default; the IZA convention for
+  zeolite comparisons) and on the structure, which must be the activated
+  framework (solvent and guests removed; disordered sites resolved). Framework
+  flexibility, gate opening, and energetics (e.g. whether a molecule actually
+  enters a window of similar size) are not considered. Surface area and pore
+  volume count every region the probe centre can reach, including pockets that are
+  isolated from the channels; the channel count shows whether the pores
+  percolate. Monte Carlo values carry sampling noise of about 1%.
+
+maturity: established
+
+golden:
+  - name: MFI pore sizes match the IZA Database of Zeolite Structures
+    quick: true
+    function: pore_geometry
+    args: {structure: tests/data/MFI.cif, radii: iza, probe_radius: 1.2}
+    expect:
+      largest_included_sphere_angstrom: {approx: 6.36, rel: 0.02}
+      free_sphere_along_angstrom.a: {approx: 4.70, rel: 0.02}
+      free_sphere_along_angstrom.b: {approx: 4.46, rel: 0.02}
+      free_sphere_along_angstrom.c: {approx: 4.46, rel: 0.02}
+      channel_dimensionality: 3
+    reference: >-
+      Ch. Baerlocher, L. B. McCusker, IZA Database of Zeolite Structures, framework MFI
+      (CIF from the same database): maximum included sphere 6.36 Å, free sphere along
+      a 4.70, b 4.46, c 4.46 Å, 3-dimensional channels; computed for T and O atoms as
+      2.7 Å hard spheres (M. D. Foster et al., Microporous Mesoporous Mater. 90, 32
+      (2006)). Zeo++ gives 6.30, 4.64, 4.40, and 4.40 Å (about 1% smaller).
+    against: independent
+  - name: LTA alpha cages and 8-ring windows match the IZA database
+    function: pore_geometry
+    args: {structure: tests/data/LTA.cif, radii: iza, probe_radius: 1.2}
+    expect:
+      largest_included_sphere_angstrom: {approx: 11.05, rel: 0.02}
+      largest_free_sphere_angstrom: {approx: 4.21, rel: 0.03}
+      channel_dimensionality: 3
+    reference: >-
+      IZA Database of Zeolite Structures, framework LTA (zeolite A): included sphere
+      11.05 Å (alpha cage), free sphere 4.21 Å along a, b, and c (8-ring windows).
+      Zeo++ gives 10.99 and 4.15 Å.
+    against: independent
+  - name: FAU supercages and 12-ring windows match the IZA database
+    function: pore_geometry
+    args: {structure: tests/data/FAU.cif, radii: iza, probe_radius: 1.2}
+    expect:
+      largest_included_sphere_angstrom: {approx: 11.24, rel: 0.02}
+      largest_free_sphere_angstrom: {approx: 7.35, rel: 0.02}
+    reference: >-
+      IZA Database of Zeolite Structures, framework FAU (faujasite, zeolite X/Y):
+      included sphere 11.24 Å (supercage), free sphere 7.35 Å along a, b, and c.
+      Zeo++ gives 11.18 and 7.29 Å.
+    against: independent
+  - name: a simple cubic lattice of spheres has exact pore sizes, area, and volume
+    function: pore_geometry
+    args: {structure: tests/data/simple_cubic_Ar.cif, radii: {Ar: 1.0}, probe_radius: 1.0}
+    expect:
+      largest_included_sphere_angstrom: {approx: 15.3205, abs: 0.001}
+      largest_free_sphere_angstrom: {approx: 12.1421, abs: 0.001}
+      surface_area.angstrom2_per_cell: {approx: 50.2655, rel: 0.01}
+      pore_volume.fraction: {approx: 0.966490, rel: 0.002}
+      channel_dimensionality: 3
+    reference: >-
+      Spheres of radius 1 Å on a 10 Å cubic lattice: the largest included sphere sits
+      at the body centre, 10 sqrt(3) - 2 = 15.3205 Å; the largest free sphere passes
+      the face centres, 10 sqrt(2) - 2 = 12.1421 Å; with a 1 Å probe the reachable
+      surface is a sphere of radius 2 Å, 4 pi 2^2 = 50.2655 Å2, and the volume
+      available to the probe centre is 1 - (4/3) pi 2^3 / 1000 = 0.966490.
+    against: exact
+  - name: a missing structure file is refused
+    function: pore_geometry
+    args: {structure: no-such-file.cif}
+    raises: "not found"
+    reference: The tool must report the missing file.
