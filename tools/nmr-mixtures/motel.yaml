@@ -1,0 +1,184 @@
+schema: 1
+name: nmr-mixtures
+version: 0.1.0
+title: NMR mixture quantification (MixSense)
+summary: >-
+  Mole fractions of known components in a mixture from its 1H NMR spectrum and
+  reference spectra (Wasserstein-distance deconvolution, robust to small peak
+  shifts and overlapping signals), composition over a reaction's time points,
+  and 1H spectrum prediction from SMILES.
+domains: [chemistry]
+tags: [nmr, 1h-nmr, proton-nmr, mixture, quantification, deconvolution, wasserstein,
+       magnetstein, mole-fraction, yield, conversion, selectivity, crude-nmr,
+       reaction-monitoring, kinetics, spectrum-prediction, nmrdb, spinus, mixsense]
+
+source:
+  repo: https://github.com/jdsanc/MixSense
+  ref: ce86a8071f2e07867d656472269e3020650b890f
+  install: false
+  homepage: https://github.com/jdsanc/MixSense
+  citation: >-
+    MixSense (hackathon project, 2025-2026), github.com/jdsanc/MixSense; method: B.
+    Domżał et al., "Magnetstein: An Open-Source Tool for Quantitative NMR Mixture
+    Analysis Robust to Low Resolution, Distorted Lineshapes, and Peak Shifts",
+    Anal. Chem. 96, 188-196 (2024); prediction: J. Aires-de-Sousa, M. C. Hemmer, J.
+    Gasteiger, Anal. Chem. 74, 80-90 (2002) (SPINUS), D. Banfi and L. Patiny, Chimia
+    62, 280 (2008) (NMRdb.org), and nmrsim (github.com/sametz/nmrsim).
+  license: not stated (the repository has no LICENSE file)
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["numpy==2.5.4", "scipy==1.18.1", "matplotlib==3.11.2", "requests==2.34.2",
+             "nmrsim==0.6.0.post1", "rdkit==2026.9.1"]
+
+entrypoint: api
+
+functions:
+  quantify_mixture:
+    params:
+      mixture: {kind: spectrum}
+      components: {kind: spectrum}
+      kappa: {unit: ppm}
+    outputs:
+      plot: {kind: image}
+  reaction_kinetics:
+    params:
+      spectra: {kind: spectrum}
+      components: {kind: spectrum}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  predict_spectrum:
+    resources: {network: true}
+    params:
+      smiles: {kind: molecule}
+      field_mhz: {unit: MHz}
+      linewidth_hz: {unit: Hz}
+    outputs:
+      spectrum: {kind: spectrum}
+
+validity: >-
+  Quantifies only the components it is given: a missing species (solvent,
+  reagent, by-product) shows up as a high Wasserstein distance and unexplained
+  signal, and distorts the other fractions. Mole fractions are only as good as the
+  reference spectra and the proton counts; predicted references (SPINUS, typically
+  within a few tenths of a ppm, no solvent or concentration effects) give rougher
+  fractions than measured ones, and exchangeable protons (OH, NH) shift with
+  conditions. Quantitative work needs quantitative acquisition (full relaxation
+  between scans). Peak shifts up to about kappa (0.25 ppm by default) are
+  tolerated; a larger referencing offset must be corrected first. This is a SciPy
+  port of Magnetstein's mixture-only denoising (one kappa), not the reference
+  implementation. Spectrum prediction calls NMRdb.org and simulates multiplets for
+  up to 11 coupled protons; larger molecules get one line per proton without
+  splitting.
+
+maturity: experimental
+
+golden:
+  - name: a synthetic 30:70 borneol/isoborneol mixture is recovered exactly
+    quick: true
+    function: quantify_mixture
+    args:
+      mixture: tests/data/borneol30_isoborneol70.csv
+      components: [tests/data/borneol.csv, tests/data/isoborneol.csv]
+      protons: [18, 18]
+      names: [borneol, isoborneol]
+    expect:
+      mole_fractions.borneol: {approx: 0.3, abs: 1.0e-6}
+      mole_fractions.isoborneol: {approx: 0.7, abs: 1.0e-6}
+      wasserstein_distance: {max: 1.0e-6}
+      fit: good
+      plot: {exists: true}
+    reference: >-
+      The mixture is 0.3 x borneol + 0.7 x isoborneol, each normalized to unit area
+      (tests/data/make_data.py); both have 18 protons, so the mole fractions equal
+      the area fractions and the Wasserstein distance is 0.
+    against: exact
+  - name: MixSense's crude camphor-reduction spectrum gives Magnetstein's proportions
+    function: quantify_mixture
+    args:
+      mixture: tests/data/crude.csv
+      components: [tests/data/borneol.csv, tests/data/isoborneol.csv]
+      protons: [18, 18]
+      names: [borneol, isoborneol]
+    expect:
+      mole_fractions.borneol: {approx: 0.059565, abs: 2.0e-6}
+      mole_fractions.isoborneol: {approx: 0.940435, abs: 2.0e-6}
+      wasserstein_distance: {approx: 0.140192, abs: 2.0e-6}
+      fit: acceptable
+    reference: >-
+      The original Magnetstein (magnetstein 2.0.1 from PyPI, estimate_proportions
+      with MTD=0.25, MTD_th=None, what_to_compare='concentration', and PuLP 2.9.0's
+      default CBC solver) on the same three files gives 0.059565 and 0.940435 with a
+      Wasserstein distance of 0.140192. (MixSense's README reports 0.23/0.77 for
+      this example, which its shipped files do not give.)
+    against: independent
+  - name: proton counts convert areas to mole fractions
+    function: quantify_mixture
+    args:
+      mixture: tests/data/etoac25_etoh75.csv
+      components: [tests/data/ethyl_acetate.xy, tests/data/ethanol.xy]
+      protons: [8, 5]
+      names: [ethyl_acetate, ethanol]
+    expect:
+      mole_fractions.ethyl_acetate: {approx: 0.25, abs: 1.0e-6}
+      mole_fractions.ethanol: {approx: 0.75, abs: 1.0e-6}
+      fit: good
+    reference: >-
+      Mole fractions 0.25 and 0.75 of molecules with 8 and 5 observed protons give
+      area fractions 2 : 3.75 (tests/data/make_data.py); dividing the areas by the
+      proton counts must restore 0.25 and 0.75. The original Magnetstein gives the
+      same.
+    against: exact
+  - name: mole fractions are followed over time points
+    function: reaction_kinetics
+    args:
+      spectra: [tests/data/t00min.csv, tests/data/t30min.csv]
+      times: [0, 30]
+      components: [tests/data/borneol.csv, tests/data/isoborneol.csv]
+      protons: [18, 18]
+      names: [borneol, isoborneol]
+    expect:
+      mole_fractions.borneol.0: {approx: 0.9, abs: 1.0e-6}
+      mole_fractions.borneol.1: {approx: 0.4, abs: 1.0e-6}
+      mole_fractions.isoborneol.1: {approx: 0.6, abs: 1.0e-6}
+      table: {exists: true}
+      plot: {exists: true}
+    reference: >-
+      The two spectra are 90:10 and 40:60 borneol/isoborneol mixtures built from the
+      reference spectra (tests/data/make_data.py).
+    against: exact
+  - name: predicted ethyl acetate matches its measured spectrum in CDCl3
+    function: predict_spectrum
+    args: {smiles: "CCOC(C)=O", name: ethyl_acetate}
+    expect:
+      protons: 8
+      multiplets_simulated: true
+      signals.0.shift_ppm: {approx: 4.12, abs: 0.2}
+      signals.0.multiplicity: q
+      signals.0.protons: 2
+      signals.1.shift_ppm: {approx: 2.05, abs: 0.2}
+      signals.1.multiplicity: s
+      signals.2.shift_ppm: {approx: 1.26, abs: 0.2}
+      signals.2.multiplicity: t
+      spectrum: {exists: true}
+    reference: >-
+      G. R. Fulmer et al., Organometallics 29, 2176 (2010), Table 1: ethyl acetate
+      in CDCl3, CH2 4.12 (q, 7 Hz), CH3CO 2.05 (s), CH3 1.26 (t, 7 Hz). The 0.2 ppm
+      tolerance is about the typical error of neural-network shift predictions;
+      SPINUS gives 4.10, 2.04, and 1.16 ppm. Needs NMRdb.org to be reachable.
+    against: independent
+  - name: proton counts must match the components
+    function: quantify_mixture
+    args:
+      mixture: tests/data/crude.csv
+      components: [tests/data/borneol.csv, tests/data/isoborneol.csv]
+      protons: [18]
+    raises: "protons needs one count per component"
+    reference: Each component needs its proton count to convert areas to mole fractions.
+  - name: a molecule without hydrogen has no 1H spectrum
+    function: predict_spectrum
+    args: {smiles: "ClC(Cl)(Cl)Cl"}
+    raises: "has no hydrogen atoms"
+    reference: Carbon tetrachloride has no protons, so there is nothing to predict.

@@ -1,0 +1,122 @@
+{
+ "lock_version": 1,
+ "inputs": "e55aa4a87c4f2575ba4913ef4bc72236c3b39169da9f3859e4010bd775e2f590",
+ "tested_on": "osx-arm64",
+ "tested_size_mb": 379.0,
+ "platforms": {
+  "linux-64": {
+   "conda": [],
+   "pip": [
+    "certifi==2026.10.19",
+    "charset-normalizer==3.5.2",
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "idna==3.20",
+    "kiwisolver==1.5.1",
+    "llvmlite==0.50.0",
+    "matplotlib==3.11.2",
+    "nmrsim==0.6.0.post1",
+    "numba==0.68.0",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "rdkit==2026.9.1",
+    "requests==2.34.2",
+    "scipy==1.18.1",
+    "six==1.17.0",
+    "sparse==0.19.2",
+    "urllib3==2.8.0"
+   ]
+  },
+  "linux-aarch64": {
+   "conda": [],
+   "pip": [
+    "certifi==2026.10.19",
+    "charset-normalizer==3.5.2",
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "idna==3.20",
+    "kiwisolver==1.5.1",
+    "llvmlite==0.50.0",
+    "matplotlib==3.11.2",
+    "nmrsim==0.6.0.post1",
+    "numba==0.68.0",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "rdkit==2026.9.1",
+    "requests==2.34.2",
+    "scipy==1.18.1",
+    "six==1.17.0",
+    "sparse==0.19.2",
+    "urllib3==2.8.0"
+   ]
+  },
+  "osx-arm64": {
+   "conda": [],
+   "pip": [
+    "certifi==2026.10.19",
+    "charset-normalizer==3.5.2",
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "idna==3.20",
+    "kiwisolver==1.5.1",
+    "llvmlite==0.50.0",
+    "matplotlib==3.11.2",
+    "nmrsim==0.6.0.post1",
+    "numba==0.68.0",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pip==26.2.2",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "rdkit==2026.9.1",
+    "requests==2.34.2",
+    "scipy==1.18.1",
+    "six==1.17.0",
+    "sparse==0.19.2",
+    "urllib3==2.8.0"
+   ]
+  },
+  "osx-64": {
+   "conda": [],
+   "pip": [],
+   "unavailable": "rdkit 2026.9.1 has no prebuilt package for macOS (Intel) (Python 3.12)"
+  },
+  "win-64": {
+   "conda": [],
+   "pip": [
+    "certifi==2026.10.19",
+    "charset-normalizer==3.5.2",
+    "contourpy==1.4.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "idna==3.20",
+    "kiwisolver==1.5.1",
+    "llvmlite==0.50.0",
+    "matplotlib==3.11.2",
+    "nmrsim==0.6.0.post1",
+    "numba==0.68.0",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "rdkit==2026.9.1",
+    "requests==2.34.2",
+    "scipy==1.18.1",
+    "six==1.17.0",
+    "sparse==0.19.2",
+    "urllib3==2.8.0"
+   ]
+  }
+ }
+}

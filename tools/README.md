@@ -14,6 +14,7 @@ reproduce published or upstream-tested values on every build.
 | [materials-project](materials-project/) | materials | Linux, macOS, Windows | Search known materials, stability (energy above hull), properties, and structures | established | Silicon (mp-149); needs a free API key |
 | [mdanalysis](mdanalysis/) | chemistry, biology, materials | Linux, macOS, Windows | MD trajectory analysis (GROMACS, AMBER, CHARMM, LAMMPS, OpenMM, extended XYZ): RMSD, RMSF, radius of gyration, g(r) and coordination numbers, MSD and diffusion coefficients | established | MDAnalysis's test suite (adenylate kinase RMSD); fcc coordination shell; random-walk Einstein relation |
 | [ml-potentials](ml-potentials/) | materials, chemistry | Linux, macOS, Windows | Universal ML potentials (Orb-v3, MACE-MP/MPA, MACE-OFF, CHGNet, TensorNet/M3GNet) in one place: energies, forces, stresses, magnetic moments, relaxation, MD, elastic constants, equation of state, thermal expansion and heat capacity, formation energies, and side-by-side model comparison | published | The test suites of Orb (Cu), CHGNet (LiMnO₂ energy and relaxation), MACE (water), and matcalc (Li₂O); Si and Al lattice constants vs. experiment; all-electron PBE bulk modulus of Si |
+| [nmr-mixtures](nmr-mixtures/) | chemistry | Linux, macOS, Windows | Mole fractions of known components in a mixture from 1H NMR spectra (Wasserstein deconvolution, robust to small peak shifts), composition over a reaction's time points, and predicted 1H spectra from SMILES; from the MixSense hackathon project | experimental | The original Magnetstein on MixSense's crude example; exact recovery of synthetic mixtures; measured ethyl acetate shifts (Fulmer et al. 2010) |
 | [openbabel](openbabel/) | chemistry | Linux, macOS, Windows | Conversion between 100+ chemical formats, canonical SMILES/InChI/InChIKey, protonation at a pH, 3D coordinates, MMFF94/UFF/GAFF energies and minimization, partial charges | established | Halgren's MMFF94 validation suite (energies, terms, charges); PubChem identifiers; glycine zwitterion; rock-salt unit cell |
 | [openmm](openmm/) | chemistry, biology | Linux, macOS, Windows | Molecular dynamics of proteins, nucleic acids, ligands and water: preparation, solvation, minimization, constant-pressure MD; small molecules with OpenFF Sage or GAFF; densities of molecular liquids | established | OpenMM's test suite vs Amber (ff14ipq energy); TIP3P density of water; NIST densities of liquid methanol and benzene |
 | [ovito](ovito/) | materials | Linux, macOS, Windows | Local crystal structure of every atom (adaptive CNA, PTM, diamond), vacancies and interstitials (Wigner-Seitz), dislocation lines and Burgers vectors (DXA), for structures and trajectories | established | Exact answers for ideal fcc/bcc/hcp/diamond lattices, a vacancy, a Frenkel pair, and a Volterra screw dislocation |
@@ -108,6 +109,10 @@ accepts.
   `vina.dock` (redock the crystal ligand first to validate the box) →
   `openmm.simulate` with the best pose as `small_molecules` →
   `mdanalysis.rmsd` on `start.pdb` + `trajectory.dcd` (does the pose stay?).
+- **What did my reaction give?** For each expected species, a measured
+  reference spectrum or `nmr-mixtures.predict_spectrum` →
+  `nmr-mixtures.quantify_mixture` on the crude 1H NMR (yield, selectivity,
+  isomer ratio) → `nmr-mixtures.reaction_kinetics` for spectra over time.
 - **Chemical files:** `openbabel.convert` and `openbabel.identifiers` move
   molecules between programs and formats and give InChIKeys for lookups.
 
@@ -119,9 +124,9 @@ data is CC BY 4.0, xtb is LGPL-3.0, and LAMMPS and Open Babel are GPL-2.0.
 Upstream code, potential files, and pseudopotentials are downloaded from their
 original sources at install time and are not redistributed here. Small test
 inputs taken from upstream projects (the LAMMPS benchmark input, the Vina 1IEP
-tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory, and
-molecules of the MMFF94 validation suite) keep their projects' licenses; each
-golden test names its source.
+tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory,
+molecules of the MMFF94 validation suite, and MixSense's example spectra) keep
+their projects' licenses; each golden test names its source.
 
 ## Adding a tool
 

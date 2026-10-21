@@ -11,10 +11,11 @@ All notable changes to this project are documented here. The format follows
 - Tool collection in `tools/`: ML potentials, phonopy, phono3py,
   pymatgen-diffusion, pymatgen-structure, Materials Project, GPAW, Quantum
   ESPRESSO, xTB, CREST, PySCF, RDKit, OpenMM, Cantera, LAMMPS, Open Babel,
-  MDAnalysis, OVITO, AutoDock Vina, and synthesis recipes (from the SKY
-  hackathon agent), each with golden tests against upstream test suites,
-  reference databases, or established physics, and a CI workflow that rebuilds
-  changed tools from scratch.
+  MDAnalysis, OVITO, AutoDock Vina, synthesis recipes (from the SKY hackathon
+  agent), and NMR mixture quantification (from the MixSense hackathon project),
+  each with golden tests against upstream test suites, reference databases, or
+  established physics, and a CI workflow that rebuilds changed tools from
+  scratch.
 - Maturity levels: every tool is `established`, `published`, or `experimental`
   (the default), declared as `maturity` in `motel.yaml`, and refused when the
   evidence is missing (a publication, and golden tests whose new `against`
