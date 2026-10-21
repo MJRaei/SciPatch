@@ -35,6 +35,10 @@ environment:
   conda_file: null                # conda only: environment.yml in the package
   post_install: []                # shell commands run in the environment afterwards
   variables: {}                   # environment variables for every run
+  secrets:                        # API keys, passed as environment variables
+    - name: MP_API_KEY
+      description: Materials Project API key
+      url: https://next-gen.materialsproject.org/api   # where to get one
 
 entrypoint: api                   # module that defines the functions
 

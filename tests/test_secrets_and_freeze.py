@@ -9,7 +9,7 @@ import pytest
 
 from motel.app import Motel
 from motel.errors import MotelError, RunError
-from motel.manifest import LOCK_FILENAME
+from motel.manifest import LOCK_FILENAME, Secret
 from motel.secrets import SecretStore
 
 from .conftest import ManifestFactory, requires_uv
@@ -66,6 +66,36 @@ def test_tools_get_only_their_declared_secrets(
     tested = motel.test("sample")
     assert tested.state is not None
     assert tested.state.golden_summary == "1/1 golden tests passed"
+
+
+@pytest.mark.integration
+@requires_uv
+def test_install_asks_for_missing_secrets_before_building(
+    motel: Motel, make_package: ManifestFactory, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("DEMO_KEY", raising=False)
+    described = {"name": "DEMO_KEY", "description": "Demo key", "url": "https://example.org"}
+    golden = [
+        {"name": "needs a key", "function": "secret_values", "requires": ["DEMO_KEY"],
+         "expect": {"demo": "s3cret"}},
+    ]  # fmt: skip
+    package = make_package(
+        functions=["secret_values"],
+        environment={"manager": "uv", "python": "3.12", "secrets": [described]},
+        golden=golden,
+    )
+    asked: list[Secret] = []
+
+    def ask(secret: Secret) -> str | None:
+        asked.append(secret)
+        return "s3cret"
+
+    tool = motel.add(str(package), ask_secret=ask)
+    assert [(s.name, s.url) for s in asked] == [("DEMO_KEY", "https://example.org")]
+    assert tool.state is not None
+    assert tool.state.golden_summary == "1/1 golden tests passed"  # the key was there in time
+    motel.add(str(package), force=True, ask_secret=ask)
+    assert len(asked) == 1  # a key that is set is not asked for again
 
 
 @pytest.mark.integration

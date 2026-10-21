@@ -121,7 +121,7 @@ class Motel:
             tool = self.tool(target)
             manifest, layout = tool.manifest, tool.layout
             hint = f"Rebuild it with 'motel rebuild {target}'."
-        secrets = SecretStore(self.paths.secrets).resolve(manifest.environment.secrets)
+        secrets = SecretStore(self.paths.secrets).resolve(manifest.environment.secret_names)
         runtime = runtime_for(manifest, layout, secrets)
         if not runtime.python.exists():
             raise MotelError(f"The environment for '{target}' does not exist yet.", hint=hint)

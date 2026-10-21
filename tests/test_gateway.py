@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 import anyio
+import httpx
 import pytest
-from mcp import Client
+from mcp import Client, MCPError
+from mcp_types import URL_ELICITATION_REQUIRED
 
 from motel.app import Motel
 from motel.gateway import build_server
@@ -95,6 +98,51 @@ def test_find_describe_run_and_collect(motel: Motel, make_package: ManifestFacto
         failed.structured_content["run_id"]
     ]
     assert listed.structured_content["tools"][0]["name"] == "sample"
+
+
+@pytest.mark.integration
+@requires_uv
+def test_missing_keys_are_entered_outside_the_chat(
+    motel: Motel, make_package: ManifestFactory, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("DEMO_KEY", raising=False)
+    described = {"name": "DEMO_KEY", "description": "Demo service key", "url": "https://x.org"}
+    environment = {"manager": "uv", "python": "3.12", "secrets": [described]}
+    motel.add(str(make_package(functions=["secret_values"], environment=environment)))
+    run = {"tool": "sample", "function": "secret_values"}
+
+    async def never_called(context: Any, params: Any) -> Any:
+        raise AssertionError("URL elicitation is requested through the error, not a request")
+
+    async def session() -> tuple[Any, MCPError]:
+        server = build_server(motel)
+        async with Client(server) as plain:
+            asked = await plain.call_tool("run_tool", run)
+        # Passing an elicitation callback declares support for URL elicitation.
+        async with Client(server, elicitation_callback=never_called) as capable:
+            with pytest.raises(MCPError) as raised:
+                await capable.call_tool("run_tool", run)
+        return asked, raised.value
+
+    asked, required = anyio.run(session)
+    # Apps that cannot open links get one for the agent to pass on.
+    text = asked.content[0].text
+    assert asked.is_error
+    assert "Demo service key" in text and "Do not ask for the key in the chat" in text
+    match = re.search(r"http://127\.0\.0\.1:\d+/keys/\S+", text)
+    assert match is not None
+    # Apps that can are asked to open the page themselves.
+    assert required.code == URL_ELICITATION_REQUIRED
+    [elicitation] = required.data["elicitations"]
+    assert elicitation["mode"] == "url"
+    assert elicitation["url"].startswith("http://127.0.0.1:")
+    assert elicitation["url"] != match.group(0)  # every link is new and single-use
+
+    # The user enters the key on the page, and the next run has it.
+    saved = httpx.post(match.group(0), data={"DEMO_KEY": "s3cret"})
+    assert saved.status_code == 200 and "Saved" in saved.text
+    [ran] = call(motel, ("run_tool", run))
+    assert ran.structured_content["result"]["demo"] == "s3cret"
 
 
 def test_preview_truncates_large_results() -> None:

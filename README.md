@@ -127,7 +127,9 @@ Add `--json` to any of these for machine-readable output (agents use this).
 Onboarding and installing tools runs code from the repositories you choose, on
 your computer, just like installing them by hand. Only add code you trust.
 Motel's servers listen only on your own computer (`127.0.0.1`), and the dashboard
-requires a per-session token. Motel only ever edits its own entry in your AI
+requires a per-session token. API keys are stored only on your computer, given
+only to the tools that declare them, and entered on a local page rather than in
+the chat, so they never reach the AI model. Motel only ever edits its own entry in your AI
 apps' configuration files, and makes a backup first.
 
 ## Status

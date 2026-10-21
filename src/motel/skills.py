@@ -215,6 +215,8 @@ def render_tool_skill(tool: InstalledTool) -> SkillFiles:
         f"> Installed in Motel as `{tool.name}` (version {manifest.version}; {status})."
     )
     sections.append(_how_to_run(tool))
+    if manifest.environment.secrets:
+        sections.append(_keys_section(tool))
     sections.append("## Functions\n\n" + "\n\n".join(_function_section(f) for f in tool.functions))
     guide = tool.guide()
     if guide:
@@ -254,6 +256,22 @@ def _how_to_run(tool: InstalledTool) -> str:
         "- For slow functions use `--background`, then `motel runs show <run-id> --json` "
         "(MCP: `get_run`)."
     )
+
+
+def _keys_section(tool: InstalledTool) -> str:
+    lines = ["## API keys", "", "This tool needs:", ""]
+    for secret in tool.manifest.environment.secrets:
+        where = f"get one at {secret.url}" if secret.url else None
+        details = "; ".join(part for part in (secret.description, where) if part)
+        lines.append(f"- `{secret.name}`" + (f" ({details})" if details else ""))
+    lines += [
+        "",
+        "Never ask the user to type a key into the chat. If a key is not set, `run_tool` "
+        "returns a link to a page on the user's computer where they can enter it; give them "
+        "the link and run the tool again afterwards. From a terminal, the user can run "
+        f"`motel secret set {tool.manifest.environment.secrets[0].name}` themselves.",
+    ]
+    return "\n".join(lines)
 
 
 def _function_section(function: FunctionInfo) -> str:

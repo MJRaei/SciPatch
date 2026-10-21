@@ -16,18 +16,22 @@ Tools installed while the server is running are picked up immediately.
 from __future__ import annotations
 
 import functools
+import uuid
 from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated, Any, ParamSpec, TypeVar
 
+from mcp import UrlElicitationRequiredError
 from mcp.server import MCPServer
+from mcp.server.mcpserver import Context
 from mcp.server.mcpserver.exceptions import ToolError
-from mcp_types import ToolAnnotations
+from mcp_types import ElicitRequestURLParams, ToolAnnotations
 from pydantic import Field
 
 from motel import __version__
 from motel.app import Motel
-from motel.errors import MotelError
+from motel.errors import MissingSecretsError, MotelError
+from motel.keypage import LINK_LIFETIME_SECONDS, KeyPage
 from motel.models import RunRecord, RunStatus
 from motel.views import match_view, run_view, tool_summary_view, tool_view
 
@@ -45,6 +49,10 @@ Recommended workflow:
 5. Report numbers with units, the tool and run id, the citation, and any
    validity caveat. Outputs that are files are returned as absolute paths and
    can be passed to other tools.
+
+Never ask the user to type an API key or password into the chat. If a tool
+needs a key that is not set, run_tool returns a link to a page on the user's
+computer where they can enter it; give them the link, then run the tool again.
 """
 
 MAX_WAIT_SECONDS = 600.0
@@ -72,6 +80,36 @@ def _run_view(record: RunRecord) -> dict[str, Any]:
     return view
 
 
+def _ask_for_secrets(error: MissingSecretsError, page: KeyPage, ctx: Context) -> Exception:
+    """Send the user to a local page to enter missing keys, never through the chat.
+
+    Apps that can open links for a server (MCP URL elicitation) are asked to open
+    the page; for the others, the agent gets the link to pass on.
+    """
+    url = page.link(error.tool, error.secrets)
+    needed = " and ".join(secret.label for secret in error.secrets)
+    capabilities = ctx.client_capabilities
+    elicitation = capabilities.elicitation if capabilities else None
+    if elicitation is not None and elicitation.url is not None:
+        request = ElicitRequestURLParams(
+            message=f"The tool '{error.tool}' needs {needed}. Enter it on this page; it stays "
+            "on your computer.",
+            url=url,
+            elicitation_id=uuid.uuid4().hex,
+        )
+        return UrlElicitationRequiredError(
+            [request],
+            f"{error.message} The user was asked to enter it on a page on their computer; "
+            "run the tool again once they have.",
+        )
+    return ToolError(
+        f"{error.message}\nAsk the user to open this link and enter {needed} there (it stays on "
+        f"their computer and is never shown to you): {url}\nThe link works once, for "
+        f"{LINK_LIFETIME_SECONDS // 60} minutes. Do not ask for the key in the chat. When they "
+        "are done, run the tool again."
+    )
+
+
 def _friendly_errors(function: Callable[P, R]) -> Callable[P, R]:
     """Report Motel's anticipated errors to the model as readable tool errors."""
 
@@ -95,6 +133,7 @@ def build_server(motel: Motel) -> MCPServer:
     server: MCPServer = MCPServer(
         "motel", instructions=INSTRUCTIONS, version=__version__, log_level="WARNING"
     )
+    key_page = KeyPage(motel.secrets)
 
     @_friendly_errors
     def find_tools(
@@ -149,20 +188,26 @@ def build_server(motel: Motel) -> MCPServer:
         use_cache: Annotated[
             bool, Field(description="Reuse the result of an identical earlier run.")
         ] = True,
+        ctx: Context | None = None,
     ) -> dict[str, Any]:
         installed = motel.tool(tool)
         info = installed.function(function)
         wait = 0.0 if info.long_running else wait_seconds
-        record = motel.run(
-            tool,
-            function,
-            arguments or {},
-            wait=wait,
-            output_dir=Path(output_dir) if output_dir else None,
-            use_cache=use_cache,
-            origin="mcp",
-            base_dir=_client_base_dir(),
-        )
+        try:
+            record = motel.run(
+                tool,
+                function,
+                arguments or {},
+                wait=wait,
+                output_dir=Path(output_dir) if output_dir else None,
+                use_cache=use_cache,
+                origin="mcp",
+                base_dir=_client_base_dir(),
+            )
+        except MissingSecretsError as exc:
+            if ctx is None:
+                raise
+            raise _ask_for_secrets(exc, key_page, ctx) from exc
         return _run_view(record)
 
     @_friendly_errors

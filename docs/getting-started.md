@@ -78,6 +78,12 @@ motel add rdkit-descriptors    # chemistry: properties of molecules from SMILES
 To turn a research repository into a tool, see
 [Turning a repository into a tool](onboarding.md).
 
+Some tools use an online service that needs an API key (the Materials Project,
+for example). `motel add` asks for it and says where to get one. If you skip it,
+your AI app gives you a link to a page on your computer where you can enter it
+later, or use the **Keys** page of the dashboard. Never paste a key into the
+chat: it would be sent to the AI model and kept in the conversation.
+
 ## 5. Use tools yourself
 
 You don't need an AI app to use your tools:

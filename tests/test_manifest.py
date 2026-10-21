@@ -49,6 +49,23 @@ def test_python_version_is_validated() -> None:
         Manifest.model_validate(minimal(environment={"python": "latest"}))
 
 
+def test_secrets_are_names_or_described_objects() -> None:
+    described = {
+        "name": "MP_API_KEY",
+        "description": "Materials Project API key",
+        "url": "https://next-gen.materialsproject.org/api",
+    }
+    environment = {"secrets": ["DEMO_KEY", described]}
+    manifest = Manifest.model_validate(minimal(environment=environment))
+    assert manifest.environment.secret_names == ["DEMO_KEY", "MP_API_KEY"]
+    demo, mp = manifest.environment.secrets
+    assert (demo.label, demo.url) == ("DEMO_KEY", None)
+    assert (mp.label, mp.url) == ("Materials Project API key", described["url"])
+    for bad in (["lower_case"], [{"name": "MP-KEY"}]):
+        with pytest.raises(ValueError, match="not an environment variable name"):
+            Manifest.model_validate(minimal(environment={"secrets": bad}))
+
+
 def test_functions_accept_a_plain_list() -> None:
     manifest = Manifest.model_validate(minimal(functions=["relax", "predict"]))
     assert manifest.exported_names == ["relax", "predict"]

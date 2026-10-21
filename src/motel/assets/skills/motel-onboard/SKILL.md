@@ -65,10 +65,11 @@ Edit `environment` in `motel.yaml` (see [references/manifest.md](references/mani
   installable, set it to `false` and add what it needs to `packages`; `api.py`
   can then import from `source/` by adding it to `sys.path`.
 - Model weights or data → `post_install` commands.
-- API keys → list their names under `environment.secrets` (e.g. `[MP_API_KEY]`)
-  and say in the usage notes where to get one; the user stores them with
-  `motel secret set NAME`. Never write a key into a file. Golden tests that need
-  a key declare it with `requires: [NAME]`.
+- API keys → declare each under `environment.secrets` with `name`,
+  `description`, and `url` (where to get one); see references/manifest.md. Motel
+  asks the user for it on install, on the dashboard, or through a one-time local
+  link. Never write a key into a file, and never ask the user to paste one into
+  the chat. Golden tests that need a key declare it with `requires: [NAME]`.
 
 Run `motel check . --skip-tests` and iterate until it builds. On failure, read the
 error and `.motel/build.log`. Typical fixes:

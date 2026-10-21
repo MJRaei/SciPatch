@@ -59,7 +59,7 @@ class InstalledTool:
 
     @property
     def runtime(self) -> ToolRuntime:
-        secrets = SecretStore(self.paths.secrets).resolve(self.manifest.environment.secrets)
+        secrets = SecretStore(self.paths.secrets).resolve(self.manifest.environment.secret_names)
         return runtime_for(self.manifest, self.layout, secrets)
 
     @property

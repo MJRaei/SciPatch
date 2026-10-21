@@ -52,6 +52,25 @@ def test_errors_are_json_with_hints(client: TestClient) -> None:
     assert client.get("/api/runs/20260101-000000-000000").status_code == 404
 
 
+def test_keys_can_be_set_and_removed_but_never_read(
+    client: TestClient, motel: Motel, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("DEMO_KEY", raising=False)
+    assert client.get("/api/secrets").json() == []
+    saved = client.post("/api/secrets", json={"name": "DEMO_KEY", "value": " s3cret "})
+    assert saved.status_code == 200
+    assert saved.json() == [
+        {"name": "DEMO_KEY", "description": None, "get_one_at": None, "used_by": [],
+         "source": "stored"},
+    ]  # fmt: skip
+    assert "s3cret" not in saved.text
+    assert motel.secrets.resolve(["DEMO_KEY"]) == {"DEMO_KEY": "s3cret"}
+    bad = client.post("/api/secrets", json={"name": "bad name", "value": "x"})
+    assert bad.status_code == 400 and "not a valid secret name" in bad.json()["error"]
+    assert client.delete("/api/secrets/DEMO_KEY").json() == []
+    assert motel.secrets.names() == []
+
+
 def test_upload_stores_files_with_safe_names(client: TestClient, motel: Motel) -> None:
     response = client.post("/api/upload", files={"file": ("../../evil name.cif", b"data_x")})
     assert response.status_code == 200

@@ -37,7 +37,9 @@ motel catalog update               # fetch new and updated tools
 ```
 
 The Materials Project tool needs a free API key from
-<https://next-gen.materialsproject.org/api>: `motel secret set MP_API_KEY`.
+<https://next-gen.materialsproject.org/api>. `motel add materials-project` asks
+for it; you can also add it later on the dashboard's Keys page, through the link
+your AI app shows when the key is missing, or with `motel secret set MP_API_KEY`.
 
 ## Workflows
 

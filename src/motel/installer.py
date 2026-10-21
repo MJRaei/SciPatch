@@ -5,6 +5,7 @@ from __future__ import annotations
 import shutil
 import subprocess
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -18,6 +19,7 @@ from motel.manifest import (
     LOCK_FILENAME,
     MANIFEST_FILENAME,
     Manifest,
+    Secret,
     find_manifest,
     load_manifest,
 )
@@ -39,6 +41,9 @@ COPY_IGNORE = shutil.ignore_patterns(
 DEV_ENV_DIR = Path(".motel") / "env"
 DEV_LOG = Path(".motel") / "build.log"
 DEV_SOURCE_DIR = Path("source")
+
+#: Asks the user for a secret during install; returns None to skip it.
+AskSecret = Callable[[Secret], str | None]
 
 _GIT_URL_PREFIXES = ("https://", "http://", "git@", "ssh://", "git+", "file://")
 
@@ -156,8 +161,13 @@ class Installer:
         run_tests: bool = True,
         allow_failing_tests: bool = False,
         ref: str | None = None,
+        ask_secret: AskSecret | None = None,
     ) -> InstalledTool:
-        """Install a tool package and build it from scratch."""
+        """Install a tool package and build it from scratch.
+
+        ``ask_secret`` is called for each declared secret that is not set yet;
+        a returned value is stored before building, so golden tests can use it.
+        """
         with tempfile.TemporaryDirectory(prefix="motel-add-") as scratch:
             package = resolve_package(
                 spec, scratch=Path(scratch), ref=ref, catalogs=CatalogStore(self.paths)
@@ -172,6 +182,8 @@ class Installer:
                     f"A tool named '{name}' is already installed.",
                     hint=f"Use --force to replace it, or 'motel rebuild {name}' to rebuild it.",
                 )
+            if ask_secret is not None:
+                self._ask_missing_secrets(manifest, ask_secret)
 
             self.paths.ensure()
             staging = self.paths.tools / f".{name}.staging"
@@ -355,7 +367,14 @@ class Installer:
         return lock, len(pins), env_dir
 
     def _secrets_for(self, manifest: Manifest) -> dict[str, str]:
-        return SecretStore(self.paths.secrets).resolve(manifest.environment.secrets)
+        return SecretStore(self.paths.secrets).resolve(manifest.environment.secret_names)
+
+    def _ask_missing_secrets(self, manifest: Manifest, ask: AskSecret) -> None:
+        store = SecretStore(self.paths.secrets)
+        available = store.resolve(manifest.environment.secret_names)
+        for secret in manifest.environment.secrets:
+            if secret.name not in available and (value := ask(secret)):
+                store.set(secret.name, value)
 
     def _mark_broken(self, name: str, reason: str) -> None:
         state = self.registry.load_state(name)

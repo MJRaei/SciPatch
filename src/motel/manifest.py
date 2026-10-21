@@ -76,6 +76,27 @@ class Source(_Model):
         return self
 
 
+class Secret(_Model):
+    """A secret (e.g. an API key) the tool receives as an environment variable."""
+
+    name: str = Field(description="Environment variable name, e.g. MP_API_KEY.")
+    description: str | None = Field(
+        None, description="What it is, e.g. 'Materials Project API key'."
+    )
+    url: str | None = Field(None, description="Where the user can get one.")
+
+    @field_validator("name")
+    @classmethod
+    def _check_name(cls, value: str) -> str:
+        if not _SECRET_NAME.match(value):
+            raise ValueError(f"'{value}' is not an environment variable name like MP_API_KEY")
+        return value
+
+    @property
+    def label(self) -> str:
+        return self.description or self.name
+
+
 class Environment(_Model):
     """How to build the tool's isolated environment."""
 
@@ -93,9 +114,10 @@ class Environment(_Model):
     variables: dict[str, str] = Field(
         default_factory=dict, description="Environment variables set whenever the tool runs."
     )
-    secrets: list[str] = Field(
+    secrets: list[Secret] = Field(
         default_factory=list,
-        description="Names of secrets (e.g. API keys) the tool receives as environment variables.",
+        description="Secrets (e.g. API keys) the tool receives as environment variables: "
+        "names, or objects with name, description, and url.",
     )
 
     @field_validator("python")
@@ -105,13 +127,16 @@ class Environment(_Model):
             raise ValueError(f"'{value}' is not a Python version like '3.11'")
         return value
 
-    @field_validator("secrets")
+    @field_validator("secrets", mode="before")
     @classmethod
-    def _check_secret_names(cls, names: list[str]) -> list[str]:
-        for name in names:
-            if not _SECRET_NAME.match(name):
-                raise ValueError(f"'{name}' is not an environment variable name like MP_API_KEY")
-        return names
+    def _secret_names_as_objects(cls, value: Any) -> Any:
+        if isinstance(value, list):
+            return [{"name": item} if isinstance(item, str) else item for item in value]
+        return value
+
+    @property
+    def secret_names(self) -> list[str]:
+        return [secret.name for secret in self.secrets]
 
     @model_validator(mode="after")
     def _conda_fields_need_conda(self) -> Environment:

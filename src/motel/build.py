@@ -71,7 +71,7 @@ def runtime_for(
     manifest: Manifest, layout: BuildLayout, secrets: Mapping[str, str] | None = None
 ) -> ToolRuntime:
     """How to run a tool built at ``layout``; only its declared secrets are passed on."""
-    declared = manifest.environment.secrets
+    declared = manifest.environment.secret_names
     return ToolRuntime(
         python=executor.environment_python(layout.env_dir),
         env_dir=layout.env_dir,

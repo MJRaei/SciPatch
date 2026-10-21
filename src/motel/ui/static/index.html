@@ -68,6 +68,7 @@
   tr.clickable { cursor: pointer; } tr.clickable:hover { background: var(--accent-soft); }
   details { margin-top: 8px; } summary { cursor: pointer; font-weight: 600; }
   .error { color: var(--bad); }
+  a { color: var(--accent); }
   .files a { display: block; color: var(--accent); cursor: pointer; text-decoration: none; margin-top: 4px; word-break: break-all; }
   .empty { text-align: center; color: var(--muted); padding: 60px 20px; }
   .empty code, .panel code { background: var(--code); padding: 1px 6px; border-radius: 5px; }
@@ -81,6 +82,7 @@
   <nav>
     <button id="nav-tools" class="active">Tools</button>
     <button id="nav-runs">Runs</button>
+    <button id="nav-keys">Keys</button>
   </nav>
 </header>
 <main>
@@ -89,7 +91,8 @@
 </main>
 <script>
 "use strict";
-const token = new URLSearchParams(location.hash.slice(1)).get("token") || sessionStorage.getItem("motel-token") || "";
+const hashParams = new URLSearchParams(location.hash.slice(1));
+const token = hashParams.get("token") || sessionStorage.getItem("motel-token") || "";
 sessionStorage.setItem("motel-token", token);
 const PATH_KINDS = new Set(["structure", "trajectory", "spectrum", "table", "image", "file", "directory", "molecule"]);
 const state = { tools: [], selected: null, view: "tools" };
@@ -116,6 +119,7 @@ async function api(path, options = {}) {
 }
 const chip = (status) => h("span", { class: `chip ${status}` }, status.replace("-", " "));
 const pretty = (value) => h("pre", {}, JSON.stringify(value, null, 2));
+const safeLink = (url) => /^https?:\/\//.test(url) ? h("a", { href: url, target: "_blank", rel: "noopener noreferrer" }, url) : url;
 function typeOf(schema) {
   const options = (schema.anyOf || []).filter((o) => o.type !== "null");
   return options.length === 1 ? { ...options[0], ...schema, anyOf: undefined, optional: true } : schema;
@@ -164,10 +168,14 @@ async function selectTool(name, functionName) {
   };
   tool.functions.forEach((fn) => tabs.append(h("button", { "data-fn": fn.name, onclick: () => pick(fn) }, fn.name)));
   const citation = tool.citation || {};
+  const missingKeys = (tool.secrets_needed || []).filter((s) => !s.set);
   setContent(
     h("div", { class: "panel" },
       h("div", { class: "row" }, h("h2", { style: "margin:0;flex:1" }, tool.title), chip(tool.status)),
       h("p", {}, tool.summary),
+      missingKeys.length > 0 && h("p", { class: "error" },
+        `Needs ${missingKeys.map((s) => s.description || s.name).join(" and ")} before it can run. `,
+        h("a", { href: "#", onclick: (event) => { event.preventDefault(); showView("keys"); } }, "Add it on the Keys page")),
       h("small", { class: "muted" }, `${tool.name} ${tool.version} · ${tool.golden_tests}`),
       tabs, formArea),
     tool.usage_notes && h("div", { class: "panel" }, h("details", { open: true }, h("summary", {}, "Usage notes"),
@@ -291,23 +299,58 @@ async function loadRuns() {
   setContent(detail, h("div", { class: "panel" }, h("table", {}, h("thead", {}, h("tr", {}, h("th", {}, "Status"), h("th", {}, "Tool"), h("th", {}, "Started"), h("th", {}, "Took"))), h("tbody", {}, ...rows))));
 }
 
+// ---------------------------------------------------------------- keys
+async function loadKeys() {
+  let keys;
+  try { keys = await api("/api/secrets"); } catch (error) { return showError(error); }
+  document.getElementById("sidebar").replaceChildren(h("p", { class: "muted" },
+    "API keys for tools that use online services. They stay on this computer, are given only to the tools " +
+    "that need them, and are never shown again after you save them."));
+  if (!keys.length) return setContent(h("div", { class: "empty" }, h("h2", {}, "No keys needed"),
+    h("p", {}, "None of your tools uses an online service that needs a key.")));
+  setContent(...keys.map(keyPanel));
+}
+function keyPanel(key) {
+  const input = h("input", { type: "password", autocomplete: "off", spellcheck: "false",
+    "aria-label": `Value for ${key.name}`, placeholder: key.source ? "Paste a new key to replace it" : "Paste the key here" });
+  const message = h("p", { class: "error" });
+  const attempt = async (action) => { try { await action(); loadKeys(); } catch (error) { message.textContent = error.message; } };
+  const save = (event) => {
+    event.preventDefault();
+    if (!input.value.trim()) return;
+    attempt(() => api("/api/secrets", { method: "POST", body: JSON.stringify({ name: key.name, value: input.value.trim() }) }));
+  };
+  const remove = () => { if (confirm(`Remove ${key.name} from this computer?`))
+    attempt(() => api("/api/secrets/" + encodeURIComponent(key.name), { method: "DELETE" })); };
+  return h("div", { class: "panel" },
+    h("div", { class: "row" }, h("h3", { style: "margin:0;flex:1" }, key.description || key.name),
+      h("span", { class: `chip ${key.source ? "ready" : "failed"}` }, key.source ? "set" : "not set")),
+    h("p", { class: "muted" }, key.name, key.used_by.length ? ` · used by ${key.used_by.join(", ")}` : " · not used by any installed tool"),
+    key.get_one_at && h("p", {}, "Get one at ", safeLink(key.get_one_at)),
+    key.source === "environment" && h("p", { class: "muted" }, "Set by an environment variable, which takes precedence over a key saved here."),
+    h("form", { class: "row", onsubmit: save }, input, h("button", { class: "small", type: "submit" }, "Save"),
+      key.source === "stored" && h("button", { class: "small", type: "button", onclick: remove }, "Remove")),
+    message);
+}
+
 // ---------------------------------------------------------------- layout
 function setContent(...children) { document.getElementById("content").replaceChildren(...children.filter(Boolean)); }
 function showError(error) { setContent(h("div", { class: "panel" }, h("pre", { class: "error" }, error.message))); }
 function showView(view, load = true) {
   state.view = view;
-  document.getElementById("nav-tools").classList.toggle("active", view === "tools");
-  document.getElementById("nav-runs").classList.toggle("active", view === "runs");
-  if (load) (view === "tools" ? loadTools() : loadRuns());
+  for (const name of ["tools", "runs", "keys"]) document.getElementById("nav-" + name).classList.toggle("active", view === name);
+  if (load) ({ tools: loadTools, runs: loadRuns, keys: loadKeys })[view]();
 }
 document.getElementById("nav-tools").onclick = () => { state.selected = null; showView("tools"); };
 document.getElementById("nav-runs").onclick = () => showView("runs");
+document.getElementById("nav-keys").onclick = () => showView("keys");
 let searchTimer;
 document.getElementById("search").addEventListener("input", (event) => {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => { if (state.view !== "tools") showView("tools", false); search(event.target.value); }, 200);
 });
 if (!token) showError(new Error("This page needs the link printed by 'motel ui' (it includes a session token)."));
+else if (hashParams.get("view") === "keys") showView("keys");
 else loadTools();
 </script>
 </body>

@@ -40,6 +40,19 @@ def test_empty_list_suggests_next_steps() -> None:
     assert json.loads(runner.invoke(app, ["list", "--json"]).output) == []
 
 
+def test_secrets_are_typed_hidden_and_never_shown(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("DEMO_KEY", raising=False)
+    result = runner.invoke(app, ["secret", "set", "DEMO_KEY"], input="s3cret\n")
+    assert result.exit_code == 0, result.output
+    assert "Paste it here (hidden)" in result.output
+    assert "Saved DEMO_KEY" in result.output
+    assert "s3cret" not in result.output
+    listed = runner.invoke(app, ["secret", "list"]).output
+    assert "DEMO_KEY" in listed and "yes" in listed and "s3cret" not in listed
+    assert runner.invoke(app, ["secret", "set", "bad-name"], input="x\n").exit_code != 0
+    assert "Removed DEMO_KEY" in runner.invoke(app, ["secret", "remove", "DEMO_KEY"]).output
+
+
 def test_catalog_lists_featured_tools() -> None:
     result = runner.invoke(app, ["catalog", "--json"])
     names = [entry["name"] for entry in json.loads(result.output)]

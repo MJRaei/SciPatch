@@ -6,6 +6,8 @@ command line, so both interfaces return identical structures.
 
 from __future__ import annotations
 
+import os
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
@@ -136,8 +138,13 @@ def tool_view(tool: InstalledTool) -> dict[str, Any]:
             for f in tool.functions
         ],
         "secrets_needed": [
-            {"name": name, "set": name in tool.runtime.secrets}
-            for name in manifest.environment.secrets
+            {
+                "name": secret.name,
+                "description": secret.description,
+                "get_one_at": secret.url,
+                "set": secret.name in tool.runtime.secrets,
+            }
+            for secret in manifest.environment.secrets
         ],
         "usage_notes": tool.guide(),
         "validity": manifest.validity,
@@ -149,3 +156,30 @@ def tool_view(tool: InstalledTool) -> dict[str, Any]:
             "license": source.license,
         },
     }
+
+
+def secrets_view(tools: Iterable[InstalledTool], stored: Iterable[str]) -> list[dict[str, Any]]:
+    """Every secret that is stored or needed, and the tools that use it (never values).
+
+    ``source`` says where a tool gets it: an environment variable (which wins),
+    the store, or nowhere yet (None).
+    """
+    stored = set(stored)
+    entries: dict[str, dict[str, Any]] = {}
+    for tool in tools:
+        for secret in tool.manifest.environment.secrets:
+            entry = entries.setdefault(
+                secret.name,
+                {"name": secret.name, "description": None, "get_one_at": None, "used_by": []},
+            )
+            entry["description"] = entry["description"] or secret.description
+            entry["get_one_at"] = entry["get_one_at"] or secret.url
+            entry["used_by"].append(tool.name)
+    for name in stored:
+        entries.setdefault(
+            name, {"name": name, "description": None, "get_one_at": None, "used_by": []}
+        )
+    for name, entry in entries.items():
+        in_environment = bool(os.environ.get(name))
+        entry["source"] = "environment" if in_environment else "stored" if name in stored else None
+    return [entries[name] for name in sorted(entries)]

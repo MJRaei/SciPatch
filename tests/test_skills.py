@@ -84,6 +84,18 @@ def test_tool_skill_is_valid_and_complete(installed_tool: InstalledTool) -> None
     assert files["references/paper.md"] == b"notes"
 
 
+def test_tool_skill_explains_keys(installed_tool: InstalledTool) -> None:
+    manifest = installed_tool.package_dir / "motel.yaml"
+    manifest.write_text(
+        manifest.read_text()
+        + "environment: {secrets: [{name: DEMO_KEY, description: Demo key, url: 'https://x.org'}]}\n"
+    )
+    text = str(render_tool_skill(Registry(MotelPaths.from_env()).get("chgnet"))["SKILL.md"])
+    assert "## API keys" in text
+    assert "- `DEMO_KEY` (Demo key; get one at https://x.org)" in text
+    assert "Never ask the user to type a key into the chat." in text
+
+
 def test_bundled_skills_have_valid_frontmatter() -> None:
     skills = bundled_skills()
     assert {"motel", "motel-onboard"} <= set(skills)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from typing import Annotated
 
 import typer
@@ -13,11 +14,13 @@ from rich.table import Table
 from motel.catalogs import DEFAULT_PATH, CatalogStore
 from motel.cli._app import PANEL_MANAGE, PANEL_USE, app, get_motel, reporter_of
 from motel.cli.console import console, print_json
+from motel.manifest import Secret
 from motel.models import FunctionInfo
 from motel.registry import InstalledTool
 from motel.schema import type_label
 from motel.search import describe_inputs
-from motel.views import match_view, tool_summary_view, tool_view
+from motel.secrets import check_name
+from motel.views import match_view, secrets_view, tool_summary_view, tool_view
 
 JsonOption = Annotated[bool, typer.Option("--json", help="Print machine-readable JSON.")]
 
@@ -49,6 +52,20 @@ def short(text: str, limit: int = 90) -> str:
 
 def status_label(tool: InstalledTool) -> str:
     return _STATUS_STYLE.get(tool.status, tool.status)
+
+
+def prompt_secret(secret: Secret, *, optional: bool) -> str | None:
+    """Ask for a secret without showing it; with ``optional``, Enter skips it."""
+    console.print(
+        f"\n[bold]{escape(secret.label)}[/]" + (f" ({secret.name})" if secret.description else "")
+    )
+    if secret.url:
+        console.print(f"Get one at {escape(secret.url)}")
+    question = "Paste it here (hidden)" + (", or press Enter to skip" if optional else "")
+    value: str = typer.prompt(
+        question, default="" if optional else None, hide_input=True, show_default=False
+    )
+    return value.strip() or None
 
 
 @app.command("list", rich_help_panel=PANEL_USE)
@@ -135,11 +152,16 @@ def info(
     if state and state.error:
         lines.append(f"[red]Last error:[/] {escape(state.error)}")
     available = installed.runtime.secrets
-    for name in manifest.environment.secrets:
+    for secret in manifest.environment.secrets:
         status = (
-            "[green]set[/]" if name in available else f"[red]not set[/] (motel secret set {name})"
+            "[green]set[/]"
+            if secret.name in available
+            else f"[red]not set[/] (motel secret set {secret.name})"
         )
-        lines.append(f"Needs {name}: {status}")
+        label = f" ({escape(secret.description)})" if secret.description else ""
+        lines.append(f"Needs {secret.name}{label}: {status}")
+        if secret.url and secret.name not in available:
+            lines.append(f"  Get one at {escape(secret.url)}")
     # Panels lay out their own text; soft wrapping would cut it off at the border.
     panel = Panel("\n".join(lines), title=header, title_align="left", expand=False)
     console.print(panel, soft_wrap=False)
@@ -297,7 +319,13 @@ def add(
 ) -> None:
     """Install a tool, e.g. [cyan]motel add ase-emt[/] or [cyan]motel add ./my-tool[/]."""
     motel = get_motel()
-    with reporter_of(motel).live("Installing..."):
+    reporter = reporter_of(motel)
+
+    def ask(secret: Secret) -> str | None:
+        with reporter.paused():
+            return prompt_secret(secret, optional=True)
+
+    with reporter.live("Installing..."):
         tool = motel.add(
             source,
             link=link,
@@ -305,10 +333,17 @@ def add(
             ref=ref,
             run_tests=not skip_tests,
             allow_failing_tests=allow_failing_tests,
+            ask_secret=ask if sys.stdin.isatty() else None,
         )
     console.print(f"\n[green]✓[/] [bold]{tool.name}[/] is ready.")
     for warning in tool.state.warnings if tool.state else []:
         console.print(f"  [yellow]![/] {escape(warning)}")
+    for secret in tool.manifest.environment.secrets:
+        if secret.name not in tool.runtime.secrets:
+            console.print(
+                f"  [yellow]![/] It needs {escape(secret.label)} before it can run: "
+                f"[cyan]motel secret set {secret.name}[/]"
+            )
     console.print(f"  See what it does: [cyan]motel info {tool.name}[/]")
     if not motel.connections.load():
         console.print("  Use it from your AI app: [cyan]motel connect[/]")
@@ -365,33 +400,35 @@ def secret_set(
     ] = None,
 ) -> None:
     """Store a secret, such as an API key, for the tools that declare it."""
-    if value is None:
-        value = typer.prompt(f"Value for {name}", hide_input=True)
     motel = get_motel()
-    motel.secrets.set(name, value)
-    users = [t.name for t in motel.tools() if name in t.manifest.environment.secrets]
+    if value is None:
+        declared = next(
+            (s for t in motel.tools() for s in t.manifest.environment.secrets if s.name == name),
+            None,
+        )
+        value = prompt_secret(declared or Secret(name=check_name(name)), optional=False)
+    motel.secrets.set(name, value or "")
+    users = [t.name for t in motel.tools() if name in t.manifest.environment.secret_names]
     console.print(f"[green]✓[/] Saved {name}" + (f" (used by {', '.join(users)})" if users else ""))
 
 
 @secret_app.command("list")
 def secret_list() -> None:
-    """Show which secrets are stored and which tools need them (values are never shown)."""
+    """Show which secrets are set and which tools need them (values are never shown)."""
     motel = get_motel()
-    stored = set(motel.secrets.names())
-    needed: dict[str, list[str]] = {}
-    for tool in motel.tools():
-        for name in tool.manifest.environment.secrets:
-            needed.setdefault(name, []).append(tool.name)
-    if not stored and not needed:
+    entries = secrets_view(motel.tools(), motel.secrets.names())
+    if not entries:
         console.print("No secrets stored, and no installed tool needs one.")
         return
     table = Table(box=None, pad_edge=False)
     table.add_column("Secret", style="bold")
-    table.add_column("Stored")
+    table.add_column("Set")
     table.add_column("Used by")
-    for name in sorted(stored | set(needed)):
-        mark = "[green]yes[/]" if name in stored else "[red]no[/]"
-        table.add_row(name, mark, ", ".join(needed.get(name, [])) or "-")
+    marks = {"stored": "[green]yes[/]", "environment": "[green]yes[/] (environment variable)"}
+    for entry in entries:
+        description = f" [dim]({escape(entry['description'])})[/]" if entry["description"] else ""
+        mark = marks.get(entry["source"], "[red]no[/]")
+        table.add_row(entry["name"] + description, mark, ", ".join(entry["used_by"]) or "-")
     console.print(table)
 
 

@@ -8,6 +8,11 @@ for developers.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from motel.manifest import Secret
+
 
 class MotelError(Exception):
     """Base class for anticipated errors, shown to the user without a traceback."""
@@ -51,6 +56,21 @@ class RunNotFoundError(RunError):
 
 class InvalidArgumentsError(RunError):
     """Arguments for a tool function do not match its signature."""
+
+
+class MissingSecretsError(RunError):
+    """A tool needs secrets (e.g. API keys) that are not set."""
+
+    def __init__(self, tool: str, secrets: list[Secret]) -> None:
+        names = ", ".join(secret.name for secret in secrets)
+        where = next((s.url for s in secrets if s.url), None)
+        super().__init__(
+            f"Tool '{tool}' needs {names}, which is not set.",
+            hint=f"Set it with 'motel secret set {secrets[0].name}'"
+            + (f" (get one at {where})." if where else "."),
+        )
+        self.tool = tool
+        self.secrets = secrets
 
 
 class ClientConfigError(MotelError):

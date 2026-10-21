@@ -16,8 +16,13 @@ All notable changes to this project are documented here. The format follows
   them by name with `motel add <name>`.
 - `motel freeze` pins the exact package versions a tool was tested with
   (`requirements.lock`, applied as constraints).
-- Secrets for tools that call online services (`motel secret set NAME`); each
-  tool receives only the secrets it declares.
+- Secrets for tools that call online services; each tool receives only the
+  secrets it declares, which can name what they are and where to get one.
+  `motel add` asks for missing keys (hidden), the dashboard has a Keys page, and
+  when a run in an AI app needs a missing key, the app gets a one-time link to a
+  page on the user's computer (opened by the app itself where it supports MCP URL
+  elicitation), so keys never pass through the chat. `motel secret set` also
+  works.
 - Golden tests can require secrets (skipped when missing) or require a clear
   error (`raises:`) for inputs outside a tool's validity.
 - Arguments are checked against each function's types before a run starts.

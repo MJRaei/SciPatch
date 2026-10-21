@@ -48,6 +48,18 @@ class RichReporter:
             finally:
                 self._status = None
 
+    @contextmanager
+    def paused(self) -> Iterator[None]:
+        """Hide the spinner while asking the user something."""
+        status = self._status
+        if status is not None:
+            status.stop()
+        try:
+            yield
+        finally:
+            if status is not None:
+                status.start()
+
     def step(self, message: str) -> None:
         err_console.print(f"[bold cyan]→[/] {escape(message)}")
         if self._status is not None:

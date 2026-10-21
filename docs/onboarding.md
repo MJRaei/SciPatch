@@ -124,5 +124,7 @@ motel catalog update                                   # fetch new and updated t
 ```
 
 Tools that call online services declare their API keys under
-`environment.secrets`; users store them with `motel secret set NAME`, and keys
-are never written into tool packages or run records.
+`environment.secrets`, with a description and where to get one ([API
+keys](tool-format.md#api-keys)). Motel asks users for them on install, on the
+dashboard, or through a one-time local link, and keys are never written into
+tool packages or run records, nor passed through the chat.

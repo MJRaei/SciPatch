@@ -20,7 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from motel.errors import InvalidArgumentsError, RunError, RunNotFoundError
+from motel.errors import InvalidArgumentsError, MissingSecretsError, RunError, RunNotFoundError
 from motel.history import RunStore, new_run_id
 from motel.models import FunctionInfo, RunRecord, RunStatus, utcnow
 from motel.paths import MotelPaths
@@ -70,13 +70,9 @@ class RunManager:
             )
         info = tool.function(function)
         runtime = tool.runtime
-        missing = [n for n in tool.manifest.environment.secrets if n not in runtime.secrets]
+        missing = [s for s in tool.manifest.environment.secrets if s.name not in runtime.secrets]
         if missing:
-            raise RunError(
-                f"Tool '{tool.name}' needs {', '.join(missing)}, which is not set.",
-                hint=f"Set it with 'motel secret set {missing[0]}' (see 'motel info {tool.name}' "
-                "for where to get it).",
-            )
+            raise MissingSecretsError(tool.name, missing)
         arguments = resolve_path_arguments(dict(args or {}), info, base_dir or Path.cwd())
         arguments = validate_arguments(tool.name, info, arguments)
 

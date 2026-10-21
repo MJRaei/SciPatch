@@ -111,10 +111,32 @@ packages (like the featured `ase-emt`).
 | `conda_packages`, `channels`, `conda_file` | Conda only. |
 | `post_install` | Shell commands run in the activated environment after installing (e.g. downloading model weights). |
 | `variables` | Environment variables set for every run. |
-| `secrets` | Names of secrets the tool needs, e.g. `[MP_API_KEY]`. Users store them once with `motel secret set MP_API_KEY`; each tool receives only the secrets it declares, as environment variables. |
+| `secrets` | Secrets the tool needs, such as API keys: names (`[MP_API_KEY]`) or, better, objects with `name`, `description`, and `url` (where to get one), so Motel can ask for them clearly. Each tool receives only the secrets it declares, as environment variables. See [API keys](#api-keys). |
 
 The environment is rebuilt only when something that affects it changes: this
 section, the source commit, the patches, the lock file, or the referenced files.
+
+#### API keys
+
+```yaml
+environment:
+  secrets:
+    - name: MP_API_KEY
+      description: Materials Project API key
+      url: https://next-gen.materialsproject.org/api
+```
+
+Read the key with `os.environ["MP_API_KEY"]` in `api.py`. Keys never go into
+tool packages, run records, or the chat with an AI app. A user can provide one:
+
+- when installing: `motel add` asks for it, hidden, with the `url`;
+- on the **Keys** page of the dashboard (`motel ui`);
+- from a run in an AI app: if the key is missing, the app gets a one-time link
+  to a page on the user's computer where they enter it (apps that support MCP
+  URL elicitation open it themselves);
+- from a terminal: `motel secret set MP_API_KEY`.
+
+An environment variable with the same name takes precedence, which suits CI.
 
 ### `requirements.lock`
 

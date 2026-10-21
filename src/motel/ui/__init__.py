@@ -7,6 +7,7 @@ projects ship (or lack).
 Security: the server binds to localhost only, accepts requests only for local
 host names (against DNS rebinding), and requires a random per-session token on
 every API call (so websites open in the same browser cannot trigger runs).
+Secrets can be set and removed here, but their values are never sent back.
 """
 
 from __future__ import annotations
@@ -30,7 +31,7 @@ from starlette.routing import Route
 from motel.app import Motel
 from motel.errors import MotelError, RunNotFoundError, ToolNotFoundError
 from motel.models import RunRecord, RunStatus
-from motel.views import match_view, run_view, tool_summary_view, tool_view
+from motel.views import match_view, run_view, secrets_view, tool_summary_view, tool_view
 
 STATIC_DIR = Path(__file__).parent / "static"
 TOKEN_HEADER = "X-Motel-Token"  # noqa: S105 - a header name, not a secret
@@ -150,6 +151,23 @@ def create_app(motel: Motel, token: str, *, allowed_hosts: list[str] | None = No
             return _json_error("The file is too large.", 413)
         return JSONResponse({"path": str(target)})
 
+    async def list_secrets(request: Request) -> Response:
+        tools = await run_in_threadpool(motel.tools)
+        return JSONResponse(secrets_view(tools, motel.secrets.names()))
+
+    async def set_secret(request: Request) -> Response:
+        # Write-only: no endpoint ever returns a stored value.
+        body = await request.json()
+        if not isinstance(body, dict):
+            return _json_error("Expected a JSON object.", 400)
+        name, value = str(body.get("name", "")), str(body.get("value", "")).strip()
+        await run_in_threadpool(motel.secrets.set, name, value)
+        return await list_secrets(request)
+
+    async def remove_secret(request: Request) -> Response:
+        await run_in_threadpool(motel.secrets.remove, request.path_params["name"])
+        return await list_secrets(request)
+
     routes = [
         Route("/", index),
         Route("/api/tools", api(list_tools)),
@@ -161,6 +179,9 @@ def create_app(motel: Motel, token: str, *, allowed_hosts: list[str] | None = No
         Route("/api/runs/{run_id}", api(get_run)),
         Route("/api/runs/{run_id}/cancel", api(cancel_run), methods=["POST"]),
         Route("/api/runs/{run_id}/files/{index:int}", api(run_file)),
+        Route("/api/secrets", api(list_secrets)),
+        Route("/api/secrets", api(set_secret), methods=["POST"]),
+        Route("/api/secrets/{name}", api(remove_secret), methods=["DELETE"]),
     ]
     hosts = allowed_hosts or LOCAL_HOSTS
     return Starlette(
