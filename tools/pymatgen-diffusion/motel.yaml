@@ -121,6 +121,20 @@ golden:
       pymatgen-analysis-diffusion's 'max' smoothing starts the MSD fit at a lag
       time of 1 ps (analyzer.py, DiffusionAnalyzer.__init__), so shorter
       trajectories cannot be analyzed with it.
+  - name: too few ions for the 1 ps fit window are refused with an explanation
+    function: analyze_trajectory
+    args:
+      trajectory: tests/data/LGPS_600K_AIMD.extxyz.gz
+      specie: Li
+      temperature_k: 600
+      frame_interval_fs: 20
+      skip_initial_ps: 18.8
+    raises: "can only use lag times up to 0.80 ps"
+    reference: >-
+      pymatgen-analysis-diffusion's 'max' smoothing uses lag times up to
+      n_ions x n_frames // min_obs frames and fits from 1 ps (analyzer.py,
+      DiffusionAnalyzer.__init__): 20 Li x 60 frames // 30 = 40 frames (0.80 ps),
+      so upstream raises "Not enough data to calculate diffusivity" here.
   - name: a pure element without a host framework is refused
     function: analyze_trajectory
     args:

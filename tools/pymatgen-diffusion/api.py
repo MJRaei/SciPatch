@@ -27,6 +27,30 @@ def _matplotlib():
     return plt
 
 
+def _check_fit_window(
+    n_frames: int, n_ions: int, specie: str, frame_interval_fs: float, min_obs: int
+) -> None:
+    """Refuse runs too short for the "max" smoothing (DiffusionAnalyzer.__init__)."""
+    first_lag = int(MIN_FIT_START_FS / frame_interval_fs)
+    if first_lag >= n_frames:
+        raise ValueError(
+            f"The trajectory covers {(n_frames - 1) * frame_interval_fs / 1000:.2f} ps after "
+            f"skipping, but the 'max' analysis fits the MSD from "
+            f"{MIN_FIT_START_FS / 1000:.0f} ps onward. Run a longer MD (several ps; tens of "
+            "ps for a reliable diffusivity), or use smoothed='none' for a rough look at a "
+            "short run."
+        )
+    last_lag = min(n_ions * n_frames // min_obs, n_frames)
+    if first_lag >= last_lag:
+        raise ValueError(
+            f"The 'max' analysis fits the MSD from {MIN_FIT_START_FS / 1000:.0f} ps onward, "
+            f"but with {n_ions} {specie} ions, {n_frames} frames, and min_obs={min_obs} it "
+            f"can only use lag times up to {last_lag * frame_interval_fs / 1000:.2f} ps "
+            f"(ions * frames / min_obs). Use a larger supercell (more {specie} ions), a "
+            "longer run, a smaller min_obs, or smoothed='none' for a rough look."
+        )
+
+
 def analyze_trajectory(
     trajectory: str,
     specie: str,
@@ -57,6 +81,8 @@ def analyze_trajectory(
         smoothed: MSD averaging: "max" (default; all time origins, weighted),
             "constant" (fixed window), or "none" (single origin).
         min_obs: With "max", the minimum number of observations per time interval.
+            The longest lag time used is (ions × run length) / min_obs, and it
+            must exceed 1 ps.
         plot: PNG file for the MSD plot.
         msd_data: CSV file for the MSD data (time in fs, MSD in Å²).
 
@@ -74,7 +100,8 @@ def analyze_trajectory(
     if temperature_k <= 0 or frame_interval_fs <= 0 or skip_initial_ps < 0:
         raise ValueError("temperature_k and frame_interval_fs must be positive.")
     frames = read(trajectory, index=":")
-    elements = set(frames[0].get_chemical_symbols())
+    symbols = frames[0].get_chemical_symbols()
+    elements = set(symbols)
     if specie not in elements:
         raise ValueError(f"'{specie}' is not in the trajectory ({', '.join(sorted(elements))}).")
     if elements == {specie}:
@@ -85,19 +112,14 @@ def analyze_trajectory(
             "self-diffusion in a pure element."
         )
     skip = round(skip_initial_ps * 1000 / frame_interval_fs)
-    if len(frames) - skip < 10:
+    n_frames = len(frames) - skip
+    if n_frames < 10:
         raise ValueError(
-            f"Only {len(frames) - skip} frames remain after skipping {skip}; "
+            f"Only {n_frames} frames remain after skipping {skip}; "
             "need at least 10. Reduce skip_initial_ps or run longer."
         )
-    duration_fs = (len(frames) - skip - 1) * frame_interval_fs
-    if smoothed == "max" and duration_fs <= MIN_FIT_START_FS:
-        raise ValueError(
-            f"The trajectory covers {duration_fs / 1000:.2f} ps after skipping, but the "
-            f"'max' analysis fits the MSD from {MIN_FIT_START_FS / 1000:.0f} ps onward. "
-            "Run a longer MD (several ps; tens of ps for a reliable diffusivity), or use "
-            "smoothed='none' for a rough look at a short run."
-        )
+    if smoothed == "max":
+        _check_fit_window(n_frames, symbols.count(specie), specie, frame_interval_fs, min_obs)
     structures = [AseAtomsAdaptor.get_structure(atoms) for atoms in frames[skip:]]
 
     with warnings.catch_warnings():
