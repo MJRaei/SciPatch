@@ -19,25 +19,31 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.list.outputs.matrix }}
+      any: ${{ steps.list.outputs.any }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - id: list
         run: |
+          before="${{ github.event.before }}"
           case "${{ github.event_name }}" in
             pull_request) changed=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD -- tools) ;;
-            push) changed=$(git diff --name-only "${{ github.event.before }}" HEAD -- tools) ;;
+            # The first push of a branch has no "before" commit: check every tool.
+            push) if [ -z "${before//0/}" ]; then changed=$(ls tools/*/motel.yaml)
+                  else changed=$(git diff --name-only "$before" HEAD -- tools); fi ;;
             *) changed=$(ls tools/*/motel.yaml) ;;
           esac
           tools=$(echo "$changed" | cut -d/ -f2 | sort -u | while read -r t; do
             [ -n "$t" ] && [ -f "tools/$t/motel.yaml" ] && echo "$t"; done)
-          echo "matrix=$(python3 .github/scripts/tool_matrix.py $tools)" >> "$GITHUB_OUTPUT"
+          matrix=$(python3 .github/scripts/tool_matrix.py $tools)
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "any=$(python3 -c 'import json, sys; print(str(bool(json.loads(sys.argv[1])["include"])).lower())' "$matrix")" >> "$GITHUB_OUTPUT"
 
   check:
     name: ${{ matrix.tool }} (${{ matrix.os }}${{ matrix.wsl && ', WSL' || '' }})
     needs: select
-    if: needs.select.outputs.matrix != '{"include": []}'
+    if: needs.select.outputs.any == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
