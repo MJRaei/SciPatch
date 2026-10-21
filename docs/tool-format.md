@@ -134,7 +134,9 @@ tool packages, run records, or the chat with an AI app. A user can provide one:
 - from a run in an AI app: if the key is missing, the app gets a one-time link
   to a page on the user's computer where they enter it (apps that support MCP
   URL elicitation open it themselves);
-- from a terminal: `motel secret set MP_API_KEY`.
+- from a terminal: `motel secret set MP_API_KEY` asks for it, hidden. Run by an
+  AI agent (no terminal to type in), the same command opens the page in the
+  user's browser instead and waits until they have entered the key.
 
 An environment variable with the same name takes precedence, which suits CI.
 

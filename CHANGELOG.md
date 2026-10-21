@@ -19,10 +19,12 @@ All notable changes to this project are documented here. The format follows
 - Secrets for tools that call online services; each tool receives only the
   secrets it declares, which can name what they are and where to get one.
   `motel add` asks for missing keys (hidden), the dashboard has a Keys page, and
-  when a run in an AI app needs a missing key, the app gets a one-time link to a
-  page on the user's computer (opened by the app itself where it supports MCP URL
-  elicitation), so keys never pass through the chat. `motel secret set` also
-  works.
+  when a run in an AI app needs a missing key, the user enters it on a one-time
+  page on their computer, so keys never pass through the chat. Apps that support
+  MCP URL elicitation (2025-11-25 and 2026-07-28) open the page themselves and the
+  run continues once the key is saved; others show the link. Without a terminal,
+  `motel secret set` opens the page in the browser, for agents that use the
+  command line.
 - Golden tests can require secrets (skipped when missing) or require a clear
   error (`raises:`) for inputs outside a tool's validity.
 - Arguments are checked against each function's types before a run starts.

@@ -52,6 +52,19 @@ skills settings:
 motel skills export ~/Desktop/motel-skills --zip
 ```
 
+## API keys in each app
+
+Some tools need an API key. Keys never go through the chat; when one is missing,
+you enter it on a page that Motel serves on your own computer:
+
+| Where you work | What happens |
+|---|---|
+| Claude Code (2.1.281 or later) | It asks whether to open the page in your browser. Enter the key there, and the run continues on its own. |
+| Claude Desktop | Claude gives you a link to the page. Enter the key there, then ask Claude to try again. |
+| Other MCP apps | They open the page themselves if they support MCP *URL elicitation*; otherwise they show the link, as Claude Desktop does. |
+| Agents using the command line (skills) | The agent runs `motel secret set NAME`, which opens the page in your browser. |
+| You, in a terminal | `motel add` asks for the key; later, `motel secret set NAME`. Or use the Keys page of `motel ui`. |
+
 ## Other MCP clients
 
 Any MCP client can use Motel. Print the configuration to copy:

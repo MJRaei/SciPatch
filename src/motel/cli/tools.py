@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import io
+import select
 import sys
+import webbrowser
 from typing import Annotated
 
 import typer
@@ -14,6 +17,8 @@ from rich.table import Table
 from motel.catalogs import DEFAULT_PATH, CatalogStore
 from motel.cli._app import PANEL_MANAGE, PANEL_USE, app, get_motel, reporter_of
 from motel.cli.console import console, print_json
+from motel.errors import MotelError
+from motel.keypage import KeyPage
 from motel.manifest import Secret
 from motel.models import FunctionInfo
 from motel.registry import InstalledTool
@@ -33,6 +38,9 @@ secret_app = typer.Typer(
     help="API keys for tools that use online services (stored only on this computer)."
 )
 app.add_typer(secret_app, name="secret", rich_help_panel=PANEL_MANAGE)
+
+#: How long `motel secret set` waits for a key entered in the browser.
+BROWSER_WAIT_SECONDS = 10 * 60
 
 _STATUS_STYLE = {
     "ready": "[green]ready[/]",
@@ -333,7 +341,7 @@ def add(
             ref=ref,
             run_tests=not skip_tests,
             allow_failing_tests=allow_failing_tests,
-            ask_secret=ask if sys.stdin.isatty() else None,
+            ask_secret=ask if _is_terminal() else None,
         )
     console.print(f"\n[green]✓[/] [bold]{tool.name}[/] is ready.")
     for warning in tool.state.warnings if tool.state else []:
@@ -399,17 +407,65 @@ def secret_set(
         str | None, typer.Argument(help="The value (omit to type it without showing it).")
     ] = None,
 ) -> None:
-    """Store a secret, such as an API key, for the tools that declare it."""
+    """Store a secret, such as an API key, for the tools that declare it.
+
+    Without a value, it is typed hidden in the terminal. Without a terminal (for
+    example when an AI agent runs this), a page on this computer opens in the
+    browser for the user to enter it, so the key never passes through the agent.
+    """
     motel = get_motel()
+    users = [t.name for t in motel.tools() if name in t.manifest.environment.secret_names]
     if value is None:
         declared = next(
             (s for t in motel.tools() for s in t.manifest.environment.secrets if s.name == name),
             None,
         )
-        value = prompt_secret(declared or Secret(name=check_name(name)), optional=False)
-    motel.secrets.set(name, value or "")
-    users = [t.name for t in motel.tools() if name in t.manifest.environment.secret_names]
+        secret = declared or Secret(name=check_name(name))
+        if _is_terminal():
+            value = prompt_secret(secret, optional=False)
+        elif (piped := _piped_value()) is not None:
+            value = piped
+        else:
+            _enter_in_browser(secret, users[0] if users else "Motel")
+    if value is not None:
+        motel.secrets.set(name, value)
     console.print(f"[green]✓[/] Saved {name}" + (f" (used by {', '.join(users)})" if users else ""))
+
+
+def _is_terminal() -> bool:
+    return sys.stdin.isatty()
+
+
+def _piped_value() -> str | None:
+    """A value piped in (``echo $KEY | motel secret set NAME``), if any arrives at once."""
+    try:
+        ready = bool(select.select([sys.stdin], [], [], 0.2)[0])
+    except io.UnsupportedOperation:  # an in-memory stream: reading it cannot block
+        ready = True
+    except (OSError, ValueError):  # e.g. Windows pipes, or no stdin at all
+        return None
+    line = sys.stdin.readline().strip() if ready else ""
+    return line or None
+
+
+def _enter_in_browser(secret: Secret, tool: str) -> None:
+    page = KeyPage(get_motel().secrets)
+    try:
+        url = page.link(tool, [secret])
+        console.print(
+            f"Opening a page on this computer where you can enter {escape(secret.label)}:\n"
+            f"{url}\nIf no browser opens, open the link yourself. Waiting up to "
+            f"{int(BROWSER_WAIT_SECONDS // 60)} minutes..."
+        )
+        webbrowser.open(url)
+        if not page.wait([secret.name], BROWSER_WAIT_SECONDS):
+            raise MotelError(
+                f"{secret.name} was not entered in time.",
+                hint=f"Run 'motel secret set {secret.name}' again, or use the Keys page of "
+                "'motel ui'.",
+            )
+    finally:
+        page.close()
 
 
 @secret_app.command("list")

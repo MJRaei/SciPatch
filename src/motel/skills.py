@@ -268,8 +268,9 @@ def _keys_section(tool: InstalledTool) -> str:
         "",
         "Never ask the user to type a key into the chat. If a key is not set, `run_tool` "
         "returns a link to a page on the user's computer where they can enter it; give them "
-        "the link and run the tool again afterwards. From a terminal, the user can run "
-        f"`motel secret set {tool.manifest.environment.secrets[0].name}` themselves.",
+        "the link and run the tool again afterwards. From a shell, run "
+        f"`motel secret set {tool.manifest.environment.secrets[0].name}`: it opens that page "
+        "in the user's browser and waits until they have entered the key.",
     ]
     return "\n".join(lines)
 

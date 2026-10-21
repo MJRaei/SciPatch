@@ -7,11 +7,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+import httpx
 import pytest
 from typer.testing import CliRunner
 
 from motel import __version__
 from motel.cli import app, hoist_global_flags
+from motel.cli import tools as cli_tools
+from motel.cli._app import get_motel
 
 from .conftest import ManifestFactory, requires_uv
 
@@ -42,6 +45,7 @@ def test_empty_list_suggests_next_steps() -> None:
 
 def test_secrets_are_typed_hidden_and_never_shown(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("DEMO_KEY", raising=False)
+    monkeypatch.setattr(cli_tools, "_is_terminal", lambda: True)
     result = runner.invoke(app, ["secret", "set", "DEMO_KEY"], input="s3cret\n")
     assert result.exit_code == 0, result.output
     assert "Paste it here (hidden)" in result.output
@@ -51,6 +55,34 @@ def test_secrets_are_typed_hidden_and_never_shown(monkeypatch: pytest.MonkeyPatc
     assert "DEMO_KEY" in listed and "yes" in listed and "s3cret" not in listed
     assert runner.invoke(app, ["secret", "set", "bad-name"], input="x\n").exit_code != 0
     assert "Removed DEMO_KEY" in runner.invoke(app, ["secret", "remove", "DEMO_KEY"]).output
+
+
+def test_without_a_terminal_secrets_are_piped_or_entered_in_the_browser(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("DEMO_KEY", raising=False)
+    piped = runner.invoke(app, ["secret", "set", "DEMO_KEY"], input="from-pipe\n")
+    assert piped.exit_code == 0 and "Saved DEMO_KEY" in piped.output
+    assert get_motel().secrets.resolve(["DEMO_KEY"]) == {"DEMO_KEY": "from-pipe"}
+
+    # An AI agent's shell has neither: the user gets a page on this computer instead.
+    opened: list[str] = []
+
+    def user_enters_key(url: str) -> bool:
+        opened.append(url)
+        assert "Saved" in httpx.post(url, data={"DEMO_KEY": "from-browser"}).text
+        return True
+
+    monkeypatch.setattr(cli_tools.webbrowser, "open", user_enters_key)
+    agent = runner.invoke(app, ["secret", "set", "DEMO_KEY"], input="")
+    assert agent.exit_code == 0, agent.output
+    assert opened and opened[0] in agent.output and "from-browser" not in agent.output
+    assert get_motel().secrets.resolve(["DEMO_KEY"]) == {"DEMO_KEY": "from-browser"}
+
+    monkeypatch.setattr(cli_tools, "BROWSER_WAIT_SECONDS", 0.5)
+    monkeypatch.setattr(cli_tools.webbrowser, "open", lambda url: False)
+    late = runner.invoke(app, ["secret", "set", "OTHER_KEY"], input="")
+    assert late.exit_code != 0 and "not entered in time" in str(late.exception)
 
 
 def test_catalog_lists_featured_tools() -> None:

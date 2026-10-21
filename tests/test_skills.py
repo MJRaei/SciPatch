@@ -94,6 +94,7 @@ def test_tool_skill_explains_keys(installed_tool: InstalledTool) -> None:
     assert "## API keys" in text
     assert "- `DEMO_KEY` (Demo key; get one at https://x.org)" in text
     assert "Never ask the user to type a key into the chat." in text
+    assert "`motel secret set DEMO_KEY`: it opens that page" in text
 
 
 def test_bundled_skills_have_valid_frontmatter() -> None:
