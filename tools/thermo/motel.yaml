@@ -1,0 +1,145 @@
+schema: 1
+name: thermo
+version: 0.1.0
+title: Chemical properties and vapor-liquid equilibrium (thermo, chemicals, fluids)
+summary: >-
+  Chemical engineering thermodynamics: properties of about 20,000 chemicals
+  (critical and boiling points, density, heat capacity, viscosity, vapor pressure),
+  vapor-liquid equilibrium of mixtures with UNIFAC, Peng-Robinson, or Raoult's law
+  (flash, bubble and dew points, T-x-y diagrams, azeotropes), and pipe pressure drop.
+domains: [chemistry, engineering]
+tags: [thermodynamics, chemical-engineering, process, vle, vapor-liquid-equilibrium, flash, distillation,
+       azeotrope, bubble-point, dew-point, unifac, peng-robinson, vapor-pressure, boiling-point,
+       critical-point, physical-properties, pressure-drop, friction-factor, pipe-flow, thermo]
+
+source:
+  homepage: https://github.com/CalebBell/thermo
+  paper: https://doi.org/10.5281/zenodo.21329946
+  citation: >-
+    C. Bell and contributors, "Thermo: Chemical properties component of Chemical
+    Engineering Design Library (ChEDL)", v0.6.1, doi:10.5281/zenodo.21329946, with
+    the chemicals and fluids libraries; property data from the compilations each
+    correlation cites (e.g. CRC Handbook, DIPPR, IUPAC), UNIFAC parameters from the
+    UNIFAC Consortium's published tables.
+  license: MIT
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["thermo==0.6.1", "chemicals==1.5.2", "fluids==1.3.1", "matplotlib==3.11.2"]
+
+entrypoint: api
+
+functions:
+  chemical:
+    params:
+      temperature_k: {unit: K}
+      pressure_pa: {unit: Pa}
+  flash:
+    params:
+      temperature_k: {unit: K}
+      pressure_pa: {unit: Pa}
+  binary_vle:
+    params:
+      pressure_pa: {unit: Pa}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  pipe_flow:
+    params:
+      diameter_m: {unit: m}
+      length_m: {unit: m}
+      volumetric_flow_m3_s: {unit: m3/s}
+      mass_flow_kg_s: {unit: kg/s}
+      roughness_m: {unit: m}
+      temperature_k: {unit: K}
+    outputs:
+      pressure_drop_pa: {unit: Pa}
+
+validity: >-
+  Pure-component properties come from correlations of measured data and are
+  reliable within their fitted ranges; outside them, and for chemicals with few
+  data, values are estimates or missing. UNIFAC predicts activity coefficients
+  from functional groups and is typically within a few percent in vapor
+  composition for common organic and aqueous mixtures at low pressure, but can
+  fail for strongly associating, electrolyte, or polymer systems, and liquid-liquid
+  splits are not computed. Peng-Robinson suits hydrocarbons and gases, including
+  at high pressure; with default interaction parameters it is poor for polar
+  mixtures such as alcohol-water (it can predict spurious azeotropes). Raoult's
+  law ignores non-ideality. Pipe flow is single-phase, steady, fully developed,
+  and isothermal; the transitional regime (Re 2300-4000) is uncertain.
+
+maturity: published
+
+golden:
+  - name: ethanol's constants agree with NIST
+    quick: true
+    function: chemical
+    args: {name: ethanol}
+    expect:
+      cas: 64-17-5
+      molar_mass_g_per_mol: {approx: 46.069, abs: 0.002}
+      normal_boiling_point_k: {approx: 351.5, abs: 0.2}
+      critical_temperature_k: {approx: 514.0, abs: 7.0}
+      critical_pressure_pa: {approx: 6.3e+6, abs: 4.0e+5}
+      state.phase: liquid
+    reference: >-
+      NIST Chemistry WebBook, ethanol (64-17-5), phase-change data: Tboil 351.5 ± 0.2 K
+      (average of 138 values), Tc 514 ± 7 K, Pc 63 ± 4 bar; molar mass from IUPAC
+      atomic weights (C2H6O, 46.069 g/mol). thermo gives 351.57 K, 514.71 K, and 6.268
+      MPa.
+    against: independent
+  - name: water boils at 101.418 kPa at 100 C (IAPWS-95)
+    function: chemical
+    args: {name: water, temperature_k: 373.15}
+    expect:
+      state.vapor_pressure_pa: {approx: 101418.0, rel: 0.0005}
+    reference: >-
+      IAPWS-95 saturation pressure of water at 373.15 K: 101.418 kPa (101417.997 Pa,
+      computed with the coolprop tool, which reproduces the IAPWS-95 verification
+      tables).
+    against: independent
+  - name: the ethanol-water azeotrope at 1 atm (UNIFAC)
+    function: binary_vle
+    args: {component1: ethanol, component2: water}
+    expect:
+      azeotrope.type: minimum-boiling
+      azeotrope.x1: {approx: 0.895, abs: 0.01}
+      azeotrope.temperature_k: {approx: 351.32, abs: 0.3}
+      boiling_point_k.water: {approx: 373.124, abs: 0.05}
+    reference: >-
+      Evans (1916), as plotted in J. B. Brady's petrology notes (Smith College, figure
+      5.06): the azeotrope at atmospheric pressure is 95.6 wt% ethanol (mole fraction
+      0.895) and boils at 78.17 °C (351.32 K). UNIFAC gives 0.892 and 351.30 K. Water
+      boils at 373.124 K at 101.325 kPa (IAPWS-95).
+    against: independent
+  - name: laminar pipe flow follows Hagen-Poiseuille
+    function: pipe_flow
+    args: {diameter_m: 0.01, length_m: 1.0, volumetric_flow_m3_s: 7.853981633974483e-06,
+           density_kg_m3: 1000.0, viscosity_pa_s: 0.001}
+    expect:
+      reynolds_number: {approx: 1000.0, rel: 1.0e-9}
+      regime: laminar
+      friction_factor_darcy: {approx: 0.064, rel: 1.0e-9}
+      pressure_drop_pa: {approx: 32.0, rel: 1.0e-9}
+    reference: >-
+      Hagen-Poiseuille law: dp = 128 mu L Q / (pi D^4) = 32.0 Pa for mu = 1 mPa s, L = 1
+      m, Q = 7.854e-6 m3/s, D = 1 cm (mean velocity 0.1 m/s, Re = 1000, f = 64/Re).
+    against: exact
+  - name: turbulent flow in a smooth pipe follows the Prandtl-Karman law
+    function: pipe_flow
+    args: {diameter_m: 0.1, length_m: 10.0, volumetric_flow_m3_s: 7.853981633974483e-03,
+           density_kg_m3: 1000.0, viscosity_pa_s: 0.001, roughness_m: 0.0}
+    expect:
+      reynolds_number: {approx: 100000.0, rel: 1.0e-9}
+      friction_factor_darcy: {approx: 0.017993, rel: 0.001}
+    reference: >-
+      For a smooth pipe at Re = 1e5 the Prandtl-Karman law, 1/sqrt(f) = 2 log10(Re
+      sqrt(f)) - 0.8, gives f = 0.017993, and Colebrook's equation 0.017990 (Moody
+      chart: about 0.018).
+    against: exact
+  - name: an unknown chemical is refused
+    function: chemical
+    args: {name: unobtainium}
+    raises: "Unknown chemical"
+    reference: The tool must say that it does not know the chemical.

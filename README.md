@@ -113,7 +113,8 @@ compounds), **Open Babel** (chemical file formats, force fields), **OpenMM**
 crude 1H NMR), **AutoDock Vina** (docking), **peptide assembly** (self-assembly
 conditions from similar peptides), **Cantera** (combustion chemistry and
 thermodynamics), **CoolProp** (properties of fluids, refrigerants, and humid
-air), **Reaktoro** (water chemistry and mineral solubility), and **pvlib** (sun
+air), **thermo** (chemical properties and vapor-liquid equilibrium),
+**Reaktoro** (water chemistry and mineral solubility), and **pvlib** (sun
 position and solar PV energy). Every tool reproduces published or
 upstream-tested values before it installs.
 

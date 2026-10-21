@@ -38,6 +38,7 @@ reproduce published or upstream-tested values on every build.
 | [rdkit](rdkit/) | chemistry | Linux, macOS, Windows | Similarity and substructure search, 3D conformers (ETKDG + MMFF94), standardization with InChI/InChIKey | established | RDKit's documentation (doctested similarities and searches); PubChem identifiers |
 | [structural-analogs](structural-analogs/) | materials | Linux, macOS, Windows | Materials Project compounds with the same crystal structure type as a material or structure file, with band gaps, formation energies, stability, and volumes, for estimating properties by analogy; from the mp-property-analogies hackathon project | experimental | Rock-salt and diamond-structure analogs (KCl for NaCl, Ge for Si); needs a free API key |
 | [synthesis-recipes](synthesis-recipes/) | materials, chemistry | Linux, macOS, Windows | Published synthesis recipes (41,300 text-mined solid-state and sol-gel recipes: precursors, reactions, temperatures, times, atmospheres, DOIs), similar Materials Project compositions, and suggested routes for new materials from their closest analogs; from the SKY hackathon agent | experimental | Exact composition-identity checks; recipe counts of the bundled dataset; NCA analog for a new NCA composition |
+| [thermo](thermo/) | chemistry, engineering | Linux, macOS, Windows | Chemical engineering thermodynamics: properties of about 20,000 chemicals, vapor-liquid equilibrium with UNIFAC, Peng-Robinson, or Raoult's law (flash, bubble and dew points, T-x-y diagrams, azeotropes), and pipe pressure drop | published | NIST constants of ethanol; IAPWS-95 vapor pressure of water; the ethanol-water azeotrope (Evans 1916); Hagen-Poiseuille and Prandtl-Karman pipe flow |
 | [vina](vina/) | chemistry, biology | Linux, macOS, Windows | Protein-ligand docking: receptor and ligand preparation (SMILES or SDF), ranked poses with Vina/Vinardo scores, RMSD to a known pose, rescoring and local optimization | established | Vina's 1IEP tutorial (imatinib redocked within 2 Å, -13.2 kcal/mol), from the crystal ligand and from SMILES |
 | [xtb](xtb/) | chemistry | Linux, macOS, Windows | GFN2-xTB energies, optimization, frequencies, and thermochemistry for molecules, with implicit solvent | established | xtb's test suite (propyne; GBSA solvation) |
 
@@ -128,6 +129,9 @@ accepts.
 - **Alloys:** `pycalphad.solidification` (melting range, phases while cooling) →
   `pycalphad.equilibrium` at the heat-treatment temperature → `lammps` or
   `ml-potentials` for the stable phases' properties.
+- **Separations:** `thermo.binary_vle` (T-x-y diagram; an azeotrope limits plain
+  distillation) → `thermo.flash` for feed and product streams →
+  `thermo.pipe_flow` for the lines between units.
 - **Refrigeration and power cycles:** `coolprop.state` and `coolprop.saturation`
   at each point of the cycle (work, heat, COP or efficiency) →
   `coolprop.diagram` to draw it on a p-h or T-s chart; `cantera` when the
