@@ -41,6 +41,7 @@ reproduce published or upstream-tested values on every build.
 | [synthesis-recipes](synthesis-recipes/) | materials, chemistry | Linux, macOS, Windows | Published synthesis recipes (41,300 text-mined solid-state and sol-gel recipes: precursors, reactions, temperatures, times, atmospheres, DOIs), similar Materials Project compositions, and suggested routes for new materials from their closest analogs; from the SKY hackathon agent | experimental | Exact composition-identity checks; recipe counts of the bundled dataset; NCA analog for a new NCA composition |
 | [thermo](thermo/) | chemistry, engineering | Linux, macOS, Windows | Chemical engineering thermodynamics: properties of about 20,000 chemicals, vapor-liquid equilibrium with UNIFAC, Peng-Robinson, or Raoult's law (flash, bubble and dew points, T-x-y diagrams, azeotropes), and pipe pressure drop | published | NIST constants of ethanol; IAPWS-95 vapor pressure of water; the ethanol-water azeotrope (Evans 1916); Hagen-Poiseuille and Prandtl-Karman pipe flow |
 | [vina](vina/) | chemistry, biology | Linux, macOS, Windows | Protein-ligand docking: receptor and ligand preparation (SMILES or SDF), ranked poses with Vina/Vinardo scores, RMSD to a known pose, rescoring and local optimization | established | Vina's 1IEP tutorial (imatinib redocked within 2 Å, -13.2 kcal/mol), from the crystal ligand and from SMILES |
+| [xraylib](xraylib/) | materials, physics, engineering | Linux, macOS, Windows | X-ray interactions: mass attenuation (photoelectric, Compton, Rayleigh) of elements, formulas, and NIST materials, transmission and half-value layers, absorption edges, emission lines and wavelengths, fluorescence yields, XRF/EDS peak identification | established | NIST attenuation tables (lead, water, lead K edge); NIST X-ray transition energies (Cu K-alpha1, Deslattes et al. 2003) |
 | [xtb](xtb/) | chemistry | Linux, macOS, Windows | GFN2-xTB energies, optimization, frequencies, and thermochemistry for molecules, with implicit solvent | established | xtb's test suite (propyne; GBSA solvation) |
 
 **Maturity** tells AI agents how far to trust a tool: *established* (mature,
@@ -118,6 +119,10 @@ accepts.
   recipes) → read the cited papers before going to the lab.
 - **Identify a structure:** `pymatgen-structure.symmetry` and `xrd_pattern`, then
   `compare` with candidates from `materials-project.get_structure`.
+- **X-ray experiments:** `xraylib.element_xray_data` (source lines and absorption
+  edges) → `xraylib.attenuation` for sample thickness, filters, or shielding →
+  `xraylib.identify_peak` for fluorescence peaks; `pymatgen-structure.xrd_pattern`
+  for diffraction.
 - **Molecules:** `xtb.optimize` from SMILES (fast pre-optimization) →
   `pyscf.optimize` and `pyscf.frequencies` with DFT (minimum? free energy) →
   `pyscf.single_point` with a larger basis or `ccsd(t)` for the final energy;

@@ -1,0 +1,129 @@
+schema: 1
+name: xraylib
+version: 0.1.0
+title: X-ray interactions with matter (xraylib)
+summary: >-
+  X-ray physics data with xraylib: mass attenuation coefficients (photoelectric,
+  Compton, Rayleigh, total) of elements, formulas, and NIST reference materials,
+  transmission and half-value layers, absorption edges, emission-line energies and
+  wavelengths, fluorescence yields, and identification of XRF/EDS peaks.
+domains: [materials, physics, engineering]
+tags: [x-ray, attenuation, absorption, mass-attenuation-coefficient, xrf, eds, fluorescence, emission-lines,
+       absorption-edge, k-alpha, shielding, radiography, half-value-layer, transmission, xraylib]
+
+source:
+  homepage: https://github.com/tschoonj/xraylib
+  paper: https://doi.org/10.1016/j.sab.2011.09.011
+  citation: >-
+    T. Schoonjans, A. Brunetti, B. Golosio, M. Sanchez del Rio, V. A. Solé, C.
+    Ferrero, et al., "The xraylib library for X-ray-matter interactions. Recent
+    developments", Spectrochim. Acta B 66, 776-784 (2011); xraylib 4.3.0.
+  license: BSD-3-Clause
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["xraylib=4.3.0", "matplotlib=3.11.2"]
+  channels: [conda-forge]
+
+entrypoint: api
+
+functions:
+  attenuation:
+    params:
+      density_g_cm3: {unit: g/cm3}
+      thickness_cm: {unit: cm}
+      e_min_kev: {unit: keV}
+      e_max_kev: {unit: keV}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  element_xray_data: {}
+  identify_peak:
+    params:
+      energy_kev: {unit: keV}
+      tolerance_kev: {unit: keV}
+  materials: {}
+
+validity: >-
+  Cross sections are for free atoms (independent-atom approximation): near
+  absorption edges (within roughly 50 eV), real materials show fine structure
+  (XANES/EXAFS) and chemical shifts that are not included, and values exactly at
+  an edge energy are ambiguous. The totals include photoelectric absorption and
+  coherent and incoherent scattering but not pair production, so use photon
+  energies of about 1 keV to 1 MeV. Transmission assumes a narrow, collimated beam
+  (no scatter build-up), so it underestimates the dose behind thick shields. Line
+  energies are tabulated values (about 0.1-1 eV); line intensities are radiative
+  rates within a shell, not detected peak ratios (absorption, detector efficiency,
+  and excitation conditions change those).
+
+maturity: established
+
+golden:
+  - name: attenuation of lead at 20 and 100 keV matches NIST
+    quick: true
+    function: attenuation
+    args: {material: Pb, energies_kev: [20, 100]}
+    expect:
+      energies.0.total_cm2_g: {approx: 86.36, rel: 0.003}
+      energies.1.total_cm2_g: {approx: 5.549, rel: 0.003}
+      density_g_cm3: {approx: 11.35, abs: 0.01}
+    reference: >-
+      J. H. Hubbell, S. M. Seltzer, X-Ray Mass Attenuation Coefficients (NIST Standard
+      Reference Database 126), lead: mu/rho = 86.36 cm2/g at 20 keV and 5.549 cm2/g at
+      100 keV.
+    against: independent
+  - name: water transmits 84.3% of 100 keV photons through 1 cm
+    function: attenuation
+    args: {material: "Water, Liquid", energies_kev: [100], thickness_cm: 1.0}
+    expect:
+      energies.0.total_cm2_g: {approx: 0.1707, rel: 0.003}
+      energies.0.transmission: {approx: 0.8431, rel: 0.003}
+      energies.0.half_value_layer_cm: {approx: 4.061, rel: 0.003}
+    reference: >-
+      NIST Standard Reference Database 126 (Hubbell and Seltzer), liquid water: mu/rho =
+      0.1707 cm2/g at 100 keV; with density 1 g/cm3, transmission exp(-0.1707) =
+      0.8431 and half-value layer ln 2 / 0.1707 = 4.061 cm (Beer-Lambert law).
+    against: independent
+  - name: the lead K edge raises attenuation fourfold
+    function: attenuation
+    args: {material: Pb, energies_kev: [88.0, 88.01]}
+    expect:
+      energies.0.total_cm2_g: {approx: 1.910, rel: 0.005}
+      energies.1.total_cm2_g: {approx: 7.683, rel: 0.005}
+    reference: >-
+      NIST Standard Reference Database 126, lead: at the K edge (88.0045 keV) mu/rho is
+      1.910 cm2/g just below and 7.683 cm2/g just above.
+    against: independent
+  - name: copper's K edge and K-alpha1 line match the NIST evaluations
+    function: element_xray_data
+    args: {element: Cu}
+    expect:
+      atomic_number: 29
+      edges.K.energy_kev: {approx: 8.9789, abs: 0.0005}
+      lines.0.line: Ka1
+      lines.0.energy_kev: {approx: 8.0478227, abs: 0.0005}
+      lines.0.wavelength_angstrom: {approx: 1.54059, abs: 0.0001}
+    reference: >-
+      R. D. Deslattes, E. G. Kessler, P. Indelicato, Rev. Mod. Phys. 75, 35 (2003),
+      NIST X-ray Transition Energies database: Cu K-L3 (K-alpha1) 8047.8227(26) eV,
+      i.e. 1.54059 Angstrom, the standard laboratory XRD wavelength; Cu K edge 8.9789
+      keV (NIST SRD 126 tables).
+    against: independent
+  - name: an 8.05 keV fluorescence peak is copper K-alpha
+    function: identify_peak
+    args: {energy_kev: 8.048, tolerance_kev: 0.05}
+    expect:
+      candidates.0.element: Cu
+      candidates.0.line: Ka1
+      candidates.1.element: Cu
+      candidates.1.line: Ka2
+    reference: >-
+      Copper's K-alpha1 and K-alpha2 lines (8.0478 and 8.0278 keV, Deslattes et al.
+      2003) are the nearest emission lines to 8.048 keV.
+    against: exact
+  - name: an unknown material is refused
+    function: attenuation
+    args: {material: Unobtainium}
+    raises: "is not an element, a chemical formula, or a NIST material"
+    reference: The tool must point to materials() instead of failing obscurely.

@@ -100,8 +100,9 @@ model comparison), **GPAW** and **Quantum ESPRESSO** (DFT for crystals),
 battery cells), **RASPA3** (gas adsorption in zeolites and MOFs),
 **pymatgen-diffusion** (ion transport from MD), **pymatgen-structure**
 (symmetry, supercells, XRD), **PyXtal** (random crystal structures for structure
-prediction), **synthesis recipes** (precursors and temperatures from papers,
-routes for new materials), **doping knowledge** (what papers report about doping
+prediction), **xraylib** (X-ray attenuation, absorption edges, and emission
+lines), **synthesis recipes** (precursors and temperatures from papers, routes
+for new materials), **doping knowledge** (what papers report about doping
 layered materials), **structural analogs** (same-structure compounds for
 estimates by analogy), and the **Materials Project** database; and for
 chemistry, **PySCF** (ab initio quantum chemistry), **xTB** (fast semiempirical
