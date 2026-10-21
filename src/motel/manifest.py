@@ -18,7 +18,7 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
-from motel import platforms
+from motel import golden, platforms
 from motel.errors import ManifestError
 
 MANIFEST_FILENAME = "motel.yaml"
@@ -276,6 +276,14 @@ class GoldenTest(_Model):
         unknown = [name for name in value or [] if name not in platforms.PLATFORMS]
         if unknown:
             raise ValueError(f"unknown platform(s) {', '.join(unknown)}")
+        return value
+
+    @field_validator("expect")
+    @classmethod
+    def _check_matchers(cls, value: dict[str, Any]) -> dict[str, Any]:
+        problems = golden.matcher_problems(value)
+        if problems:
+            raise ValueError("; ".join(problems))
         return value
 
     @model_validator(mode="after")

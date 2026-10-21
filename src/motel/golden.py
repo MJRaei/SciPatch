@@ -75,6 +75,25 @@ def check(expect: dict[str, Any], value: Any) -> list[str]:
     return failures
 
 
+#: Matcher keys whose value must be a number.
+NUMERIC_KEYS = ("approx", "rel", "abs", "min", "max", "length")
+
+
+def matcher_problems(expect: dict[str, Any]) -> list[str]:
+    """Mistakes in the matchers of an ``expect`` block, found before any test runs."""
+    problems = []
+    for path, spec in expect.items():
+        if not _is_matcher(spec):
+            continue
+        for key in NUMERIC_KEYS:
+            if key in spec and not _is_number(spec[key]):
+                hint = ""
+                if isinstance(spec[key], str) and "e" in spec[key].lower():
+                    hint = " (YAML reads 6.3e6 as text; write 6.3e+6 or 6.3e+06)"
+                problems.append(f"{path}: {key} must be a number, got {spec[key]!r}{hint}")
+    return problems
+
+
 def _is_matcher(spec: Any) -> bool:
     return isinstance(spec, dict) and bool(spec) and set(spec) <= MATCHER_KEYS
 

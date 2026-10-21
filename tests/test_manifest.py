@@ -83,6 +83,12 @@ def test_golden_tests_must_use_exported_functions() -> None:
         )
 
 
+def test_golden_matchers_must_be_numbers() -> None:
+    test = {"name": "t", "function": "relax", "expect": {"pc": {"approx": "6.3e6"}}}
+    with pytest.raises(ValueError, match=r"pc: approx must be a number.*write 6\.3e\+6"):
+        Manifest.model_validate(minimal(golden=[test]))
+
+
 def test_newer_schema_asks_for_upgrade() -> None:
     with pytest.raises(ValueError, match="upgrade Motel"):
         Manifest.model_validate(minimal(schema=99))
