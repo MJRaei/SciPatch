@@ -28,6 +28,7 @@ from motel.manifest import Secret
 from motel.secrets import SecretStore
 
 LINK_LIFETIME_SECONDS = 30 * 60
+WAIT_POLL_SECONDS = 0.5
 MAX_FORM_BYTES = 64 * 1024
 _PATH_PREFIX = "/keys/"
 _HEADERS = {
@@ -68,6 +69,15 @@ class KeyPage:
             self._pending = {k: v for k, v in self._pending.items() if v.expires > now}
             self._pending[token] = _Request(tool, list(needed), now + LINK_LIFETIME_SECONDS)
         return f"http://{self.host}:{port}{_PATH_PREFIX}{token}"
+
+    def wait(self, names: list[str], timeout: float) -> bool:
+        """Wait until every secret in ``names`` is set; False if ``timeout`` passes first."""
+        deadline = time.monotonic() + timeout
+        while len(self.store.resolve(names)) < len(set(names)):
+            if time.monotonic() >= deadline:
+                return False
+            time.sleep(WAIT_POLL_SECONDS)
+        return True
 
     def close(self) -> None:
         with self._lock:

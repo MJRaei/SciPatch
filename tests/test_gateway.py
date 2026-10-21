@@ -8,9 +8,10 @@ from typing import Any
 import anyio
 import httpx
 import pytest
-from mcp import Client, MCPError
-from mcp_types import URL_ELICITATION_REQUIRED
+from mcp import Client
+from mcp_types import ElicitResult
 
+from motel import gateway
 from motel.app import Motel
 from motel.gateway import build_server
 from motel.views import preview
@@ -109,40 +110,57 @@ def test_missing_keys_are_entered_outside_the_chat(
     described = {"name": "DEMO_KEY", "description": "Demo service key", "url": "https://x.org"}
     environment = {"manager": "uv", "python": "3.12", "secrets": [described]}
     motel.add(str(make_package(functions=["secret_values"], environment=environment)))
-    run = {"tool": "sample", "function": "secret_values"}
+    run = {"tool": "sample", "function": "secret_values", "use_cache": False}
 
-    async def never_called(context: Any, params: Any) -> Any:
-        raise AssertionError("URL elicitation is requested through the error, not a request")
+    async def enter_key(context: Any, params: Any) -> ElicitResult:
+        """The user agrees to open the page and types the key there."""
+        assert params.mode == "url" and "Demo service key" in params.message
+        async with httpx.AsyncClient() as http:
+            saved = await http.post(params.url, data={"DEMO_KEY": "s3cret"})
+        assert "Saved" in saved.text
+        return ElicitResult(action="accept")
 
-    async def session() -> tuple[Any, MCPError]:
-        server = build_server(motel)
-        async with Client(server) as plain:
-            asked = await plain.call_tool("run_tool", run)
-        # Passing an elicitation callback declares support for URL elicitation.
-        async with Client(server, elicitation_callback=never_called) as capable:
-            with pytest.raises(MCPError) as raised:
-                await capable.call_tool("run_tool", run)
-        return asked, raised.value
+    async def decline(context: Any, params: Any) -> ElicitResult:
+        return ElicitResult(action="decline")
 
-    asked, required = anyio.run(session)
-    # Apps that cannot open links get one for the agent to pass on.
-    text = asked.content[0].text
-    assert asked.is_error
+    async def accept_only(context: Any, params: Any) -> ElicitResult:
+        return ElicitResult(action="accept")
+
+    def call_with(callback: Any = None, mode: str = "auto") -> Any:
+        async def session() -> Any:
+            server = build_server(motel)
+            async with Client(server, elicitation_callback=callback, mode=mode) as client:
+                return await client.call_tool("run_tool", run)
+
+        motel.secrets.remove("DEMO_KEY")
+        return anyio.run(session)
+
+    # Apps that cannot open links: the agent gets one to pass on.
+    plain = call_with()
+    text = plain.content[0].text
+    assert plain.is_error
     assert "Demo service key" in text and "Do not ask for the key in the chat" in text
-    match = re.search(r"http://127\.0\.0\.1:\d+/keys/\S+", text)
-    assert match is not None
-    # Apps that can are asked to open the page themselves.
-    assert required.code == URL_ELICITATION_REQUIRED
-    [elicitation] = required.data["elicitations"]
-    assert elicitation["mode"] == "url"
-    assert elicitation["url"].startswith("http://127.0.0.1:")
-    assert elicitation["url"] != match.group(0)  # every link is new and single-use
-
-    # The user enters the key on the page, and the next run has it.
-    saved = httpx.post(match.group(0), data={"DEMO_KEY": "s3cret"})
+    link = re.search(r"http://127\.0\.0\.1:\d+/keys/\S+", text)
+    assert link is not None
+    saved = httpx.post(link.group(0), data={"DEMO_KEY": "s3cret"})
     assert saved.status_code == 200 and "Saved" in saved.text
     [ran] = call(motel, ("run_tool", run))
     assert ran.structured_content["result"]["demo"] == "s3cret"
+
+    # Apps that can open the page themselves: the run continues once the key is
+    # saved, with the 2026-07-28 protocol (InputRequiredResult) and with older ones.
+    for mode in ("auto", "legacy"):
+        result = call_with(enter_key, mode)
+        assert not result.is_error, (mode, result.content)
+        assert result.structured_content["result"]["demo"] == "s3cret"
+
+    # When the user declines or never enters the key, the agent still gets a link.
+    declined = call_with(decline)
+    assert declined.is_error and "did not open the page" in declined.content[0].text
+    monkeypatch.setattr(gateway, "KEY_WAIT_SECONDS", 0.5)
+    late = call_with(accept_only, "legacy")
+    assert late.is_error and "not entered in time" in late.content[0].text
+    assert "/keys/" in late.content[0].text
 
 
 def test_preview_truncates_large_results() -> None:

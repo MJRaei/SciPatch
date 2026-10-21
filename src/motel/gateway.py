@@ -21,11 +21,12 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated, Any, ParamSpec, TypeVar
 
-from mcp import UrlElicitationRequiredError
+import anyio.from_thread
 from mcp.server import MCPServer
 from mcp.server.mcpserver import Context
 from mcp.server.mcpserver.exceptions import ToolError
-from mcp_types import ElicitRequestURLParams, ToolAnnotations
+from mcp_types import ElicitRequest, ElicitRequestURLParams, InputRequiredResult, ToolAnnotations
+from mcp_types.version import is_version_at_least
 from pydantic import Field
 
 from motel import __version__
@@ -56,6 +57,11 @@ computer where they can enter it; give them the link, then run the tool again.
 """
 
 MAX_WAIT_SECONDS = 600.0
+#: How long a run waits for the user to enter a key after agreeing to open the page.
+KEY_WAIT_SECONDS = 300.0
+#: The protocol revision that asks for input by returning an InputRequiredResult.
+_INPUT_REQUIRED_VERSION = "2026-07-28"
+_KEY_REQUEST = "motel-api-key"
 
 P = ParamSpec("P")
 R = TypeVar("R")
@@ -80,33 +86,61 @@ def _run_view(record: RunRecord) -> dict[str, Any]:
     return view
 
 
-def _ask_for_secrets(error: MissingSecretsError, page: KeyPage, ctx: Context) -> Exception:
-    """Send the user to a local page to enter missing keys, never through the chat.
+def _ask_for_secrets(
+    error: MissingSecretsError, page: KeyPage, ctx: Context
+) -> InputRequiredResult | None:
+    """Get missing keys from the user on a local page, never through the chat.
 
     Apps that can open links for a server (MCP URL elicitation) are asked to open
-    the page; for the others, the agent gets the link to pass on.
+    the page, and the run continues once the key is saved: on 2026-07-28
+    connections through an ``InputRequiredResult`` that the app answers by
+    retrying the call, on older ones through a request in the middle of the call.
+
+    Returns the ``InputRequiredResult`` to send, or None once the keys are set.
+    Otherwise raises a ``ToolError`` with a link for the agent to pass on.
     """
-    url = page.link(error.tool, error.secrets)
-    needed = " and ".join(secret.label for secret in error.secrets)
+    names = [secret.name for secret in error.secrets]
     capabilities = ctx.client_capabilities
     elicitation = capabilities.elicitation if capabilities else None
-    if elicitation is not None and elicitation.url is not None:
-        request = ElicitRequestURLParams(
-            message=f"The tool '{error.tool}' needs {needed}. Enter it on this page; it stays "
-            "on your computer.",
-            url=url,
-            elicitation_id=uuid.uuid4().hex,
-        )
-        return UrlElicitationRequiredError(
-            [request],
-            f"{error.message} The user was asked to enter it on a page on their computer; "
-            "run the tool again once they have.",
-        )
+    if elicitation is None or elicitation.url is None:
+        raise _link_error(error, page)
+    message = (
+        f"The tool '{error.tool}' needs {_needed(error)}. Enter it on this page; it stays on "
+        "your computer."
+    )
+    input_required = is_version_at_least(ctx.protocol_version or "", _INPUT_REQUIRED_VERSION)
+    if input_required:
+        response = (ctx.input_responses or {}).get(_KEY_REQUEST)
+        if response is None:
+            url = page.link(error.tool, error.secrets)
+            request = ElicitRequest(params=ElicitRequestURLParams(message=message, url=url))
+            return InputRequiredResult(input_requests={_KEY_REQUEST: request})
+        accepted = getattr(response, "action", None) == "accept"
+    else:
+        elicitation_id = uuid.uuid4().hex
+        url = page.link(error.tool, error.secrets)
+        result = anyio.from_thread.run(ctx.elicit_url, message, url, elicitation_id)
+        accepted = result.action == "accept"
+    if not accepted:
+        raise _link_error(error, page, "The user did not open the page.")
+    if not page.wait(names, KEY_WAIT_SECONDS):
+        raise _link_error(error, page, "The key was not entered in time.")
+    if not input_required:
+        anyio.from_thread.run(ctx.session.send_elicit_complete, elicitation_id)
+    return None
+
+
+def _needed(error: MissingSecretsError) -> str:
+    return " and ".join(secret.label for secret in error.secrets)
+
+
+def _link_error(error: MissingSecretsError, page: KeyPage, note: str | None = None) -> ToolError:
+    url = page.link(error.tool, error.secrets)
     return ToolError(
-        f"{error.message}\nAsk the user to open this link and enter {needed} there (it stays on "
-        f"their computer and is never shown to you): {url}\nThe link works once, for "
-        f"{LINK_LIFETIME_SECONDS // 60} minutes. Do not ask for the key in the chat. When they "
-        "are done, run the tool again."
+        f"{error.message}" + (f" {note}" if note else "") + f"\nAsk the user to open this link "
+        f"and enter {_needed(error)} there (it stays on their computer and is never shown to "
+        f"you): {url}\nThe link works once, for {LINK_LIFETIME_SECONDS // 60} minutes. Do not "
+        "ask for the key in the chat. When they are done, run the tool again."
     )
 
 
@@ -189,12 +223,13 @@ def build_server(motel: Motel) -> MCPServer:
             bool, Field(description="Reuse the result of an identical earlier run.")
         ] = True,
         ctx: Context | None = None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | InputRequiredResult:
         installed = motel.tool(tool)
         info = installed.function(function)
         wait = 0.0 if info.long_running else wait_seconds
-        try:
-            record = motel.run(
+
+        def start() -> RunRecord:
+            return motel.run(
                 tool,
                 function,
                 arguments or {},
@@ -204,10 +239,15 @@ def build_server(motel: Motel) -> MCPServer:
                 origin="mcp",
                 base_dir=_client_base_dir(),
             )
+
+        try:
+            record = start()
         except MissingSecretsError as exc:
             if ctx is None:
                 raise
-            raise _ask_for_secrets(exc, key_page, ctx) from exc
+            if (request := _ask_for_secrets(exc, key_page, ctx)) is not None:
+                return request
+            record = start()  # the user entered the key
         return _run_view(record)
 
     @_friendly_errors
