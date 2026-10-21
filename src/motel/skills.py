@@ -23,7 +23,7 @@ import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from motel import __version__, frontmatter
+from motel import __version__, frontmatter, maturity
 from motel.models import FunctionInfo
 from motel.registry import InstalledTool, Registry
 from motel.schema import type_label
@@ -193,8 +193,10 @@ def skill_description(tool: InstalledTool) -> str:
         + (f" ({', '.join(manifest.domains)})" if manifest.domains else "")
         + "."
     )
-    description += f" Runs locally through Motel as tool '{manifest.name}'."
-    return description[:DESCRIPTION_LIMIT]
+    suffix = f" Runs locally through Motel as tool '{manifest.name}'."
+    if tool.maturity == "experimental":
+        suffix += " Experimental (little outside validation): prefer established tools that fit."
+    return description[: DESCRIPTION_LIMIT - len(suffix)] + suffix
 
 
 def render_tool_skill(tool: InstalledTool) -> SkillFiles:
@@ -213,6 +215,11 @@ def render_tool_skill(tool: InstalledTool) -> SkillFiles:
     status = tool.state.golden_summary if tool.state else "not built"
     sections.append(
         f"> Installed in Motel as `{tool.name}` (version {manifest.version}; {status})."
+    )
+    sections.append(
+        f"**Maturity: {tool.maturity}.** {maturity.MEANING[tool.maturity]} "
+        f"Evidence: {maturity.evidence(manifest)}."
+        + (f"\n\n{caution}" if (caution := maturity.caution(tool.maturity, [])) else "")
     )
     sections.append(_how_to_run(tool))
     if manifest.environment.secrets:

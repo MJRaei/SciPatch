@@ -78,6 +78,11 @@ class MotelPaths:
     def secrets(self) -> Path:
         return self.home / "secrets.json"
 
+    @property
+    def maturity(self) -> Path:
+        """Maturity levels the user lowered on this computer."""
+        return self.home / "maturity.json"
+
     def ensure(self) -> MotelPaths:
         """Create the directory skeleton if it does not exist yet."""
         for directory in (self.tools, self.envs, self.sources, self.state, self.runs, self.logs):

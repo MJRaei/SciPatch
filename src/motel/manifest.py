@@ -43,6 +43,18 @@ KNOWN_KINDS = frozenset(
     }
 )
 
+#: How much evidence backs a tool's results, most to least (see ``motel.maturity``).
+Maturity = Literal["established", "published", "experimental"]
+
+#: Where a golden test's expected values come from.
+Against = Literal["independent", "paper", "upstream-tests", "exact", "regression"]
+
+#: The ``against`` values that back each maturity level (besides a paper).
+_LEVEL_EVIDENCE: dict[str, frozenset[str]] = {
+    "established": frozenset({"independent", "exact"}),
+    "published": frozenset({"independent", "exact", "paper", "upstream-tests"}),
+}
+
 _PYTHON_VERSION = re.compile(r"^3(\.\d+){0,2}$")
 _MODULE_PATH = re.compile(r"^[A-Za-z_]\w*(\.[A-Za-z_]\w*)*$")
 _IDENTIFIER = re.compile(r"^[A-Za-z_]\w*$")
@@ -197,6 +209,13 @@ class GoldenTest(_Model):
         description="Checks on the result, keyed by dotted path (e.g. 'energy_ev').",
     )
     reference: str | None = Field(None, description="Where the expected values come from.")
+    against: Against | None = Field(
+        None,
+        description="Kind of reference: 'independent' (experiment, reference data, or another "
+        "program), 'paper' (the tool's own publication), 'upstream-tests' (the project's test "
+        "suite or documentation), 'exact' (an analytical result, sum rule, symmetry, or count), "
+        "or 'regression' (the tool's own earlier output).",
+    )
     timeout: float = Field(900, gt=0)
     requires: list[str] = Field(
         default_factory=list,
@@ -226,6 +245,12 @@ class GoldenTest(_Model):
             raise ValueError(f"unknown platform(s) {', '.join(unknown)}")
         return value
 
+    @model_validator(mode="after")
+    def _refusals_have_no_reference_values(self) -> GoldenTest:
+        if self.raises is not None and self.against is not None:
+            raise ValueError("'against' describes expected values; a test with 'raises' has none")
+        return self
+
 
 class Manifest(_Model):
     """A validated ``motel.yaml``."""
@@ -246,6 +271,11 @@ class Manifest(_Model):
         None, description="Functions to expose. Omit to expose every public function."
     )
     validity: str | None = Field(None, description="When results can and cannot be trusted.")
+    maturity: Maturity = Field(
+        "experimental",
+        description="'established' (mature, widely used, independently checked), 'published' "
+        "(research code from a publication), or 'experimental'.",
+    )
     golden: list[GoldenTest] = Field(default_factory=list)
 
     @field_validator("schema_version")
@@ -302,6 +332,21 @@ class Manifest(_Model):
                         f"golden test '{test.name}' calls '{test.function}', "
                         "which is not listed under 'functions'"
                     )
+        return self
+
+    @model_validator(mode="after")
+    def _maturity_has_evidence(self) -> Manifest:
+        accepted = _LEVEL_EVIDENCE.get(self.maturity)
+        if accepted is None:
+            return self
+        missing = []
+        if not self.source.paper:
+            missing.append("source.paper (its publication or citable software record)")
+        if not any(test.against in accepted for test in self.golden):
+            kinds = " or ".join(f"'{kind}'" for kind in sorted(accepted))
+            missing.append(f"a golden test with 'against' set to {kinds}")
+        if missing:
+            raise ValueError(f"maturity '{self.maturity}' needs {' and '.join(missing)}")
         return self
 
     @property

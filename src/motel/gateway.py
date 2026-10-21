@@ -36,6 +36,7 @@ from motel.installs import BackgroundInstalls
 from motel.keypage import LINK_LIFETIME_SECONDS, KeyPage
 from motel.lock import unavailable_here
 from motel.models import RunRecord, RunStatus
+from motel.registry import InstalledTool
 from motel.views import installable_view as _installable_view
 from motel.views import match_view, run_view, tool_summary_view, tool_view
 
@@ -47,15 +48,24 @@ Every run is recorded.
 Recommended workflow:
 1. search_history: an earlier run may already answer the question.
 2. find_tools with a plain-language description of what you need. If the best
-   match is listed under "not_installed", ask the user whether to install it
-   (installs download packages, often hundreds of MB, and take minutes); if they
-   agree, call install_tool and call it again until it reports "ready".
+   match is listed under "not_installed", ask the user whether to install it,
+   naming its maturity level and catalog (installs download packages, often
+   hundreds of MB, and take minutes); if they agree, call install_tool and call
+   it again until it reports "ready".
 3. describe_tool before the first use: parameters and units, usage notes,
-   validity limits, and how to cite.
+   validity limits, maturity, and how to cite.
 4. run_tool. If it returns status "running", call get_run later with the run_id.
 5. Report numbers with units, the tool and run id, the citation, and any
    validity caveat. Outputs that are files are returned as absolute paths and
    can be passed to other tools.
+
+Every tool has a maturity level: "established" (mature, widely used, checked
+against independent references), "published" (research code from a
+publication, less widely tested), or "experimental" (little outside
+validation). When several tools fit, prefer the more established one (search
+already ranks them first among similar matches); use a less mature tool when it
+is the only fit or the user asks for it. Name the tool and its level with the
+numbers it produced, and follow the caution that comes with experimental tools.
 
 Never ask the user to type an API key or password into the chat. If a tool
 needs a key that is not set, run_tool returns a link to a page on the user's
@@ -85,8 +95,8 @@ def _client_base_dir() -> Path:
     return Path.home() if cwd == Path(cwd.anchor) else cwd
 
 
-def _run_view(record: RunRecord) -> dict[str, Any]:
-    view = run_view(record)
+def _run_view(record: RunRecord, tool: InstalledTool | None = None) -> dict[str, Any]:
+    view = run_view(record, tool=tool)
     if record.status is RunStatus.RUNNING:
         view["next_step"] = f"Still running. Call get_run(run_id='{record.id}') to collect it."
     return view
@@ -187,6 +197,11 @@ def build_server(motel: Motel) -> MCPServer:
                 hint=f"Ask the user, then call install_tool(tool='{tool}').",
             )
 
+    def view_run(record: RunRecord) -> dict[str, Any]:
+        """A run, with its tool's maturity while the tool is installed."""
+        tool = motel.tool(record.tool) if motel.registry.exists(record.tool) else None
+        return _run_view(record, tool)
+
     @_friendly_errors
     def find_tools(
         query: Annotated[
@@ -208,7 +223,8 @@ def build_server(motel: Motel) -> MCPServer:
             result["not_installed"] = suggestions
             result["hint"] = (
                 "Tools under not_installed match too. Ask the user before installing one with "
-                "install_tool: installs download packages and take minutes."
+                "install_tool, naming its maturity and catalog: installs download packages and "
+                "take minutes."
             )
         elif not matches:
             result["hint"] = (
@@ -226,7 +242,11 @@ def build_server(motel: Motel) -> MCPServer:
         tool: Annotated[str, Field(description="Tool name, as returned by find_tools.")],
     ) -> dict[str, Any]:
         require_installed(tool)
-        return tool_view(motel.tool(tool))
+        installed = motel.tool(tool)
+        experimental = installed.maturity == "experimental"
+        return tool_view(
+            installed, motel.stronger_alternatives(installed) if experimental else None
+        )
 
     @_friendly_errors
     def install_tool(
@@ -326,7 +346,7 @@ def build_server(motel: Motel) -> MCPServer:
             if (request := _ask_for_secrets(exc, key_page, ctx)) is not None:
                 return request
             record = start()  # the user entered the key
-        return _run_view(record)
+        return view_run(record)
 
     @_friendly_errors
     def get_run(
@@ -336,13 +356,13 @@ def build_server(motel: Motel) -> MCPServer:
             Field(ge=0, le=MAX_WAIT_SECONDS, description="Wait up to this long for it to finish."),
         ] = 0,
     ) -> dict[str, Any]:
-        return _run_view(motel.get_run(run_id, wait=wait_seconds))
+        return view_run(motel.get_run(run_id, wait=wait_seconds))
 
     @_friendly_errors
     def cancel_run(
         run_id: Annotated[str, Field(description="Run id of a running job.")],
     ) -> dict[str, Any]:
-        return _run_view(motel.cancel_run(run_id))
+        return view_run(motel.cancel_run(run_id))
 
     @_friendly_errors
     def search_history(
@@ -357,7 +377,7 @@ def build_server(motel: Motel) -> MCPServer:
         limit: Annotated[int, Field(ge=1, le=100)] = 10,
     ) -> dict[str, Any]:
         records = motel.history_list(tool=tool, status=status, query=query or None, limit=limit)
-        return {"runs": [_run_view(record) for record in records]}
+        return {"runs": [view_run(record) for record in records]}
 
     server.add_tool(
         search_history,

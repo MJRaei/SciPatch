@@ -228,9 +228,13 @@ def run(
             raise typer.Exit(130) from None
 
     if as_json:
-        print_json(run_view(record))
+        print_json(run_view(record, tool=installed))
     else:
         print_record(record)
+        if record.status is RunStatus.SUCCEEDED and installed.maturity == "experimental":
+            console.print(
+                f"[yellow]![/] {installed.name} is experimental: cross-check key numbers."
+            )
     if record.status in (RunStatus.FAILED, RunStatus.CANCELLED):
         raise typer.Exit(1)
 
@@ -282,9 +286,11 @@ def runs_show(
     as_json: JsonOption = False,
 ) -> None:
     """Show the status, result, files, or error of one run."""
-    record = get_motel().get_run(run_id, wait=wait)
+    motel = get_motel()
+    record = motel.get_run(run_id, wait=wait)
     if as_json:
-        print_json(run_view(record, full=True))
+        tool = motel.tool(record.tool) if motel.registry.exists(record.tool) else None
+        print_json(run_view(record, full=True, tool=tool))
         return
     console.print(f"[dim]{record.tool}.{record.function}({escape(json.dumps(record.args))})[/]")
     print_record(record)

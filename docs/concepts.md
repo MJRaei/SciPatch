@@ -37,6 +37,17 @@ is built, so "installed" means "reproduces known results", not just "imports
 without errors". The manifest's **validity** text says when results should not
 be trusted.
 
+Not all research code deserves the same trust. Each tool has a **maturity**
+level: *established* (mature, widely used code, checked against independent
+references), *published* (research code from a publication, less widely
+tested), or *experimental* (little outside validation, such as a small project
+without a paper). Motel checks the claim against evidence in the manifest (a
+publication, and golden tests that say what they are checked against). Agents
+see the level with its evidence, search ranks established tools first among
+similar matches, and experimental tools come with a caution to say so and
+cross-check their numbers. You can lower a tool's level on your computer with
+`motel maturity <tool> experimental`.
+
 ## 2. Rooms: isolated environments
 
 Every tool gets its own environment, built with uv (PyPI packages) or conda
@@ -86,7 +97,7 @@ tools, with a fixed set of operations:
 | `search_history` | find earlier runs (check before computing again) |
 | `find_tools` | search all functions by plain-language description; also suggests matching tools from catalogs that are not installed yet |
 | `list_tools` | everything installed |
-| `describe_tool` | parameters with units, usage notes, validity, citation |
+| `describe_tool` | parameters with units, usage notes, validity, maturity, citation |
 | `install_tool` | install a suggested tool, after the user agrees (runs in the background; call again until it is ready) |
 | `run_tool` | run a function; long jobs continue in the background |
 | `get_run`, `cancel_run` | collect or stop a background run |

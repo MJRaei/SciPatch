@@ -20,6 +20,7 @@ from motel import frontmatter, wsl
 from motel.build import BuildLayout, runtime_for
 from motel.errors import ManifestError, ToolNotFoundError
 from motel.manifest import MANIFEST_FILENAME, NAME_PATTERN, Manifest, load_manifest
+from motel.maturity import MaturityOverrides, effective
 from motel.models import FunctionInfo, ToolState
 from motel.paths import MotelPaths
 from motel.runtime.executor import ToolRuntime
@@ -73,6 +74,12 @@ class InstalledTool:
     @property
     def usable(self) -> bool:
         return self.status in ("ready", "failing-tests")
+
+    @property
+    def maturity(self) -> str:
+        """The manifest's maturity level, or the lower one the user set on this computer."""
+        lowered = MaturityOverrides(self.paths.maturity).get(self.name)
+        return effective(self.manifest.maturity, lowered)
 
     @property
     def functions(self) -> list[FunctionInfo]:

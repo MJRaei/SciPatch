@@ -66,6 +66,7 @@ functions:                         # optional
 
 validity: >-
   When results can and cannot be trusted.
+maturity: published        # established, published, or experimental (the default)
 
 golden:
   - name: reproduces the paper's value for silicon
@@ -74,6 +75,7 @@ golden:
     expect:
       lattice_a_angstrom: {approx: 5.47, abs: 0.05}
     reference: <exact source of the number>
+    against: paper             # kind of reference, see below
     timeout: 900
 ```
 
@@ -214,6 +216,26 @@ Plain text: the training data or level of theory, supported elements or
 chemistries, known failure modes. Agents are instructed to respect it and repeat
 the relevant caveats.
 
+### `maturity`
+
+How much evidence backs the tool's results. Agents see the level with the
+evidence behind it (`describe_tool`, `motel info`); search ranks
+better-established tools first among similar matches; and experimental tools
+carry a caution telling agents to say so and cross-check key numbers with
+better-established tools.
+
+| Level | Meaning | Needs |
+|---|---|---|
+| `established` | Mature, widely used community code | `source.paper` (its publication or citable software record) and a golden test with `against: independent` or `against: exact` |
+| `published` | Research code from a publication, less widely tested | `source.paper` and a golden test with `against` set to `independent`, `exact`, `paper`, or `upstream-tests` |
+| `experimental` (default) | Little outside validation, e.g. a small project without a publication | nothing |
+
+The manifest is refused when the evidence for its level is missing. Whether code
+is "widely used" cannot be checked automatically: whoever adds a tool to a
+catalog decides, and `established` should not be claimed for a project only its
+authors use. On their own computer, users can lower a level (never raise it)
+with `motel maturity <tool> <level>`.
+
 ### `golden`
 
 | Field | Meaning |
@@ -222,6 +244,7 @@ the relevant caveats.
 | `function`, `args` | The call. Relative file paths are resolved from the package folder. |
 | `expect` | Checks, keyed by a dotted path into the result (`energy`, `forces.0.2`; `.` is the whole result). |
 | `reference` | Where the expected values come from. Never invent one. |
+| `against` | The kind of reference: `independent` (experiment, a reference database, or another program), `paper` (the tool's own publication), `upstream-tests` (the project's own test suite or documentation), `exact` (an analytical result, a sum or conservation rule, symmetry, or a count), or `regression` (output of this tool or its example, which catches changes but not errors). It backs the tool's `maturity` and is summarized for agents. Not used with `raises`. |
 | `timeout` | Seconds (default 900). |
 | `requires` | Secrets the test needs, e.g. `[MP_API_KEY]`. Without them the test is skipped, not failed, so the tool still installs. |
 | `raises` | Text the call's error message must contain: the test passes only if the call *fails* this way. Use it to prove that inputs outside the tool's validity are refused, e.g. `raises: "no reliable parameters for Fe"`. |

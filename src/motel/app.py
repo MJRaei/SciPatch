@@ -25,6 +25,7 @@ from motel.freeze import FreezeResult
 from motel.history import RunStore
 from motel.installer import Installer, dev_layout
 from motel.manifest import MANIFEST_FILENAME, load_manifest
+from motel.maturity import WEIGHTS, MaturityOverrides, rank
 from motel.models import FunctionInfo, RunRecord, RunStatus
 from motel.paths import MotelPaths
 from motel.registry import InstalledTool, Registry
@@ -89,9 +90,42 @@ class Motel:
             if entry.manifest.name not in installed
         }
         index = ToolIndex.of_documents(
-            ((name, ""), catalog_document(entry.manifest)) for name, entry in entries.items()
+            (((name, ""), catalog_document(entry.manifest)) for name, entry in entries.items()),
+            {name: WEIGHTS[entry.manifest.maturity] for name, entry in entries.items()},
         )
         return [(entries[hit.tool], hit.score) for hit in index.search(query, limit=limit)]
+
+    def stronger_alternatives(self, tool: InstalledTool, limit: int = 3) -> list[str]:
+        """Installed tools of a higher maturity level that cover similar ground."""
+        others = [
+            other
+            for other in self.tools()
+            if other.usable and rank(other.maturity) < rank(tool.maturity)
+        ]
+        if not others:
+            return []
+        manifest = tool.manifest
+        query = " ".join([manifest.summary, *manifest.domains, *manifest.tags])
+        hits = ToolIndex(others).search(query, limit=100)
+        best = hits[0].score if hits else 0.0
+        names: list[str] = []
+        for hit in hits:
+            if hit.score >= 0.3 * best and hit.tool not in names:
+                names.append(hit.tool)
+        return names[:limit]
+
+    def lower_maturity(self, name: str, level: str | None) -> InstalledTool:
+        """Lower a tool's maturity level on this computer; None restores the declared one."""
+        tool = self.tool(name)
+        declared = tool.manifest.maturity
+        if level is not None and rank(level) < rank(declared):
+            raise MotelError(
+                f"'{name}' is declared '{declared}'; levels can only be lowered here.",
+                hint="A higher level needs evidence in its motel.yaml (see docs/tool-format.md).",
+            )
+        MaturityOverrides(self.paths.maturity).set(name, None if level == declared else level)
+        self.sync_skills()
+        return self.tool(name)
 
     def catalog_entry(self, name: str) -> CatalogEntry | None:
         """The catalog package of a tool, if a catalog (or Motel itself) has one."""

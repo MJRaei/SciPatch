@@ -27,8 +27,9 @@ Otherwise use the **`motel` command line** with `--json`.
 2. **Find a tool.** `motel find "<what you need, in plain words>" --json`
    (MCP: `find_tools`). Results marked `"installed": false` (MCP: under
    `not_installed`) exist in a catalog but are not installed: ask the user before
-   installing (it downloads packages and takes minutes), then `motel add <tool>`
-   (MCP: `install_tool`, called again until it reports `ready`).
+   installing, naming its maturity and catalog (it downloads packages and takes
+   minutes), then `motel add <tool>` (MCP: `install_tool`, called again until it
+   reports `ready`).
 3. **Read it before running it.** `motel info <tool> --json` (MCP: `describe_tool`)
    gives parameters with units, usage notes, validity limits, and the citation.
 4. **Run it.**
@@ -43,8 +44,25 @@ Otherwise use the **`motel` command line** with `--json`.
    `status: "running"` and a `run_id` when the job outlives `wait_seconds`; poll it
    with `get_run`. While it runs, `latest_output` shows its most recent progress
    lines and `elapsed_seconds` how long it has been running.
-6. **Report.** Give numbers with units, name the tool and run id, cite the paper
-   (`motel info` shows how), and state any validity caveat that applies.
+6. **Report.** Give numbers with units, name the tool, its maturity, and the run
+   id, cite the paper (`motel info` shows how), and state any validity caveat that
+   applies.
+
+## Maturity
+
+Every tool has a level, shown by `find`, `info`, and in run results:
+
+- **established**: mature, widely used code, checked against independent
+  references or exact results;
+- **published**: research code from a publication, less widely tested;
+- **experimental**: little outside validation, such as a small project without a
+  publication.
+
+When several tools fit, prefer the more established one (search already ranks
+it first among similar matches). Use a less mature tool when it is the only fit
+or the user asks for it. With an experimental tool, tell the user, and
+cross-check key numbers with an established tool that covers the task
+(`motel info` suggests some); if none does, present the numbers as provisional.
 
 ## Good practice
 

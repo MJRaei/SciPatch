@@ -21,6 +21,7 @@ from motel.errors import MotelError
 from motel.keypage import KeyPage
 from motel.lock import platform_summary, runs_in_wsl, unavailable_here
 from motel.manifest import Secret
+from motel.maturity import LEVELS
 from motel.models import FunctionInfo
 from motel.platforms import current as current_platform
 from motel.platforms import label as platform_label
@@ -31,6 +32,7 @@ from motel.secrets import check_name
 from motel.views import (
     installable_view,
     match_view,
+    maturity_view,
     secrets_view,
     tool_summary_view,
     tool_view,
@@ -58,6 +60,12 @@ _STATUS_STYLE = {
     "not-built": "[red]not built[/]",
 }
 
+_MATURITY_STYLE = {
+    "established": "established",
+    "published": "[cyan]published[/]",
+    "experimental": "[yellow]experimental[/]",
+}
+
 
 def short(text: str, limit: int = 90) -> str:
     """The first sentence of ``text``, cut at a word boundary if still too long."""
@@ -69,6 +77,10 @@ def short(text: str, limit: int = 90) -> str:
 
 def status_label(tool: InstalledTool) -> str:
     return _STATUS_STYLE.get(tool.status, tool.status)
+
+
+def maturity_label(level: str) -> str:
+    return _MATURITY_STYLE.get(level, level)
 
 
 def prompt_secret(secret: Secret, *, optional: bool) -> str | None:
@@ -102,11 +114,18 @@ def list_tools(as_json: JsonOption = False) -> None:
     table = Table(box=None, pad_edge=False)
     table.add_column("Tool", style="bold")
     table.add_column("Status")
+    table.add_column("Maturity")
     table.add_column("Functions")
     table.add_column("Summary", overflow="fold")
     for tool in tools:
         names = ", ".join(f.name for f in tool.functions) or "-"
-        table.add_row(tool.name, status_label(tool), names, escape(short(tool.manifest.summary)))
+        table.add_row(
+            tool.name,
+            status_label(tool),
+            maturity_label(tool.maturity),
+            names,
+            escape(short(tool.manifest.summary)),
+        )
     console.print(table)
 
 
@@ -140,7 +159,11 @@ def find(
         for entry in available:
             reason = unavailable_here(entry.folder)
             note = f" [dim](not for this computer: {escape(reason)})[/]" if reason else ""
-            console.print(f"  {entry.manifest.name}: {escape(short(entry.manifest.summary))}{note}")
+            level = maturity_label(entry.manifest.maturity)
+            console.print(
+                f"  {entry.manifest.name} ({level}, {escape(entry.catalog)}): "
+                f"{escape(short(entry.manifest.summary))}{note}"
+            )
         console.print()
     if not matches:
         if not available:
@@ -155,8 +178,10 @@ def find(
     table.add_column("Inputs", overflow="fold", style="dim")
     for match in matches:
         function = match.function
+        level = match.tool.maturity
         table.add_row(
-            f"{match.tool.name} {function.name}",
+            f"{match.tool.name} {function.name}"
+            + ("" if level == "established" else f"\n[not bold]{maturity_label(level)}[/]"),
             escape(function.summary or match.tool.manifest.summary),
             escape(describe_inputs(function.properties, function.required)),
         )
@@ -174,9 +199,12 @@ def info(
     as_json: JsonOption = False,
 ) -> None:
     """Show a tool's functions, parameters, usage notes, validity limits, and citation."""
-    installed = get_motel().tool(tool)
+    motel = get_motel()
+    installed = motel.tool(tool)
+    experimental = installed.maturity == "experimental"
+    alternatives = motel.stronger_alternatives(installed) if experimental else None
     if as_json:
-        print_json(tool_view(installed))
+        print_json(tool_view(installed, alternatives))
         return
     manifest = installed.manifest
     state = installed.state
@@ -191,6 +219,7 @@ def info(
     )
     if state and state.error:
         lines.append(f"[red]Last error:[/] {escape(state.error)}")
+    lines.extend(_maturity_lines(installed, alternatives))
     summary = platform_summary(installed.package_dir)
     if summary:
         supported = [platform_label(name) for name, reason in summary.items() if not reason]
@@ -238,6 +267,19 @@ def info(
         console.rule("Provenance", align="left", style="dim")
         for line in filter(None, citation):
             console.print(escape(line))
+
+
+def _maturity_lines(tool: InstalledTool, alternatives: list[str] | None) -> list[str]:
+    view = maturity_view(tool, alternatives)
+    lines = [
+        f"Maturity: {maturity_label(view['level'])} · {escape(view['evidence'])}",
+        f"  [dim]Declared in {escape(view['declared_in'])}[/]",
+    ]
+    if "lowered_by_user" in view:
+        lines.append(f"  [dim]{escape(view['lowered_by_user'])}[/]")
+    if "caution" in view:
+        lines.append(f"  [yellow]{escape(view['caution'])}[/]")
+    return lines
 
 
 def _print_function(tool: str, function: FunctionInfo) -> None:
@@ -293,6 +335,7 @@ def catalog_list(
                     "catalog": e.catalog,
                     "summary": e.manifest.summary,
                     "domains": e.manifest.domains,
+                    "maturity": e.manifest.maturity,
                     "installed": e.manifest.name in installed,
                     "unavailable_here": unavailable_here(e.folder),
                 }
@@ -303,6 +346,7 @@ def catalog_list(
     table = Table(box=None, pad_edge=False)
     table.add_column("Name", style="bold")
     table.add_column("Catalog")
+    table.add_column("Maturity")
     table.add_column("Summary", overflow="fold")
     unavailable = 0
     for entry in entries:
@@ -315,7 +359,7 @@ def catalog_list(
             summary = (
                 f"[dim]{summary}\nNot for {platform_label(current_platform())}: {escape(reason)}[/]"
             )
-        table.add_row(name, entry.catalog, summary)
+        table.add_row(name, entry.catalog, maturity_label(entry.manifest.maturity), summary)
     console.print(table)
     console.print(
         "\n[green]✓[/] installed"
@@ -410,6 +454,11 @@ def add(
                 f"  [yellow]![/] It needs {escape(secret.label)} before it can run: "
                 f"[cyan]motel secret set {secret.name}[/]"
             )
+    if tool.maturity == "experimental":
+        console.print(
+            "  [yellow]![/] It is experimental (little outside validation): AI apps are told to "
+            "prefer established tools and to cross-check its results."
+        )
     console.print(f"  See what it does: [cyan]motel info {tool.name}[/]")
     if not motel.connections.load():
         console.print("  Use it from your AI app: [cyan]motel connect[/]")
@@ -460,6 +509,38 @@ def test(tool: Annotated[str, typer.Argument(help="Tool name.")]) -> None:
     console.print(f"{installed.name}: {state.golden_summary if state else 'not built'}")
     if installed.status != "ready":
         raise typer.Exit(1)
+
+
+@app.command("maturity", rich_help_panel=PANEL_MANAGE)
+def maturity_command(
+    tool: Annotated[str, typer.Argument(help="Tool name.")],
+    level: Annotated[
+        str | None, typer.Argument(help="Lower it to this level: published or experimental.")
+    ] = None,
+    reset: Annotated[
+        bool, typer.Option("--reset", help="Go back to the level its motel.yaml declares.")
+    ] = False,
+) -> None:
+    """Show a tool's maturity level and its evidence, or lower the level on this computer.
+
+    AI apps prefer more established tools and cross-check experimental ones. Lower
+    a tool you trust less than its catalog does, e.g.
+    [cyan]motel maturity some-tool experimental[/].
+    """
+    motel = get_motel()
+    if level is not None and level not in LEVELS:
+        raise MotelError(
+            f"'{level}' is not a maturity level.", hint=f"Use one of: {', '.join(LEVELS)}."
+        )
+    if level is not None or reset:
+        installed = motel.lower_maturity(tool, None if reset else level)
+        console.print(
+            f"[green]✓[/] {tool} is {maturity_label(installed.maturity)} on this computer."
+        )
+    else:
+        installed = motel.tool(tool)
+    for line in _maturity_lines(installed, None):
+        console.print(line)
 
 
 @secret_app.command("set")

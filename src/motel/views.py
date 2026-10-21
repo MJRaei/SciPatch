@@ -11,8 +11,9 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
+from motel import maturity
 from motel.app import Match
-from motel.catalogs import CatalogEntry
+from motel.catalogs import CatalogEntry, CatalogStore
 from motel.lock import platform_summary, runs_in_wsl, unavailable_here
 from motel.models import RunRecord, RunStatus, utcnow
 from motel.platforms import label as platform_label
@@ -48,8 +49,36 @@ def preview(value: Any, depth: int = 0) -> tuple[Any, bool]:
     return value, False
 
 
-def run_view(record: RunRecord, *, full: bool = False) -> dict[str, Any]:
-    """A run as JSON. ``full=True`` skips truncation of the result and traceback."""
+def maturity_view(tool: InstalledTool, alternatives: list[str] | None = None) -> dict[str, Any]:
+    """A tool's maturity level, what it means, and the evidence behind it.
+
+    ``alternatives`` are better-established tools for the same kind of task,
+    suggested for cross-checks in the caution that experimental tools carry.
+    """
+    manifest = tool.manifest
+    origin = tool.state.installed_from if tool.state else str(tool.package_dir)
+    view: dict[str, Any] = {
+        "level": tool.maturity,
+        "meaning": maturity.MEANING[tool.maturity],
+        "evidence": maturity.evidence(manifest),
+        "declared_in": CatalogStore(tool.paths).describe_origin(origin),
+    }
+    if tool.maturity != manifest.maturity:
+        view["lowered_by_user"] = f"declared '{manifest.maturity}'; lowered on this computer"
+    caution = maturity.caution(tool.maturity, alternatives or [])
+    if caution:
+        view["caution"] = caution
+    return view
+
+
+def run_view(
+    record: RunRecord, *, full: bool = False, tool: InstalledTool | None = None
+) -> dict[str, Any]:
+    """A run as JSON. ``full=True`` skips truncation of the result and traceback.
+
+    With the run's ``tool``, the view says the tool's maturity level, and for an
+    experimental tool, how to treat its results.
+    """
     view: dict[str, Any] = {
         "run_id": record.id,
         "status": record.status.value,
@@ -88,6 +117,11 @@ def run_view(record: RunRecord, *, full: bool = False) -> dict[str, Any]:
         "tool_version": record.tool_version,
         "source_commit": record.source_commit,
     }
+    if tool is not None:
+        view["maturity"] = tool.maturity
+        caution = maturity.caution(tool.maturity, [])
+        if caution and record.status is RunStatus.SUCCEEDED:
+            view["caution"] = caution
     return view
 
 
@@ -99,6 +133,7 @@ def match_view(match: Match) -> dict[str, Any]:
         "summary": function.summary or match.tool.manifest.summary,
         "inputs": describe_inputs(function.properties, function.required),
         "long_running": function.long_running,
+        "maturity": match.tool.maturity,
         "score": match.hit.score,
     }
 
@@ -112,6 +147,7 @@ def installable_view(entry: CatalogEntry) -> dict[str, Any]:
         "title": manifest.display_title,
         "summary": manifest.summary,
         "catalog": entry.catalog,
+        "maturity": manifest.maturity,
         "installable_here": reason is None,
         **({"why_not": reason} if reason else {}),
     }
@@ -125,10 +161,12 @@ def tool_summary_view(tool: InstalledTool) -> dict[str, Any]:
         "domains": tool.manifest.domains,
         "functions": [f.name for f in tool.functions],
         "status": tool.status,
+        "maturity": tool.maturity,
     }
 
 
-def tool_view(tool: InstalledTool) -> dict[str, Any]:
+def tool_view(tool: InstalledTool, alternatives: list[str] | None = None) -> dict[str, Any]:
+    """Everything about a tool; ``alternatives`` as for :func:`maturity_view`."""
     manifest = tool.manifest
     state = tool.state
     source = manifest.source
@@ -141,6 +179,7 @@ def tool_view(tool: InstalledTool) -> dict[str, Any]:
         "tags": manifest.tags,
         "version": manifest.version,
         "status": tool.status,
+        "maturity": maturity_view(tool, alternatives),
         "golden_tests": state.golden_summary if state else "not built",
         "functions": [
             {

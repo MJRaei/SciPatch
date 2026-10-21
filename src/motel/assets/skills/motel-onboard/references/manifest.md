@@ -58,6 +58,9 @@ validity: >-
   MP-compatible data. Unreliable for elements or bonding environments absent
   from the training set; confirm critical results with DFT.
 
+maturity: published               # established | published | experimental (default);
+                                  # needs the evidence below, see "Maturity"
+
 golden:
   - name: relaxes Si close to its PBE lattice constant
     function: relax
@@ -65,12 +68,23 @@ golden:
     expect:
       lattice_a_angstrom: {approx: 5.47, abs: 0.05}
     reference: "<exact source of the number: paper table/figure, or documented example>"
+    against: paper                # independent | paper | upstream-tests | exact | regression
     timeout: 900
   - name: refuses elements outside the training data   # inputs outside validity must fail
     function: relax
     args: {structure: tests/data/unsupported.cif}
     raises: "not supported"                              # text the error message must contain
 ```
+
+Maturity: `established` (mature, widely used code) needs `source.paper` and a
+golden test with `against: independent` or `exact`; `published` (research code
+from a publication) needs `source.paper` and a test with `against` set to
+`independent`, `exact`, `paper`, or `upstream-tests`; `experimental` needs
+nothing. `against` says where expected values come from: `independent`
+(experiment, a reference database, or another program), `paper` (the tool's own
+publication), `upstream-tests` (the project's test suite or documentation),
+`exact` (an analytical result, sum rule, symmetry, or count), or `regression`
+(this tool's own earlier output). Refusal tests (`raises`) have no `against`.
 
 Patches: every `*.patch` or `*.diff` file in `patches/` is applied to the
 checkout in name order. Create them with `motel patch save . -m "reason"`.

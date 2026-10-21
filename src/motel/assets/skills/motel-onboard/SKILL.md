@@ -50,7 +50,11 @@ briefly:
 - what the code computes and for which systems;
 - the 1 to 5 functions you plan to expose (name, inputs, outputs, units);
 - heavy requirements: GPU, model weights, licensed software, compiled code, long
-  runtimes, credentials.
+  runtimes, credentials;
+- anything the user should know before running the code on their computer:
+  network access beyond downloading data or weights, writes outside the working
+  folder, calls to unexpected programs, or obfuscated code. Motel isolates
+  packages, not access to files or the network.
 
 If the repository is an app with a user interface (Gradio, Streamlit, Dash,
 Flask, a Qt desktop program, notebook widgets), the tool exposes what the
@@ -150,6 +154,12 @@ Mark one fast test (seconds) that exercises the main computation with
 `quick: true`: installing a tool runs only the quick tests, while `motel check`,
 `motel test`, and CI run all of them.
 
+Set `against` on each test with expected values: `independent` (experiment,
+a reference database, or another program), `paper` (the tool's own
+publication), `upstream-tests` (the project's test suite or documentation),
+`exact` (an analytical result, sum rule, symmetry, or count), or `regression`
+(a value this tool produced). Agents see this summary to judge the evidence.
+
 Copy the input files into `tests/data/` (golden tests must not point into
 `source/`, which lives elsewhere once the tool is installed). Set the tolerance
 from the precision the paper reports; explain unusual tolerances in `reference`. Also add a test
@@ -167,6 +177,15 @@ paper), say exactly that. Matchers: `approx`
   with the words a user would say. Agents choose tools by this text.
 - `SKILL.md` body: workflows (including chaining with other tools), parameter
   advice, interpretation of outputs, pitfalls. Don't repeat the signatures.
+- `maturity`: propose a level to the user with its evidence, and set it only
+  once they agree. `established`: mature, widely used community code
+  (publications, many users and contributors, releases over years) checked
+  against independent references or exact results. `published`: research code
+  from a peer-reviewed paper or preprint, reproducing the paper's or its test
+  suite's numbers. `experimental` (the default): anything else, such as a small
+  project without a publication. When unsure, choose the lower level.
+  `motel check` refuses a level whose evidence is missing (see
+  [references/manifest.md](references/manifest.md)).
 
 ### 7. Verify and install
 
@@ -199,6 +218,8 @@ results, patches and why they were needed, and the caveats.
       reproduces a published or documented number
 - [ ] every exposed function has type hints and documented arguments with units
 - [ ] `summary`, `validity`, `citation`, and `license` are filled in
+- [ ] every golden test with expected values says what it is checked `against`
+- [ ] `maturity` is agreed with the user
 - [ ] the `SKILL.md` description says when to use the tool
 - [ ] all edits to `source/` are saved as patches
 - [ ] package versions are pinned with `motel freeze .`

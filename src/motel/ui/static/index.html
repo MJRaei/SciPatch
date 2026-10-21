@@ -50,6 +50,9 @@
   .chip.running { color: var(--accent); background: var(--accent-soft); }
   .chip.failed, .chip.broken, .chip.cancelled { color: var(--bad); background: var(--bad-soft); }
   .chip.failing-tests { color: var(--warn); background: var(--warn-soft); }
+  .chip.established { color: var(--muted); background: var(--code); }
+  .chip.published { color: var(--accent); background: var(--accent-soft); }
+  .chip.experimental { color: var(--warn); background: var(--warn-soft); }
   .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 16px; }
   .muted { color: var(--muted); }
   .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 16px 0 10px; }
@@ -171,12 +174,15 @@ async function selectTool(name, functionName) {
   const missingKeys = (tool.secrets_needed || []).filter((s) => !s.set);
   setContent(
     h("div", { class: "panel" },
-      h("div", { class: "row" }, h("h2", { style: "margin:0;flex:1" }, tool.title), chip(tool.status)),
+      h("div", { class: "row" }, h("h2", { style: "margin:0;flex:1" }, tool.title),
+        chip(tool.maturity.level), chip(tool.status)),
       h("p", {}, tool.summary),
+      tool.maturity.caution && h("p", { class: "muted" }, tool.maturity.caution),
       missingKeys.length > 0 && h("p", { class: "error" },
         `Needs ${missingKeys.map((s) => s.description || s.name).join(" and ")} before it can run. `,
         h("a", { href: "#", onclick: (event) => { event.preventDefault(); showView("keys"); } }, "Add it on the Keys page")),
-      h("small", { class: "muted" }, `${tool.name} ${tool.version} · ${tool.golden_tests}`),
+      h("small", { class: "muted", title: tool.maturity.meaning },
+        `${tool.name} ${tool.version} · ${tool.golden_tests} · ${tool.maturity.evidence}`),
       tabs, formArea),
     tool.usage_notes && h("div", { class: "panel" }, h("details", { open: true }, h("summary", {}, "Usage notes"),
       h("pre", {}, tool.usage_notes))),

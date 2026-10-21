@@ -4,7 +4,8 @@ Each function of each installed tool is one searchable document, built from
 the tool's name, summary, domains and tags, and the function's name, docs, and
 parameters. Documents are ranked with BM25. Words also match their close
 relatives by shared prefix ("relaxation" ~ "relax", "energies" ~ "energy"), so
-agents and people need not guess exact vocabulary.
+agents and people need not guess exact vocabulary. Scores are scaled by each
+tool's maturity, so among similar matches better-established tools come first.
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from motel.manifest import Manifest
+from motel.maturity import WEIGHTS
 from motel.registry import InstalledTool
 from motel.schema import type_label
 
@@ -127,19 +129,34 @@ class ToolIndex:
 
     def __init__(self, tools: list[InstalledTool]) -> None:
         self._index(
-            ((tool.name, function.name), _document(tool, index))
-            for tool in tools
-            for index, function in enumerate(tool.functions)
+            (
+                ((tool.name, function.name), _document(tool, index))
+                for tool in tools
+                for index, function in enumerate(tool.functions)
+            ),
+            {tool.name: WEIGHTS[tool.maturity] for tool in tools},
         )
 
     @classmethod
-    def of_documents(cls, documents: Iterable[tuple[tuple[str, str], list[str]]]) -> ToolIndex:
-        """An index over any (tool, function) keyed documents, e.g. catalog tools."""
+    def of_documents(
+        cls,
+        documents: Iterable[tuple[tuple[str, str], list[str]]],
+        weights: dict[str, float] | None = None,
+    ) -> ToolIndex:
+        """An index over any (tool, function) keyed documents, e.g. catalog tools.
+
+        ``weights`` scales the scores of each tool's documents (default 1).
+        """
         index = cls.__new__(cls)
-        index._index(documents)
+        index._index(documents, weights)
         return index
 
-    def _index(self, documents: Iterable[tuple[tuple[str, str], list[str]]]) -> None:
+    def _index(
+        self,
+        documents: Iterable[tuple[tuple[str, str], list[str]]],
+        weights: dict[str, float] | None = None,
+    ) -> None:
+        self._weights = weights or {}
         self._keys: list[tuple[str, str]] = []
         self._docs: list[Counter[str]] = []
         self._lengths: list[int] = []
@@ -181,6 +198,7 @@ class ToolIndex:
                 score += best
             if score > 0:
                 tool, function = self._keys[index]
+                score *= self._weights.get(tool, 1.0)
                 hits.append(SearchHit(tool, function, round(score, 4)))
         hits.sort(key=lambda hit: (-hit.score, hit.tool, hit.function))
         return hits[:limit]

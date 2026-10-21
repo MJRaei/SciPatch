@@ -43,6 +43,10 @@ Motel is built for science, with materials science and chemistry first.
 - **Results you can trust and cite.** Each tool carries golden tests that check
   it reproduces known results, plus stated validity limits and citations. Every
   run records the exact tool version and source commit.
+- **Mature tools first.** Each tool is *established*, *published*, or
+  *experimental*, backed by evidence Motel checks. Agents prefer established
+  tools and are told to cross-check results from experimental ones, such as a
+  small lab's code without a paper.
 - **A memory.** Ask about something you computed last week; identical calls are
   answered instantly from the history instead of being recomputed.
 - **No terminal required for daily use.** `motel ui` opens a dashboard with a

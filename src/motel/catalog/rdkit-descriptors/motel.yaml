@@ -51,6 +51,8 @@ validity: >-
   embedding, not the global minimum or a Boltzmann ensemble; force-field
   energies are only comparable between conformers of the same molecule.
 
+maturity: established
+
 golden:
   - name: aspirin matches PubChem
     function: descriptors
@@ -64,6 +66,7 @@ golden:
     reference: >-
       PubChem CID 2244 (aspirin): C9H8O4, 180.16 g/mol, monoisotopic mass
       180.04225873 Da, topological polar surface area 63.6 Å².
+    against: independent
   - name: caffeine formula and weight match PubChem
     quick: true
     function: descriptors
@@ -72,12 +75,14 @@ golden:
       formula: C8H10N4O2
       molecular_weight_g_mol: {approx: 194.19, abs: 0.01}
     reference: "PubChem CID 2519 (caffeine): C8H10N4O2, 194.19 g/mol."
+    against: independent
   - name: a molecule is identical to itself
     function: similarity
     args: {smiles_a: "c1ccccc1O", smiles_b: "Oc1ccccc1"}
     expect:
       tanimoto: 1.0
     reference: Two SMILES of phenol describe the same molecule.
+    against: exact
   - name: aspirin conformer is generated and optimized
     function: conformer
     args: {smiles: "CC(=O)Oc1ccccc1C(=O)O"}
@@ -86,3 +91,4 @@ golden:
       n_atoms: 21
       conformer: {exists: true}
     reference: Aspirin has 21 atoms including hydrogens (C9H8O4).
+    against: exact

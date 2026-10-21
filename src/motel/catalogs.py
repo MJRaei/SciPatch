@@ -174,6 +174,17 @@ class CatalogStore:
             found.extend(self._entries_of(catalog))
         return found
 
+    def describe_origin(self, origin: str) -> str:
+        """Where an installed tool came from, in words (an installed tool's ``installed_from``)."""
+        if origin.startswith(f"{BUILT_IN}:"):
+            return "Motel's built-in catalog"
+        for catalog in self.catalogs():
+            if origin.startswith(f"{catalog.url}@"):
+                return f"the catalog '{catalog.name}'"
+        if Path(origin).is_absolute():
+            return f"the folder {origin}"
+        return f"the repository {origin.rsplit('@', 1)[0]}"
+
     def find(self, name: str) -> CatalogEntry | None:
         """Find a tool by ``name`` or ``catalog/name``; ambiguous names raise an error."""
         catalog_name, _, tool_name = name.rpartition("/")

@@ -136,8 +136,12 @@ def relax(
 def run(smiles, temperature):
     result = model.predict(load(smiles), T=temperature)
     return plot(result), result.table
-gr.Interface(run, [gr.Textbox(), gr.Slider(200, 1000, value=300)],
-             [gr.Plot(), gr.Dataframe()]).launch()
+
+
+gr.Interface(
+    run, [gr.Textbox(), gr.Slider(200, 1000, value=300)], [gr.Plot(), gr.Dataframe()]
+).launch()
+
 
 # api.py (the tool): same computation, no gradio
 def predict(smiles: str, temperature_k: float = 300.0, plot: str = "result.png") -> dict:

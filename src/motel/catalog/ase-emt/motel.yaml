@@ -65,6 +65,8 @@ validity: >-
   magnetism, charge transfer, or directional bonding. Use it for teaching, quick
   checks, and testing workflows, not for publishable numbers.
 
+maturity: established
+
 golden:
   - name: Cu lattice constant within 1% of experiment
     function: equation_of_state
@@ -74,6 +76,7 @@ golden:
     reference: >-
       Experimental room-temperature lattice constant of copper, 3.615 Å. EMT gives
       3.590 Å with this setup, 0.7% below experiment.
+    against: independent
   - name: Cu equation of state matches the reference calculation
     quick: true
     function: equation_of_state
@@ -82,6 +85,7 @@ golden:
       lattice_constant_angstrom: {approx: 3.590, abs: 0.002}
       bulk_modulus_gpa: {approx: 133.6, rel: 0.01}
     reference: Regression value computed with ASE 3.29.0 EMT (deterministic).
+    against: regression
   - name: a rattled Cu crystal relaxes back to the ideal-crystal energy
     function: relax
     args: {structure: tests/data/Cu_rattled.cif, fmax: 0.01}
@@ -92,6 +96,7 @@ golden:
     reference: >-
       The ideal 8-atom Cu supercell at ASE's reference lattice constant has
       -0.005682 eV/atom with EMT (from 'energy').
+    against: regression
   - name: elements without EMT parameters are refused
     function: equation_of_state
     args: {element: Fe, crystal: bcc}

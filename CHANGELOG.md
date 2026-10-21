@@ -14,6 +14,21 @@ All notable changes to this project are documented here. The format follows
   MDAnalysis, OVITO, and AutoDock Vina, each with golden tests against upstream
   test suites, reference databases, or established physics, and a CI workflow
   that rebuilds changed tools from scratch.
+- Maturity levels: every tool is `established`, `published`, or `experimental`
+  (the default), declared as `maturity` in `motel.yaml`, and refused when the
+  evidence is missing (a publication, and golden tests whose new `against`
+  field says what they are checked against: independent references, the paper,
+  upstream tests, exact results, or the tool's own earlier output). Agents see
+  the level with a one-line summary of the evidence in `find_tools`,
+  `describe_tool`, and run results; search ranks better-established tools first
+  among similar matches; experimental tools carry a caution that names
+  better-established tools for cross-checks, also in their skills. `motel list`,
+  `motel info`, `motel catalog`, and the dashboard show the level, and
+  `motel maturity <tool> <level>` lowers it on your computer.
+- Onboarding: the agent proposes a maturity level for the user to confirm, says
+  what each golden test is checked against, and reports anything in the code a
+  user should know before running it (network access, writes outside the run
+  folder, unexpected programs, obfuscated code).
 - Catalogs: `motel catalog add <git-url>` adds a collection of tools; install
   them by name with `motel add <name>`.
 - `motel freeze` pins the exact packages a tool was tested with and resolves it
