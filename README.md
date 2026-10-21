@@ -91,10 +91,12 @@ Built in: **ase-emt** (fast approximate simulations of metals) and
 (machine-learned potentials), **GPAW** (DFT for crystals), **matcalc** (elastic
 and thermal properties), **phonopy** (phonons and stability),
 **pymatgen-diffusion** (ion transport from MD), **pymatgen-structure**
-(symmetry, supercells, XRD), and the **Materials Project** database; and for
+(symmetry, supercells, XRD), **phono3py** (thermal conductivity), **Quantum
+ESPRESSO** (plane-wave DFT), and the **Materials Project** database; and for
 chemistry, **PySCF** (ab initio quantum chemistry), **xTB** (fast semiempirical
-quantum chemistry), **RDKit** (cheminformatics), and **OpenMM** (molecular
-dynamics). Every tool reproduces published or upstream-tested values before it
+quantum chemistry), **CREST** (conformers, protomers, tautomers), **RDKit**
+(cheminformatics), **OpenMM** (molecular dynamics), and **Cantera** (combustion
+chemistry and thermodynamics). Every tool reproduces published or upstream-tested values before it
 installs.
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),

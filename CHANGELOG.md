@@ -8,11 +8,11 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
-- Tool collection in `tools/`: CHGNet, MACE, phonopy, pymatgen-diffusion,
-  pymatgen-structure, Materials Project, xTB, PySCF, GPAW, matcalc, OpenMM, and
-  RDKit, each with golden tests against upstream test suites, reference
-  databases, or established physics, and a CI workflow that rebuilds changed
-  tools from scratch.
+- Tool collection in `tools/`: CHGNet, MACE, phonopy, phono3py,
+  pymatgen-diffusion, pymatgen-structure, Materials Project, GPAW, Quantum
+  ESPRESSO, matcalc, xTB, CREST, PySCF, RDKit, OpenMM, and Cantera, each with
+  golden tests against upstream test suites, reference databases, or
+  established physics, and a CI workflow that rebuilds changed tools from scratch.
 - Catalogs: `motel catalog add <git-url>` adds a collection of tools; install
   them by name with `motel add <name>`.
 - `motel freeze` pins the exact package versions a tool was tested with
@@ -38,6 +38,10 @@ All notable changes to this project are documented here. The format follows
   `frame_interval_fs`; guidance on `fmax` for cell relaxation.
 
 ### Fixed
+
+- conda environments use only the channels in the manifest (`--override-channels`),
+  so a user's own conda configuration cannot change or slow down a tool's environment.
+- Golden tests resolve lists of file paths in their arguments, as runs do.
 
 - Reinstalling from a checkout (`./install.sh`, `uv tool install .`) could reuse a
   stale cached build when only source files changed.
