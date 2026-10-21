@@ -1,0 +1,191 @@
+schema: 1
+name: coolprop
+version: 0.1.0
+title: Thermophysical properties of fluids (CoolProp)
+summary: >-
+  Reference-quality properties of about 120 fluids and refrigerants with CoolProp:
+  density, enthalpy, entropy, heat capacity, speed of sound, viscosity, and thermal
+  conductivity at any state; saturation (boiling points, vapor pressure, latent
+  heat, surface tension); property tables along isobars; p-h and T-s diagrams;
+  mixtures, refrigerant blends, aqueous brines, and humid-air psychrometrics.
+domains: [engineering, chemistry]
+tags: [thermophysical-properties, equation-of-state, fluid, refrigerant, water, steam, iapws, co2,
+       density, enthalpy, viscosity, thermal-conductivity, heat-capacity, saturation, vapor-pressure,
+       boiling-point, psychrometrics, humid-air, refrigeration, heat-transfer, coolprop]
+
+source:
+  homepage: http://www.coolprop.org
+  paper: https://doi.org/10.1021/ie4033999
+  citation: >-
+    I. H. Bell, J. Wronski, S. Quoilin, V. Lemort, "Pure and Pseudo-pure Fluid
+    Thermophysical Property Evaluation and the Open-Source Thermophysical Property
+    Library CoolProp", Ind. Eng. Chem. Res. 53, 2498-2508 (2014); plus the equation of
+    state and transport references of each fluid, as listed by fluids().
+  license: MIT
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["CoolProp==8.0.0", "matplotlib==3.11.2"]
+
+entrypoint: api
+
+functions:
+  state:
+    params:
+      temperature_k: {unit: K}
+      pressure_pa: {unit: Pa}
+      density_kg_m3: {unit: kg/m3}
+      enthalpy_j_per_kg: {unit: J/kg}
+      entropy_j_per_kg_k: {unit: J/(kg K)}
+  saturation:
+    params:
+      temperature_k: {unit: K}
+      pressure_pa: {unit: Pa}
+  isobar:
+    params:
+      pressure_pa: {unit: Pa}
+      t_min_k: {unit: K}
+      t_max_k: {unit: K}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  diagram:
+    outputs:
+      plot: {kind: image}
+  humid_air:
+    params:
+      dry_bulb_k: {unit: K}
+      pressure_pa: {unit: Pa}
+      dew_point_k: {unit: K}
+      wet_bulb_k: {unit: K}
+  fluids: {}
+
+validity: >-
+  Each property is only as good as the fluid's reference model (listed by
+  fluids()): the best equations of state, e.g. IAPWS-95 for water, reproduce
+  measured densities to 0.01-0.1% and heat capacities and speeds of sound to
+  about 0.1-1%; transport properties (viscosity, thermal conductivity) are
+  typically uncertain by 1-5%, more near the critical point. Outside the range
+  where a model was fitted (very high pressures or temperatures, near the triple
+  point) values are extrapolations. Mixtures use generic mixing parameters where
+  no fitted ones exist and are much less certain than pure fluids; two-phase
+  mixture states can fail to converge. Incompressible brines ("INCOMP::") are
+  correlations valid only for their stated temperature and concentration ranges.
+  Inside the two-phase dome, heat capacities, speed of sound, and transport
+  properties are undefined and returned as null.
+
+maturity: established
+
+golden:
+  - name: water at 500 K reproduces the IAPWS-95 verification table
+    quick: true
+    function: state
+    args: {fluid: Water, temperature_k: 500, density_kg_m3: 838.025}
+    expect:
+      pressure_pa: {approx: 10000385.8, rel: 1.0e-7}
+      speed_of_sound_m_s: {approx: 1271.28441, rel: 1.0e-7}
+      cv_j_per_kg_k: {approx: 3221.06219, rel: 1.0e-7}
+      entropy_j_per_kg_k: {approx: 2566.90919, rel: 1.0e-7}
+      phase: liquid
+    reference: >-
+      IAPWS R6-95(2018), Revised Release on the IAPWS Formulation 1995 for the
+      Thermodynamic Properties of Ordinary Water Substance, Table 7: at T = 500 K and
+      rho = 838.025 kg/m3, p = 10.0003858 MPa, cv = 3.22106219 kJ/(kg K), w =
+      1271.28441 m/s, s = 2.56690919 kJ/(kg K).
+    against: independent
+  - name: saturated water at 450 K reproduces the IAPWS-95 verification table
+    function: saturation
+    args: {fluid: Water, temperature_k: 450}
+    expect:
+      pressure_pa: {approx: 932203.564, rel: 1.0e-7}
+      liquid.density_kg_m3: {approx: 890.341250, rel: 1.0e-7}
+      vapor.density_kg_m3: {approx: 4.81200360, rel: 1.0e-7}
+      liquid.enthalpy_j_per_kg: {approx: 749161.585, rel: 1.0e-7}
+      vapor.enthalpy_j_per_kg: {approx: 2774410.78, rel: 1.0e-7}
+    reference: >-
+      IAPWS R6-95(2018), Table 8 at T = 450 K: p_sigma = 0.932203564 MPa, rho' =
+      890.341250 kg/m3, rho'' = 4.81200360 kg/m3, h' = 749.161585 kJ/kg, h'' =
+      2774.41078 kJ/kg.
+    against: independent
+  - name: liquid water at 25 C and 1 atm, including viscosity and conductivity
+    function: state
+    args: {fluid: Water, temperature_k: 298.15, pressure_pa: 101325}
+    expect:
+      density_kg_m3: {approx: 997.048, rel: 1.0e-5}
+      cp_j_per_kg_k: {approx: 4181.31, rel: 1.0e-5}
+      speed_of_sound_m_s: {approx: 1496.70, rel: 1.0e-5}
+      viscosity_pa_s: {approx: 890.022e-6, rel: 1.0e-5}
+      thermal_conductivity_w_m_k: {approx: 0.606516, rel: 1.0e-5}
+    reference: >-
+      NIST Chemistry WebBook, SRD 69, Thermophysical Properties of Fluid Systems
+      (E. W. Lemmon et al.), water at 298.15 K and 0.101325 MPa: 997.048 kg/m3,
+      cp 4.18131 J/(g K), sound speed 1496.70 m/s, viscosity 890.022 uPa s, thermal
+      conductivity 0.606516 W/(m K).
+    against: independent
+  - name: saturated R134a near 0 C
+    function: saturation
+    args: {fluid: R134a, temperature_k: 273.006}
+    expect:
+      pressure_pa: {approx: 291277, rel: 2.0e-5}
+      liquid.density_kg_m3: {approx: 1295.25, rel: 1.0e-5}
+      vapor.density_kg_m3: {approx: 14.3557, rel: 1.0e-5}
+      liquid.enthalpy_j_per_kg: {approx: 199806, rel: 1.0e-5}
+      vapor.enthalpy_j_per_kg: {approx: 398519, rel: 1.0e-5}
+    reference: >-
+      NIST Chemistry WebBook, SRD 69, saturation properties of R134a
+      (1,1,1,2-tetrafluoroethane) at 273.006 K: 0.291277 MPa, liquid 1295.25 kg/m3
+      and 199.806 kJ/kg, vapor 14.3557 kg/m3 and 398.519 kJ/kg (IIR reference
+      state).
+    against: independent
+  - name: nitrogen gas at 300 K and 1 bar
+    function: state
+    args: {fluid: N2, temperature_k: 300, pressure_pa: 100000}
+    expect:
+      density_kg_m3: {approx: 1.12328, rel: 1.0e-5}
+      viscosity_pa_s: {approx: 17.8899e-6, rel: 1.0e-5}
+      thermal_conductivity_w_m_k: {approx: 0.0259682, rel: 1.0e-5}
+      phase: supercritical_gas
+    reference: >-
+      NIST Chemistry WebBook, SRD 69, nitrogen at 300 K and 0.1 MPa: 1.12328 kg/m3,
+      viscosity 17.8899 uPa s, thermal conductivity 0.0259682 W/(m K). 300 K is
+      above nitrogen's critical temperature (126.19 K) at a pressure below the
+      critical pressure, which CoolProp calls a supercritical gas.
+    against: independent
+  - name: the critical point of CO2
+    function: fluids
+    args: {search: R744}
+    expect:
+      fluids.CarbonDioxide.critical_temperature_k: {approx: 304.1282, abs: 0.0001}
+      fluids.CarbonDioxide.critical_pressure_pa: {approx: 7377300, rel: 1.0e-5}
+      fluids.CarbonDioxide.critical_density_kg_m3: {approx: 467.6, rel: 1.0e-4}
+      fluids.CarbonDioxide.references.eos: Span-JPCRD-1996
+    reference: >-
+      R. Span, W. Wagner, J. Phys. Chem. Ref. Data 25, 1509 (1996): Tc = 304.1282 K,
+      pc = 7.3773 MPa, rho_c = 467.6 kg/m3.
+    against: independent
+  - name: saturated air has dew point and wet bulb equal to its temperature
+    function: humid_air
+    args: {dry_bulb_k: 298.15, relative_humidity: 1.0}
+    expect:
+      dew_point_k: {approx: 298.15, abs: 1.0e-6}
+      wet_bulb_k: {approx: 298.15, abs: 1.0e-6}
+    reference: >-
+      At 100% relative humidity air is saturated, so cooling it at all condenses
+      water (dew point = dry bulb) and evaporation cannot cool it (wet bulb = dry
+      bulb).
+    against: exact
+  - name: a refrigerant p-h diagram is drawn
+    function: diagram
+    args: {fluid: R134a, kind: PH}
+    expect:
+      plot: {exists: true}
+      triple_point_temperature_k: {approx: 169.85, abs: 0.01}
+    reference: >-
+      R. Tillner-Roth, H. D. Baehr, J. Phys. Chem. Ref. Data 23, 657 (1994): the
+      R134a equation of state starts at the triple point, 169.85 K.
+  - name: an unknown fluid is refused
+    function: state
+    args: {fluid: Unobtainium, temperature_k: 300, pressure_pa: 100000}
+    raises: "Unknown fluid"
+    reference: The tool must point to fluids() rather than fail obscurely.

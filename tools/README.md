@@ -9,6 +9,7 @@ reproduce published or upstream-tested values on every build.
 |---|---|---|---|---|---|
 | [aizynthfinder](aizynthfinder/) | chemistry | Linux, macOS, Windows | Retrosynthesis: ranked routes from purchasable starting materials (17.4 million ZINC compounds) or your own inventory, with each reaction step and route images; one-step precursor suggestions with feasibility; purchasability lookups | established | Textbook syntheses of paracetamol, aspirin (Olmsted 1998), and lidocaine in two steps (Reilly 1999); the published ZINC stock |
 | [cantera](cantera/) | chemistry, engineering | Linux, macOS, Windows | Combustion chemistry: equilibrium, adiabatic flame temperatures, laminar flame speeds, ignition delays, species thermodynamics | established | NASA CEA flame temperatures; NIST-JANAF heat capacities; methane-air flame speed vs experiment |
+| [coolprop](coolprop/) | engineering, chemistry | Linux, macOS, Windows | Reference-quality fluid properties for about 120 fluids and refrigerants (IAPWS-95 water, Span-Wagner CO2, ...): density, enthalpy, heat capacity, speed of sound, viscosity, thermal conductivity, saturation and latent heat, isobar tables, p-h and T-s diagrams, mixtures, brines, humid-air psychrometrics | established | IAPWS-95 verification tables (single-phase and saturation); NIST WebBook water, R134a, and nitrogen including viscosity and conductivity; Span-Wagner CO2 critical point |
 | [crest](crest/) | chemistry | Linux, macOS, Windows (WSL) | Conformer search with Boltzmann populations, protonation and deprotonation sites, tautomers (GFN2-xTB) | established | Butane anti/gauche; pyridine, acetic acid, and keto-enol chemistry (NIST enthalpies) |
 | [doping-knowledge](doping-knowledge/) | materials | Linux, macOS, Windows | What papers report about doping and intercalation of 2D and layered materials: 440 studies (dopants, methods, conditions, sites, phase transitions, property changes) and 1,443 cause-effect relationships with the authors' mechanisms, extracted by an LLM; from the ARIA hackathon project | experimental | Li-intercalated WTe2 record vs its paper (Wang et al. 2022); counts and a quoted mechanism from the knowledge base |
 | [gpaw](gpaw/) | materials | Linux, macOS, Windows (WSL) | DFT for crystals (plane waves, PAW): energies, forces, stress, relaxation, equation of state, band structures and gaps, magnetism | established | GPAW's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
@@ -119,6 +120,10 @@ accepts.
 - **Alloys:** `pycalphad.solidification` (melting range, phases while cooling) →
   `pycalphad.equilibrium` at the heat-treatment temperature → `lammps` or
   `ml-potentials` for the stable phases' properties.
+- **Refrigeration and power cycles:** `coolprop.state` and `coolprop.saturation`
+  at each point of the cycle (work, heat, COP or efficiency) →
+  `coolprop.diagram` to draw it on a p-h or T-s chart; `cantera` when the
+  working fluid reacts.
 - **Carbon capture and gas storage:** `raspa3.henry_coefficient` for each
   candidate CIF (CO2/N2 selectivity at low pressure) →
   `raspa3.mixture_adsorption` with flue gas (15% CO2, 85% N2) and

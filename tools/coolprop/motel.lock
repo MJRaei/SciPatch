@@ -1,0 +1,94 @@
+{
+ "lock_version": 1,
+ "inputs": "f5a3050636c6e58f62e7e819cbad027f92e4038f710ea6720c43282c69c12b83",
+ "tested_on": "osx-arm64",
+ "tested_size_mb": 120.7,
+ "platforms": {
+  "linux-64": {
+   "conda": [],
+   "pip": [
+    "contourpy==1.4.0",
+    "coolprop==8.0.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "six==1.17.0"
+   ]
+  },
+  "linux-aarch64": {
+   "conda": [],
+   "pip": [
+    "contourpy==1.4.0",
+    "coolprop==8.0.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "six==1.17.0"
+   ]
+  },
+  "osx-arm64": {
+   "conda": [],
+   "pip": [
+    "contourpy==1.4.0",
+    "coolprop==8.0.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pip==26.2.2",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "six==1.17.0"
+   ]
+  },
+  "osx-64": {
+   "conda": [],
+   "pip": [
+    "contourpy==1.4.0",
+    "coolprop==8.0.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "six==1.17.0"
+   ]
+  },
+  "win-64": {
+   "conda": [],
+   "pip": [
+    "contourpy==1.4.0",
+    "coolprop==8.0.0",
+    "cycler==0.12.1",
+    "fonttools==4.67.0",
+    "kiwisolver==1.5.1",
+    "matplotlib==3.11.2",
+    "numpy==2.5.4",
+    "packaging==26.3",
+    "pillow==13.0.0",
+    "pyparsing==3.3.3",
+    "python-dateutil==2.9.0.post0",
+    "six==1.17.0"
+   ]
+  }
+ }
+}
