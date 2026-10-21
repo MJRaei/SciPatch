@@ -1,0 +1,117 @@
+schema: 1
+name: propka
+version: 0.1.0
+title: Protein pKa values and protonation states (PROPKA 3)
+summary: >-
+  Predict the pKa of every titratable group in a protein structure with PROPKA 3
+  (Asp, Glu, His, Cys, Tyr, Lys, Arg, termini, and ligand groups), the protonation
+  state and charge of each at a chosen pH, the net charge and isoelectric point,
+  and the charge and folding free energy versus pH; compare with measured pKa
+  values.
+domains: [biology, chemistry]
+tags: [protein, pka, protonation, protonation-state, titration, isoelectric-point, pi, charge, histidine,
+       electrostatics, ph, enzyme, structure, pdb, molecular-dynamics-preparation, docking-preparation, propka]
+
+source:
+  homepage: https://github.com/jensengroup/propka
+  paper: https://doi.org/10.1021/ct100578z
+  citation: >-
+    M. H. M. Olsson, C. R. Søndergaard, M. Rostkowski, J. H. Jensen, "PROPKA3:
+    Consistent Treatment of Internal and Surface Residues in Empirical pKa
+    Predictions", J. Chem. Theory Comput. 7, 525-537 (2011); C. R. Søndergaard, M. H.
+    M. Olsson, M. Rostkowski, J. H. Jensen, J. Chem. Theory Comput. 7, 2284-2295
+    (2011) (ligands and coupled groups).
+  license: LGPL-2.1
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["propka==3.5.1", "matplotlib==3.11.2"]
+
+entrypoint: api
+
+functions:
+  protein_pka:
+    params:
+      structure: {kind: structure}
+    outputs:
+      table: {kind: table}
+  charge_curve:
+    params:
+      structure: {kind: structure}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  fetch_pdb:
+    resources: {network: true}
+    outputs:
+      file: {kind: structure}
+
+validity: >-
+  Empirical predictions from a single static structure: typical errors are below
+  about one pH unit, larger for buried groups, groups in strongly coupled
+  clusters, metal sites, and residues whose conformation changes on
+  (de)protonation. Results depend on the structure (crystal contacts, resolution,
+  alternate conformations, missing atoms); compare several structures of the same
+  protein when possible. Waters, ions, and ligands are removed unless
+  keep_hetero is set, and PROPKA's typing of unusual ligands should be checked.
+  Folding free energies are relative estimates from the pKa shifts only.
+
+maturity: established
+
+golden:
+  - name: lysozyme pKa values agree with NMR titrations
+    quick: true
+    function: protein_pka
+    args:
+      structure: tests/data/2LZT.pdb
+      experimental: {E7: 2.85, D18: 2.66, E35: 6.2, D48: 1.6, D52: 3.68, D66: 0.9,
+                     D87: 2.07, D101: 4.09, D119: 3.2, H15: 5.36, C-TERM 129: 2.75}
+    expect:
+      comparison.rmsd: {max: 1.0}
+      comparison.not_found: {length: 0}
+      comparison.groups.2.predicted: {approx: 6.2, abs: 0.5}
+      comparison.groups.4.predicted: {approx: 3.68, abs: 0.5}
+    reference: >-
+      K. Bartik, C. Redfield, C. M. Dobson, Biophys. J. 66, 1180 (1994), via the
+      PKAD-2 database: hen egg-white lysozyme (PDB 2LZT) Glu7 2.85, Asp18 2.66, Glu35
+      6.2 (the catalytic acid, raised from about 4.5), Asp48 1.6, Asp52 3.68, Asp66
+      0.9, Asp87 2.07, Asp101 4.09, Asp119 3.2, His15 5.36, C-terminus 2.75. PROPKA
+      gives an RMS error of 0.76 pH units (largest His15, 1.35), Glu35 6.51 and Asp52
+      3.83.
+    against: independent
+  - name: PROPKA's own regression test for HIV-1 protease with an inhibitor
+    function: protein_pka
+    args: {structure: tests/data/1HPX.pdb, keep_hetero: true}
+    expect:
+      groups: {length: 49}
+      groups.0.label: ASP 25 A
+      groups.0.pka: {approx: 5.07, abs: 0.01}
+      groups.4.label: ASP 25 B
+      groups.4.pka: {approx: 9.28, abs: 0.01}
+      groups.48.pka: {approx: 4.60, abs: 0.01}
+      pi_folded: {approx: 9.54, abs: 0.01}
+      pi_unfolded: {approx: 8.90, abs: 0.01}
+    reference: >-
+      PROPKA 3.5.1 test suite (tests/results/1HPX.json for tests/pdb/1HPX.pdb, with the
+      KNI-272 inhibitor): 49 groups, the first 5.07 and the fifth (catalytic Asp25 of
+      chain B) 9.28, the inhibitor's group 4.60, and pI 9.54 (folded) and 8.90
+      (unfolded), to 0.01.
+    against: upstream-tests
+  - name: the four disulfide bonds of lysozyme are recognised
+    function: protein_pka
+    args: {structure: tests/data/2LZT.pdb}
+    expect:
+      disulfide_cysteines: {length: 8}
+      net_charge_folded: {min: 7.0, max: 9.5}
+    reference: >-
+      Lysozyme's eight cysteines form four disulfides (6-127, 30-115, 64-80, 76-94;
+      SSBOND records of PDB 2LZT), which do not titrate. Its 6 Lys, 11 Arg, 1 His, and
+      N-terminus against 7 Asp, 2 Glu, and the C-terminus give a net charge of
+      about +8 at pH 7.
+    against: exact
+  - name: a missing structure file is refused
+    function: protein_pka
+    args: {structure: no-such-file.pdb}
+    raises: "not found"
+    reference: The tool must point to fetch_pdb instead of failing obscurely.

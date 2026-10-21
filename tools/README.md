@@ -24,6 +24,7 @@ reproduce published or upstream-tested values on every build.
 | [peptide-assembly](peptide-assembly/) | chemistry, biology | Linux, macOS, Windows | Conditions for peptide self-assembly (pH, concentration, temperature, solvent, time) from the most similar of 989 curated records (SAPdb and literature), for fibers, hydrogels, and spheres; from the peptide-agent hackathon project | experimental | Fmoc-FF hydrogel in water (Mahler et al. 2006); exact self-match; on the held-out split, the nearest records' solvent is right 69% of the time |
 | [phono3py](phono3py/) | materials | Linux, macOS, Windows | Lattice thermal conductivity vs temperature (RTA or full Boltzmann), from DFT forces or a universal ML potential | established | phono3py's test suite (Si with PBEsol forces, with and without isotopes) |
 | [phonopy](phonopy/) | materials | Linux, macOS, Windows | Phonon bands and DOS, dynamical stability, vibrational free energy and heat capacity | established | Dulong-Petit limit; Γ-point symmetry of silicon |
+| [propka](propka/) | biology, chemistry | Linux, macOS, Windows | Protein pKa values and protonation states (PROPKA 3): pKa of every titratable group, protonation and charge at a chosen pH, net charge and isoelectric point, charge and folding free energy versus pH, comparison with measured values | established | NMR pKa values of lysozyme (Bartik et al. 1994, via PKAD-2); PROPKA's own regression test (HIV-1 protease with inhibitor); lysozyme disulfides and charge |
 | [pvlib](pvlib/) | engineering | Linux, macOS, Windows | Solar energy: sun position (NREL SPA), sunrise and sunset, clear-sky irradiance, typical-year weather for any land location (PVGIS), and annual and monthly energy of fixed-tilt PV systems (PVWatts model: specific yield, capacity factor, performance ratio) | established | NREL SPA worked example; US Naval Observatory sunrise and sunset; PVGIS's own PV calculator for Munich; horizontal-plane identity |
 | [pybamm](pybamm/) | materials, chemistry, engineering | Linux, macOS, Windows | Lithium-ion cells with physics-based models (Doyle-Fuller-Newman, single-particle): discharge curves, capacity and energy, rate capability, heating, CC-CV and other cycling protocols, with published cell parameters (LG M50 21700 and others) | established | LG M50 specification (18.2 Wh, ≥ 4.85 Ah, 3.63 V) at C/5; exact charge conservation over a CC-CV cycle |
 | [pycalphad](pycalphad/) | materials | Linux, macOS, Windows | Alloy thermodynamics (CALPHAD): stable phases and their compositions, liquidus, solidus, and phase fractions during solidification, binary phase diagrams; COST507 light alloys and other published databases, or your own TDB | established | ITS-90 melting point of Al; Al-Si eutectic (Murray & McAlister 1984); Pb-Sn solder eutectic |
@@ -32,7 +33,7 @@ reproduce published or upstream-tested values on every build.
 | [pyscf](pyscf/) | chemistry | Linux, macOS, Windows | Ab initio quantum chemistry: HF, DFT, MP2, CCSD(T) energies, optimization, frequencies and thermochemistry, excited states (TDDFT) | established | PySCF's test suite (water HF, B3LYP, MP2, CCSD(T), frequencies; CIS of HF); NIST CCCBDB |
 | [quantum-espresso](quantum-espresso/) | materials | Linux, macOS, Windows (WSL) | Plane-wave DFT with the verified SSSP pseudopotentials: energies, forces, stress, relaxation, equation of state, gaps, magnetism | established | Quantum ESPRESSO's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
 | [raspa3](raspa3/) | materials, chemistry | Linux, macOS, Windows | Gas adsorption in zeolites and MOFs by Monte Carlo (GCMC, Widom): isotherms, uptake and selectivity from mixtures such as CO2/N2 flue gas, Henry coefficients, heats of adsorption for CO2, N2, and methane, in bundled frameworks (silicalite, HKUST-1, MOF-5, CALF-20) or any CIF | established | Measured methane and CO2 isotherms in silicalite (Abdul-Rehman et al. 1990; Siperstein & Myers 2001; Smit 2015); methane storage in HKUST-1 (Mason et al. 2014) |
-| [reaktoro](reaktoro/) | chemistry, earth science, engineering | | Aqueous and geochemical equilibrium with the PHREEQC databases: speciation of water analyses (pH, ionic strength, species, mineral saturation indices), mineral solubility and precipitation, water open to air or CO2, solubility versus temperature, Pitzer brines | established | PHREEQC 3 manual examples: gypsum in pure water, calcite open to atmospheric CO2, seawater speciation |
+| [reaktoro](reaktoro/) | chemistry, earth science, engineering | Linux, macOS, Windows | Aqueous and geochemical equilibrium with the PHREEQC databases: speciation of water analyses (pH, ionic strength, species, mineral saturation indices), mineral solubility and precipitation, water open to air or CO2, solubility versus temperature, Pitzer brines | established | PHREEQC 3 manual examples: gypsum in pure water, calcite open to atmospheric CO2, seawater speciation |
 | [rdkit](rdkit/) | chemistry | Linux, macOS, Windows | Similarity and substructure search, 3D conformers (ETKDG + MMFF94), standardization with InChI/InChIKey | established | RDKit's documentation (doctested similarities and searches); PubChem identifiers |
 | [structural-analogs](structural-analogs/) | materials | Linux, macOS, Windows | Materials Project compounds with the same crystal structure type as a material or structure file, with band gaps, formation energies, stability, and volumes, for estimating properties by analogy; from the mp-property-analogies hackathon project | experimental | Rock-salt and diamond-structure analogs (KCl for NaCl, Ge for Si); needs a free API key |
 | [synthesis-recipes](synthesis-recipes/) | materials, chemistry | Linux, macOS, Windows | Published synthesis recipes (41,300 text-mined solid-state and sol-gel recipes: precursors, reactions, temperatures, times, atmospheres, DOIs), similar Materials Project compositions, and suggested routes for new materials from their closest analogs; from the SKY hackathon agent | experimental | Exact composition-identity checks; recipe counts of the bundled dataset; NCA analog for a new NCA composition |
@@ -140,6 +141,9 @@ accepts.
 - **Defects and plasticity:** `lammps.run_script` with your deformation or
   cascade input → `ovito.dislocations` (line length, Burgers vectors, density)
   and `ovito.point_defects` (vacancies, interstitials per frame).
+- **Protein protonation:** `propka.fetch_pdb` → `propka.protein_pka` at the
+  working pH (which His, Asp, and Glu are charged, which pKa values are shifted) →
+  use those states when preparing `openmm` or `vina` inputs.
 - **Docking:** `openbabel.convert` (protonate the ligand for pH 7.4) →
   `vina.dock` (redock the crystal ligand first to validate the box) →
   `openmm.simulate` with the best pose as `small_molecules` →
@@ -164,10 +168,10 @@ Upstream code, potential files, and pseudopotentials are downloaded from their
 original sources at install time and are not redistributed here. Small test
 inputs taken from upstream projects (the LAMMPS benchmark input, the Vina 1IEP
 tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory,
-molecules of the MMFF94 validation suite, MixSense's example spectra,
-RASPA3's HKUST-1 structure, and a PVGIS typical year for Munich from the
-European Commission's JRC) keep their sources' terms; each golden test names its
-source.
+molecules of the MMFF94 validation suite, MixSense's example spectra, RASPA3's
+HKUST-1 structure, PROPKA's 1HPX test structure, and a PVGIS typical year for
+Munich from the European Commission's JRC) keep their sources' terms; each
+golden test names its source.
 
 ## Adding a tool
 
