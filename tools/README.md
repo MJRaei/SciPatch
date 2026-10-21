@@ -14,6 +14,7 @@ reproduce published or upstream-tested values on every build.
 | [pyscf](pyscf/) | chemistry | Ab initio quantum chemistry: HF, DFT, MP2, CCSD(T) energies, optimization, frequencies and thermochemistry, excited states (TDDFT) | PySCF's test suite (water HF, B3LYP, MP2, CCSD(T), frequencies; CIS of HF); NIST CCCBDB |
 | [pymatgen-diffusion](pymatgen-diffusion/) | materials | Diffusivity, ionic conductivity, Haven ratio, and Arrhenius fits from MD trajectories | pymatgen-analysis-diffusion's test suite (LGPS at 600 K) |
 | [pymatgen-structure](pymatgen-structure/) | materials | Space groups, standard cells, supercells, format conversion, XRD patterns, structure matching | pymatgen's XRD tests; olivine and diamond space groups |
+| [matcalc](matcalc/) | materials | Elastic tensor and moduli, equation of state, thermal expansion and heat capacity (quasi-harmonic), formation energies, from universal potentials (TensorNet, M3GNet, CHGNet on MatPES) | matcalc's test suite (Li2O); all-electron PBE bulk modulus of Si |
 | [materials-project](materials-project/) | materials | Search known materials, stability (energy above hull), properties, and structures | Silicon (mp-149); needs a free API key |
 | [xtb](xtb/) | chemistry | GFN2-xTB energies, optimization, frequencies, and thermochemistry for molecules, with implicit solvent | xtb's test suite (propyne; GBSA solvation) |
 

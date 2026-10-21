@@ -1,0 +1,170 @@
+schema: 1
+name: matcalc
+version: 0.1.0
+title: Materials properties from universal potentials (matcalc)
+summary: >-
+  Mechanical and thermal properties of crystals from universal machine-learned
+  potentials (TensorNet, M3GNet, CHGNet trained on MatPES PBE or r2SCAN data):
+  full elastic tensor, bulk, shear and Young's moduli, Poisson's ratio,
+  mechanical stability, equation of state, thermal expansion, heat capacity and
+  Gibbs free energy vs temperature (quasi-harmonic), and formation and cohesive
+  energies.
+domains: [materials]
+tags: [elastic-constants, elastic-tensor, bulk-modulus, shear-modulus, youngs-modulus,
+       poisson-ratio, mechanical-stability, equation-of-state, thermal-expansion,
+       heat-capacity, quasi-harmonic, gruneisen, gibbs-free-energy, formation-energy,
+       cohesive-energy, ml-potential, universal-potential, tensornet, m3gnet, matpes, matgl]
+
+source:
+  homepage: https://github.com/materialyzeai/matcalc
+  paper: https://doi.org/10.1038/s41524-025-01742-y
+  citation: >-
+    matcalc (Materials Virtual Lab, github.com/materialyzeai/matcalc, v0.6.0);
+    T. W. Ko et al., "Materials Graph Library (MatGL), an open-source graph deep
+    learning library for materials science and chemistry", npj Comput. Mater. 11,
+    253 (2025); A. D. Kaplan et al., "A Foundational Potential Energy Surface
+    Dataset for Materials", arXiv:2503.04070 (2025) (MatPES); G. Simeon and G. De
+    Fabritiis, "TensorNet: Cartesian Tensor Representations for Efficient
+    Learning of Molecular Potentials", Adv. Neural Inf. Process. Syst. 36 (2023).
+  license: BSD-3-Clause
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["matcalc==0.6.0", "matgl==4.1.0", "pymatgen==2026.9.24", "ase==3.29.0",
+             "phonopy==4.8.3", "matplotlib"]
+  post_install:
+    - python -c "import matcalc; matcalc.load_fp('TensorNet-MatPES-PBE-2025.2')"
+
+entrypoint: api
+
+functions:
+  elastic_constants:
+    params:
+      structure: {kind: structure}
+      fmax: {unit: eV/Å}
+    outputs:
+      elastic_tensor_voigt_gpa: {unit: GPa}
+      bulk_modulus_vrh_gpa: {unit: GPa}
+      shear_modulus_vrh_gpa: {unit: GPa}
+      youngs_modulus_gpa: {unit: GPa}
+  equation_of_state:
+    params:
+      structure: {kind: structure}
+      fmax: {unit: eV/Å}
+      plot: {kind: image}
+    outputs:
+      bulk_modulus_gpa: {unit: GPa}
+      volume_per_atom_angstrom3: {unit: Å³/atom}
+      energy_per_atom_ev: {unit: eV/atom}
+      plot: {kind: image}
+  thermal_properties:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      t_max: {unit: K}
+      t_step: {unit: K}
+      report_temperatures: {unit: K}
+      fmax: {unit: eV/Å}
+      table: {kind: table}
+      plot: {kind: image}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  formation_energy:
+    params:
+      structure: {kind: structure}
+    outputs:
+      formation_energy_per_atom_ev: {unit: eV/atom}
+      cohesive_energy_per_atom_ev: {unit: eV/atom}
+      energy_ev: {unit: eV}
+
+validity: >-
+  Results inherit the accuracy of the potential and of the DFT functional it was
+  trained on. PBE-trained models (the default) reproduce PBE, which
+  underestimates elastic constants and bulk moduli by roughly 5-15% and
+  overestimates lattice constants by about 1%; on top of that the potential adds
+  its own error (for silicon, about 5% below the all-electron PBE bulk
+  modulus). r2SCAN models are closer to experiment for stiff and covalent
+  solids. Expect larger errors for chemistries and structures far from the
+  training data (MatPES covers 89 elements, mostly near-equilibrium bulk
+  crystals). Elastic constants and phonons are only meaningful for a relaxed,
+  dynamically stable structure (quasi-harmonic results are meaningless if the
+  phonons have imaginary modes). The quasi-harmonic approximation neglects
+  anharmonicity and fails near melting or phase transitions. Formation
+  energies are relative to MatPES elemental references without the empirical
+  anion corrections of the Materials Project, so oxide and other anion formation
+  energies differ from Materials Project values by the correction (about -0.7 eV
+  per O atom). Disordered (partially occupied) structures must be ordered first.
+
+golden:
+  - name: Li2O formation and cohesive energies match the matcalc test suite
+    function: formation_energy
+    args: {structure: tests/data/Li2O.json}
+    expect:
+      formation_energy_per_atom_ev: {approx: -1.7850605646769206, rel: 0.01}
+      cohesive_energy_per_atom_ev: {approx: -4.053125177202149, rel: 0.01}
+    reference: >-
+      matcalc v0.6.0, tests/test_stability.py::test_energetics_calc
+      (TensorNet-MatPES-PBE-2025.2, pymatgen's Li2O test structure): formation
+      energy -1.7850605646769206 eV/atom and cohesive energy -4.053125177202149
+      eV/atom (1%).
+  - name: Li2O bulk modulus matches the matcalc test suite
+    function: equation_of_state
+    args: {structure: tests/data/Li2O.json, fmax: 0.1}
+    expect:
+      bulk_modulus_gpa: {approx: 84.08164565338282, rel: 0.1}
+      plot: {exists: true}
+    reference: >-
+      matcalc v0.6.0, tests/test_eos.py::test_eos_calc: Li2O bulk modulus
+      (Birch-Murnaghan) 84.08164565338282 GPa (10%).
+  - name: Li2O elastic moduli match the matcalc test suite
+    function: elastic_constants
+    args: {structure: tests/data/Li2O.json, fmax: 0.1, max_normal_strain: 0.004, max_shear_strain: 0.004}
+    expect:
+      bulk_modulus_vrh_gpa: {approx: 81.1446, rel: 0.1}
+      shear_modulus_vrh_gpa: {approx: 64.4392, rel: 0.1}
+      mechanically_stable: true
+    reference: >-
+      matcalc v0.6.0, tests/test_elasticity.py::test_elastic_calc: Li2O bulk and
+      shear moduli (VRH) 0.5064644749775054 and 0.40219758881584616 eV/Angstrom^3
+      (10%), that is 81.1446 and 64.4392 GPa.
+  - name: Li2O thermal properties at 300 K match the matcalc test suite
+    function: thermal_properties
+    args:
+      structure: tests/data/Li2O.json
+      supercell: [2, 2, 2]
+      scale_range: 0.03
+      n_volumes: 7
+      fmax: 0.1
+      report_temperatures: [300]
+    expect:
+      at.0.temperature_k: 300
+      at.0.thermal_expansion_per_k: {approx: 8.664701952239187e-05, rel: 0.1}
+      at.0.heat_capacity_p_j_per_k_mol: {approx: 59.2773001627165, rel: 0.1}
+      at.0.bulk_modulus_gpa: {approx: 70.91381208222826, rel: 0.1}
+      at.0.gruneisen_parameter: {approx: 1.694821179002536, rel: 0.1}
+      table: {exists: true}
+    reference: >-
+      matcalc v0.6.0, tests/test_qha.py::test_qha_calc (2x2x2 supercell, lattice
+      scale factors 0.97-1.03, T up to 1000 K in 50 K steps): at 300 K, thermal
+      expansion 8.664701952239187e-05 /K, Cp 59.2773001627165 J/K/mol, bulk
+      modulus 70.91381208222826 GPa, Gruneisen parameter 1.694821179002536 (10%).
+  - name: silicon bulk modulus is close to all-electron PBE
+    function: equation_of_state
+    args: {structure: tests/data/Si.json}
+    expect:
+      bulk_modulus_gpa: {approx: 88.545, rel: 0.1}
+      volume_per_atom_angstrom3: {approx: 20.453, rel: 0.03}
+    reference: >-
+      Delta benchmark, WIEN2k all-electron PBE (K. Lejaeghere et al., Science 351,
+      aad3000 (2016); github.com/molmod/DeltaCodesDFT WIEN2k.txt at commit
+      f9b6693): Si B0 = 88.545 GPa, V0 = 20.453 Angstrom^3/atom. The PBE-trained
+      default model gives about 84 GPa and 20.1 Angstrom^3/atom.
+  - name: disordered structures are refused
+    function: formation_energy
+    args: {structure: tests/data/Li0.5Cl_disordered.cif}
+    raises: "partial occupancies"
+    reference: >-
+      A potential needs one atom per site; a partially occupied (disordered)
+      structure must be ordered before it can be computed.
