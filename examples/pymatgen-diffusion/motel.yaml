@@ -1,0 +1,108 @@
+schema: 1
+name: pymatgen-diffusion
+version: 0.1.0
+title: Ion diffusion analysis (pymatgen-analysis-diffusion)
+summary: >-
+  Analyze molecular dynamics trajectories for ion transport: mean squared
+  displacement, diffusivity, ionic conductivity, Haven ratio, and Arrhenius fits
+  of activation energy, with the pymatgen-analysis-diffusion package.
+domains: [materials]
+tags: [diffusion, diffusivity, ionic-conductivity, conductivity, msd, mean-squared-displacement,
+       arrhenius, activation-energy, molecular-dynamics, md, trajectory, battery,
+       solid-electrolyte, superionic, haven-ratio, pymatgen]
+
+source:
+  repo: "https://github.com/materialsvirtuallab/pymatgen-analysis-diffusion"
+  ref: "6f9fe6a7df1f66074a8c5407646aa17a3eb7d4a2"   # tag v2025.11.14
+  install: true
+  paper: "https://doi.org/10.1021/acs.chemmater.6b02648"
+  citation: >-
+    Z. Deng, Z. Zhu, I.-H. Chu, S. P. Ong, "Data-Driven First-Principles Methods
+    for the Study and Design of Alkali Superionic Conductors", Chem. Mater. 29,
+    281-288 (2017); and pymatgen: S. P. Ong et al., Comput. Mater. Sci. 68,
+    314-319 (2013).
+  license: BSD-3-Clause
+  homepage: https://materialsvirtuallab.github.io/pymatgen-analysis-diffusion/
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: []
+
+entrypoint: api
+
+functions:
+  analyze_trajectory:
+    params:
+      trajectory: {kind: trajectory}
+      temperature_k: {unit: K}
+      frame_interval_fs: {unit: fs}
+      skip_initial_ps: {unit: ps}
+    outputs:
+      diffusivity_cm2_s: {unit: cm²/s}
+      conductivity_ms_cm: {unit: mS/cm}
+      msd_final_angstrom2: {unit: Å²}
+      max_ion_displacement_angstrom: {unit: Å}
+      msd_plot: {kind: image}
+      msd_data: {kind: table}
+  arrhenius_fit:
+    params:
+      temperatures_k: {unit: K}
+      diffusivities_cm2_s: {unit: cm²/s}
+      extrapolate_to_k: {unit: K}
+      structure: {kind: structure}
+    outputs:
+      activation_energy_ev: {unit: eV}
+      prefactor_cm2_s: {unit: cm²/s}
+      extrapolated_diffusivity_cm2_s: {unit: cm²/s}
+      extrapolated_conductivity_ms_cm: {unit: mS/cm}
+      plot: {kind: image}
+
+validity: >-
+  The analysis is exact for the trajectory it is given, but the result is only
+  as good as that trajectory. A diffusivity is meaningful only if many ions hop
+  between sites during the run (check ions_moved_beyond_hop_distance and the
+  warnings): short runs, small cells, or low temperatures give noise or only an
+  upper bound. Typical ab initio or ML-potential runs are tens to hundreds of
+  ps, so room-temperature values usually come from Arrhenius extrapolation of
+  high-temperature runs, which assumes the same mechanism at all temperatures
+  (no phase transition). Conductivity uses the Nernst-Einstein relation with the
+  tracer diffusivity and ignores ion correlations (see the Haven ratio). The MD
+  temperature, the potential's accuracy, and the cell volume all carry over into
+  the result.
+
+golden:
+  - name: LGPS at 600 K matches the pymatgen-analysis-diffusion test suite
+    function: analyze_trajectory
+    args:
+      trajectory: tests/data/LGPS_600K_AIMD.extxyz.gz
+      specie: Li
+      temperature_k: 600
+      frame_interval_fs: 20
+    expect:
+      diffusivity_cm2_s: {approx: 1.16083658794e-06, rel: 0.001}
+      conductivity_ms_cm: {approx: 74.1653726, abs: 0.0005}
+      haven_ratio: {approx: 0.318541610, abs: 0.0000001}
+      n_ions: 20
+      msd_plot: {exists: true}
+    reference: >-
+      pymatgen-analysis-diffusion v2025.11.14,
+      tests/pymatgen/analysis/diffusion/test_analyzer.py::DiffusionAnalyzerTest::test_init
+      (Li10GeP2S12 AIMD at 600 K): D = 1.16083658794e-06 cm²/s (asserted to 7
+      decimal places), conductivity 74.165372613735684 mS/cm (4 places), Haven
+      ratio 0.31854161048867402. The trajectory was rebuilt from that test's
+      DiffusionAnalyzer.json (initial structure plus displacements, 20 fs apart).
+  - name: Arrhenius fit matches the pymatgen-analysis-diffusion test suite
+    function: arrhenius_fit
+    args:
+      temperatures_k: [300, 1000, 500]
+      diffusivities_cm2_s: [4.810130237144e-08, 0.03653983893031, 0.0001079748948967]
+    expect:
+      activation_energy_ev: {approx: 0.5, abs: 0.0000001}
+      prefactor_cm2_s: {approx: 12.0, abs: 0.00001}
+      activation_energy_std_ev: {approx: 0.000895566, abs: 0.0000001}
+      plot: {exists: true}
+    reference: >-
+      pymatgen-analysis-diffusion v2025.11.14, tests/pymatgen/analysis/diffusion/test_analyzer.py::FuncTest::test_fit_arrhenius:
+      Ea = 0.5 eV, prefactor 12 cm²/s, standard error 0.000895566 eV for
+      D = 12 exp(-0.5 eV / kT) at 300, 1000, 500 K with small fixed perturbations.

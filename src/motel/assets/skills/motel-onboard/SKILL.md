@@ -88,7 +88,11 @@ motel exec . -- python source/examples/quickstart.py
 Find one number the paper reports (a table entry, an energy, an error metric) or
 the README prints, and reproduce it. This becomes the golden test. The
 repository's own test suite is often the best source: look for asserted values
-such as `pytest.approx(-7.36769)` next to an example input file. If nothing is
+such as `pytest.approx(-7.36769)` next to an example input file. If those tests
+use preprocessed data rather than the input your function takes (say, saved
+displacements instead of a trajectory), convert that data into your input
+format once, keep the conversion script in `tests/data/`, and reproduce the
+same numbers through your function. If nothing is
 reproducible on this machine (for example, it needs a cluster), say so and
 reproduce the documented example instead.
 

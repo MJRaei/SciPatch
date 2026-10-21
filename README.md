@@ -91,9 +91,10 @@ conformers from SMILES).
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),
 Codex, or Gemini CLI. See [Turning a repository into a tool](docs/onboarding.md),
-and [examples/chgnet](examples/README.md) for a real repository (the CHGNet
-universal potential) turned into a tool, with golden tests that reproduce the
-values in its own test suite.
+and [examples](examples/README.md) for real repositories turned into tools (the
+CHGNet universal potential, and pymatgen-analysis-diffusion for diffusivities
+and activation energies), with golden tests that reproduce the values in their
+own test suites.
 
 ## Using tools without an AI app
 
