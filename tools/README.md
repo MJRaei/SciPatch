@@ -39,6 +39,7 @@ reproduce published or upstream-tested values on every build.
 | [raspa3](raspa3/) | materials, chemistry | Linux, macOS, Windows | Gas adsorption in zeolites and MOFs by Monte Carlo (GCMC, Widom): isotherms, uptake and selectivity from mixtures such as CO2/N2 flue gas, Henry coefficients, heats of adsorption for CO2, N2, and methane, in bundled frameworks (silicalite, HKUST-1, MOF-5, CALF-20) or any CIF | established | Measured methane and CO2 isotherms in silicalite (Abdul-Rehman et al. 1990; Siperstein & Myers 2001; Smit 2015); methane storage in HKUST-1 (Mason et al. 2014) |
 | [reaktoro](reaktoro/) | chemistry, earth science, engineering | Linux, macOS, Windows | Aqueous and geochemical equilibrium with the PHREEQC databases: speciation of water analyses (pH, ionic strength, species, mineral saturation indices), mineral solubility and precipitation, water open to air or CO2, solubility versus temperature, Pitzer brines | established | PHREEQC 3 manual examples: gypsum in pure water, calcite open to atmospheric CO2, seawater speciation |
 | [rdkit](rdkit/) | chemistry | Linux, macOS, Windows | Similarity and substructure search, 3D conformers (ETKDG + MMFF94), standardization with InChI/InChIKey | established | RDKit's documentation (doctested similarities and searches); PubChem identifiers |
+| [robocrys](robocrys/) | materials, chemistry | Linux, macOS, Windows | Crystal structures described in words (robocrystallographer): mineral prototype, dimensionality, coordination polyhedra and their corner, edge, or face sharing, tilts, bond lengths; per-site environments with ChemEnv polyhedra | established | robocrystallographer's own tests (rutile SnO2, MAPI); textbook rock salt, cubic perovskite, 2H-MoS2, and solid CO2 from published structures |
 | [structural-analogs](structural-analogs/) | materials | Linux, macOS, Windows | Materials Project compounds with the same crystal structure type as a material or structure file, with band gaps, formation energies, stability, and volumes, for estimating properties by analogy; from the mp-property-analogies hackathon project | experimental | Rock-salt and diamond-structure analogs (KCl for NaCl, Ge for Si); needs a free API key |
 | [synthesis-recipes](synthesis-recipes/) | materials, chemistry | Linux, macOS, Windows | Published synthesis recipes (41,300 text-mined solid-state and sol-gel recipes: precursors, reactions, temperatures, times, atmospheres, DOIs), similar Materials Project compositions, and suggested routes for new materials from their closest analogs; from the SKY hackathon agent | experimental | Exact composition-identity checks; recipe counts of the bundled dataset; NCA analog for a new NCA composition |
 | [thermo](thermo/) | chemistry, engineering | Linux, macOS, Windows | Chemical engineering thermodynamics: properties of about 20,000 chemicals, vapor-liquid equilibrium with UNIFAC, Peng-Robinson, or Raoult's law (flash, bubble and dew points, T-x-y diagrams, azeotropes), and pipe pressure drop | published | NIST constants of ethanol; IAPWS-95 vapor pressure of water; the ethanol-water azeotrope (Evans 1916); Hagen-Poiseuille and Prandtl-Karman pipe flow |
@@ -128,7 +129,8 @@ accepts.
   a new composition, `synthesis-recipes.suggest_routes` (closest analogs with
   recipes) → read the cited papers before going to the lab.
 - **Identify a structure:** `pymatgen-structure.symmetry` and `xrd_pattern`, then
-  `compare` with candidates from `materials-project.get_structure`.
+  `compare` with candidates from `materials-project.get_structure`;
+  `robocrys.describe` explains it in words (prototype, polyhedra, layers).
 - **X-ray experiments:** `xraylib.element_xray_data` (source lines and absorption
   edges) → `xraylib.attenuation` for sample thickness, filters, or shielding →
   `xraylib.identify_peak` for fluorescence peaks; `pymatgen-structure.xrd_pattern`
@@ -198,10 +200,11 @@ original sources at install time and are not redistributed here. Small test
 inputs taken from upstream projects (the LAMMPS benchmark input, the Vina 1IEP
 tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory,
 molecules of the MMFF94 validation suite, MixSense's example spectra,
-impedance.py's example spectrum, IZA zeolite frameworks, RASPA3's HKUST-1
-structure, PROPKA's 1HPX test structure, an OpenMS example spectrum, and a PVGIS
-typical year for Munich from the European Commission's JRC) keep their sources'
-terms; each golden test names its source.
+impedance.py's example spectrum, robocrystallographer's test structures, crystal
+structures from the Crystallography Open Database, IZA zeolite frameworks,
+RASPA3's HKUST-1 structure, PROPKA's 1HPX test structure, an OpenMS example
+spectrum, and a PVGIS typical year for Munich from the European Commission's
+JRC) keep their sources' terms; each golden test names its source.
 
 ## Adding a tool
 

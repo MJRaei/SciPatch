@@ -101,7 +101,8 @@ profiles and phase-field microstructures), **PyBaMM** (lithium-ion battery
 cells), **impedance.py** (electrochemical impedance spectra), **RASPA3** (gas
 adsorption in zeolites and MOFs), **Zeo++** (pore sizes, surface area, and pore
 volume), **pymatgen-diffusion** (ion transport from MD), **pymatgen-structure**
-(symmetry, supercells, XRD), **PyXtal** (random crystal structures for structure
+(symmetry, supercells, XRD), **robocrystallographer** (crystal structures
+described in words), **PyXtal** (random crystal structures for structure
 prediction), **xraylib** (X-ray attenuation, absorption edges, and emission
 lines), **synthesis recipes** (precursors and temperatures from papers, routes
 for new materials), **doping knowledge** (what papers report about doping

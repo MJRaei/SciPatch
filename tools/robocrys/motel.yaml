@@ -1,0 +1,189 @@
+schema: 1
+name: robocrys
+version: 0.1.0
+title: Crystal structure descriptions (robocrystallographer)
+summary: >-
+  Describe a crystal structure in words with robocrystallographer: mineral
+  prototype, symmetry, dimensionality (molecules, chains, layers, framework),
+  coordination polyhedra and how they share corners, edges, or faces, tilts, and
+  bond lengths; plus each site's coordination environment, identified with both
+  robocrystallographer and pymatgen's ChemEnv.
+domains: [materials, chemistry]
+tags: [crystal-structure, description, coordination, polyhedra, connectivity, octahedral-tilt,
+       dimensionality, layered, 2d, mineral, prototype, bond-length, chemenv, wyckoff,
+       robocrystallographer, pymatgen]
+
+source:
+  homepage: https://hackingmaterials.lbl.gov/robocrystallographer/
+  paper: https://doi.org/10.1557/mrc.2019.94
+  citation: >-
+    A. M. Ganose, A. Jain, "Robocrystallographer: automated crystal structure text
+    descriptions and analysis", MRS Commun. 9, 874-881 (2019); ChemEnv: D.
+    Waroquiers et al., Acta Cryst. B 76, 683-695 (2020).
+  license: BSD-3-Clause-LBNL (robocrystallographer); MIT (pymatgen)
+
+environment:
+  manager: conda
+  python: "3.12"
+  conda_packages: ["robocrys=0.2.13", "pymatgen=2026.9.24"]
+  channels: [conda-forge]
+
+entrypoint: api
+
+functions:
+  describe:
+    params:
+      structure: {kind: structure}
+  site_environments:
+    params:
+      structure: {kind: structure}
+
+validity: >-
+  Bonds come from CrystalNN, a geometric neighbour finder, so weak or long
+  contacts (lone pairs, Jahn-Teller, hydrogen bonds, metal-metal bonds) may be
+  counted or missed; check coordination numbers against chemical sense.
+  Oxidation states are guessed from bond valences when the file has none and can
+  be wrong for intermetallics, mixed valence, or organic parts. Mineral names
+  come from a prototype database (exact match or the closest by fingerprint
+  distance). Disordered (partially occupied) sites are not supported; order the
+  structure first. Results describe the input structure, so they are only as
+  good as it is (experimental CIF, DFT relaxation, or a guess).
+
+maturity: established
+
+golden:
+  - name: rutile SnO2 is described as robocrystallographer's own tests expect
+    quick: true
+    function: describe
+    args: {structure: tests/data/SnO2.json.gz, fmt: raw}
+    expect:
+      mineral.name: Rutile
+      mineral.exact_match: true
+      space_group: P4_2/mnm
+      crystal_system: tetragonal
+      dimensionality: 3
+      description: {contains: "Sn(1)4+ is bonded to six equivalent O(1)2- atoms"}
+    reference: >-
+      robocrystallographer test suite (tests/condense/test_structure.py and
+      tests/describe/test_description.py, SnO2 test structure): mineral Rutile,
+      P4_2/mnm, tetragonal, three-dimensional, Sn(1)4+ bonded to O(1).
+    against: upstream-tests
+  - name: the tin site of rutile matches robocrystallographer's tests
+    function: site_environments
+    args: {structure: tests/data/SnO2.json.gz}
+    expect:
+      sites.0.element: Sn4+
+      sites.0.geometry: octahedral
+      sites.0.geometry_likeness: {approx: 0.9349817, abs: 0.001}
+      sites.0.coordination_number: 6
+      sites.0.shared_with_neighbouring_polyhedra.corner: 8
+      sites.0.shared_with_neighbouring_polyhedra.edge: 2
+      sites.0.bond_length_angstrom.min: {approx: 2.0922106, abs: 0.0001}
+      sites.0.connection_angles_deg.edge.0: {approx: 101.6228, abs: 0.01}
+    reference: >-
+      robocrystallographer tests/condense/test_structure.py: Sn octahedral with
+      likeness 0.9349817, six neighbours, 8 corner- and 2 edge-sharing neighbouring
+      octahedra, Sn-O 2.092210570 Angstrom, edge-sharing angle 101.6228°.
+    against: upstream-tests
+  - name: methylammonium lead iodide splits into molecules inside a framework
+    function: describe
+    args: {structure: tests/data/mapi.json.gz}
+    expect:
+      mineral.name: Orthorhombic Perovskite
+      components.0.formula: CH3NH3
+      components.0.dimensionality: 0
+      components.0.count: 4
+      components.1.formula: PbI3
+      components.1.dimensionality: 3
+    reference: >-
+      robocrystallographer tests/condense/test_component.py (MAPI test structure):
+      components CH3NH3 (molecular) and a PbI3 framework, with four formula units of
+      CH3NH3 per PbI3 component.
+    against: upstream-tests
+  - name: rock salt (halite) is recognised
+    function: describe
+    args: {structure: tests/data/NaCl_halite.cif, fmt: raw}
+    expect:
+      mineral.name: {contains: Halite}
+      mineral.exact_match: true
+      space_group: Fm-3m
+      dimensionality: 3
+    reference: >-
+      NaCl, halite, Fm-3m, a three-dimensional ionic framework (R. W. G. Wyckoff,
+      Crystal Structures, vol. 1, 2nd ed., 1963; CIF from the Crystallography Open
+      Database, entry 9008678).
+    against: independent
+  - name: rock-salt octahedra share 12 edges and 6 corners
+    function: site_environments
+    args: {structure: tests/data/NaCl_halite.cif}
+    expect:
+      sites.0.element: Na+
+      sites.0.wyckoff_position: 4a
+      sites.0.coordination_number: 6
+      sites.0.chemenv.symbol: "O:6"
+      sites.0.chemenv.continuous_symmetry_measure: {max: 0.001}
+      sites.0.bond_length_angstrom.min: {approx: 2.82028, abs: 0.0001}
+      sites.0.shared_with_neighbouring_polyhedra.edge: 12
+      sites.0.shared_with_neighbouring_polyhedra.corner: 6
+      sites.0.connection_angles_deg.corner.0: {approx: 180.0, abs: 0.01}
+    reference: >-
+      Rock-salt structure (Wyckoff 1963, a = 5.64056 Angstrom, COD 9008678): Na at 4a
+      in a regular octahedron of six Cl at a/2 = 2.82028 Angstrom; each NaCl6
+      octahedron shares edges with 12 others and only a corner with the 6 across its
+      vertices (Na-Cl-Na 180°).
+    against: independent
+  - name: cubic perovskite SrTiO3 has untilted corner-sharing octahedra
+    function: site_environments
+    args: {structure: tests/data/SrTiO3_tausonite.cif}
+    expect:
+      sites.0.element: Sr2+
+      sites.0.coordination_number: 12
+      sites.0.geometry: cuboctahedral
+      sites.0.bond_length_angstrom.min: {approx: 2.76143, abs: 0.0001}
+      sites.1.element: Ti4+
+      sites.1.coordination_number: 6
+      sites.1.chemenv.symbol: "O:6"
+      sites.1.bond_length_angstrom.min: {approx: 1.95264, abs: 0.0001}
+      sites.1.shared_with_neighbouring_polyhedra.corner: 6
+      sites.1.shared_with_neighbouring_polyhedra.edge: 0
+      sites.1.connection_angles_deg.corner.0: {approx: 180.0, abs: 0.01}
+    reference: >-
+      SrTiO3 (tausonite), Pm-3m, a = 3.90528 Angstrom (R. H. Mitchell, A. R.
+      Chakhmouradian, P. M. Woodward, Phys. Chem. Miner. 27, 583 (2000); COD
+      9006864): Ti in TiO6 octahedra sharing all six corners with Ti-O-Ti = 180°,
+      Ti-O = a/2 = 1.95264 Angstrom; Sr in 12-fold cuboctahedral coordination, Sr-O =
+      a/sqrt 2 = 2.76143 Angstrom.
+    against: independent
+  - name: molybdenite is a layered compound with trigonal-prismatic Mo
+    function: describe
+    args: {structure: tests/data/MoS2_molybdenite.cif, fmt: raw}
+    expect:
+      mineral.name: Molybdenite
+      dimensionality: 2
+      components.0.orientation: [0, 0, 1]
+      van_der_waals_layers.repetitions: 2
+      description: {contains: "MoS6 trigonal prisms"}
+    reference: >-
+      2H-MoS2 (B. Schönfeld, J. J. Huang, S. C. Moss, Acta Cryst. B 39, 404 (1983);
+      COD 9007660): S-Mo-S layers perpendicular to c, two per cell, with Mo in
+      trigonal-prismatic coordination by six S (R. G. Dickinson, L. Pauling, J. Am.
+      Chem. Soc. 45, 1466 (1923)).
+    against: independent
+  - name: solid CO2 is a molecular crystal of four molecules per cell
+    function: describe
+    args: {structure: tests/data/CO2.cif}
+    expect:
+      dimensionality: 0
+      components.0.formula: CO2
+      components.0.dimensionality: 0
+      components.0.count: 4
+      space_group: Pa-3
+    reference: >-
+      Solid carbon dioxide, Pa-3 with Z = 4 linear CO2 molecules (A. Simon, K.
+      Peters, Acta Cryst. B 36, 2750 (1980); COD 9007643).
+    against: independent
+  - name: a missing structure file is refused
+    function: describe
+    args: {structure: no-such-file.cif}
+    raises: "not found"
+    reference: The tool must report the missing file.
