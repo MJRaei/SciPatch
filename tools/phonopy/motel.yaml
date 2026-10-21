@@ -26,6 +26,9 @@ environment:
   python: "3.12"
   packages: ["phonopy==4.8.3", "seekpath==2.2.2", "chgnet==0.4.2", "ase==3.29.0"]
 
+resources:
+  gpu: optional  # CHGNet forces on an NVIDIA GPU when the user turns GPU use on
+
 entrypoint: api
 
 functions:

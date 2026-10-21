@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import math
+import os
 import warnings
 from typing import Literal
 
@@ -62,7 +63,7 @@ def phonons(
     displacement_angstrom: float = 0.01,
     mesh: list[int] | None = None,
     temperatures_k: list[float] | None = None,
-    device: Literal["cpu", "auto", "cuda", "mps"] = "cpu",
+    device: Literal["auto", "cpu", "cuda", "mps"] = "auto",
     band_plot: str = "phonon_bands.png",
     dos_plot: str = "phonon_dos.png",
     parameters: str = "phonopy_params.yaml",
@@ -82,7 +83,8 @@ def phonons(
         mesh: q-point mesh for the density of states and thermal properties.
             Default [20, 20, 20].
         temperatures_k: Temperatures in K for thermal properties. Default [300].
-        device: Device for CHGNet: "cpu" (reproducible), "auto", "cuda", or "mps".
+        device: Device for CHGNet: "auto" (an NVIDIA GPU if the user turned GPU use on,
+            otherwise the CPU), "cpu", "cuda", or "mps".
         band_plot: PNG file for the band structure along a standard path.
         dos_plot: PNG file for the phonon density of states.
         parameters: phonopy file with the structure and force constants, for reuse.
@@ -118,6 +120,8 @@ def phonons(
     )
     phonon.generate_displacements(distance=displacement_angstrom)
     displaced = phonon.supercells_with_displacements
+    if device == "auto":
+        device = "cuda" if os.environ.get("MOTEL_DEVICE") == "cuda" else "cpu"
     force_field = _calculator(calculator, device)
     forces = []
     for index, cell in enumerate(displaced, start=1):
