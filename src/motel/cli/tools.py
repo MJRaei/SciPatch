@@ -140,7 +140,9 @@ def info(
             "[green]set[/]" if name in available else f"[red]not set[/] (motel secret set {name})"
         )
         lines.append(f"Needs {name}: {status}")
-    console.print(Panel("\n".join(lines), title=header, title_align="left", expand=False))
+    # Panels lay out their own text; soft wrapping would cut it off at the border.
+    panel = Panel("\n".join(lines), title=header, title_align="left", expand=False)
+    console.print(panel, soft_wrap=False)
 
     for function in installed.functions:
         _print_function(installed.name, function)

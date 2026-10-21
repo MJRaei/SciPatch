@@ -137,7 +137,8 @@ def test_global_flags_are_accepted_anywhere() -> None:
 def test_human_readable_views_render(make_package: ManifestFactory, tmp_path: Path) -> None:
     """Every human-facing view renders, including text with [brackets] (Rich markup)."""
     package = make_package(
-        summary="Adds numbers [eV] and writes files [for testing].",
+        summary="Adds numbers [eV] and writes files [for testing], with a summary long enough "
+        "to wrap inside the info panel's border ending in zebra.",
         validity="Valid for [all] inputs.",
         functions={"add": {"params": {"a": {"unit": "eV/Å"}}}, "fail": {}},
         golden=[{"name": "adds [ok]", "function": "add", "args": {"a": 1}, "expect": {"sum": 2}}],
@@ -148,6 +149,7 @@ def test_human_readable_views_render(make_package: ManifestFactory, tmp_path: Pa
     checks = [
         (["list"], "sample"),
         (["info", "sample"], "number [eV/Å]"),
+        (["info", "sample"], "zebra"),  # long text wraps instead of being cut off
         (["find", "add numbers"], "sample add"),
         (["run", "sample", "add", "a=1"], '"sum": 2.0'),
         (["run", "sample", "fail", "message=[bad]"], "ValueError: [bad]"),
