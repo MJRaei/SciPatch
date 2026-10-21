@@ -4,6 +4,23 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Progress for running jobs: `get_run`, `motel runs show`, and the dashboard show
+  the elapsed time and the tool's latest printed lines (`latest_output`). Tool
+  output is now line-buffered, so it appears while the job runs.
+- Example `pymatgen-diffusion`: diffusivity, conductivity, and Arrhenius analysis
+  of MD trajectories, with golden tests reproducing the upstream test suite.
+- CHGNet example: MD prints progress and reports `n_frames` and
+  `frame_interval_fs`; guidance on `fmax` for cell relaxation.
+
+### Fixed
+
+- Reinstalling from a checkout (`./install.sh`, `uv tool install .`) could reuse a
+  stale cached build when only source files changed.
+
 ## [0.1.0] - 2026-10-18
 
 First release.
