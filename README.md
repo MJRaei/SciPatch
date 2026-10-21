@@ -104,7 +104,8 @@ semiempirical quantum chemistry), **CREST** (conformers, protomers, tautomers),
 **RDKit** (cheminformatics), **Open Babel** (chemical file formats, force
 fields), **OpenMM** (molecular dynamics), **MDAnalysis** (trajectory analysis),
 **NMR mixtures** (mole fractions from crude 1H NMR), **AutoDock Vina**
-(docking), and **Cantera** (combustion chemistry and thermodynamics). Every tool
+(docking), **peptide assembly** (self-assembly conditions from similar
+peptides), and **Cantera** (combustion chemistry and thermodynamics). Every tool
 reproduces published or upstream-tested values before it installs.
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),

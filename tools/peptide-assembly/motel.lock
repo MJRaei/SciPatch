@@ -1,0 +1,30 @@
+{
+ "lock_version": 1,
+ "inputs": "8247303eeb36839bd7a163fb81ca043ea1cfa24db54eacbad850981d781ab44d",
+ "tested_on": "osx-arm64",
+ "tested_size_mb": 5.4,
+ "platforms": {
+  "linux-64": {
+   "conda": [],
+   "pip": []
+  },
+  "linux-aarch64": {
+   "conda": [],
+   "pip": []
+  },
+  "osx-arm64": {
+   "conda": [],
+   "pip": [
+    "pip==26.2.2"
+   ]
+  },
+  "osx-64": {
+   "conda": [],
+   "pip": []
+  },
+  "win-64": {
+   "conda": [],
+   "pip": []
+  }
+ }
+}

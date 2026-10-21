@@ -1,0 +1,95 @@
+schema: 1
+name: peptide-assembly
+version: 0.1.0
+title: Peptide self-assembly conditions (peptide-agent)
+summary: >-
+  Conditions for peptide self-assembly (pH, concentration, temperature, solvent,
+  time) from the most similar of 989 curated records of 194 peptides with known
+  outcomes (fibers, spheres, aggregates, or none), with terminal groups (Fmoc,
+  Boc, acetyl, amide) and references.
+domains: [chemistry, biology]
+tags: [peptide, self-assembly, hydrogel, nanofiber, nanotube, morphology, fmoc, dipeptide,
+       tripeptide, diphenylalanine, ph, solvent, conditions, sapdb, peptide-agent]
+
+source:
+  repo: https://github.com/ndharms/peptide-agent
+  ref: af125c284f7f9e1ca76e0dc69fc6d735aa4a1d14
+  install: false
+  homepage: https://github.com/ndharms/peptide-agent
+  citation: >-
+    peptide-agent (N. D. Harms et al., hackathon project, 2025),
+    github.com/ndharms/peptide-agent; data: SAPdb, D. Mathur et al., Comput. Biol.
+    Med. 133, 104391 (2021), and the summaries named in the repository's
+    data/README.md.
+  license: MIT (code); data from SAPdb and the cited publications
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: []
+
+entrypoint: api
+
+functions:
+  similar_peptides: {}
+  suggest_conditions:
+    outputs:
+      concentration_mg_ml: {unit: mg/mL}
+      temperature_c: {unit: °C}
+      time_min: {unit: min}
+
+validity: >-
+  Suggestions come from the closest peptides in a small curated dataset (989
+  records of 194 sequences, mostly di- and tripeptides): a peptide unlike any of
+  them (similarity well below 1) gets conditions of only loosely related
+  peptides. Similarity is by edit distance between sequences, so it does not
+  know that some substitutions are conservative (e.g. F for Y). The morphology
+  recorded depends on the method and characterization of each study, "none"
+  means no assembly was reported, and several fields are missing in many
+  records. Records without a DOI give the record number of the compilation they
+  come from (SAPdb or the summaries in the repository's data/README.md). Treat
+  the output as a starting point for experiments, not a prediction of success.
+  On peptide-agent's held-out split (198 records), the most common solvent of
+  the 10 nearest training records was right 69% of the time; peptide-agent's own
+  Gemini runs in its archive scored 44-49% on the same records.
+
+maturity: experimental
+
+golden:
+  - name: a peptide in the data is its own most similar peptide
+    quick: true
+    function: similar_peptides
+    args: {sequence: FF, count: 3}
+    expect:
+      matches.0.sequence: FF
+      matches.0.similarity: 1.0
+    reference: >-
+      Diphenylalanine (FF) is in the data; identical sequences have edit distance 0,
+      so similarity 1.
+    against: exact
+  - name: Fmoc-FF forms fibers in water
+    function: suggest_conditions
+    args: {sequence: FF, morphology: fiber, n_terminal: Fmoc}
+    expect:
+      solvents.0.solvent: water
+      similarity.same_sequence: {min: 1}
+      records.0.n_terminal: Fmoc
+    reference: >-
+      A. Mahler, M. Reches, M. Rechter, S. Cohen, E. Gazit, Adv. Mater. 18, 1365-1370
+      (2006): Fmoc-diphenylalanine dissolved in DMSO and diluted in water forms a
+      rigid hydrogel of nanofibers.
+    against: independent
+  - name: an unknown peptide gets records that share its core
+    function: suggest_conditions
+    args: {sequence: KLVFFAE, morphology: fiber}
+    expect:
+      records.0.sequence: {contains: LVFFA}
+      similarity.same_sequence: 0
+    reference: >-
+      KLVFFAE (amyloid-beta 16-22) is not in the data; the most similar fiber-forming
+      records are acetylated variants with the same LVFFA core (similarity 0.71).
+  - name: text that is not a peptide sequence is refused
+    function: similar_peptides
+    args: {sequence: F1F}
+    raises: "is not a peptide sequence"
+    reference: Digits are not amino-acid codes; the tool must say so.
