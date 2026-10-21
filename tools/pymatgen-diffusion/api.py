@@ -47,10 +47,12 @@ def analyze_trajectory(
     Args:
         trajectory: Trajectory file readable by ASE (.traj, .extxyz, XDATCAR,
             vasprun.xml, ...), with frames in time order.
-        specie: Diffusing element, e.g. "Li" or "Na".
+        specie: Diffusing element, e.g. "Li" or "Na". The trajectory must also
+            contain other elements (the host framework).
         temperature_k: Temperature of the MD run in K.
         frame_interval_fs: Time between consecutive frames in fs (MD time step
-            times the save interval; CHGNet's molecular_dynamics reports it).
+            times the save interval; the chgnet and mace molecular_dynamics
+            functions report it).
         skip_initial_ps: Equilibration time to discard from the start, in ps.
         smoothed: MSD averaging: "max" (default; all time origins, weighted),
             "constant" (fixed window), or "none" (single origin).
@@ -72,6 +74,16 @@ def analyze_trajectory(
     if temperature_k <= 0 or frame_interval_fs <= 0 or skip_initial_ps < 0:
         raise ValueError("temperature_k and frame_interval_fs must be positive.")
     frames = read(trajectory, index=":")
+    elements = set(frames[0].get_chemical_symbols())
+    if specie not in elements:
+        raise ValueError(f"'{specie}' is not in the trajectory ({', '.join(sorted(elements))}).")
+    if elements == {specie}:
+        raise ValueError(
+            f"Every atom in the trajectory is {specie}, but the analysis needs other atoms "
+            "(a host framework) as the reference for removing drift. It is made for ions "
+            "moving through a host, such as Li in a solid electrolyte, not for "
+            "self-diffusion in a pure element."
+        )
     skip = round(skip_initial_ps * 1000 / frame_interval_fs)
     if len(frames) - skip < 10:
         raise ValueError(
@@ -87,9 +99,6 @@ def analyze_trajectory(
             "smoothed='none' for a rough look at a short run."
         )
     structures = [AseAtomsAdaptor.get_structure(atoms) for atoms in frames[skip:]]
-    elements = {element.symbol for element in structures[0].composition.elements}
-    if specie not in elements:
-        raise ValueError(f"'{specie}' is not in the trajectory ({', '.join(sorted(elements))}).")
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")

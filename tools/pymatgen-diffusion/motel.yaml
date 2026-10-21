@@ -1,6 +1,6 @@
 schema: 1
 name: pymatgen-diffusion
-version: 0.1.0
+version: 0.1.1
 title: Ion diffusion analysis (pymatgen-analysis-diffusion)
 summary: >-
   Analyze molecular dynamics trajectories for ion transport: mean squared
@@ -69,7 +69,9 @@ validity: >-
   (no phase transition). Conductivity uses the Nernst-Einstein relation with the
   tracer diffusivity and ignores ion correlations (see the Haven ratio). The MD
   temperature, the potential's accuracy, and the cell volume all carry over into
-  the result.
+  the result. The trajectory needs a host framework (atoms of other elements)
+  as the reference for removing drift, so self-diffusion in a pure element
+  cannot be analyzed.
 
 golden:
   - name: LGPS at 600 K matches the pymatgen-analysis-diffusion test suite
@@ -119,3 +121,15 @@ golden:
       pymatgen-analysis-diffusion's 'max' smoothing starts the MSD fit at a lag
       time of 1 ps (analyzer.py, DiffusionAnalyzer.__init__), so shorter
       trajectories cannot be analyzed with it.
+  - name: a pure element without a host framework is refused
+    function: analyze_trajectory
+    args:
+      trajectory: tests/data/Si_pure.extxyz
+      specie: Si
+      temperature_k: 1500
+      frame_interval_fs: 10
+    raises: "needs other atoms (a host framework)"
+    reference: >-
+      pymatgen-analysis-diffusion removes drift using the average displacement of
+      the non-diffusing atoms (analyzer.py, DiffusionAnalyzer.__init__); with none,
+      every result would be NaN and the upstream code fails on an empty array.

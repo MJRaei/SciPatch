@@ -11,3 +11,6 @@ motel exec . -- python tests/data/make_lgps_trajectory.py \
     source/tests/pymatgen/analysis/diffusion/DiffusionAnalyzer.json \
     tests/data/LGPS_600K_AIMD.extxyz.gz
 ```
+
+`Si_pure.extxyz`: three slightly rattled frames of diamond silicon (8 atoms),
+written with ASE. It checks that a trajectory with no host framework is refused.
