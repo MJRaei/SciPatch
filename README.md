@@ -110,9 +110,10 @@ purchasable compounds), **Open Babel** (chemical file formats, force fields),
 **OpenMM** (molecular dynamics), **MDAnalysis** (trajectory analysis), **NMR
 mixtures** (mole fractions from crude 1H NMR), **AutoDock Vina** (docking),
 **peptide assembly** (self-assembly conditions from similar peptides),
-**Cantera** (combustion chemistry and thermodynamics), and **CoolProp**
-(properties of fluids, refrigerants, and humid air). Every tool reproduces
-published or upstream-tested values before it installs.
+**Cantera** (combustion chemistry and thermodynamics), **CoolProp** (properties
+of fluids, refrigerants, and humid air), and **pvlib** (sun position and solar
+PV energy). Every tool reproduces published or upstream-tested values before it
+installs.
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),
 Codex, or Gemini CLI. See [Turning a repository into a tool](docs/onboarding.md),

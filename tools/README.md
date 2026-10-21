@@ -24,6 +24,7 @@ reproduce published or upstream-tested values on every build.
 | [peptide-assembly](peptide-assembly/) | chemistry, biology | Linux, macOS, Windows | Conditions for peptide self-assembly (pH, concentration, temperature, solvent, time) from the most similar of 989 curated records (SAPdb and literature), for fibers, hydrogels, and spheres; from the peptide-agent hackathon project | experimental | Fmoc-FF hydrogel in water (Mahler et al. 2006); exact self-match; on the held-out split, the nearest records' solvent is right 69% of the time |
 | [phono3py](phono3py/) | materials | Linux, macOS, Windows | Lattice thermal conductivity vs temperature (RTA or full Boltzmann), from DFT forces or a universal ML potential | established | phono3py's test suite (Si with PBEsol forces, with and without isotopes) |
 | [phonopy](phonopy/) | materials | Linux, macOS, Windows | Phonon bands and DOS, dynamical stability, vibrational free energy and heat capacity | established | Dulong-Petit limit; Γ-point symmetry of silicon |
+| [pvlib](pvlib/) | engineering | Linux, macOS, Windows | Solar energy: sun position (NREL SPA), sunrise and sunset, clear-sky irradiance, typical-year weather for any land location (PVGIS), and annual and monthly energy of fixed-tilt PV systems (PVWatts model: specific yield, capacity factor, performance ratio) | established | NREL SPA worked example; US Naval Observatory sunrise and sunset; PVGIS's own PV calculator for Munich; horizontal-plane identity |
 | [pybamm](pybamm/) | materials, chemistry, engineering | Linux, macOS, Windows | Lithium-ion cells with physics-based models (Doyle-Fuller-Newman, single-particle): discharge curves, capacity and energy, rate capability, heating, CC-CV and other cycling protocols, with published cell parameters (LG M50 21700 and others) | established | LG M50 specification (18.2 Wh, ≥ 4.85 Ah, 3.63 V) at C/5; exact charge conservation over a CC-CV cycle |
 | [pycalphad](pycalphad/) | materials | Linux, macOS, Windows | Alloy thermodynamics (CALPHAD): stable phases and their compositions, liquidus, solidus, and phase fractions during solidification, binary phase diagrams; COST507 light alloys and other published databases, or your own TDB | established | ITS-90 melting point of Al; Al-Si eutectic (Murray & McAlister 1984); Pb-Sn solder eutectic |
 | [pymatgen-diffusion](pymatgen-diffusion/) | materials | Linux, macOS, Windows | Diffusivity, ionic conductivity, Haven ratio, and Arrhenius fits from MD trajectories | published | pymatgen-analysis-diffusion's test suite (LGPS at 600 K) |
@@ -124,6 +125,9 @@ accepts.
   at each point of the cycle (work, heat, COP or efficiency) →
   `coolprop.diagram` to draw it on a p-h or T-s chart; `cantera` when the
   working fluid reacts.
+- **Solar PV:** `pvlib.pvgis_weather` (typical year for the site) →
+  `pvlib.pv_energy` for a few tilts and orientations (kWh/kWp, monthly profile)
+  → `pvlib.solar_position` at critical dates to check shading.
 - **Carbon capture and gas storage:** `raspa3.henry_coefficient` for each
   candidate CIF (CO2/N2 selectivity at low pressure) →
   `raspa3.mixture_adsorption` with flue gas (15% CO2, 85% N2) and
@@ -156,9 +160,10 @@ Upstream code, potential files, and pseudopotentials are downloaded from their
 original sources at install time and are not redistributed here. Small test
 inputs taken from upstream projects (the LAMMPS benchmark input, the Vina 1IEP
 tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory,
-molecules of the MMFF94 validation suite, MixSense's example spectra, and
-RASPA3's HKUST-1 structure) keep their projects' licenses; each golden test
-names its source.
+molecules of the MMFF94 validation suite, MixSense's example spectra,
+RASPA3's HKUST-1 structure, and a PVGIS typical year for Munich from the
+European Commission's JRC) keep their sources' terms; each golden test names its
+source.
 
 ## Adding a tool
 

@@ -1,0 +1,171 @@
+schema: 1
+name: pvlib
+version: 0.1.0
+title: Solar position, irradiance, and PV system energy (pvlib)
+summary: >-
+  Solar energy calculations with pvlib: the sun's position (NREL SPA), sunrise,
+  solar noon, and sunset, cloudless-sky irradiance, typical-year weather for any
+  land location from PVGIS, and the annual and monthly energy, specific yield,
+  capacity factor, and performance ratio of a fixed-tilt PV system (PVWatts model).
+domains: [engineering]
+tags: [solar, photovoltaic, pv, solar-energy, solar-position, sun-position, sunrise, sunset, irradiance,
+       clear-sky, ghi, dni, tmy, pvgis, pvwatts, energy-yield, capacity-factor, renewable-energy, pvlib]
+
+source:
+  homepage: https://pvlib-python.readthedocs.io
+  paper: https://doi.org/10.21105/joss.05994
+  citation: >-
+    K. S. Anderson, C. W. Hansen, W. F. Holmgren, A. R. Jensen, M. A. Mikofski, A.
+    Driesse, "pvlib python: 2023 project update", J. Open Source Softw. 8, 5994
+    (2023); I. Reda, A. Andreas, "Solar position algorithm for solar radiation
+    applications", Sol. Energy 76, 577-589 (2004); A. P. Dobos, "PVWatts Version 5
+    Manual", NREL/TP-6A20-62641 (2014). Weather from PVGIS (European Commission,
+    Joint Research Centre).
+  license: BSD-3-Clause
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["pvlib==0.16.1", "matplotlib==3.11.2"]
+
+entrypoint: api
+
+functions:
+  solar_position:
+    params:
+      altitude_m: {unit: m}
+      pressure_pa: {unit: Pa}
+      temperature_c: {unit: °C}
+      delta_t_s: {unit: s}
+  sun_times: {}
+  clear_sky:
+    params:
+      altitude_m: {unit: m}
+      step_min: {unit: min}
+    outputs:
+      ghi_kwh_m2: {unit: kWh/m2}
+      table: {kind: table}
+      plot: {kind: image}
+  pvgis_weather:
+    resources: {network: true}
+    outputs:
+      file: {kind: table}
+  pv_energy:
+    params:
+      weather: {kind: file}
+      capacity_kw: {unit: kW}
+      tilt_deg: {unit: degree}
+      azimuth_deg: {unit: degree}
+      altitude_m: {unit: m}
+    outputs:
+      annual_ac_kwh: {unit: kWh}
+      specific_yield_kwh_per_kwp: {unit: kWh/kWp}
+      table: {kind: table}
+      plot: {kind: image}
+  sample_weather: {}
+
+validity: >-
+  Sun positions (NREL SPA) are accurate to about 0.0003 degrees for years -2000
+  to 6000; sunrise and sunset refer to the upper limb with standard refraction
+  and can differ by a minute or more from local observation (terrain, unusual
+  refraction). Clear-sky irradiance assumes no clouds and climatological or given
+  turbidity, so it is an upper bound. PV energy uses the simplified PVWatts model:
+  fixed tilt, no tracking, no row-to-row or horizon shading beyond what the
+  weather file includes, no snow, one temperature coefficient and one inverter
+  efficiency curve, and a single lumped loss factor; for a specific module and
+  inverter, bifacial systems, or trackers it is indicative only. Typical-year
+  weather represents average conditions; a given year can differ by 5-10% in
+  energy. Results are only as good as the weather data.
+
+maturity: established
+
+golden:
+  - name: the worked example of NREL's Solar Position Algorithm
+    quick: true
+    function: solar_position
+    args:
+      latitude: 39.742476
+      longitude: -105.1786
+      times: ["2003-10-17T12:30:30-07:00"]
+      timezone: Etc/GMT+7
+      altitude_m: 1830.14
+      pressure_pa: 82000
+      temperature_c: 11
+      delta_t_s: 67.0
+    expect:
+      positions.0.apparent_zenith_deg: {approx: 50.11162, abs: 1.0e-5}
+      positions.0.azimuth_deg: {approx: 194.34024, abs: 1.0e-5}
+    reference: >-
+      I. Reda, A. Andreas, Sol. Energy 76, 577 (2004), and NREL/TP-560-34302: at
+      Golden, CO (39.742476 N, 105.1786 W, 1830.14 m, 820 mbar, 11 °C, Delta T = 67
+      s) on 2003-10-17 at 12:30:30 MST, the topocentric zenith angle is 50.11162° and
+      the topocentric azimuth 194.34024°.
+    against: independent
+  - name: sunrise and sunset at Golden, CO match the US Naval Observatory
+    function: sun_times
+    args:
+      latitude: 39.0
+      longitude: -105.0
+      dates: ["2015-01-02", "2015-04-02", "2015-08-02", "2015-12-02"]
+      timezone: Etc/GMT+7
+    expect:
+      days.0.sunrise_hours: {approx: 7.3167, abs: 0.042}
+      days.0.sunset_hours: {approx: 16.8167, abs: 0.042}
+      days.1.sunrise_hours: {approx: 5.7167, abs: 0.042}
+      days.1.sunset_hours: {approx: 18.4, abs: 0.042}
+      days.2.sunrise_hours: {approx: 5.0167, abs: 0.042}
+      days.2.sunset_hours: {approx: 19.1667, abs: 0.042}
+      days.3.sunrise_hours: {approx: 7.0167, abs: 0.042}
+      days.3.sunset_hours: {approx: 16.6333, abs: 0.042}
+    reference: >-
+      US Naval Observatory times (to the minute, MST) for 39 N, 105 W, as recorded
+      in pvlib's test suite: 2015-01-02 07:19 and 16:49, 2015-04-02 05:43 and 18:24,
+      2015-08-02 05:01 and 19:10, 2015-12-02 07:01 and 16:38. The tolerance, 150 s,
+      is the one pvlib's own test uses (USNO's refraction and rounding differ); the
+      largest difference is 92 s (sunset on 2015-08-02, 19:11:31).
+    against: independent
+  - name: PV energy in Munich agrees with PVGIS's own calculator
+    function: pv_energy
+    args: {latitude: 48.14, longitude: 11.58, weather: tests/data/munich_pvgis_tmy.csv,
+           tilt_deg: 48, capacity_kw: 1.0, losses_percent: 14}
+    expect:
+      specific_yield_kwh_per_kwp: {approx: 1130.57, rel: 0.05}
+      poa_kwh_m2: {approx: 1418.58, rel: 0.03}
+      ghi_kwh_m2: {approx: 1191.2, rel: 0.001}
+    reference: >-
+      PVGIS 5.3 PVcalc (European Commission JRC; PVGIS-SARAH3 radiation and ERA5,
+      2005-2023, its own crystalline-silicon model) for 1 kWp at 48.14 N, 11.58 E,
+      slope 48°, facing south, 14% system loss: 1130.57 kWh/year and 1418.58
+      kWh/m2/year on the modules (queried 2026-10-20). The tool's PVWatts model on
+      the PVGIS typical year for the same point (tests/data) gives 1117 and 1411
+      (1.2% and 0.5% lower).
+    against: independent
+  - name: on a horizontal panel the plane-of-array irradiation equals the global horizontal
+    function: pv_energy
+    args: {latitude: 36.1, longitude: -79.9, weather: clearsky, tilt_deg: 0,
+           transposition: isotropic}
+    expect:
+      poa_kwh_m2: {approx: 2028.07, rel: 1.0e-4}
+      ghi_kwh_m2: {approx: 2028.07, rel: 1.0e-4}
+      clipped_hours: 0.0
+    reference: >-
+      For a horizontal surface the isotropic model gives beam DNI cos(zenith) plus
+      all of the diffuse irradiance, which sums to GHI for the clear-sky data
+      (GHI = DNI cos(zenith) + DHI by construction). The tiny difference comes from
+      the refraction temperature used for the sun position.
+    against: exact
+  - name: the polar day has no sunrise
+    function: sun_times
+    args: {latitude: 78.2, longitude: 15.6, dates: ["2024-06-21"], timezone: Europe/Oslo}
+    expect:
+      days.0.sunrise: null
+      days.0.sunset: null
+    reference: >-
+      At 78.2 N (Longyearbyen, Svalbard) the sun stays above the horizon from April
+      to August (midnight sun north of the Arctic Circle, 66.6 N).
+    against: exact
+  - name: an invalid latitude is refused
+    function: clear_sky
+    args: {latitude: 95, longitude: 0, date: "2024-01-01"}
+    raises: "latitude must be within"
+    reference: Latitudes lie between -90 and 90 degrees.
