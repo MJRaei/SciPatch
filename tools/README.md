@@ -22,6 +22,7 @@ reproduce published or upstream-tested values on every build.
 | [peptide-assembly](peptide-assembly/) | chemistry, biology | Linux, macOS, Windows | Conditions for peptide self-assembly (pH, concentration, temperature, solvent, time) from the most similar of 989 curated records (SAPdb and literature), for fibers, hydrogels, and spheres; from the peptide-agent hackathon project | experimental | Fmoc-FF hydrogel in water (Mahler et al. 2006); exact self-match; on the held-out split, the nearest records' solvent is right 69% of the time |
 | [phono3py](phono3py/) | materials | Linux, macOS, Windows | Lattice thermal conductivity vs temperature (RTA or full Boltzmann), from DFT forces or a universal ML potential | established | phono3py's test suite (Si with PBEsol forces, with and without isotopes) |
 | [phonopy](phonopy/) | materials | Linux, macOS, Windows | Phonon bands and DOS, dynamical stability, vibrational free energy and heat capacity | established | Dulong-Petit limit; Γ-point symmetry of silicon |
+| [pycalphad](pycalphad/) | materials | Linux, macOS, Windows | Alloy thermodynamics (CALPHAD): stable phases and their compositions, liquidus, solidus, and phase fractions during solidification, binary phase diagrams; COST507 light alloys and other published databases, or your own TDB | established | ITS-90 melting point of Al; Al-Si eutectic (Murray & McAlister 1984); Pb-Sn solder eutectic |
 | [pymatgen-diffusion](pymatgen-diffusion/) | materials | Linux, macOS, Windows | Diffusivity, ionic conductivity, Haven ratio, and Arrhenius fits from MD trajectories | published | pymatgen-analysis-diffusion's test suite (LGPS at 600 K) |
 | [pymatgen-structure](pymatgen-structure/) | materials | Linux, macOS, Windows | Space groups, standard cells, supercells, format conversion, XRD patterns, structure matching | established | pymatgen's XRD tests; olivine and diamond space groups |
 | [pyscf](pyscf/) | chemistry | Linux, macOS, Windows | Ab initio quantum chemistry: HF, DFT, MP2, CCSD(T) energies, optimization, frequencies and thermochemistry, excited states (TDDFT) | established | PySCF's test suite (water HF, B3LYP, MP2, CCSD(T), frequencies; CIS of HF); NIST CCCBDB |
@@ -109,6 +110,9 @@ accepts.
   `ml-potentials.elastic_constants` or DFT) → `lammps.simulate` at several temperatures
   (NPT: thermal expansion; heating: melting) → `ovito.structure_types` on the
   trajectory (phase of each atom per frame) and `mdanalysis.rdf` / `mdanalysis.msd`.
+- **Alloys:** `pycalphad.solidification` (melting range, phases while cooling) →
+  `pycalphad.equilibrium` at the heat-treatment temperature → `lammps` or
+  `ml-potentials` for the stable phases' properties.
 - **Defects and plasticity:** `lammps.run_script` with your deformation or
   cascade input → `ovito.dislocations` (line length, Burgers vectors, density)
   and `ovito.point_defects` (vacancies, interstitials per frame).

@@ -14,10 +14,10 @@ All notable changes to this project are documented here. The format follows
   MDAnalysis, OVITO, AutoDock Vina, synthesis recipes (from the SKY hackathon
   agent), NMR mixture quantification (from the MixSense hackathon project),
   peptide self-assembly conditions (from peptide-agent), doping of layered
-  materials from papers (from ARIA), and structural analogs in the Materials
-  Project (from mp-property-analogies), each with golden tests against upstream
-  test suites, reference databases, or established physics, and a CI workflow
-  that rebuilds changed tools from scratch.
+  materials from papers (from ARIA), structural analogs in the Materials Project
+  (from mp-property-analogies), and pycalphad, each with golden tests against
+  upstream test suites, reference databases, or established physics, and a CI
+  workflow that rebuilds changed tools from scratch.
 - Maturity levels: every tool is `established`, `published`, or `experimental`
   (the default), declared as `maturity` in `motel.yaml`, and refused when the
   evidence is missing (a publication, and golden tests whose new `against`

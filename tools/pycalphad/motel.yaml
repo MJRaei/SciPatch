@@ -1,0 +1,138 @@
+schema: 1
+name: pycalphad
+version: 0.1.0
+title: Alloy phase equilibria and phase diagrams (pycalphad)
+summary: >-
+  CALPHAD thermodynamics of alloys with pycalphad: stable phases with their
+  amounts and compositions at a temperature, liquidus and solidus with phase
+  fractions during solidification, and binary phase diagrams, from published
+  databases (COST507 light alloys, Al-Fe, Al-Mg, Al-Ni, Al-Zn, Cu-Mg, Pb-Sn) or
+  your own TDB file.
+domains: [materials]
+tags: [calphad, phase-diagram, phase-equilibria, alloy, solidification, liquidus, solidus, eutectic,
+       tdb, thermodynamics, gibbs-energy, aluminum, solder, metallurgy, cost507, pycalphad]
+
+source:
+  repo: https://github.com/pycalphad/pycalphad
+  ref: 2d4c744ddb890e179542894d070150797e13b325
+  install: false
+  homepage: https://pycalphad.org
+  paper: https://doi.org/10.5334/jors.140
+  citation: >-
+    R. Otis and Z.-K. Liu, "pycalphad: CALPHAD-based Computational Thermodynamics in
+    Python", J. Open Res. Softw. 5, 1 (2017); databases as listed by database_info
+    (e.g. COST 507, I. Ansara, A. T. Dinsdale, M. H. Rand (eds.), 1998).
+  license: MIT (pycalphad); databases as published by their authors
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["pycalphad==0.11.2", "matplotlib==3.11.2"]
+
+entrypoint: api
+
+functions:
+  equilibrium:
+    params:
+      temperature_k: {unit: K}
+    outputs:
+      gibbs_energy_j_per_mol: {unit: J/mol}
+  solidification:
+    params:
+      t_min_k: {unit: K}
+      t_max_k: {unit: K}
+      step_k: {unit: K}
+    outputs:
+      liquidus_k: {unit: K}
+      solidus_k: {unit: K}
+      table: {kind: table}
+      plot: {kind: image}
+  phase_diagram:
+    long_running: true
+    params:
+      t_min_k: {unit: K}
+      t_max_k: {unit: K}
+    outputs:
+      plot: {kind: image}
+  database_info: {}
+
+validity: >-
+  Results are only as good as the database: CALPHAD assessments fit experimental
+  phase diagrams and thermochemistry of particular systems and can be wrong
+  outside the compositions and temperatures they were fitted to, or for elements
+  added without assessed interactions (multicomponent alloys from a database of
+  binaries extrapolate). Solidification here is equilibrium (lever rule):
+  real castings solidify closer to the Scheil limit, with segregation and a lower
+  final solidus. Metastable phases, kinetics, and microstructure are not
+  predicted; pressure is 1 atm. Phase names follow the database (FCC_A1 is the
+  fcc solid solution, e.g. (Al); DIAMOND_A4 is (Si); BCT_A5 is (Sn)).
+
+maturity: established
+
+golden:
+  - name: pure aluminium melts at its ITS-90 fixed point (COST507)
+    quick: true
+    function: solidification
+    args: {database: COST507, balance: AL, t_min_k: 800, t_max_k: 1000}
+    expect:
+      liquidus_k: {approx: 933.473, abs: 0.5}
+      solidus_k: {approx: 933.473, abs: 0.5}
+    reference: >-
+      The freezing point of aluminium, 933.473 K (660.323 °C), is a defining fixed
+      point of the International Temperature Scale of 1990 (ITS-90). COST507 gives
+      933.46 K.
+    against: independent
+  - name: Al-12.6 wt% Si solidifies at the Al-Si eutectic, 577 C
+    function: solidification
+    args: {database: COST507, balance: AL, composition: {SI: 12.6}, t_min_k: 700, t_max_k: 1000}
+    expect:
+      solidus_c: {approx: 577.0, abs: 1.5}
+      liquidus_c: {approx: 577.0, abs: 3.0}
+      phases_at_t_min.FCC_A1: {min: 0.85}
+      phases_at_t_min.DIAMOND_A4: {min: 0.1}
+    reference: >-
+      J. L. Murray and A. J. McAlister, "The Al-Si (Aluminum-Silicon) system", Bull.
+      Alloy Phase Diagrams 5, 74-84 (1984): eutectic at 577 ± 1 °C and 12.6 wt% Si;
+      below it (Al) + (Si). COST507 gives a solidus of 576.99 °C and a liquidus 1.6 K
+      higher (12.6 wt% is just off the model's eutectic composition).
+    against: independent
+  - name: (Al) dissolves less than 1.6 at% Si below the eutectic
+    function: equilibrium
+    args: {database: COST507, balance: AL, composition: {SI: 12.6}, temperature_k: 800}
+    expect:
+      stable_phases: {length: 2}
+      phases.0.phase: FCC_A1
+      phases.0.composition_mole_percent.SI: {min: 0.1, max: 1.6}
+      phases.1.phase: DIAMOND_A4
+    reference: >-
+      Murray and McAlister (1984): the maximum solubility of Si in (Al) is 1.65 wt%
+      (about 1.6 at%) at the eutectic temperature, decreasing at lower temperatures;
+      the alloy is (Al) + (Si) below 577 °C.
+    against: independent
+  - name: the 61.9 wt% Sn solder melts at the Pb-Sn eutectic, 183 C
+    function: solidification
+    args: {database: Pb-Sn, balance: PB, composition: {SN: 61.9}, t_min_k: 350, t_max_k: 650}
+    expect:
+      solidus_c: {approx: 183.0, abs: 2.5}
+      liquidus_c: {approx: 183.0, abs: 2.5}
+    reference: >-
+      Pb-Sn eutectic at 183 °C and 61.9 wt% Sn (e.g. W. D. Callister and D. G.
+      Rethwisch, Materials Science and Engineering: An Introduction, Pb-Sn phase
+      diagram). The NIMS database gives 181.4 °C, 1.6 K low; the tolerance allows
+      this.
+    against: independent
+  - name: a binary phase diagram is drawn
+    function: phase_diagram
+    args: {database: Pb-Sn, elements: [PB, SN], t_min_k: 300, t_max_k: 650}
+    expect:
+      phases: [BCT_A5, FCC_A1, LIQUID]
+      plot: {exists: true}
+    reference: >-
+      The Pb-Sn system has three phases: liquid, (Pb) (fcc), and (Sn) (body-centered
+      tetragonal, BCT_A5).
+    against: exact
+  - name: an element missing from the database is refused
+    function: solidification
+    args: {database: Pb-Sn, balance: PB, composition: {AU: 5}}
+    raises: "not in this database"
+    reference: The Pb-Sn database has no gold; the tool must say so.
