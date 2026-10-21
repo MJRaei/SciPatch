@@ -261,6 +261,8 @@ function runDetails(run, container) {
       h("small", { class: "muted" }, run.run_id)),
     run.cached && h("p", { class: "muted" }, "Reused an identical earlier run."),
     run.duration_seconds != null && h("p", { class: "muted" }, `Took ${run.duration_seconds.toFixed(2)} s`),
+    run.status === "running" && h("p", { class: "muted" }, `Running for ${Math.round(run.elapsed_seconds)} s`),
+    run.latest_output && h("pre", {}, run.latest_output),
     "result" in run && pretty(run.result),
     run.error && h("div", {}, h("p", { class: "error" }, `${run.error.type}: ${run.error.message}`),
       run.error.traceback && h("details", {}, h("summary", {}, "Technical details"), h("pre", {}, run.error.traceback))),

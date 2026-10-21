@@ -95,7 +95,8 @@ def relax(
   reaches the agent.
 - Load models once (`functools.lru_cache`); heavy imports may live inside
   functions so introspection stays fast.
-- Printing is fine: output goes to the run's `stdout.log`.
+- Printing is fine: output goes to the run's `stdout.log`, and is shown live for
+  long jobs.
 
 **Repositories that are not pip-installable**
 - Set `source.install: false`. At runtime the checkout's absolute path is in
@@ -105,5 +106,8 @@ def relax(
 
 **Long jobs**
 - Mark slow functions `long_running: true` in `motel.yaml`.
-- Write progress to stdout and intermediate results to files so a failed job
-  still leaves something to inspect.
+- Print progress (e.g. `step 120/5000, T = 598 K`): the latest lines are shown
+  to agents and users while the job runs. If the wrapped code logs to a file
+  instead, attach a callback that prints a short line every few hundred steps.
+- Write intermediate results to files, so a failed job still leaves something
+  to inspect.

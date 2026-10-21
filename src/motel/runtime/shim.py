@@ -73,6 +73,11 @@ def main(argv: list[str]) -> int:
     command, request_path = argv[1], argv[2]
     with open(request_path, encoding="utf-8") as handle:
         request = json.load(handle)
+    # Output goes to log files; flush every line so progress is visible while running.
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(line_buffering=True)
 
     started = time.time()
     payload: dict[str, Any]

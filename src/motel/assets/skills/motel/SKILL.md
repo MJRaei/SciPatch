@@ -38,7 +38,8 @@ use the **`motel` command line** with `--json`.
 5. **Slow jobs.** Add `--background` and collect later with
    `motel runs show <run-id> --json`. Over MCP, `run_tool` returns
    `status: "running"` and a `run_id` when the job outlives `wait_seconds`; poll it
-   with `get_run`.
+   with `get_run`. While it runs, `latest_output` shows its most recent progress
+   lines and `elapsed_seconds` how long it has been running.
 6. **Report.** Give numbers with units, name the tool and run id, cite the paper
    (`motel info` shows how), and state any validity caveat that applies.
 

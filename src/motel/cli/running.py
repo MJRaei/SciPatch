@@ -138,7 +138,11 @@ def print_record(record: RunRecord) -> None:
         if record.result is not None:
             console.print(JSON.from_data(record.result, default=str))
     elif record.status is RunStatus.RUNNING:
-        console.print(f"[cyan]…[/] {label} is running  [dim]run {record.id}[/]")
+        view = run_view(record)
+        elapsed = f"{view['elapsed_seconds']:.0f} s"
+        console.print(f"[cyan]…[/] {label} is running ({elapsed})  [dim]run {record.id}[/]")
+        if view.get("latest_output"):
+            console.print(f"[dim]{escape(view['latest_output'])}[/]")
         console.print(
             f"  Check on it: [cyan]motel runs show {record.id}[/]   "
             f"Stop it: [cyan]motel runs cancel {record.id}[/]"

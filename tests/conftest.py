@@ -89,6 +89,19 @@ def mode(kind: Literal["fast", "slow"] = "fast") -> str:
     return kind
 
 
+def count(n: int = 3, delay: float = 0.2) -> int:
+    """Print progress lines, slowly.
+
+    Args:
+        n: How many steps.
+        delay: Seconds per step.
+    """
+    for step in range(n):
+        print(f"step {step + 1}/{n}")  # no flush: Motel makes output line-buffered
+        time.sleep(delay)
+    return n
+
+
 def source_file() -> str:
     """Read DATA.txt from the upstream source checkout."""
     with open(os.path.join(os.environ["MOTEL_SOURCE_DIR"], "DATA.txt")) as handle:

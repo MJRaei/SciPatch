@@ -16,6 +16,7 @@ from motel.errors import BuildError, InvalidArgumentsError, RunError, ToolExists
 from motel.installer import dev_layout
 from motel.models import RunStatus
 from motel.runtime.executor import SHIM_PATH, environment_python, pid_alive
+from motel.views import run_view
 
 from .conftest import ManifestFactory, requires_git, requires_uv
 
@@ -301,3 +302,21 @@ def test_stale_runs_are_closed(installed: Motel) -> None:
     child = installed.runs._children.pop(record.id)  # clean up the real child
     child.kill()
     child.wait()
+
+
+def test_running_jobs_report_their_latest_output(
+    motel: Motel, make_package: ManifestFactory
+) -> None:
+    motel.add(str(make_package(functions=["count"])))
+    record = motel.run("sample", "count", {"n": 100, "delay": 0.1}, wait=0)
+    deadline = time.monotonic() + 15
+    view: dict[str, object] = {}
+    while time.monotonic() < deadline:
+        view = run_view(motel.get_run(record.id))
+        if "step 3/100" in str(view.get("latest_output", "")):
+            break
+        time.sleep(0.2)
+    assert view["status"] == "running"
+    assert "step 3/100" in str(view["latest_output"])
+    assert float(str(view["elapsed_seconds"])) > 0
+    motel.cancel_run(record.id)

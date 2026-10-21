@@ -211,7 +211,8 @@ def relax(
 - Raise `ValueError` with a clear message for bad input. The message is shown
   to the user and the agent.
 - No prompts, windows, or `plt.show()`. Printing is fine; it goes to the run's
-  log.
+  log. While a long job runs, its latest printed lines are shown to agents and
+  users (`latest_output`), so print progress such as `step 120/5000`.
 
 ## `SKILL.md`
 

@@ -10,14 +10,15 @@ from pathlib import Path
 from typing import Any
 
 from motel.app import Match
-from motel.models import RunRecord, RunStatus
+from motel.models import RunRecord, RunStatus, utcnow
 from motel.registry import InstalledTool
-from motel.runtime.executor import RESPONSE_FILE
+from motel.runtime.executor import RESPONSE_FILE, STDOUT_FILE, tail
 from motel.search import describe_inputs
 
 MAX_LIST_ITEMS = 100
 MAX_STRING = 4000
 TRACEBACK_LINES = 15
+PROGRESS_LINES = 8
 
 
 def preview(value: Any, depth: int = 0) -> tuple[Any, bool]:
@@ -72,6 +73,11 @@ def run_view(record: RunRecord, *, full: bool = False) -> dict[str, Any]:
         view["duration_seconds"] = round(record.duration, 3)
     view["output_folder"] = record.workdir
     if record.status is RunStatus.RUNNING:
+        # Progress for every client, including those without shell access to the logs.
+        view["elapsed_seconds"] = round((utcnow() - record.started_at).total_seconds(), 1)
+        latest = tail(Path(record.run_dir) / STDOUT_FILE, PROGRESS_LINES)
+        if latest:
+            view["latest_output"] = latest
         view["next_step"] = f"Still running. Collect it later with run id '{record.id}'."
     view["provenance"] = {
         "tool_version": record.tool_version,

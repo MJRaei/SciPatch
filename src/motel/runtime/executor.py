@@ -245,9 +245,13 @@ def missing_response_error(run_dir: Path, returncode: int | None) -> dict[str, A
     return {"ok": False, "error": {"type": "ProcessExited", "message": message}}
 
 
-def tail(path: Path, lines: int = 25) -> str:
+def tail(path: Path, lines: int = 25, *, max_bytes: int = 64 * 1024) -> str:
+    """Last ``lines`` lines of a text file, reading at most ``max_bytes`` from its end."""
     try:
-        content = path.read_text(encoding="utf-8", errors="replace")
+        with path.open("rb") as handle:
+            size = handle.seek(0, os.SEEK_END)
+            handle.seek(max(0, size - max_bytes))
+            content = handle.read().decode("utf-8", errors="replace")
     except FileNotFoundError:
         return ""
     return "\n".join(content.splitlines()[-lines:])
