@@ -136,8 +136,8 @@ golden:
       along [1-10] through a cell of 4 periods of a/2 [1-10] (10.22476 Å),
       Burgers vector a/2 [1-10] of length a/sqrt(2) = 2.55619 Å, parallel to the
       line (screw, 0 degrees).
-  - name: a missing file is refused
-    function: structure_types
-    args: {structure: tests/data/missing.xyz}
-    raises: "No such file"
-    reference: A file that does not exist must give a clear error.
+  - name: a frame outside the trajectory is refused
+    function: dislocations
+    args: {structure: tests/data/Cu_fcc.xyz, frame: 5}
+    raises: "frame must be within the 1 frames"
+    reference: The file holds one frame; asking for frame 5 must give a clear error.
