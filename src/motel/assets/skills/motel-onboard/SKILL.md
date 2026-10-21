@@ -64,8 +64,11 @@ Edit `environment` in `motel.yaml` (see [references/manifest.md](references/mani
 - `source.install: true` installs the repository itself (editable). If it is not
   installable, set it to `false` and add what it needs to `packages`; `api.py`
   can then import from `source/` by adding it to `sys.path`.
-- Model weights or data → `post_install` commands. Secrets → environment
-  variables named in usage notes, never written into files.
+- Model weights or data → `post_install` commands.
+- API keys → list their names under `environment.secrets` (e.g. `[MP_API_KEY]`)
+  and say in the usage notes where to get one; the user stores them with
+  `motel secret set NAME`. Never write a key into a file. Golden tests that need
+  a key declare it with `requires: [NAME]`.
 
 Run `motel check . --skip-tests` and iterate until it builds. On failure, read the
 error and `.motel/build.log`. Typical fixes:
@@ -147,7 +150,8 @@ paper), say exactly that. Matchers: `approx`
 ### 7. Verify and install
 
 ```bash
-motel check . --clean   # rebuild from the pinned repo + patches; all golden tests must pass
+motel freeze .          # pin the exact package versions you tested (requirements.lock)
+motel check . --clean   # rebuild from the pinned repo + patches + lock; golden tests must pass
 motel add .             # install into Motel (use --link while still iterating)
 motel run <name> <function> key=value --json
 ```
@@ -163,6 +167,7 @@ results, patches and why they were needed, and the caveats.
 | `motel check DIR [--clean] [--skip-tests]` | build, inspect functions, run golden tests |
 | `motel exec DIR -- CMD ...` | run a command inside the package's environment |
 | `motel patch save DIR -m "why"` | save edits in `DIR/source` as a patch file |
+| `motel freeze DIR` | pin tested package versions into `requirements.lock` |
 | `motel add DIR [--link] [--force]` | install the package |
 | `motel info NAME` | what agents will see |
 | `motel run NAME FUNCTION k=v --json` | try a function |
@@ -175,4 +180,5 @@ results, patches and why they were needed, and the caveats.
 - [ ] `summary`, `validity`, `citation`, and `license` are filled in
 - [ ] the `SKILL.md` description says when to use the tool
 - [ ] all edits to `source/` are saved as patches
+- [ ] package versions are pinned with `motel freeze .`
 - [ ] the tool is installed (`motel add .`) and a test call succeeds

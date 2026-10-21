@@ -135,6 +135,10 @@ def tool_view(tool: InstalledTool) -> dict[str, Any]:
             }
             for f in tool.functions
         ],
+        "secrets_needed": [
+            {"name": name, "set": name in tool.runtime.secrets}
+            for name in manifest.environment.secrets
+        ],
         "usage_notes": tool.guide(),
         "validity": manifest.validity,
         "citation": {

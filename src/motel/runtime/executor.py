@@ -49,6 +49,8 @@ class ToolRuntime:
     variables: dict[str, str] = field(default_factory=dict)
     #: Upstream checkout, exposed to tools as ``MOTEL_SOURCE_DIR`` (for scripts and data).
     source_dir: Path | None = None
+    #: Secrets the tool declared and the user provided (e.g. API keys).
+    secrets: dict[str, str] = field(default_factory=dict)
 
     def child_environment(self, extra: dict[str, str] | None = None) -> dict[str, str]:
         """Process environment that behaves like an activated tool environment."""
@@ -60,6 +62,7 @@ class ToolRuntime:
         if self.source_dir is not None:
             env["MOTEL_SOURCE_DIR"] = str(self.source_dir)
         env.update(self.variables)
+        env.update(self.secrets)
         env.update(extra or {})
         return env
 

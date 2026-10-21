@@ -56,6 +56,7 @@ class GoldenResult(BaseModel):
     name: str
     function: str
     passed: bool
+    skipped: bool = False
     failures: list[str] = Field(default_factory=list)
     error: str | None = None
     duration: float | None = None
@@ -88,7 +89,9 @@ class ToolState(BaseModel):
         if not self.golden:
             return "no golden tests"
         passed = sum(result.passed for result in self.golden)
-        return f"{passed}/{len(self.golden)} golden tests passed"
+        skipped = sum(result.skipped for result in self.golden)
+        summary = f"{passed}/{len(self.golden) - skipped} golden tests passed"
+        return summary + (f", {skipped} skipped (missing secrets)" if skipped else "")
 
 
 class RunStatus(StrEnum):

@@ -13,6 +13,7 @@ so users can find, back up, or delete it in one place::
       workspace/<name>/    drafts created by ``motel onboard``
       motel.db             run history (SQLite)
       connections.json     AI apps that Motel has been connected to
+      secrets.json         API keys for tools (readable only by you)
 """
 
 from __future__ import annotations
@@ -72,6 +73,10 @@ class MotelPaths:
     @property
     def connections(self) -> Path:
         return self.home / "connections.json"
+
+    @property
+    def secrets(self) -> Path:
+        return self.home / "secrets.json"
 
     def ensure(self) -> MotelPaths:
         """Create the directory skeleton if it does not exist yet."""

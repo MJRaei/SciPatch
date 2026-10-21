@@ -9,7 +9,12 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
-from motel.environments.base import BuildLog, EnvironmentBackend, activated_environment
+from motel.environments.base import (
+    BuildLog,
+    EnvironmentBackend,
+    activated_environment,
+    pip_arguments,
+)
 from motel.errors import BuildError
 from motel.manifest import Environment
 
@@ -75,11 +80,7 @@ def install_python_packages(
     The source is installed *editable*: edits and patches in the checkout take
     effect without rebuilding, and no stale cached wheel can shadow them.
     """
-    args: list[str] = list(spec.packages)
-    if spec.requirements:
-        args += ["-r", str(package_dir / spec.requirements)]
-    if source_dir is not None:
-        args += ["--editable", str(source_dir)]
+    args = pip_arguments(spec, package_dir, source_dir)
     if not args:
         return
     log.run(

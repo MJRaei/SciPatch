@@ -23,6 +23,7 @@ from motel.manifest import MANIFEST_FILENAME, NAME_PATTERN, Manifest, load_manif
 from motel.models import FunctionInfo, ToolState
 from motel.paths import MotelPaths
 from motel.runtime.executor import ToolRuntime
+from motel.secrets import SecretStore
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,8 @@ class InstalledTool:
 
     @property
     def runtime(self) -> ToolRuntime:
-        return runtime_for(self.manifest, self.layout)
+        secrets = SecretStore(self.paths.secrets).resolve(self.manifest.environment.secrets)
+        return runtime_for(self.manifest, self.layout, secrets)
 
     @property
     def linked(self) -> bool:

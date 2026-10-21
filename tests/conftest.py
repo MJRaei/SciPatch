@@ -102,6 +102,11 @@ def count(n: int = 3, delay: float = 0.2) -> int:
     return n
 
 
+def secret_values() -> dict:
+    """Report which secrets the tool can see."""
+    return {"demo": os.environ.get("DEMO_KEY"), "other": os.environ.get("OTHER_KEY")}
+
+
 def source_file() -> str:
     """Read DATA.txt from the upstream source checkout."""
     with open(os.path.join(os.environ["MOTEL_SOURCE_DIR"], "DATA.txt")) as handle:

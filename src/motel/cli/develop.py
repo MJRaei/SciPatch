@@ -174,6 +174,21 @@ def exec_command(
     raise typer.Exit(get_motel().exec(target, command))
 
 
+@app.command(rich_help_panel=PANEL_BUILD)
+def freeze(
+    directory: Annotated[Path, typer.Argument(help="Tool package folder.")] = Path(),
+) -> None:
+    """Pin the exact package versions a tool was tested with (writes requirements.lock).
+
+    Do this before sharing a tool, so others build exactly what you tested.
+    """
+    lock, count, env_dir = get_motel().freeze(str(directory))
+    console.print(f"[green]✓[/] Pinned {count} packages in {escape(str(lock))}")
+    console.print(f"  [dim]from {escape(str(env_dir))}[/]")
+    folder = escape(str(directory))
+    console.print(f"  Verify the pinned build: [cyan]motel check {folder} --clean[/]")
+
+
 @patch_app.command("save")
 def patch_save(
     target: Annotated[

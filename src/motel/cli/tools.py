@@ -10,7 +10,7 @@ from rich.markup import escape
 from rich.panel import Panel
 from rich.table import Table
 
-from motel.catalog import catalog_entries
+from motel.catalogs import DEFAULT_PATH, CatalogStore
 from motel.cli._app import PANEL_MANAGE, PANEL_USE, app, get_motel, reporter_of
 from motel.cli.console import console, print_json
 from motel.models import FunctionInfo
@@ -20,6 +20,16 @@ from motel.search import describe_inputs
 from motel.views import match_view, tool_summary_view, tool_view
 
 JsonOption = Annotated[bool, typer.Option("--json", help="Print machine-readable JSON.")]
+
+catalog_app = typer.Typer(
+    help="Tools you can install: built-in ones and collections you add.",
+    invoke_without_command=True,
+)
+app.add_typer(catalog_app, name="catalog", rich_help_panel=PANEL_MANAGE)
+secret_app = typer.Typer(
+    help="API keys for tools that use online services (stored only on this computer)."
+)
+app.add_typer(secret_app, name="secret", rich_help_panel=PANEL_MANAGE)
 
 _STATUS_STYLE = {
     "ready": "[green]ready[/]",
@@ -124,6 +134,12 @@ def info(
     )
     if state and state.error:
         lines.append(f"[red]Last error:[/] {escape(state.error)}")
+    available = installed.runtime.secrets
+    for name in manifest.environment.secrets:
+        status = (
+            "[green]set[/]" if name in available else f"[red]not set[/] (motel secret set {name})"
+        )
+        lines.append(f"Needs {name}: {status}")
     console.print(Panel("\n".join(lines), title=header, title_align="left", expand=False))
 
     for function in installed.functions:
@@ -185,23 +201,78 @@ def _print_function(tool: str, function: FunctionInfo) -> None:
     console.print(f"  [dim]run:[/] motel run {tool} {function.name} {example}".rstrip())
 
 
-@app.command(rich_help_panel=PANEL_MANAGE)
-def catalog(as_json: JsonOption = False) -> None:
-    """Show featured tools that ship with Motel."""
-    entries = catalog_entries()
+@catalog_app.callback()
+def catalog_list(
+    ctx: typer.Context,
+    as_json: JsonOption = False,
+) -> None:
+    """Tools available to install: built-in ones and those in catalogs you added."""
+    if ctx.invoked_subcommand is not None:
+        return
+    motel = get_motel()
+    entries = CatalogStore(motel.paths).entries()
+    installed = set(motel.registry.names())
     if as_json:
         print_json(
-            [{"name": m.name, "summary": m.summary, "domains": m.domains} for m, _ in entries]
+            [
+                {
+                    "name": e.manifest.name,
+                    "catalog": e.catalog,
+                    "summary": e.manifest.summary,
+                    "domains": e.manifest.domains,
+                    "installed": e.manifest.name in installed,
+                }
+                for e in entries
+            ]
         )
         return
     table = Table(box=None, pad_edge=False)
     table.add_column("Name", style="bold")
-    table.add_column("Domains")
+    table.add_column("Catalog")
     table.add_column("Summary", overflow="fold")
-    for manifest, _ in entries:
-        table.add_row(manifest.name, escape(", ".join(manifest.domains)), escape(manifest.summary))
+    for entry in entries:
+        name = entry.manifest.name + (" [green]✓[/]" if entry.manifest.name in installed else "")
+        table.add_row(name, entry.catalog, escape(short(entry.manifest.summary)))
     console.print(table)
-    console.print("\nInstall one with [cyan]motel add <name>[/].")
+    console.print(
+        "\n[green]✓[/] installed.  Install one with [cyan]motel add <name>[/]; "
+        "add a collection with [cyan]motel catalog add <git-url>[/]."
+    )
+
+
+@catalog_app.command("add")
+def catalog_add(
+    url: Annotated[str, typer.Argument(help="Git URL (or local folder) of the collection.")],
+    name: Annotated[str | None, typer.Option(help="Short name (default: from the URL).")] = None,
+    path: Annotated[
+        str, typer.Option(help="Folder inside the repository that holds the tools.")
+    ] = DEFAULT_PATH,
+) -> None:
+    """Add a collection of tools (a git repository with one folder per tool)."""
+    store = CatalogStore(get_motel().paths)
+    catalog = store.add(url, name=name, path=path)
+    count = sum(entry.catalog == catalog.name for entry in store.entries())
+    console.print(f"[green]✓[/] Added catalog [bold]{catalog.name}[/] with {count} tool(s).")
+    console.print("  See them with [cyan]motel catalog[/].")
+
+
+@catalog_app.command("update")
+def catalog_update(
+    name: Annotated[str | None, typer.Argument(help="Catalog to update (default: all).")] = None,
+) -> None:
+    """Fetch the latest version of your catalogs (installed tools are not changed)."""
+    updated = CatalogStore(get_motel().paths).update(name)
+    if not updated:
+        console.print("No catalogs added yet. Add one with [cyan]motel catalog add <git-url>[/].")
+    for catalog, commit in updated:
+        console.print(f"[green]✓[/] {catalog.name} @ {commit[:12]}")
+
+
+@catalog_app.command("remove")
+def catalog_remove(name: Annotated[str, typer.Argument(help="Catalog name.")]) -> None:
+    """Remove a catalog (tools installed from it stay installed)."""
+    CatalogStore(get_motel().paths).remove(name)
+    console.print(f"[green]✓[/] Removed catalog {name}.")
 
 
 @app.command(rich_help_panel=PANEL_MANAGE)
@@ -282,3 +353,50 @@ def test(tool: Annotated[str, typer.Argument(help="Tool name.")]) -> None:
     console.print(f"{installed.name}: {state.golden_summary if state else 'not built'}")
     if installed.status != "ready":
         raise typer.Exit(1)
+
+
+@secret_app.command("set")
+def secret_set(
+    name: Annotated[str, typer.Argument(help="Name the tool expects, e.g. MP_API_KEY.")],
+    value: Annotated[
+        str | None, typer.Argument(help="The value (omit to type it without showing it).")
+    ] = None,
+) -> None:
+    """Store a secret, such as an API key, for the tools that declare it."""
+    if value is None:
+        value = typer.prompt(f"Value for {name}", hide_input=True)
+    motel = get_motel()
+    motel.secrets.set(name, value)
+    users = [t.name for t in motel.tools() if name in t.manifest.environment.secrets]
+    console.print(f"[green]✓[/] Saved {name}" + (f" (used by {', '.join(users)})" if users else ""))
+
+
+@secret_app.command("list")
+def secret_list() -> None:
+    """Show which secrets are stored and which tools need them (values are never shown)."""
+    motel = get_motel()
+    stored = set(motel.secrets.names())
+    needed: dict[str, list[str]] = {}
+    for tool in motel.tools():
+        for name in tool.manifest.environment.secrets:
+            needed.setdefault(name, []).append(tool.name)
+    if not stored and not needed:
+        console.print("No secrets stored, and no installed tool needs one.")
+        return
+    table = Table(box=None, pad_edge=False)
+    table.add_column("Secret", style="bold")
+    table.add_column("Stored")
+    table.add_column("Used by")
+    for name in sorted(stored | set(needed)):
+        mark = "[green]yes[/]" if name in stored else "[red]no[/]"
+        table.add_row(name, mark, ", ".join(needed.get(name, [])) or "-")
+    console.print(table)
+
+
+@secret_app.command("remove")
+def secret_remove(name: Annotated[str, typer.Argument(help="Secret name.")]) -> None:
+    """Delete a stored secret."""
+    if get_motel().secrets.remove(name):
+        console.print(f"[green]✓[/] Removed {name}")
+    else:
+        console.print(f"No secret named {name} is stored.")

@@ -29,6 +29,7 @@ from motel.registry import InstalledTool, Registry
 from motel.reporting import NullReporter, Reporter
 from motel.runs import RunManager
 from motel.search import SearchHit, ToolIndex
+from motel.secrets import SecretStore
 from motel.skills import SkillManager, SyncReport
 
 
@@ -58,6 +59,7 @@ class Motel:
         self.installer = Installer(self.paths, self.registry, self.reporter)
         self.skills = SkillManager(self.registry)
         self.connections = ConnectionStore(self.paths.connections)
+        self.secrets = SecretStore(self.paths.secrets)
 
     # ------------------------------------------------------------------ tools
 
@@ -105,6 +107,9 @@ class Motel:
     def save_patch(self, target: str, label: str) -> Path | None:
         return self.installer.save_patch(target, label)
 
+    def freeze(self, target: str) -> tuple[Path, int, Path]:
+        return self.installer.freeze(target)
+
     def exec(self, target: str, command: list[str]) -> int:
         """Run a command inside a tool's environment (package folder or installed tool)."""
         folder = Path(target).expanduser()
@@ -116,7 +121,8 @@ class Motel:
             tool = self.tool(target)
             manifest, layout = tool.manifest, tool.layout
             hint = f"Rebuild it with 'motel rebuild {target}'."
-        runtime = runtime_for(manifest, layout)
+        secrets = SecretStore(self.paths.secrets).resolve(manifest.environment.secrets)
+        runtime = runtime_for(manifest, layout, secrets)
         if not runtime.python.exists():
             raise MotelError(f"The environment for '{target}' does not exist yet.", hint=hint)
         env = runtime.child_environment()

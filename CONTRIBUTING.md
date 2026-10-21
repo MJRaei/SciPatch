@@ -91,13 +91,22 @@ Subclass `EnvironmentBackend` in `environments/`, register it in
 The backend only has to create an environment with a Python interpreter; the
 runtime shim does the rest.
 
-## Adding a featured tool
+## Adding a tool to the collection
 
-Add a complete tool package under `src/motel/catalog/<name>/`, with exact
-version pins, a `validity` statement, a citation, and golden tests whose
-`reference` says exactly where each expected value comes from.
-`tests/test_catalog.py` checks the structure; run `motel add <name>` to check
-that it builds and its golden tests pass.
+Tools live in [`tools/`](tools/README.md), one folder per tool. A new tool needs:
+
+- golden tests whose `reference` says exactly where each expected value comes
+  from (the paper, or the upstream test suite), and that pass with
+  `motel check tools/<name> --clean`;
+- a `validity` statement, a citation, and a license;
+- pinned versions: run `motel freeze tools/<name>` after a passing build.
+
+The **Tools** CI workflow rebuilds every changed tool from scratch on Linux and
+macOS and runs its golden tests; it also checks all tools weekly. Golden tests
+that need an API key run when the key is configured as a repository secret.
+
+The two built-in tools in `src/motel/catalog/` ship inside Motel itself, so the
+first-run demo needs nothing else; keep them small.
 
 ## Releasing
 

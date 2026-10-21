@@ -21,6 +21,8 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 from motel.errors import ManifestError
 
 MANIFEST_FILENAME = "motel.yaml"
+#: Exact package versions a tool was tested with (written by ``motel freeze``).
+LOCK_FILENAME = "requirements.lock"
 SCHEMA_VERSION = 1
 
 #: Tool names become folder names, skill names (``motel-<name>``) and CLI words.
@@ -45,6 +47,7 @@ KNOWN_KINDS = frozenset(
 _PYTHON_VERSION = re.compile(r"^3(\.\d+){0,2}$")
 _MODULE_PATH = re.compile(r"^[A-Za-z_]\w*(\.[A-Za-z_]\w*)*$")
 _IDENTIFIER = re.compile(r"^[A-Za-z_]\w*$")
+_SECRET_NAME = re.compile(r"^[A-Z][A-Z0-9_]*$")
 
 
 class _Model(BaseModel):
@@ -90,6 +93,10 @@ class Environment(_Model):
     variables: dict[str, str] = Field(
         default_factory=dict, description="Environment variables set whenever the tool runs."
     )
+    secrets: list[str] = Field(
+        default_factory=list,
+        description="Names of secrets (e.g. API keys) the tool receives as environment variables.",
+    )
 
     @field_validator("python")
     @classmethod
@@ -97,6 +104,14 @@ class Environment(_Model):
         if not _PYTHON_VERSION.match(value):
             raise ValueError(f"'{value}' is not a Python version like '3.11'")
         return value
+
+    @field_validator("secrets")
+    @classmethod
+    def _check_secret_names(cls, names: list[str]) -> list[str]:
+        for name in names:
+            if not _SECRET_NAME.match(name):
+                raise ValueError(f"'{name}' is not an environment variable name like MP_API_KEY")
+        return names
 
     @model_validator(mode="after")
     def _conda_fields_need_conda(self) -> Environment:
@@ -137,6 +152,10 @@ class GoldenTest(_Model):
     )
     reference: str | None = Field(None, description="Where the expected values come from.")
     timeout: float = Field(900, gt=0)
+    requires: list[str] = Field(
+        default_factory=list,
+        description="Secrets or environment variables the test needs; skipped when missing.",
+    )
 
 
 class Manifest(_Model):

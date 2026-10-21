@@ -12,7 +12,12 @@ import os
 import shutil
 from pathlib import Path
 
-from motel.environments.base import BuildLog, EnvironmentBackend, activated_environment
+from motel.environments.base import (
+    BuildLog,
+    EnvironmentBackend,
+    activated_environment,
+    pip_arguments,
+)
 from motel.environments.uv import find_uv, install_python_packages
 from motel.errors import BuildError
 from motel.manifest import Environment
@@ -135,11 +140,7 @@ class CondaBackend(EnvironmentBackend):
         source_dir: Path | None,
         log: BuildLog,
     ) -> None:
-        args: list[str] = list(spec.packages)
-        if spec.requirements:
-            args += ["-r", str(package_dir / spec.requirements)]
-        if source_dir is not None:
-            args += ["--editable", str(source_dir)]
+        args = pip_arguments(spec, package_dir, source_dir)
         if args:
             log.run(
                 [str(python), "-m", "pip", "install", *args],

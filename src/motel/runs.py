@@ -68,6 +68,14 @@ class RunManager:
                 hint=f"Rebuild it with 'motel rebuild {tool.name}'.",
             )
         info = tool.function(function)
+        runtime = tool.runtime
+        missing = [n for n in tool.manifest.environment.secrets if n not in runtime.secrets]
+        if missing:
+            raise RunError(
+                f"Tool '{tool.name}' needs {', '.join(missing)}, which is not set.",
+                hint=f"Set it with 'motel secret set {missing[0]}' (see 'motel info {tool.name}' "
+                "for where to get it).",
+            )
         arguments = resolve_path_arguments(dict(args or {}), info, base_dir or Path.cwd())
         validate_arguments(tool.name, info, arguments)
 
@@ -93,7 +101,7 @@ class RunManager:
             cache_key=cache_key,
         )
         process = executor.launch(
-            tool.runtime,
+            runtime,
             function,
             arguments,
             workdir=workdir,

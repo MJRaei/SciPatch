@@ -10,14 +10,23 @@ from pathlib import Path
 
 from motel import __version__
 from motel.build import BuildLayout, BuildOutcome, build, run_golden_tests
-from motel.catalog import catalog_path
+from motel.catalogs import CatalogStore
 from motel.environments import BuildLog
+from motel.environments.uv import UvBackend, find_uv
 from motel.errors import BuildError, MotelError, ToolExistsError, ToolNotFoundError
-from motel.manifest import MANIFEST_FILENAME, find_manifest, load_manifest
+from motel.manifest import (
+    LOCK_FILENAME,
+    MANIFEST_FILENAME,
+    Manifest,
+    find_manifest,
+    load_manifest,
+)
 from motel.models import ToolState, utcnow
 from motel.paths import MotelPaths
 from motel.registry import InstalledTool, Registry
 from motel.reporting import Reporter
+from motel.runtime.executor import environment_python
+from motel.secrets import SecretStore
 from motel.source import SourceCheckout, git_executable
 
 #: Never copied into an installed tool: they are rebuilt from the manifest.
@@ -55,8 +64,14 @@ def dev_layout(package_dir: Path) -> BuildLayout:
     )
 
 
-def resolve_package(spec: str, *, scratch: Path, ref: str | None = None) -> ResolvedPackage:
-    """Find the tool package that ``spec`` refers to: a folder, a catalog name, or a git URL."""
+def resolve_package(
+    spec: str,
+    *,
+    scratch: Path,
+    ref: str | None = None,
+    catalogs: CatalogStore | None = None,
+) -> ResolvedPackage:
+    """Find the tool package ``spec`` refers to: a folder, a catalog name, or a git URL."""
     path = Path(spec).expanduser()
     if path.exists():
         folder = path.parent if path.name == MANIFEST_FILENAME else path
@@ -69,16 +84,16 @@ def resolve_package(spec: str, *, scratch: Path, ref: str | None = None) -> Reso
             ) from None
         return ResolvedPackage(folder.resolve(), str(folder.resolve()), is_local=True)
 
-    catalog = catalog_path(spec)
-    if catalog is not None:
-        return ResolvedPackage(catalog, f"catalog:{spec}", is_local=False)
-
     if is_git_url(spec):
         return _clone_package(spec, scratch=scratch, ref=ref)
 
+    entry = catalogs.find(spec) if catalogs is not None else None
+    if entry is not None:
+        return ResolvedPackage(entry.folder, entry.origin, is_local=False)
+
     raise ToolNotFoundError(
-        f"'{spec}' is not a folder, a featured tool, or a git URL.",
-        hint="See featured tools with 'motel catalog'.",
+        f"'{spec}' is not a folder, a tool in your catalogs, or a git URL.",
+        hint="See what's available with 'motel catalog'.",
     )
 
 
@@ -144,7 +159,9 @@ class Installer:
     ) -> InstalledTool:
         """Install a tool package and build it from scratch."""
         with tempfile.TemporaryDirectory(prefix="motel-add-") as scratch:
-            package = resolve_package(spec, scratch=Path(scratch), ref=ref)
+            package = resolve_package(
+                spec, scratch=Path(scratch), ref=ref, catalogs=CatalogStore(self.paths)
+            )
             if link and not package.is_local:
                 raise MotelError("--link only works with a local folder.")
             manifest = load_manifest(package.path)
@@ -173,7 +190,12 @@ class Installer:
             self.reporter.step(f"Installing '{name}' from {package.origin}")
             try:
                 outcome = build(
-                    manifest, layout, reporter=self.reporter, fresh=True, run_tests=run_tests
+                    manifest,
+                    layout,
+                    reporter=self.reporter,
+                    fresh=True,
+                    run_tests=run_tests,
+                    secrets=self._secrets_for(manifest),
                 )
                 if not outcome.tests_passed and not allow_failing_tests:
                     raise BuildError(
@@ -209,7 +231,12 @@ class Installer:
         self.reporter.step(f"Rebuilding '{name}'" + (" from scratch" if clean else ""))
         try:
             outcome = build(
-                tool.manifest, tool.layout, reporter=self.reporter, fresh=clean, run_tests=run_tests
+                tool.manifest,
+                tool.layout,
+                reporter=self.reporter,
+                fresh=clean,
+                run_tests=run_tests,
+                secrets=self._secrets_for(tool.manifest),
             )
         except MotelError as exc:
             self._mark_broken(name, exc.message)
@@ -240,6 +267,7 @@ class Installer:
             reporter=self.reporter,
             fresh=clean,
             run_tests=run_tests,
+            secrets=self._secrets_for(manifest),
         )
 
     def test(self, name: str) -> InstalledTool:
@@ -253,7 +281,7 @@ class Installer:
         self.reporter.step(f"Running {len(tool.manifest.golden)} golden test(s) for '{name}'")
         results = run_golden_tests(tool.manifest, tool.runtime, tool.package_dir, self.reporter)
         state.golden = results
-        state.status = "ready" if all(r.passed for r in results) else "failing-tests"
+        state.status = "ready" if all(r.passed or r.skipped for r in results) else "failing-tests"
         self.registry.save_state(name, state)
         return self.registry.get(name)
 
@@ -272,6 +300,62 @@ class Installer:
             )
         log = BuildLog(self.paths.logs / "patch.log", self.reporter)
         return SourceCheckout(source_dir, log).save_patch(package_dir / "patches", label)
+
+    def freeze(self, target: str) -> tuple[Path, int, Path]:
+        """Pin the package versions of a built environment into the package's lock file.
+
+        ``target`` is a tool package folder (the one you share). Versions come
+        from its development build (``motel check``), or else from the installed
+        tool of the same name. Returns the lock path, the number of pinned
+        packages, and the environment they were read from.
+        """
+        package_dir = Path(target).expanduser().resolve()
+        if not (package_dir / MANIFEST_FILENAME).is_file():
+            raise MotelError(
+                f"{target} is not a tool package folder.",
+                hint="Freeze the folder you share, e.g. 'motel freeze tools/chgnet'.",
+            )
+        manifest = load_manifest(package_dir)
+        candidates = [dev_layout(package_dir).env_dir, self.paths.envs / manifest.name]
+        env_dir = next((d for d in candidates if environment_python(d).exists()), None)
+        if env_dir is None:
+            raise MotelError(
+                f"'{manifest.name}' has no built environment to read versions from.",
+                hint=f"Build and test it first with 'motel check {target}'.",
+            )
+        uv = find_uv()
+        if uv is None:
+            raise BuildError("uv is not installed.", hint=UvBackend.install_hint)
+        python = environment_python(env_dir)
+        frozen = subprocess.run(
+            [uv, "pip", "freeze", "--python", str(python), "--exclude-editable"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+        pins = sorted(
+            (line for line in frozen.splitlines() if line and " @ file://" not in line),
+            key=str.lower,
+        )
+        describe_python = "import platform as p; print(p.python_version(), p.system(), p.machine())"
+        about = subprocess.run(
+            [str(python), "-c", describe_python],
+            capture_output=True,
+            text=True,
+            check=False,
+        ).stdout.strip()
+        lock = package_dir / LOCK_FILENAME
+        lock.write_text(
+            "# Exact versions this tool was tested with, written by 'motel freeze'.\n"
+            f"# Built with Python {about}. Applied as constraints when building the\n"
+            "# environment; packages not listed here resolve normally.\n"
+            + "".join(f"{pin}\n" for pin in pins),
+            encoding="utf-8",
+        )
+        return lock, len(pins), env_dir
+
+    def _secrets_for(self, manifest: Manifest) -> dict[str, str]:
+        return SecretStore(self.paths.secrets).resolve(manifest.environment.secrets)
 
     def _mark_broken(self, name: str, reason: str) -> None:
         state = self.registry.load_state(name)
@@ -300,9 +384,8 @@ def _state_from(outcome: BuildOutcome, manager: str, *, origin: str, linked: boo
 
 
 def _failed_tests(outcome: BuildOutcome) -> str:
-    return "; ".join(
-        f"'{r.name}' ({r.error or ', '.join(r.failures)})" for r in outcome.golden if not r.passed
-    )
+    failed = [r for r in outcome.golden if not (r.passed or r.skipped)]
+    return "; ".join(f"'{r.name}' ({r.error or ', '.join(r.failures)})" for r in failed)
 
 
 def _remove_path(path: Path) -> None:

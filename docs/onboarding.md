@@ -100,11 +100,29 @@ Add `--verbose` to see each command as it runs.
 
 ## Sharing a tool
 
-A tool package is just a folder. Put it in a git repository (the scaffold's
-`.gitignore` already excludes `source/` and `.motel/`) and others can install it
-with:
+1. Pin what you tested: `motel freeze .` writes `requirements.lock`, then
+   `motel check . --clean` confirms the pinned build still passes.
+2. Put the package folder in a git repository (the scaffold's `.gitignore`
+   already excludes `source/` and `.motel/`). A **collection** of tools is a
+   repository with one folder per tool under `tools/`, like this project's own
+   [tools/](../tools/README.md).
+
+Others can then install it directly:
 
 ```bash
 motel add https://github.com/you/chgnet-motel
-motel add https://github.com/you/motel-tools#subdirectory=chgnet   # one of several in a repo
+motel add "https://github.com/you/motel-tools#subdirectory=tools/chgnet"
 ```
+
+or add the whole collection once and install tools by name:
+
+```bash
+motel catalog add https://github.com/you/motel-tools   # once
+motel catalog                                          # browse
+motel add chgnet                                       # install by name
+motel catalog update                                   # fetch new and updated tools
+```
+
+Tools that call online services declare their API keys under
+`environment.secrets`; users store them with `motel secret set NAME`, and keys
+are never written into tool packages or run records.

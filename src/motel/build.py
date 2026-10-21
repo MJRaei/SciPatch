@@ -20,8 +20,10 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 import shutil
 import tempfile
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -29,7 +31,7 @@ from typing import Any
 from motel import golden
 from motel.environments import BuildLog, get_backend
 from motel.errors import BuildError
-from motel.manifest import Manifest
+from motel.manifest import LOCK_FILENAME, Manifest
 from motel.models import FunctionInfo, GoldenResult
 from motel.reporting import Reporter
 from motel.runtime import executor
@@ -62,10 +64,14 @@ class BuildOutcome:
 
     @property
     def tests_passed(self) -> bool:
-        return all(result.passed for result in self.golden)
+        return all(result.passed or result.skipped for result in self.golden)
 
 
-def runtime_for(manifest: Manifest, layout: BuildLayout) -> ToolRuntime:
+def runtime_for(
+    manifest: Manifest, layout: BuildLayout, secrets: Mapping[str, str] | None = None
+) -> ToolRuntime:
+    """How to run a tool built at ``layout``; only its declared secrets are passed on."""
+    declared = manifest.environment.secrets
     return ToolRuntime(
         python=executor.environment_python(layout.env_dir),
         env_dir=layout.env_dir,
@@ -74,6 +80,7 @@ def runtime_for(manifest: Manifest, layout: BuildLayout) -> ToolRuntime:
         functions=manifest.exported_names,
         variables=dict(manifest.environment.variables),
         source_dir=layout.source_dir if manifest.source.repo else None,
+        secrets={name: value for name, value in (secrets or {}).items() if name in declared},
     )
 
 
@@ -84,6 +91,7 @@ def build(
     reporter: Reporter,
     fresh: bool = False,
     run_tests: bool = True,
+    secrets: Mapping[str, str] | None = None,
 ) -> BuildOutcome:
     """Build and verify a tool package. Raises :class:`BuildError` on failure."""
     log = BuildLog(layout.log_path, reporter)
@@ -135,7 +143,7 @@ def build(
 
     # 3. Introspection
     reporter.step("Inspecting the tool's functions")
-    runtime = runtime_for(manifest, layout)
+    runtime = runtime_for(manifest, layout, secrets)
     with tempfile.TemporaryDirectory(prefix="motel-describe-") as scratch:
         try:
             description = executor.describe(runtime, work_dir=Path(scratch))
@@ -217,6 +225,20 @@ def run_golden_tests(
 ) -> list[GoldenResult]:
     results = []
     for test in manifest.golden:
+        missing = [n for n in test.requires if n not in runtime.secrets and not os.environ.get(n)]
+        if missing:
+            reporter.warn(f"golden test '{test.name}' skipped: needs {', '.join(missing)}")
+            results.append(
+                GoldenResult(
+                    name=test.name,
+                    function=test.function,
+                    passed=False,
+                    skipped=True,
+                    error=f"skipped: needs {', '.join(missing)}",
+                    reference=test.reference,
+                )
+            )
+            continue
         with tempfile.TemporaryDirectory(prefix="motel-golden-") as scratch:
             run_dir = Path(scratch)
             args = golden.resolve_paths(test.args, package_dir)
@@ -265,6 +287,8 @@ def environment_fingerprint(
     for relative in (spec.requirements, spec.conda_file):
         if relative:
             material[relative] = _file_hash(package_dir / relative)
+    if (package_dir / LOCK_FILENAME).is_file():
+        material[LOCK_FILENAME] = _file_hash(package_dir / LOCK_FILENAME)
     blob = json.dumps(material, sort_keys=True).encode()
     return hashlib.sha256(blob).hexdigest()
 

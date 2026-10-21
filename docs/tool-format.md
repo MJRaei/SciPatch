@@ -111,9 +111,18 @@ packages (like the featured `ase-emt`).
 | `conda_packages`, `channels`, `conda_file` | Conda only. |
 | `post_install` | Shell commands run in the activated environment after installing (e.g. downloading model weights). |
 | `variables` | Environment variables set for every run. |
+| `secrets` | Names of secrets the tool needs, e.g. `[MP_API_KEY]`. Users store them once with `motel secret set MP_API_KEY`; each tool receives only the secrets it declares, as environment variables. |
 
 The environment is rebuilt only when something that affects it changes: this
-section, the source commit, the patches, or the referenced files.
+section, the source commit, the patches, the lock file, or the referenced files.
+
+### `requirements.lock`
+
+The exact package versions a tool was tested with, written by `motel freeze`
+from a working build. It is applied as **constraints**: every package it lists is
+pinned, while packages it doesn't list (such as platform-specific GPU libraries)
+still resolve, so one lock works on macOS and Linux. Freeze every tool you share,
+so others build what you tested.
 
 ### `functions`
 
@@ -150,6 +159,7 @@ the relevant caveats.
 | `expect` | Checks, keyed by a dotted path into the result (`energy`, `forces.0.2`; `.` is the whole result). |
 | `reference` | Where the expected values come from. Never invent one. |
 | `timeout` | Seconds (default 900). |
+| `requires` | Secrets the test needs, e.g. `[MP_API_KEY]`. Without them the test is skipped, not failed, so the tool still installs. |
 
 Each check is a literal (numbers are compared to within about 1e-9) or a matcher:
 

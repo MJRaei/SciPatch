@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from motel.errors import BuildError
-from motel.manifest import Environment
+from motel.manifest import LOCK_FILENAME, Environment
 from motel.reporting import Reporter
 from motel.runtime.executor import environment_bin_dirs, environment_python, tail
 
@@ -69,6 +69,24 @@ class BuildLog:
                 hint=hint or f"The full log is at {self.path}",
                 log_path=str(self.path),
             )
+
+
+def pip_arguments(spec: Environment, package_dir: Path, source_dir: Path | None) -> list[str]:
+    """Arguments for ``pip install``: packages, requirements, the source, and the lock.
+
+    The lock (``requirements.lock``) is applied as *constraints*: every package it
+    lists is pinned, while packages it doesn't mention (such as platform-specific
+    GPU libraries) still resolve, so one lock works across operating systems.
+    """
+    args: list[str] = list(spec.packages)
+    if spec.requirements:
+        args += ["-r", str(package_dir / spec.requirements)]
+    if source_dir is not None:
+        args += ["--editable", str(source_dir)]
+    lock = package_dir / LOCK_FILENAME
+    if args and lock.is_file():
+        args += ["--constraint", str(lock)]
+    return args
 
 
 def activated_environment(env_dir: Path, variables: dict[str, str] | None = None) -> dict[str, str]:
