@@ -1,0 +1,139 @@
+schema: 1
+name: pymatgen-structure
+version: 0.1.0
+title: Crystal structure tools (pymatgen)
+summary: >-
+  Everyday crystal-structure operations with pymatgen: space group and
+  symmetry analysis, standard conventional and primitive cells, supercells,
+  file format conversion, simulated powder X-ray diffraction patterns, and
+  checking whether two structures are the same.
+domains: [materials]
+tags: [crystal-structure, symmetry, space-group, spglib, supercell, conversion, cif, poscar,
+       xrd, x-ray-diffraction, powder-pattern, structure-matching, pymatgen]
+
+source:
+  homepage: https://pymatgen.org
+  paper: https://doi.org/10.1016/j.commatsci.2012.10.028
+  citation: >-
+    S. P. Ong et al., "Python Materials Genomics (pymatgen): A robust,
+    open-source python library for materials analysis", Comput. Mater. Sci. 68,
+    314-319 (2013); symmetry via spglib: A. Togo et al., Sci. Technol. Adv.
+    Mater. Methods 4, 2384822 (2024).
+  license: MIT
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["pymatgen==2026.9.24", "ase==3.29.0"]
+
+entrypoint: api
+
+functions:
+  symmetry:
+    params:
+      structure: {kind: structure}
+      symprec: {unit: Å}
+      angle_tolerance: {unit: degree}
+    outputs:
+      density_g_cm3: {unit: g/cm³}
+      conventional_cell: {kind: structure}
+      primitive_cell: {kind: structure}
+  make_supercell:
+    params:
+      structure: {kind: structure}
+    outputs:
+      volume_angstrom3: {unit: Å³}
+      supercell: {kind: structure}
+  convert:
+    params:
+      structure: {kind: structure}
+    outputs:
+      output: {kind: structure}
+  xrd_pattern:
+    params:
+      structure: {kind: structure}
+      two_theta_min: {unit: degree}
+      two_theta_max: {unit: degree}
+    outputs:
+      wavelength_angstrom: {unit: Å}
+      plot: {kind: image}
+      data: {kind: table}
+  compare:
+    params:
+      structure_a: {kind: structure}
+      structure_b: {kind: structure}
+
+validity: >-
+  Symmetry depends on the tolerance: with the default symprec of 0.01 Å, small
+  distortions from DFT relaxation, MD, or experimental noise lower the symmetry
+  (a slightly distorted olivine reads as P2_1/c instead of Pnma), so try 0.1 Å
+  for such structures and report the tolerance used. Simulated XRD patterns are
+  ideal: no peak broadening, preferred orientation, thermal motion, or
+  instrument effects, so compare peak positions confidently but relative
+  intensities only roughly; disordered or partially occupied sites need care.
+  Structure matching uses tolerances, so near-identical distorted variants can
+  count as the same structure.
+
+golden:
+  - name: CsCl XRD peaks match the pymatgen test suite
+    function: xrd_pattern
+    args: {structure: tests/data/CsCl.json}
+    expect:
+      peaks.0.two_theta: {approx: 21.107738329639844, abs: 0.000001}
+      peaks.0.intensity: {approx: 36.483184003748946, abs: 0.000001}
+      peaks.0.d_angstrom: {approx: 4.209, abs: 0.000001}
+      peaks.0.hkls.0: [1, 0, 0]
+      peaks.1.two_theta: {approx: 30.024695921112777, abs: 0.000001}
+      peaks.1.intensity: {approx: 100.0, abs: 0.000001}
+      plot: {exists: true}
+    reference: >-
+      pymatgen v2026.9.24, tests/analysis/diffraction/test_xrd.py::TestXRDCalculator::test_get_pattern
+      (CsCl test structure shipped with pymatgen, Cu Kα, 2θ = 0-90°).
+  - name: LiFePO4 XRD peak matches the pymatgen test suite
+    function: xrd_pattern
+    args: {structure: tests/data/LiFePO4.json}
+    expect:
+      peaks.1.two_theta: {approx: 17.03504233621785, abs: 0.000001}
+      peaks.1.intensity: {approx: 50.400928948337075, abs: 0.000001}
+    reference: >-
+      pymatgen v2026.9.24, tests/analysis/diffraction/test_xrd.py::TestXRDCalculator::test_get_pattern
+      (LiFePO4 test structure shipped with pymatgen).
+  - name: LiFePO4 is olivine (Pnma) at a 0.1 Å tolerance
+    function: symmetry
+    args: {structure: tests/data/LiFePO4.json, symprec: 0.1}
+    expect:
+      space_group_symbol: Pnma
+      space_group_number: 62
+      crystal_system: orthorhombic
+    reference: >-
+      Olivine LiFePO4 crystallizes in Pnma (No. 62): A. K. Padhi, K. S.
+      Nanjundaswamy, J. B. Goodenough, J. Electrochem. Soc. 144, 1188-1194
+      (1997). This slightly distorted test structure reads as P2_1/c at the
+      default 0.01 Å tolerance.
+  - name: silicon has the diamond structure
+    function: symmetry
+    args: {structure: tests/data/Si.json}
+    expect:
+      space_group_symbol: Fd-3m
+      space_group_number: 227
+      conventional_n_sites: 8
+      primitive_n_sites: 2
+    reference: >-
+      Diamond-structure silicon: space group Fd-3m (No. 227), 8 atoms in the
+      conventional cubic cell and 2 in the primitive cell (standard crystallography).
+  - name: a converted CIF is the same structure as its source
+    function: compare
+    args: {structure_a: tests/data/LiFePO4.json, structure_b: tests/data/LiFePO4.cif}
+    expect:
+      match: true
+      rms_displacement: {max: 0.000001}
+    reference: >-
+      tests/data/LiFePO4.cif was written from LiFePO4.json with this tool's
+      convert function; a lossless round trip must match exactly.
+  - name: a 2x1x1 supercell doubles the sites
+    function: make_supercell
+    args: {structure: tests/data/LiFePO4.json, scaling: [2, 1, 1]}
+    expect:
+      n_sites: 56
+      supercell: {exists: true}
+    reference: LiFePO4 has 28 sites per cell (4 formula units).
