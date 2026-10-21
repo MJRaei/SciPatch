@@ -102,6 +102,10 @@ def test_arguments_are_checked_before_running(installed: Motel) -> None:
         installed.run("sample", "add", {})
     with pytest.raises(InvalidArgumentsError, match="unknown argument"):
         installed.run("sample", "add", {"a": 1, "c": 2})
+    with pytest.raises(InvalidArgumentsError, match="a should be number, not ''"):
+        installed.run("sample", "add", {"a": ""})
+    with pytest.raises(InvalidArgumentsError, match=r"kind should be fast\|slow"):
+        installed.run("sample", "mode", {"kind": "medium"})
 
 
 def test_background_runs_can_be_collected_or_cancelled(installed: Motel) -> None:
@@ -320,3 +324,21 @@ def test_running_jobs_report_their_latest_output(
     assert "step 3/100" in str(view["latest_output"])
     assert float(str(view["elapsed_seconds"])) > 0
     motel.cancel_run(record.id)
+
+
+def test_golden_tests_can_require_a_clear_error(
+    motel: Motel, make_package: ManifestFactory
+) -> None:
+    golden = [
+        {"name": "refuses", "function": "fail", "args": {"message": "Fe is not supported"},
+         "raises": "not supported"},
+        {"name": "wrong message", "function": "fail", "args": {"message": "boom"},
+         "raises": "not supported"},
+        {"name": "does not fail", "function": "add", "args": {"a": 1}, "raises": "anything"},
+    ]  # fmt: skip
+    outcome = motel.check(make_package(functions=["add", "fail"], golden=golden))
+    passed = {result.name: result.passed for result in outcome.golden}
+    assert passed == {"refuses": True, "wrong message": False, "does not fail": False}
+    failures = {result.name: result.failures for result in outcome.golden}
+    assert "got ValueError: boom" in failures["wrong message"][0]
+    assert "but it succeeded" in failures["does not fail"][0]

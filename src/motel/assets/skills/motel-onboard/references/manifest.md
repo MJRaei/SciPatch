@@ -62,6 +62,10 @@ golden:
       lattice_a_angstrom: {approx: 5.47, abs: 0.05}
     reference: "<exact source of the number: paper table/figure, or documented example>"
     timeout: 900
+  - name: refuses elements outside the training data   # inputs outside validity must fail
+    function: relax
+    args: {structure: tests/data/unsupported.cif}
+    raises: "not supported"                              # text the error message must contain
 ```
 
 Patches: every `*.patch` or `*.diff` file in `patches/` is applied to the

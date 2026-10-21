@@ -246,14 +246,22 @@ def run_golden_tests(
                 runtime, test.function, args, workdir=run_dir, run_dir=run_dir, timeout=test.timeout
             )
             # Check while output files still exist (``exists`` matchers look at them).
-            if response.get("ok"):
+            failure = response.get("error") or {}
+            message = f"{failure.get('type')}: {failure.get('message')}"
+            error = None
+            if test.raises is not None:
+                # The call must fail, with a message that explains why.
+                if response.get("ok"):
+                    failures = [f"expected an error containing {test.raises!r}, but it succeeded"]
+                elif test.raises not in message:
+                    failures = [f"expected an error containing {test.raises!r}, got {message}"]
+                else:
+                    failures = []
+            elif response.get("ok"):
                 value = absolutize_paths(response.get("value"), run_dir)
                 failures = golden.check(test.expect, value)
-                error = None
             else:
-                failure = response.get("error") or {}
-                failures = []
-                error = f"{failure.get('type')}: {failure.get('message')}"
+                failures, error = [], message
         result = GoldenResult(
             name=test.name,
             function=test.function,

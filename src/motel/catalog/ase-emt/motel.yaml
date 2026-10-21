@@ -91,3 +91,10 @@ golden:
     reference: >-
       The ideal 8-atom Cu supercell at ASE's reference lattice constant has
       -0.005682 eV/atom with EMT (from 'energy').
+  - name: elements without EMT parameters are refused
+    function: equation_of_state
+    args: {element: Fe, crystal: bcc}
+    raises: "EMT has no reliable parameters for Fe"
+    reference: >-
+      EMT is parameterized only for Al, Cu, Ag, Au, Ni, Pd and Pt; iron must be
+      refused rather than given a meaningless number.

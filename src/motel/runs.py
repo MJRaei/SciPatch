@@ -27,6 +27,7 @@ from motel.paths import MotelPaths
 from motel.registry import InstalledTool
 from motel.runtime import executor
 from motel.runtime.results import absolutize_paths, list_output_files, looks_like_path
+from motel.schema import matches, normalize, type_label
 
 #: Parameter kinds whose values are file or folder paths.
 PATH_KINDS = frozenset(
@@ -77,7 +78,7 @@ class RunManager:
                 "for where to get it).",
             )
         arguments = resolve_path_arguments(dict(args or {}), info, base_dir or Path.cwd())
-        validate_arguments(tool.name, info, arguments)
+        arguments = validate_arguments(tool.name, info, arguments)
 
         cache_key = compute_cache_key(tool, function, arguments)
         if use_cache and info.cache and output_dir is None:
@@ -220,18 +221,29 @@ class RunManager:
 # --------------------------------------------------------------------------- #
 
 
-def validate_arguments(tool: str, info: FunctionInfo, args: dict[str, Any]) -> None:
-    """Catch missing and unknown arguments before starting a process."""
+def validate_arguments(tool: str, info: FunctionInfo, args: dict[str, Any]) -> dict[str, Any]:
+    """Catch missing, unknown, and wrongly typed arguments before starting a process.
+
+    Returns the arguments with harmless normalizations applied (``500.0`` → ``500``
+    for integer parameters).
+    """
     properties = info.properties
-    missing = [name for name in info.required if name not in args]
+    normalized = {k: normalize(v, properties.get(k, {})) for k, v in args.items()}
+    missing = [name for name in info.required if name not in normalized]
     unknown = [] if info.accepts_extra_arguments else [k for k in args if k not in properties]
-    if not missing and not unknown:
-        return
+    mistyped = [
+        f"{name} should be {type_label(properties[name])}, not {value!r}"
+        for name, value in normalized.items()
+        if name in properties and not matches(value, properties[name])
+    ]
+    if not missing and not unknown and not mistyped:
+        return normalized
     problems = []
     if missing:
         problems.append(f"missing required argument(s): {', '.join(missing)}")
     if unknown:
         problems.append(f"unknown argument(s): {', '.join(unknown)}")
+    problems.extend(mistyped)
     raise InvalidArgumentsError(
         f"{tool}.{info.name}: {'; '.join(problems)}.",
         hint=f"Expected {info.signature()}. See 'motel info {tool}' for details.",

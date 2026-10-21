@@ -160,6 +160,7 @@ the relevant caveats.
 | `reference` | Where the expected values come from. Never invent one. |
 | `timeout` | Seconds (default 900). |
 | `requires` | Secrets the test needs, e.g. `[MP_API_KEY]`. Without them the test is skipped, not failed, so the tool still installs. |
+| `raises` | Text the call's error message must contain: the test passes only if the call *fails* this way. Use it to prove that inputs outside the tool's validity are refused, e.g. `raises: "no reliable parameters for Fe"`. |
 
 Each check is a literal (numbers are compared to within about 1e-9) or a matcher:
 

@@ -156,6 +156,11 @@ class GoldenTest(_Model):
         default_factory=list,
         description="Secrets or environment variables the test needs; skipped when missing.",
     )
+    raises: str | None = Field(
+        None,
+        description="The call must fail with an error message containing this text "
+        "(for checking that invalid inputs are refused).",
+    )
 
 
 class Manifest(_Model):
