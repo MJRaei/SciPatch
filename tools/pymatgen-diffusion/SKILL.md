@@ -14,7 +14,9 @@ description: >-
 - **One MD run:** `analyze_trajectory(trajectory, specie="Li", temperature_k=600,
   frame_interval_fs=20)`. CHGNet's `molecular_dynamics` returns both the
   `trajectory` path and `frame_interval_fs`; pass them through unchanged.
-  Discard equilibration with `skip_initial_ps` (1 ps is usually enough).
+  Discard equilibration with `skip_initial_ps` (1 ps is usually enough). The
+  default analysis needs more than 1 ps of trajectory after skipping; plan MD
+  runs of several ps at least (tens of ps for a reliable diffusivity).
 - **Activation energy and room-temperature value:** run MD at three or more
   temperatures (e.g. 800, 1000, 1200 K), analyze each, then call
   `arrhenius_fit(temperatures_k, diffusivities_cm2_s, extrapolate_to_k=300)`.

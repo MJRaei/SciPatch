@@ -106,3 +106,16 @@ golden:
       pymatgen-analysis-diffusion v2025.11.14, tests/pymatgen/analysis/diffusion/test_analyzer.py::FuncTest::test_fit_arrhenius:
       Ea = 0.5 eV, prefactor 12 cm²/s, standard error 0.000895566 eV for
       D = 12 exp(-0.5 eV / kT) at 300, 1000, 500 K with small fixed perturbations.
+  - name: a trajectory shorter than 1 ps is refused with an explanation
+    function: analyze_trajectory
+    args:
+      trajectory: tests/data/LGPS_600K_AIMD.extxyz.gz
+      specie: Li
+      temperature_k: 600
+      frame_interval_fs: 20
+      skip_initial_ps: 19.5
+    raises: "fits the MSD from 1 ps onward"
+    reference: >-
+      pymatgen-analysis-diffusion's 'max' smoothing starts the MSD fit at a lag
+      time of 1 ps (analyzer.py, DiffusionAnalyzer.__init__), so shorter
+      trajectories cannot be analyzed with it.

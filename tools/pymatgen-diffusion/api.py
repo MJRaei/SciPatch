@@ -14,6 +14,8 @@ import numpy as np
 
 #: Ions that never move further than this (Å) are taken to have only vibrated.
 HOP_DISTANCE_ANGSTROM = 1.5
+#: pymatgen's "max" smoothing fits the MSD from this lag time (fs) onward.
+MIN_FIT_START_FS = 1000.0
 
 
 def _matplotlib():
@@ -75,6 +77,14 @@ def analyze_trajectory(
         raise ValueError(
             f"Only {len(frames) - skip} frames remain after skipping {skip}; "
             "need at least 10. Reduce skip_initial_ps or run longer."
+        )
+    duration_fs = (len(frames) - skip - 1) * frame_interval_fs
+    if smoothed == "max" and duration_fs <= MIN_FIT_START_FS:
+        raise ValueError(
+            f"The trajectory covers {duration_fs / 1000:.2f} ps after skipping, but the "
+            f"'max' analysis fits the MSD from {MIN_FIT_START_FS / 1000:.0f} ps onward. "
+            "Run a longer MD (several ps; tens of ps for a reliable diffusivity), or use "
+            "smoothed='none' for a rough look at a short run."
         )
     structures = [AseAtomsAdaptor.get_structure(atoms) for atoms in frames[skip:]]
     elements = {element.symbol for element in structures[0].composition.elements}
