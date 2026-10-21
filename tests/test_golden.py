@@ -64,3 +64,15 @@ def test_resolve_paths_only_touches_existing_relative_files(tmp_path: Path) -> N
     resolved = golden.resolve_paths(args, tmp_path)
     cif = str((tmp_path / "data" / "Cu.cif").resolve())
     assert resolved == {"structure": cif, "element": "Cu", "n": 3, "files": [cif, "CO"]}
+
+
+def test_resolve_paths_finds_source_files_wherever_the_checkout_is(tmp_path: Path) -> None:
+    package, checkout = tmp_path / "package", tmp_path / "elsewhere"
+    package.mkdir()
+    (checkout / "data").mkdir(parents=True)
+    (checkout / "data" / "MgF2.cif").write_text("x")
+    resolved = golden.resolve_paths({"structure": "source/data/MgF2.cif"}, package, checkout)
+    assert resolved == {"structure": str((checkout / "data" / "MgF2.cif").resolve())}
+    assert golden.resolve_paths({"structure": "source/data/MgF2.cif"}, package) == {
+        "structure": "source/data/MgF2.cif"
+    }

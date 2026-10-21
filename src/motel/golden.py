@@ -165,17 +165,30 @@ def _accepted_types(name: str) -> set[str]:
     return {"number", "integer"} if name == "number" else {name}
 
 
-def resolve_paths(args: dict[str, Any], base_dir: Path) -> dict[str, Any]:
+SOURCE_PREFIX = "source/"
+
+
+def resolve_paths(
+    args: dict[str, Any], base_dir: Path, source_dir: Path | None = None
+) -> dict[str, Any]:
     """Make relative paths in golden-test arguments (and in lists of them) absolute.
 
-    Paths are relative to the package; values that are not existing files are kept.
+    Paths are relative to the package, except that ``source/...`` refers to the
+    tool's source checkout wherever it lives (inside the package while developing,
+    elsewhere once installed). Values that are not existing files are kept.
     """
-    return {key: _resolve(value, base_dir) for key, value in args.items()}
+    return {key: _resolve(value, base_dir, source_dir) for key, value in args.items()}
 
 
-def _resolve(value: Any, base_dir: Path) -> Any:
+def _resolve(value: Any, base_dir: Path, source_dir: Path | None) -> Any:
     if isinstance(value, list):
-        return [_resolve(item, base_dir) for item in value]
-    if isinstance(value, str) and not Path(value).is_absolute() and (base_dir / value).exists():
+        return [_resolve(item, base_dir, source_dir) for item in value]
+    if not isinstance(value, str) or Path(value).is_absolute():
+        return value
+    if source_dir is not None and value.startswith(SOURCE_PREFIX):
+        candidate = source_dir / value[len(SOURCE_PREFIX) :]
+        if candidate.exists():
+            return str(candidate.resolve())
+    if (base_dir / value).exists():
         return str((base_dir / value).resolve())
     return value

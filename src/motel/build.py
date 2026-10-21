@@ -371,7 +371,7 @@ def run_golden_tests(
             continue
         with tempfile.TemporaryDirectory(prefix="motel-golden-") as scratch:
             run_dir = Path(scratch)
-            args = golden.resolve_paths(test.args, package_dir)
+            args = golden.resolve_paths(test.args, package_dir, runtime.source_dir)
             response = executor.call_sync(
                 runtime,
                 test.function,

@@ -276,7 +276,7 @@ with `motel maturity <tool> <level>`.
 | Field | Meaning |
 |---|---|
 | `name` | What the test shows. |
-| `function`, `args` | The call. Relative file paths are resolved from the package folder. |
+| `function`, `args` | The call. Relative file paths are resolved from the package folder; paths starting with `source/` refer to the tool's source checkout (`source.repo`), so tests can use the project's own example files wherever the checkout lives. |
 | `expect` | Checks, keyed by a dotted path into the result (`energy`, `forces.0.2`; `.` is the whole result). |
 | `reference` | Where the expected values come from. Never invent one. |
 | `against` | The kind of reference: `independent` (experiment, a reference database, or another program), `paper` (the tool's own publication), `upstream-tests` (the project's own test suite or documentation), `exact` (an analytical result, a sum or conservation rule, symmetry, or a count), or `regression` (output of this tool or its example, which catches changes but not errors). It backs the tool's `maturity` and is summarized for agents. Not used with `raises`. |
