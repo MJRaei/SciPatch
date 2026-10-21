@@ -1,0 +1,110 @@
+schema: 1
+name: structural-analogs
+version: 0.1.0
+title: Structural analogs in the Materials Project (mp-property-analogies)
+summary: >-
+  Materials Project compounds with the same crystal structure type as a material
+  or structure file (same anonymous formula and space group, matched with the
+  elements ignored), with their band gaps, formation energies, stability, and
+  volumes, for estimating a material's properties by analogy.
+domains: [materials]
+tags: [analogs, analogues, prototype, structure-type, isostructural, substitution, materials-project,
+       structure-matcher, band-gap, formation-energy, volume, property-estimation, analogy,
+       mp-property-analogies]
+
+source:
+  repo: https://github.com/ahaibel/mp-property-analogies
+  ref: 9cecccea48f59aaad31ce56feed0119932a06808
+  install: false
+  homepage: https://github.com/ahaibel/mp-property-analogies
+  citation: >-
+    mp-property-analogies (A. Haibel et al., ATOMS Lab, UMBC; prize winner at the
+    2025 LLM Hackathon for Applications in Materials Science and Chemistry),
+    github.com/ahaibel/mp-property-analogies; data: A. Jain et al., APL Mater. 1,
+    011002 (2013) (Materials Project); matching: S. P. Ong et al., Comput. Mater.
+    Sci. 68, 314 (2013) (pymatgen).
+  license: >-
+    not stated (the repository has no LICENSE file); Materials Project data,
+    CC BY 4.0.
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["mp-api==0.46.5", "pymatgen==2026.9.24"]
+  secrets:
+    - name: MP_API_KEY
+      description: Materials Project API key
+      url: https://next-gen.materialsproject.org/api
+
+resources:
+  network: true  # queries the Materials Project's web API
+
+entrypoint: api
+
+functions:
+  structural_analogs:
+    params:
+      structure: {kind: structure}
+    outputs:
+      properties: {description: "Median and range over the analogs of each property"}
+
+validity: >-
+  Analogs share a structure type, not chemistry: properties such as band gaps
+  depend strongly on the elements, so an analog's value is a starting estimate,
+  not a prediction. The properties are Materials Project PBE(+U) values, with
+  PBE's systematic errors (band gaps too small, volumes slightly too large).
+  Candidates are limited to the reference's space group, so distorted variants
+  of a structure type (lower symmetry) are missed, and a loose structural match
+  can still be a different arrangement: check analogs with a larger rms. The
+  results depend on the Materials Project database version, which is reported.
+  In the project's own tests (GPT-5-mini reasoning over analogs), analogies cut
+  the errors in formation energy and volume but not in band gap.
+
+maturity: experimental
+
+golden:
+  - name: rock-salt NaCl has KCl among its analogs
+    quick: true
+    function: structural_analogs
+    args: {material_id: mp-22862, count: 20}
+    requires: [MP_API_KEY]
+    expect:
+      reference.formula: NaCl
+      reference.anonymous_formula: AB
+      reference.space_group_number: 225
+      formulas: {contains: KCl}
+      analogs.0.kinship: 2
+    reference: >-
+      NaCl and KCl both crystallize in the rock-salt structure (space group
+      Fm-3m, No. 225), e.g. A. R. West, Basic Solid State Chemistry, 2nd ed. (1999),
+      Sec. 1.17. Ranked by chemistry, the first analogs are other alkali halides
+      (kinship 2: an alkali metal and a halogen).
+    against: independent
+  - name: diamond silicon has germanium among its analogs
+    function: structural_analogs
+    args: {material_id: mp-149, count: 10}
+    requires: [MP_API_KEY]
+    expect:
+      reference.space_group_number: 227
+      formulas: {contains: Ge}
+    reference: >-
+      Silicon and germanium share the diamond structure (Fd-3m,
+      No. 227), e.g. C. Kittel, Introduction to Solid State Physics, 8th ed., Ch. 1.
+    against: independent
+  - name: a structure file works as the reference
+    function: structural_analogs
+    args: {structure: tests/data/NaCl.cif, count: 20}
+    requires: [MP_API_KEY]
+    expect:
+      reference.formula: NaCl
+      reference.anonymous_formula: AB
+      reference.space_group_number: 225
+      formulas: {contains: KCl}
+    reference: >-
+      The rock-salt CIF (Fm-3m, 2 symmetry-unique sites) has the structure type of
+      KCl, which crystallizes in the rock-salt structure (West, Sec. 1.17).
+    against: independent
+  - name: a reference is needed
+    function: structural_analogs
+    raises: "Give either material_id or structure"
+    reference: Without a material ID or a structure file there is nothing to compare.

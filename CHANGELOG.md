@@ -13,8 +13,9 @@ All notable changes to this project are documented here. The format follows
   ESPRESSO, xTB, CREST, PySCF, RDKit, OpenMM, Cantera, LAMMPS, Open Babel,
   MDAnalysis, OVITO, AutoDock Vina, synthesis recipes (from the SKY hackathon
   agent), NMR mixture quantification (from the MixSense hackathon project),
-  peptide self-assembly conditions (from peptide-agent), and doping of layered
-  materials from papers (from ARIA), each with golden tests against upstream
+  peptide self-assembly conditions (from peptide-agent), doping of layered
+  materials from papers (from ARIA), and structural analogs in the Materials
+  Project (from mp-property-analogies), each with golden tests against upstream
   test suites, reference databases, or established physics, and a CI workflow
   that rebuilds changed tools from scratch.
 - Maturity levels: every tool is `established`, `published`, or `experimental`
