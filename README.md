@@ -97,28 +97,29 @@ model comparison), **GPAW** and **Quantum ESPRESSO** (DFT for crystals),
 **LAMMPS** (classical MD), **OVITO** (crystal structure, defects, dislocations),
 **phonopy** (phonons and stability), **phono3py** (thermal conductivity),
 **pycalphad** (alloy phase diagrams and solidification), **PyBaMM** (lithium-ion
-battery cells), **RASPA3** (gas adsorption in zeolites and MOFs), **Zeo++**
-(pore sizes, surface area, and pore volume), **pymatgen-diffusion** (ion
-transport from MD), **pymatgen-structure** (symmetry, supercells, XRD),
-**PyXtal** (random crystal structures for structure prediction), **xraylib**
-(X-ray attenuation, absorption edges, and emission lines), **synthesis recipes**
-(precursors and temperatures from papers, routes for new materials), **doping
-knowledge** (what papers report about doping layered materials), **structural
-analogs** (same-structure compounds for estimates by analogy), and the
-**Materials Project** database; and for chemistry, **PySCF** (ab initio quantum
-chemistry), **xTB** (fast semiempirical quantum chemistry), **CREST**
-(conformers, protomers, tautomers), **RDKit** (cheminformatics),
-**AiZynthFinder** (synthesis routes from purchasable compounds), **Open Babel**
-(chemical file formats, force fields), **OpenMM** (molecular dynamics),
-**PROPKA** (protein pKa and protonation states), **MDAnalysis** (trajectory
-analysis), **NMR mixtures** (mole fractions from crude 1H NMR), **pyOpenMS**
-(mass spectrometry: exact masses, isotope patterns, peptides), **AutoDock Vina**
-(docking), **peptide assembly** (self-assembly conditions from similar
-peptides), **Cantera** (combustion chemistry and thermodynamics), **CoolProp**
-(properties of fluids, refrigerants, and humid air), **thermo** (chemical
-properties and vapor-liquid equilibrium), **Reaktoro** (water chemistry and
-mineral solubility), and **pvlib** (sun position and solar PV energy). Every
-tool reproduces published or upstream-tested values before it installs.
+battery cells), **impedance.py** (electrochemical impedance spectra), **RASPA3**
+(gas adsorption in zeolites and MOFs), **Zeo++** (pore sizes, surface area, and
+pore volume), **pymatgen-diffusion** (ion transport from MD),
+**pymatgen-structure** (symmetry, supercells, XRD), **PyXtal** (random crystal
+structures for structure prediction), **xraylib** (X-ray attenuation, absorption
+edges, and emission lines), **synthesis recipes** (precursors and temperatures
+from papers, routes for new materials), **doping knowledge** (what papers report
+about doping layered materials), **structural analogs** (same-structure
+compounds for estimates by analogy), and the **Materials Project** database; and
+for chemistry, **PySCF** (ab initio quantum chemistry), **xTB** (fast
+semiempirical quantum chemistry), **CREST** (conformers, protomers, tautomers),
+**RDKit** (cheminformatics), **AiZynthFinder** (synthesis routes from
+purchasable compounds), **Open Babel** (chemical file formats, force fields),
+**OpenMM** (molecular dynamics), **PROPKA** (protein pKa and protonation
+states), **MDAnalysis** (trajectory analysis), **NMR mixtures** (mole fractions
+from crude 1H NMR), **pyOpenMS** (mass spectrometry: exact masses, isotope
+patterns, peptides), **AutoDock Vina** (docking), **peptide assembly**
+(self-assembly conditions from similar peptides), **Cantera** (combustion
+chemistry and thermodynamics), **CoolProp** (properties of fluids, refrigerants,
+and humid air), **thermo** (chemical properties and vapor-liquid equilibrium),
+**Reaktoro** (water chemistry and mineral solubility), and **pvlib** (sun
+position and solar PV energy). Every tool reproduces published or
+upstream-tested values before it installs.
 
 Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),
 Codex, or Gemini CLI. See [Turning a repository into a tool](docs/onboarding.md),

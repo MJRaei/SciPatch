@@ -13,6 +13,7 @@ reproduce published or upstream-tested values on every build.
 | [crest](crest/) | chemistry | Linux, macOS, Windows (WSL) | Conformer search with Boltzmann populations, protonation and deprotonation sites, tautomers (GFN2-xTB) | established | Butane anti/gauche; pyridine, acetic acid, and keto-enol chemistry (NIST enthalpies) |
 | [doping-knowledge](doping-knowledge/) | materials | Linux, macOS, Windows | What papers report about doping and intercalation of 2D and layered materials: 440 studies (dopants, methods, conditions, sites, phase transitions, property changes) and 1,443 cause-effect relationships with the authors' mechanisms, extracted by an LLM; from the ARIA hackathon project | experimental | Li-intercalated WTe2 record vs its paper (Wang et al. 2022); counts and a quoted mechanism from the knowledge base |
 | [gpaw](gpaw/) | materials | Linux, macOS, Windows (WSL) | DFT for crystals (plane waves, PAW): energies, forces, stress, relaxation, equation of state, band structures and gaps, magnetism | established | GPAW's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
+| [impedance](impedance/) | chemistry, materials, engineering | Linux, macOS, Windows | Electrochemical impedance spectroscopy: equivalent-circuit fitting (Randles, CPE, Warburg, transmission lines) of spectra from common potentiostats, circuit simulation, Lin-KK Kramers-Kronig validation | published | impedance.py's documented example fit and Lin-KK result; exact recovery of an analytic Randles spectrum; RC element at its characteristic frequency |
 | [lammps](lammps/) | materials | Linux, macOS, Windows (WSL) | Classical MD and 0 K crystal properties with EAM, SW, Tersoff, AIREBO, SNAP, ACE or any LAMMPS pair style: lattice constants, cohesive energies, elastic tensors, NVT/NPT dynamics; your own input scripts | established | NIST Interatomic Potentials Repository (Cu, Fe, Si: lattice, cohesive energy, C11/C12/C44); LAMMPS benchmark log; equipartition |
 | [materials-project](materials-project/) | materials | Linux, macOS, Windows | Search known materials, stability (energy above hull), properties, and structures | established | Silicon (mp-149); needs a free API key |
 | [mdanalysis](mdanalysis/) | chemistry, biology, materials | Linux, macOS, Windows | MD trajectory analysis (GROMACS, AMBER, CHARMM, LAMMPS, OpenMM, extended XYZ): RMSD, RMSF, radius of gyration, g(r) and coordination numbers, MSD and diffusion coefficients | established | MDAnalysis's test suite (adenylate kinase RMSD); fcc coordination shell; random-walk Einstein relation |
@@ -107,6 +108,9 @@ accepts.
 - **Batteries:** `ml-potentials` and `pymatgen-diffusion` for ion transport in an
   electrode or electrolyte material → `pybamm.discharge` and
   `pybamm.rate_capability` for the cell (capacity and energy versus rate, heating).
+- **Electrochemical impedance:** `impedance.kramers_kronig` (is the spectrum
+  valid?) → `impedance.fit_circuit` (ohmic, charge-transfer, and diffusion
+  contributions) → compare cells, temperatures, or states of charge.
 - **How fast do ions move?** `pymatgen-structure.make_supercell` (≥ 100 atoms) →
   `ml-potentials.molecular_dynamics` at several temperatures
   (several ps each) → `pymatgen-diffusion.analyze_trajectory` →
@@ -189,10 +193,11 @@ Upstream code, potential files, and pseudopotentials are downloaded from their
 original sources at install time and are not redistributed here. Small test
 inputs taken from upstream projects (the LAMMPS benchmark input, the Vina 1IEP
 tutorial files, an excerpt of MDAnalysis's adenylate kinase trajectory,
-molecules of the MMFF94 validation suite, MixSense's example spectra, IZA
-zeolite frameworks, RASPA3's HKUST-1 structure, PROPKA's 1HPX test structure, an
-OpenMS example spectrum, and a PVGIS typical year for Munich from the European
-Commission's JRC) keep their sources' terms; each golden test names its source.
+molecules of the MMFF94 validation suite, MixSense's example spectra,
+impedance.py's example spectrum, IZA zeolite frameworks, RASPA3's HKUST-1
+structure, PROPKA's 1HPX test structure, an OpenMS example spectrum, and a PVGIS
+typical year for Munich from the European Commission's JRC) keep their sources'
+terms; each golden test names its source.
 
 ## Adding a tool
 

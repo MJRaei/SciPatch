@@ -1,0 +1,138 @@
+schema: 1
+name: impedance
+version: 0.1.0
+title: Electrochemical impedance spectroscopy fitting (impedance.py)
+summary: >-
+  Analyse electrochemical impedance spectra with impedance.py: fit equivalent
+  circuits (Randles, constant-phase elements, Warburg diffusion, transmission
+  lines, ...) to measured data from common potentiostats, simulate circuit
+  spectra, and test data quality with the Lin-KK Kramers-Kronig method.
+domains: [chemistry, materials, engineering]
+tags: [eis, impedance, electrochemistry, equivalent-circuit, randles, nyquist, bode, warburg, cpe,
+       charge-transfer, battery, fuel-cell, corrosion, kramers-kronig, potentiostat, impedance.py]
+
+source:
+  homepage: https://impedancepy.readthedocs.io
+  paper: https://doi.org/10.21105/joss.02349
+  citation: >-
+    M. D. Murbach, B. Gerwe, N. Dawson-Elli, L. Tsui, "impedance.py: A Python package
+    for electrochemical impedance analysis", J. Open Source Softw. 5, 2349 (2020);
+    Lin-KK: M. Schönleber, D. Klotz, E. Ivers-Tiffée, Electrochim. Acta 131, 20-27
+    (2014).
+  license: MIT
+
+environment:
+  manager: uv
+  python: "3.12"
+  # impedance imports pandas (for its altair plots) without declaring it.
+  packages: ["impedance==1.7.1", "pandas==3.0.6", "matplotlib==3.11.2"]
+
+entrypoint: api
+
+functions:
+  fit_circuit:
+    params:
+      data: {kind: spectrum}
+    outputs:
+      table: {kind: table}
+      plot: {kind: image}
+  simulate:
+    params:
+      f_min_hz: {unit: Hz}
+      f_max_hz: {unit: Hz}
+    outputs:
+      table: {kind: spectrum}
+      plot: {kind: image}
+  impedance_at: {}
+  kramers_kronig:
+    params:
+      data: {kind: spectrum}
+      max_frequency_hz: {unit: Hz}
+  elements: {}
+
+validity: >-
+  An equivalent circuit is a model, not a mechanism: different circuits can fit
+  the same spectrum equally well, so element values are only meaningful for a
+  physically justified circuit and should be compared with other evidence. Fits
+  are local least squares and can converge to wrong minima from poor starting
+  values (check the residual RMS and the plot; use initial_guess or global_fit).
+  The data must be linear, stationary, and causal; run kramers_kronig first, and
+  remove inductive points from cables at high frequency. Constant-phase element
+  parameters are not capacitances (convert with the Brug or Hsu-Mansfeld
+  formula). Lin-KK settings follow the impedance.py documentation.
+
+maturity: published
+
+golden:
+  - name: the documented battery example fit
+    quick: true
+    function: fit_circuit
+    args: {data: tests/data/exampleData.csv, circuit: "R0-p(R1,C1)-p(R2-Wo1,C2)",
+           initial_guess: [0.01, 0.01, 100, 0.01, 0.05, 100, 1]}
+    expect:
+      parameters.0.value: {approx: 1.65e-02, rel: 0.005}
+      parameters.1.value: {approx: 8.68e-03, rel: 0.005}
+      parameters.2.value: {approx: 3.32, rel: 0.005}
+      parameters.3.value: {approx: 5.39e-03, rel: 0.005}
+      parameters.4.value: {approx: 6.31e-02, rel: 0.005}
+      parameters.5.value: {approx: 233.0, rel: 0.005}
+      parameters.6.value: {approx: 0.220, rel: 0.005}
+    reference: >-
+      impedance.py documentation, "Getting started" (data/exampleData.csv, circuit
+      R0-p(R1,C1)-p(R2-Wo1,C2), initial guess [.01, .01, 100, .01, .05, 100, 1]): R0
+      1.65e-02, R1 8.68e-03, C1 3.32e+00, R2 5.39e-03, Wo1_0 6.31e-02, Wo1_1
+      2.33e+02, C2 2.20e-01.
+    against: upstream-tests
+  - name: a Randles circuit is recovered exactly from its analytic spectrum
+    function: fit_circuit
+    args: {data: tests/data/randles_synthetic.csv, circuit: randles}
+    expect:
+      parameters.0.value: {approx: 10.0, rel: 1.0e-4}
+      parameters.1.value: {approx: 100.0, rel: 1.0e-4}
+      parameters.2.value: {approx: 1.0e-5, rel: 1.0e-4}
+      rms_relative_residual: {max: 1.0e-6}
+    reference: >-
+      tests/data/randles_synthetic.csv was written from the analytic impedance of a
+      Randles circuit, Z = R0 + R1 / (1 + j w R1 C1) with R0 = 10 Ohm, R1 = 100 Ohm, C1 =
+      10 uF, at 71 frequencies from 100 kHz to 0.01 Hz (computed independently of
+      impedance.py); a correct fit returns these values.
+    against: exact
+  - name: an RC element at its characteristic frequency
+    function: impedance_at
+    args: {circuit: "p(R1,C1)", parameters: [100.0, 1.0e-5], frequencies_hz: [159.15494309189535]}
+    expect:
+      points.0.z_real_ohm: {approx: 50.0, rel: 1.0e-9}
+      points.0.z_imag_ohm: {approx: -50.0, rel: 1.0e-9}
+      points.0.phase_deg: {approx: -45.0, rel: 1.0e-9}
+    reference: >-
+      For R parallel to C, Z = R / (1 + j w R C); at w = 1/(RC), i.e. f = 1/(2 pi R C) =
+      159.155 Hz for 100 Ohm and 10 uF, Z = R/2 - j R/2 = 50 - 50j Ohm, phase -45°.
+    against: exact
+  - name: the documented Lin-KK validation of the battery example
+    function: kramers_kronig
+    args: {data: tests/data/exampleData.csv, max_frequency_hz: 1000}
+    expect:
+      rc_elements: 26
+      mu: {approx: 0.31, abs: 0.005}
+      valid_within_1_percent: true
+    reference: >-
+      impedance.py documentation, "Validating your data with Lin-KK" (exampleData.csv,
+      f < 1000 Hz, c = 0.5, complex fit with a capacitance): M = 26, mu = 0.31, residuals
+      within the plotted ±2%.
+    against: upstream-tests
+  - name: an analytic spectrum passes the Kramers-Kronig test
+    function: kramers_kronig
+    args: {data: tests/data/randles_synthetic.csv}
+    expect:
+      valid_within_1_percent: true
+      max_real_residual: {max: 0.001}
+      max_imag_residual: {max: 0.001}
+    reference: >-
+      The impedance of any passive RC network is causal and linear, so it satisfies the
+      Kramers-Kronig relations exactly; Lin-KK residuals must be small.
+    against: exact
+  - name: an invalid circuit string is refused
+    function: fit_circuit
+    args: {data: tests/data/exampleData.csv, circuit: "R0-q(R1)"}
+    raises: "Cannot read the circuit"
+    reference: The tool must reject unknown circuit elements.
