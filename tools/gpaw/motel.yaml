@@ -1,0 +1,178 @@
+schema: 1
+name: gpaw
+version: 0.1.0
+title: Density functional theory for crystals (GPAW)
+summary: >-
+  First-principles DFT for crystals with GPAW (plane waves, PAW): total
+  energies, forces and stress, relaxation of atoms and cell, equation of state
+  (equilibrium volume, bulk modulus), band gaps and band structures, Fermi
+  level, and magnetic moments. The reference method for checking
+  machine-learned potentials.
+domains: [materials]
+tags: [dft, density-functional-theory, plane-wave, paw, gpaw, pbe, band-structure, band-gap,
+       bulk-modulus, equation-of-state, lattice-constant, relaxation, stress, magnetism,
+       magnetic-moment, fermi-level, electronic-structure, first-principles, ab-initio]
+
+source:
+  homepage: https://gpaw.readthedocs.io
+  paper: https://doi.org/10.1063/5.0182685
+  citation: >-
+    J. J. Mortensen et al., "GPAW: An open Python package for electronic
+    structure calculations", J. Chem. Phys. 160, 092503 (2024); A. H. Larsen et
+    al., "The atomic simulation environment", J. Phys.: Condens. Matter 29,
+    273002 (2017).
+  license: GPL-3.0-or-later
+
+environment:
+  manager: conda
+  python: "3.12"
+  # The OpenMP build without MPI; PAW datasets come with gpaw-data.
+  conda_packages: ["gpaw=26.7.0=*nompi*", "ase=3.29.0", "matplotlib=3.11.2"]
+  channels: [conda-forge]
+
+entrypoint: api
+
+functions:
+  scf:
+    params:
+      structure: {kind: structure}
+      ecut_ev: {unit: eV}
+      kpoint_density: {unit: 1/Å}
+      smearing_ev: {unit: eV}
+      output: {kind: file}
+    outputs:
+      energy_ev: {unit: eV}
+      energy_per_atom_ev: {unit: eV/atom}
+      max_force_ev_per_angstrom: {unit: eV/Å}
+      stress_gpa: {unit: GPa}
+      fermi_level_ev: {unit: eV}
+      band_gap_ev: {unit: eV}
+      direct_band_gap_ev: {unit: eV}
+      magnetic_moment_mu_b: {unit: μB}
+      restart_file: {kind: file}
+  relax:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      ecut_ev: {unit: eV}
+      kpoint_density: {unit: 1/Å}
+      smearing_ev: {unit: eV}
+      fmax: {unit: eV/Å}
+      output: {kind: structure}
+    outputs:
+      energy_ev: {unit: eV}
+      energy_per_atom_ev: {unit: eV/atom}
+      volume_per_atom_angstrom3: {unit: Å³/atom}
+      stress_gpa: {unit: GPa}
+      band_gap_ev: {unit: eV}
+      magnetic_moment_mu_b: {unit: μB}
+      relaxed_structure: {kind: structure}
+  equation_of_state:
+    long_running: true
+    params:
+      structure: {kind: structure}
+      ecut_ev: {unit: eV}
+      kpoint_density: {unit: 1/Å}
+      smearing_ev: {unit: eV}
+      plot: {kind: image}
+    outputs:
+      volume_per_atom_angstrom3: {unit: Å³/atom}
+      energy_per_atom_ev: {unit: eV/atom}
+      bulk_modulus_gpa: {unit: GPa}
+      plot: {kind: image}
+  band_structure:
+    long_running: true
+    params:
+      structure: {kind: file}
+      ecut_ev: {unit: eV}
+      kpoint_density: {unit: 1/Å}
+      plot: {kind: image}
+    outputs:
+      band_gap_ev: {unit: eV}
+      valence_band_maximum_ev: {unit: eV}
+      fermi_level_ev: {unit: eV}
+      plot: {kind: image}
+
+validity: >-
+  Results depend on the functional, the plane-wave cutoff, and the k-point
+  mesh; check convergence (energy differences change by less than about 1
+  meV/atom when ecut_ev and kpoint_density increase) before trusting fine
+  energy differences. PBE overestimates lattice constants by about 1% and
+  underestimates bulk moduli; PBEsol is better for lattice constants. Band gaps
+  from PBE and LDA are typically 30-50% too small (silicon: about 0.6 eV vs 1.17
+  eV measured), and some semiconductors come out metallic; hybrid functionals or
+  GW are needed for quantitative gaps. Strongly correlated d- and f-electron
+  materials (many oxides of Mn, Fe, Co, Ni) need DFT+U or beyond, which this
+  tool does not set up. Spin-polarized runs start ferromagnetic; antiferromagnets
+  need initial moments in the structure file. Calculations are at 0 K without
+  zero-point motion. Cost grows with the number of atoms cubed and with the
+  k-point count: dozens of atoms are practical, hundreds are not.
+
+golden:
+  - name: silicon energy and gap match the GPAW test suite
+    function: scf
+    args:
+      structure: tests/data/Si_5.475.extxyz
+      xc: LDA
+      ecut_ev: 200
+      kpts: [4, 4, 4]
+      gamma_centered: false
+      occupations: tetrahedron
+      spin_polarized: true
+    expect:
+      energy_ev: {approx: -11.8584, abs: 0.001}
+      band_gap_ev: {approx: 1.117, abs: 0.002}
+      restart_file: {exists: true}
+    reference: >-
+      GPAW 26.7.0, gpaw/test/generic/test_si_primitive.py: diamond Si (a = 5.475
+      Angstrom), GPAW's default LDA functional, PW 200 eV, 4x4x4 Monkhorst-Pack
+      k-points, tetrahedron method, spin-polarized: E = -11.8584 eV (0.001) and
+      LUMO - HOMO on that mesh = 1.117 eV (0.002).
+  - name: silicon equation of state matches all-electron PBE
+    function: equation_of_state
+    args: {structure: tests/data/Si_5.475.extxyz, ecut_ev: 500, kpoint_density: 5}
+    expect:
+      volume_per_atom_angstrom3: {approx: 20.453, rel: 0.005}
+      bulk_modulus_gpa: {approx: 88.545, rel: 0.04}
+      plot: {exists: true}
+    timeout: 1800
+    reference: >-
+      Delta benchmark, WIEN2k 13.1 all-electron PBE reference (K. Lejaeghere et al.,
+      Science 351, aad3000 (2016); github.com/molmod/DeltaCodesDFT WIEN2k.txt at
+      commit f9b6693): Si V0 = 20.4530 Angstrom^3/atom, B0 = 88.545 GPa. This tool
+      gives 20.52 Angstrom^3/atom and 88.58 GPa (PW 500 eV, 10x10x10 k-points).
+  - name: silicon has an indirect gap from Gamma to the Gamma-X line
+    function: band_structure
+    args: {structure: tests/data/Si_5.475.extxyz, n_points: 60}
+    expect:
+      gap_is_direct: false
+      valence_band_maximum_at: "Γ"
+      conduction_band_minimum_at: {contains: "between Γ and X"}
+      band_gap_ev: {min: 0.4, max: 0.8}
+      plot: {exists: true}
+    timeout: 1800
+    reference: >-
+      Silicon is an indirect semiconductor: valence band maximum at Gamma,
+      conduction band minimum on the Delta line about 85% of the way from Gamma to
+      X (e.g. P. Y. Yu and M. Cardona, Fundamentals of Semiconductors). PBE
+      underestimates the 1.17 eV measured gap, typically giving about 0.6 eV.
+  - name: iron is a ferromagnet with the measured moment
+    function: scf
+    args: {structure: tests/data/Fe_bcc.extxyz, ecut_ev: 500, kpoint_density: 5, smearing_ev: 0.1}
+    expect:
+      magnetic_moment_mu_b: {approx: 2.22, abs: 0.12}
+      is_metal: true
+      settings.spin_polarized: true
+    timeout: 1800
+    reference: >-
+      Saturation moment of bcc iron at 0 K, 2.22 mu_B per atom (C. Kittel,
+      Introduction to Solid State Physics, 8th ed., Ch. 11). This tool gives 2.16
+      mu_B at the all-electron PBE volume (a = 2.8309 Angstrom, V = 11.3436
+      Angstrom^3/atom from the Delta benchmark). Spin polarization must switch on
+      automatically for Fe.
+  - name: molecules without a periodic cell are refused
+    function: scf
+    args: {structure: tests/data/water.xyz}
+    raises: "has no periodic cell"
+    reference: >-
+      Plane-wave DFT needs a periodic cell; molecules belong to the pyscf or xtb tools.

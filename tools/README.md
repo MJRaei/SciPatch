@@ -8,6 +8,7 @@ reproduce published or upstream-tested values on every build.
 | Tool | Field | What it does | Checked against |
 |---|---|---|---|
 | [chgnet](chgnet/) | materials | Energies, forces, stresses, magnetic moments, relaxation, and MD with the CHGNet universal potential | CHGNet's test suite (LiMnO₂ energy and relaxation) |
+| [gpaw](gpaw/) | materials | DFT for crystals (plane waves, PAW): energies, forces, stress, relaxation, equation of state, band structures and gaps, magnetism | GPAW's test suite (Si); all-electron PBE equation of state (Delta benchmark); Fe moment |
 | [mace](mace/) | materials, chemistry | The same with MACE-MP (89 elements) and MACE-OFF (organic molecules) | MACE's test suite (water); Si and Al lattice constants vs. experiment |
 | [phonopy](phonopy/) | materials | Phonon bands and DOS, dynamical stability, vibrational free energy and heat capacity | Dulong-Petit limit; Γ-point symmetry of silicon |
 | [pyscf](pyscf/) | chemistry | Ab initio quantum chemistry: HF, DFT, MP2, CCSD(T) energies, optimization, frequencies and thermochemistry, excited states (TDDFT) | PySCF's test suite (water HF, B3LYP, MP2, CCSD(T), frequencies; CIS of HF); NIST CCCBDB |
@@ -49,7 +50,10 @@ accepts.
 
 - **Is a new material stable?** `materials-project.search` (known phases) →
   `chgnet.relax` and `mace.relax` (two independent potentials) →
+  `gpaw.scf` on the relaxed structure (do DFT forces and stress agree?) →
   `phonopy.phonons` on the relaxed structure (dynamical stability).
+- **Electronic structure:** `gpaw.scf` → `gpaw.band_structure` on its restart
+  file (gap, direct or indirect, band edges; PBE gaps are too small).
 - **How fast do ions move?** `pymatgen-structure.make_supercell` (≥ 100 atoms) →
   `chgnet.molecular_dynamics` or `mace.molecular_dynamics` at several temperatures
   (several ps each) → `pymatgen-diffusion.analyze_trajectory` →
