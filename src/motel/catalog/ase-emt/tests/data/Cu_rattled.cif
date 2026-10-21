@@ -1,0 +1,33 @@
+data_image0
+_chemical_formula_structural       Cu8
+_chemical_formula_sum              "Cu8"
+_cell_length_a       5.105310960166873
+_cell_length_b       5.105310960166873
+_cell_length_c       5.105310960166873
+_cell_angle_alpha    60.00000000000001
+_cell_angle_beta     60.00000000000001
+_cell_angle_gamma    60.00000000000001
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Cu  Cu1       1.0  0.021479282318033036  0.9951935322931847  0.9936646792933311  1.0000
+  Cu  Cu2       1.0  0.9938004490186134  0.018988910852485535  0.4723934767411183  1.0000
+  Cu  Cu3       1.0  0.02011677274731256  0.49011604590090396  0.0038268138779206525  1.0000
+  Cu  Cu4       1.0  0.9975273801564973  0.5247717109161081  0.4752890001413372  1.0000
+  Cu  Cu5       1.0  0.4944808185047611  0.9911236826337557  0.01359935095702223  1.0000
+  Cu  Cu6       1.0  0.4937128648784383  0.0015599564408337319  0.4894702535893917  1.0000
+  Cu  Cu7       1.0  0.5015185277150365  0.5109915238009862  0.9867982802304887  1.0000
+  Cu  Cu8       1.0  0.5041040361013419  0.5081868160643289  0.5060273249687934  1.0000

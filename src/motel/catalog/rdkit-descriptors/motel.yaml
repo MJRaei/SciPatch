@@ -1,0 +1,87 @@
+schema: 1
+name: rdkit-descriptors
+version: 1.0.0
+title: RDKit molecular descriptors
+summary: >-
+  Cheminformatics for small molecules given as SMILES: molecular weight, logP,
+  polar surface area, hydrogen-bond counts, drug-likeness (QED, Lipinski),
+  fingerprint similarity, and force-field optimized 3D conformers, using RDKit.
+domains: [chemistry]
+tags: [cheminformatics, smiles, descriptors, drug-likeness, lipinski, qed, logp, tpsa,
+       fingerprints, similarity, tanimoto, conformer, 3d-structure, mmff, rdkit]
+
+source:
+  homepage: https://www.rdkit.org
+  paper: https://doi.org/10.5281/zenodo.591637
+  citation: "RDKit: Open-source cheminformatics, https://www.rdkit.org (doi:10.5281/zenodo.591637)."
+  license: BSD-3-Clause
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["rdkit==2026.9.1"]
+
+entrypoint: api
+
+functions:
+  descriptors:
+    params:
+      smiles: {kind: molecule}
+    outputs:
+      molecular_weight_g_mol: {unit: g/mol}
+      exact_mass_da: {unit: Da}
+      tpsa_angstrom2: {unit: Å²}
+  similarity:
+    params:
+      smiles_a: {kind: molecule}
+      smiles_b: {kind: molecule}
+  conformer:
+    params:
+      smiles: {kind: molecule}
+    outputs:
+      conformer: {kind: molecule}
+      energy_kcal_mol: {unit: kcal/mol}
+
+validity: >-
+  Descriptors are deterministic functions of the molecular graph and are exact
+  for what they define; but logP (Crippen) and TPSA are empirical estimates that
+  differ from other methods (e.g. PubChem's XLogP3) by up to about one log unit
+  or several Å². QED and the rule of five are heuristics for oral drugs, not
+  predictions of activity. Conformers are a single force-field minimum near the
+  embedding, not the global minimum or a Boltzmann ensemble; force-field
+  energies are only comparable between conformers of the same molecule.
+
+golden:
+  - name: aspirin matches PubChem
+    function: descriptors
+    args: {smiles: "CC(=O)Oc1ccccc1C(=O)O"}
+    expect:
+      formula: C9H8O4
+      molecular_weight_g_mol: {approx: 180.16, abs: 0.01}
+      exact_mass_da: {approx: 180.04226, abs: 0.00005}
+      tpsa_angstrom2: {approx: 63.6, abs: 0.05}
+      lipinski_violations: 0
+    reference: >-
+      PubChem CID 2244 (aspirin): C9H8O4, 180.16 g/mol, monoisotopic mass
+      180.04225873 Da, topological polar surface area 63.6 Å².
+  - name: caffeine formula and weight match PubChem
+    function: descriptors
+    args: {smiles: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C"}
+    expect:
+      formula: C8H10N4O2
+      molecular_weight_g_mol: {approx: 194.19, abs: 0.01}
+    reference: "PubChem CID 2519 (caffeine): C8H10N4O2, 194.19 g/mol."
+  - name: a molecule is identical to itself
+    function: similarity
+    args: {smiles_a: "c1ccccc1O", smiles_b: "Oc1ccccc1"}
+    expect:
+      tanimoto: 1.0
+    reference: Two SMILES of phenol describe the same molecule.
+  - name: aspirin conformer is generated and optimized
+    function: conformer
+    args: {smiles: "CC(=O)Oc1ccccc1C(=O)O"}
+    expect:
+      converged: true
+      n_atoms: 21
+      conformer: {exists: true}
+    reference: Aspirin has 21 atoms including hydrogens (C9H8O4).
