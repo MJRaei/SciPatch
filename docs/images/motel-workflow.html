@@ -2,331 +2,191 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>How Motel works</title>
+<title>Motel workflow</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --ink: #0b1220;
-    --text: #1e293b;
-    --muted: #55657c;
-    --faint: #94a3b8;
-    --line: #e2e8f0;
-    --bg: #f5f7fb;
-    --card: #ffffff;
-    --build: #4f46e5;
-    --build-soft: #eef0ff;
-    --verify: #059669;
-    --verify-soft: #e8f8f1;
-    --catalog: #c2410c;
-    --catalog-soft: #fff1e8;
-    --use: #0369a1;
-    --use-soft: #e6f3fb;
-    --gold: #b45309;
-    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
-  }
-  @page { size: 1920px 1080px; margin: 0; }
-  @media print { .card, .stat, .logo { box-shadow: none !important; } }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  html, body { background: var(--bg); }
-  body { font-family: Inter, "Helvetica Neue", Arial, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
-  .canvas { position: relative; width: 1920px; height: 1080px; overflow: hidden;
-            background:
-              radial-gradient(1200px 500px at 85% -10%, #e9ecff 0%, rgba(233,236,255,0) 60%),
-              radial-gradient(900px 500px at -10% 110%, #e3f4ff 0%, rgba(227,244,255,0) 60%),
-              var(--bg); }
-
-  /* header */
-  .header { position: absolute; left: 44px; right: 44px; top: 30px; height: 92px; display: flex; align-items: center; justify-content: space-between; }
-  .brand { display: flex; align-items: center; gap: 18px; }
-  .logo { width: 68px; height: 68px; border-radius: 18px; background: linear-gradient(135deg, #4f46e5, #0369a1); display: grid; place-items: center; box-shadow: 0 10px 24px rgba(79,70,229,.28); }
-  .title { font-size: 46px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); line-height: 1; }
-  .tagline { margin-top: 8px; font-size: 20px; color: var(--muted); font-weight: 500; }
-  .tagline b { color: var(--ink); font-weight: 600; }
-  .stats { display: flex; gap: 12px; }
-  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 16px 9px; min-width: 112px; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
-  .stat .n { font-size: 28px; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; line-height: 1.05; }
-  .stat .l { font-size: 12.5px; color: var(--muted); font-weight: 500; margin-top: 2px; white-space: nowrap; }
-
-  /* lanes */
-  .lane-label { position: absolute; left: 44px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-  .lane-label .num { width: 26px; height: 26px; border-radius: 50%; color: #fff; display: grid; place-items: center; font-size: 14px; letter-spacing: 0; }
-  .lane-label .rest { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--muted); font-size: 15px; }
-
-  .card { position: absolute; width: 419px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px 16px; box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 8px 24px rgba(15,23,42,.06); }
-  .card .top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-  .icon { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; flex: none; }
-  .icon svg { width: 22px; height: 22px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .kicker { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
-  .card h3 { font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; line-height: 1.2; }
-  .card p { font-size: 14px; line-height: 1.45; color: var(--muted); }
-
-  .build .icon { background: var(--build-soft); } .build .icon svg { stroke: var(--build); } .build .kicker { color: var(--build); }
-  .verify .icon { background: var(--verify-soft); } .verify .icon svg { stroke: var(--verify); } .verify .kicker { color: var(--verify); }
-  .catalog .icon { background: var(--catalog-soft); } .catalog .icon svg { stroke: var(--catalog); } .catalog .kicker { color: var(--catalog); }
-  .use .icon { background: var(--use-soft); } .use .icon svg { stroke: var(--use); } .use .kicker { color: var(--use); }
-  .card.verify { border: 1.5px solid #a7e3cb; box-shadow: 0 1px 2px rgba(5,150,105,.08), 0 10px 28px rgba(5,150,105,.12); }
-
-  .cmd { font-family: var(--mono); font-size: 13px; background: #0f172a; color: #e2e8f0; border-radius: 9px; padding: 8px 11px; margin-top: 10px; white-space: nowrap; }
-  .cmd .p { color: #7dd3fc; }
-  .cmd .a { color: #a5b4fc; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-  .chip { font-size: 12.5px; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; white-space: nowrap; }
-  .chip.b { background: var(--build-soft); color: #3730a3; border-color: #dfe2ff; }
-  .chip.u { background: var(--use-soft); color: #075985; border-color: #cfe7f6; }
-  .chip.ok { background: var(--verify-soft); color: #065f46; border-color: #c9eedd; }
-
-  .repo { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-  .repo .r { font-family: var(--mono); font-size: 12.5px; color: #334155; background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; display: flex; justify-content: space-between; }
-  .repo .r span:last-child { color: var(--faint); font-family: Inter, sans-serif; font-size: 12px; }
-
-  .steps { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
-  .steps li { font-size: 14px; color: var(--text); display: flex; gap: 8px; align-items: baseline; line-height: 1.35; }
-  .steps li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--build); flex: none; transform: translateY(-2px); }
-  .use .steps li::before { background: var(--use); }
-  .files { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
-  .files span { font-family: var(--mono); font-size: 12px; color: #3730a3; background: var(--build-soft); border-radius: 6px; padding: 3px 7px; }
-
-  .golden { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; }
-  .g { display: grid; grid-template-columns: 18px 70px 1fr; align-items: center; gap: 7px; font-size: 13px; line-height: 1.3; white-space: nowrap; }
-  .g-head { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
-  .g-head em { font-style: normal; }
-  .tags { display: flex; gap: 6px; margin-top: 9px; }
-  .tags span { font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--catalog-soft); color: #9a3412; }
-  .g .ok { width: 18px; height: 18px; border-radius: 50%; background: var(--verify); display: grid; place-items: center; }
-  .g .ok svg { width: 11px; height: 11px; stroke: #fff; stroke-width: 3.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-  .g .t { font-weight: 700; color: var(--ink); }
-  .g .v { color: var(--text); }
-  .g .v em { font-style: normal; color: var(--faint); }
-  .bugs { margin-top: 9px; font-size: 12.5px; color: #92400e; background: #fff7ed; border: 1px solid #fde4c8; border-radius: 9px; padding: 7px 10px; line-height: 1.38; }
-  .bugs b { color: #7c2d12; }
-
-  .fields { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; }
-  .f { display: grid; grid-template-columns: 86px 1fr; gap: 8px; font-size: 13px; line-height: 1.32; white-space: nowrap; }
-  .f .k { font-weight: 700; color: var(--catalog); }
-  .f .vv { color: #334155; }
-
-  .bubble { border-radius: 14px; padding: 10px 13px; font-size: 14.5px; line-height: 1.42; }
-  .bubble.q { background: #0f172a; color: #f1f5f9; border-bottom-left-radius: 4px; margin-top: 4px; }
-  .bubble.a { background: var(--use-soft); color: #0c2a42; border: 1px solid #cfe7f6; border-bottom-right-radius: 4px; }
-  .bubble b { font-weight: 700; }
-
-  .call { border: 1px solid var(--line); border-radius: 11px; padding: 8px 10px; margin-top: 7px; background: #fbfcfe; }
-  .call .fn { font-family: var(--mono); font-size: 12.5px; font-weight: 600; color: #075985; }
-  .call .fn i { font-style: normal; color: var(--faint); font-weight: 400; }
-  .call .out { font-size: 13.5px; color: var(--text); margin-top: 3px; }
-  .call .out b { color: var(--ink); }
-  .call .out em { font-style: normal; color: var(--verify); font-weight: 600; }
-
-  .meta { display: flex; flex-direction: column; gap: 5px; margin-top: 9px; }
-  .meta div { font-size: 12.5px; color: var(--muted); display: flex; gap: 7px; line-height: 1.33; }
-  .meta div b { color: var(--ink); font-weight: 600; flex: none; }
-
-  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
-  .badge.est { background: #ecfdf5; color: #047857; border: 1px solid #b7ebd3; }
-
-  /* why it matters */
-  .why { position: absolute; left: 44px; right: 44px; top: 868px; height: 182px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-  .w { background: #0f172a; border-radius: 18px; padding: 18px 20px; color: #cbd5e1; position: relative; overflow: hidden; }
-  .w .k { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-  .w h4 { font-size: 18.5px; font-weight: 700; color: #fff; margin-top: 6px; line-height: 1.25; letter-spacing: -0.01em; }
-  .w p { font-size: 13.5px; line-height: 1.45; margin-top: 7px; color: #b6c2d3; }
-  .w .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
-
-  svg.arrows { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; }
-  .alabel { position: absolute; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); background: var(--bg); padding: 1px 6px; border-radius: 6px; white-space: nowrap; }
+  @page { size: 1800px 660px; margin: 0; }
+  * { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { background: #ffffff; }
+  svg { display: block; }
+  text { font-family: Inter, "Helvetica Neue", Arial, sans-serif; }
+  .mono { font-family: "JetBrains Mono", Menlo, monospace; }
+  @media print { .sh { filter: none; } }
 </style>
 </head>
 <body>
-<div class="canvas">
+<svg width="1800" height="660" viewBox="0 0 1800 660" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#0284c7"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <marker id="a-indigo" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4f46e5"/></marker>
+    <marker id="a-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto"><path d="M0 0L10 5L0 10z" fill="#059669"/></marker>
+    <marker id="a-sky" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0284c7"/></marker>
+    <marker id="a-rose" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#e11d48"/></marker>
 
-  <!-- header -->
-  <div class="header">
-    <div class="brand">
-      <div class="logo">
-        <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-6h6v6"/><path d="M7.5 11.5h0M16.5 11.5h0"/>
-        </svg>
-      </div>
-      <div>
-        <div class="title">Motel</div>
-        <div class="tagline">Any research repository → <b>a verified tool every AI assistant can run</b> · built for the physical sciences</div>
-      </div>
-    </div>
-    <div class="stats">
-      <div class="stat"><div class="n">50</div><div class="l">research tools</div></div>
-      <div class="stat"><div class="n">303</div><div class="l">golden tests</div></div>
-      <div class="stat"><div class="n">10</div><div class="l">hackathon projects</div></div>
-      <div class="stat"><div class="n">5</div><div class="l">AI apps connected</div></div>
-      <div class="stat"><div class="n">3</div><div class="l">OS: Linux · Mac · Win</div></div>
-    </div>
-  </div>
+    <!-- icons: 24x24, stroked with the current colour -->
+    <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+    <symbol id="i-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <symbol id="i-atom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.2"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/></symbol>
+    <symbol id="i-molecule" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="7" r="2.5"/><circle cx="18.5" cy="7" r="2.5"/><circle cx="12" cy="18" r="2.5"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="7" y1="9.2" x2="10.7" y2="15.8"/><line x1="17" y1="9.2" x2="13.3" y2="15.8"/></symbol>
+    <symbol id="i-cube" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
+    <symbol id="i-battery" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/><path d="M11.5 9.5 9 12h3l-2.5 2.5"/></symbol>
+    <symbol id="i-thermo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></symbol>
+    <symbol id="i-house" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v12h14V9"/><path d="M10 21v-6h4v6"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="hex" viewBox="-50 -50 100 100"><polygon points="0,-46 39.8,-23 39.8,23 0,46 -39.8,23 -39.8,-23" stroke-linejoin="round"/></symbol>
+  </defs>
 
-  <!-- lane 1 -->
-  <div class="lane-label" style="top:140px; color: var(--build);"><span class="num" style="background: var(--build);">1</span>Build once<span class="rest">— your coding agent wraps the code, Motel verifies it</span></div>
+  <!-- zones -->
+  <rect x="10" y="10" width="870" height="640" rx="36" fill="#f1f2ff" stroke="#e0e3fd" stroke-width="2"/>
+  <rect x="920" y="10" width="870" height="640" rx="36" fill="#ecf6fc" stroke="#d3e9f6" stroke-width="2"/>
+  <circle cx="50" cy="52" r="20" fill="#4f46e5"/>
+  <text x="50" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#fff">1</text>
+  <text x="82" y="61" font-size="26" font-weight="800" letter-spacing="3" fill="#4f46e5">BUILD ONCE</text>
+  <circle cx="960" cy="52" r="20" fill="#0284c7"/>
+  <text x="960" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#fff">2</text>
+  <text x="992" y="61" font-size="26" font-weight="800" letter-spacing="3" fill="#0284c7">USE EVERYWHERE</text>
 
-  <div class="card build" style="left:44px; top:172px; height:296px;">
-    <div class="top">
-      <div class="icon"><svg viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg></div>
-      <div><div class="kicker">Start</div><h3>A research repo + its paper</h3></div>
-    </div>
-    <div class="repo">
-      <div class="r"><span>usnistgov/fipy</span><span>diffusion, phase field</span></div>
-      <div class="r"><span>xraypy/xraylarch</span><span>X-ray absorption</span></div>
-      <div class="r"><span>iRASPA/RASPA3</span><span>adsorption</span></div>
-      <div class="r"><span>MauricioCafiero/UMADock</span><span>hackathon project</span></div>
-    </div>
-    <div class="cmd"><span class="p">$</span> motel onboard <span class="a">&lt;github-url&gt;</span> --paper <span class="a">&lt;doi&gt;</span></div>
-  </div>
+  <!-- 1. research code -->
+  <circle class="sh" cx="135" cy="310" r="66" fill="#fff" stroke="#4f46e5" stroke-width="4" filter="url(#shadow)"/>
+  <use href="#i-code" x="107" y="282" width="56" height="56" style="color:#4f46e5"/>
+  <circle cx="186" cy="360" r="25" fill="#fff" stroke="#4f46e5" stroke-width="3"/>
+  <use href="#i-file" x="173" y="347" width="26" height="26" style="color:#4f46e5"/>
+  <text x="135" y="428" text-anchor="middle" font-size="28" font-weight="700" fill="#0b1220">Research code</text>
+  <text x="135" y="460" text-anchor="middle" font-size="22" fill="#55657c">+ its paper</text>
 
-  <div class="card build" style="left:515px; top:172px; height:296px;">
-    <div class="top">
-      <div class="icon"><svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
-      <div><div class="kicker">Onboard</div><h3>Your coding agent builds the tool</h3></div>
-    </div>
-    <div class="chips" style="margin-top:0; margin-bottom:10px;"><span class="chip b">Claude Code</span><span class="chip b">Codex</span><span class="chip b">Gemini CLI</span><span class="chip">+ Motel onboarding skill</span></div>
-    <ul class="steps">
-      <li>Pin the commit; build an isolated environment</li>
-      <li>Wrap the science, not the UI or LLM layer</li>
-      <li>Fix upstream bugs as replayable patches</li>
-      <li>Typed functions, units, validity limits, citation</li>
-    </ul>
-    <div class="files"><span>motel.yaml</span><span>api.py</span><span>SKILL.md</span><span>patches/</span><span>tests/data/</span></div>
-  </div>
+  <line x1="212" y1="310" x2="266" y2="310" stroke="#4f46e5" stroke-width="5" stroke-linecap="round" marker-end="url(#a-indigo)"/>
 
-  <div class="card verify" style="left:986px; top:172px; height:296px;">
-    <div class="top">
-      <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
-      <div><div class="kicker">Verify · golden tests</div><h3>Must reproduce known science</h3></div>
-    </div>
-    <div class="golden">
-      <div class="g g-head"><span></span><span>tool</span><span>computed <em>· reference</em></span></div>
-      <div class="g"><span class="ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="t">RASPA3</span><span class="v">CO₂ in silicalite 1.52 mmol/g <em>· exp. 1.48</em></span></div>
-      <div class="g"><span class="ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="t">Psi4</span><span class="v">water dimer −4.9184 kcal/mol <em>· S66 −4.918</em></span></div>
-      <div class="g"><span class="ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="t">FiPy</span><span class="v">steel carburizing 25,456 s <em>· Callister 25,400</em></span></div>
-      <div class="g"><span class="ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="t">xraylarch</span><span class="v">EXAFS Cu–Cu 2.542 Å <em>· crystal 2.556</em></span></div>
-      <div class="g"><span class="ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="t">Zeo++</span><span class="v">MFI pore 6.30 Å <em>· IZA database 6.36</em></span></div>
-    </div>
-    <div class="bugs"><b>Caught before release:</b> overlapping atoms in UMA-Dock sites, truncated AIMNet2 neighbour lists, a five-compound fallback hazard table in Catalyze.</div>
-  </div>
+  <!-- 2. coding agent -->
+  <circle class="sh" cx="345" cy="310" r="66" fill="#4f46e5" filter="url(#shadow)"/>
+  <use href="#i-bot" x="315" y="280" width="60" height="60" style="color:#fff"/>
+  <text x="345" y="428" text-anchor="middle" font-size="28" font-weight="700" fill="#0b1220">Coding agent</text>
+  <text x="345" y="460" text-anchor="middle" font-size="22" fill="#55657c">wraps it as a tool</text>
 
-  <div class="card catalog" style="left:1457px; top:172px; height:296px;">
-    <div class="top">
-      <div class="icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
-      <div><div class="kicker">Share</div><h3>A catalog of 50 verified tools</h3></div>
-    </div>
-    <div class="fields">
-      <div class="f"><span class="k">Quantum</span><span class="vv">PySCF · Psi4 · GPAW · QE · xTB · CREST</span></div>
-      <div class="f"><span class="k">Simulation</span><span class="vv">LAMMPS · OpenMM · phonopy · ML potentials</span></div>
-      <div class="f"><span class="k">Materials</span><span class="vv">pymatgen · PyXtal · Zeo++ · RASPA3</span></div>
-      <div class="f"><span class="k">Continuum</span><span class="vv">Cantera · pycalphad · FiPy · PyBaMM</span></div>
-      <div class="f"><span class="k">Spectra</span><span class="vv">xraylarch · xraylib · pyOpenMS · NMR</span></div>
-      <div class="f"><span class="k">Molecules</span><span class="vv">RDKit · AiZynthFinder · Vina · UMA-Dock</span></div>
-    </div>
-    <div class="tags"><span>established 36</span><span>published 4</span><span>experimental 10</span></div>
-    <div class="cmd" style="margin-top:9px;"><span class="p">$</span> motel add zeopp raspa3</div>
-  </div>
+  <line x1="422" y1="310" x2="480" y2="310" stroke="#4f46e5" stroke-width="5" stroke-linecap="round" marker-end="url(#a-indigo)"/>
 
-  <!-- lane 2 -->
-  <div class="lane-label" style="top:496px; color: var(--use);"><span class="num" style="background: var(--use);">2</span>Use everywhere<span class="rest">— any AI assistant runs real science through Motel</span></div>
+  <!-- 3. golden test gate -->
+  <polygon class="sh" points="570,232 648,310 570,388 492,310" fill="#fff" stroke="#059669" stroke-width="4" stroke-linejoin="round" filter="url(#shadow)"/>
+  <use href="#i-shield" x="544" y="284" width="52" height="52" style="color:#059669"/>
+  <text x="570" y="428" text-anchor="middle" font-size="28" font-weight="700" fill="#0b1220">Matches known</text>
+  <text x="570" y="460" text-anchor="middle" font-size="28" font-weight="700" fill="#0b1220">results?</text>
 
-  <div class="card use" style="left:44px; top:528px; height:306px;">
-    <div class="top">
-      <div class="icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
-      <div><div class="kicker">Ask</div><h3>A question, in any AI app</h3></div>
-    </div>
-    <div class="bubble q">Can silicalite (MFI zeolite) capture CO₂ from power-plant flue gas, 15% CO₂ in N₂, at 1 bar and 300 K?</div>
-    <div class="chips" style="margin-top:12px;"><span class="chip u">Claude Desktop</span><span class="chip u">Claude Code</span><span class="chip u">Codex</span><span class="chip u">Gemini CLI</span><span class="chip u">Cursor</span><span class="chip">dashboard · CLI</span></div>
-    <p style="margin-top:9px; font-size:13px;">Connected through the Model Context Protocol and Agent Skills.</p>
-  </div>
+  <!-- no: back to the agent -->
+  <path d="M570 226 V182 Q570 168 556 168 H359 Q345 168 345 182 V230" fill="none" stroke="#e11d48" stroke-width="4" stroke-dasharray="10 9" stroke-linecap="round" marker-end="url(#a-rose)"/>
+  <circle cx="457" cy="168" r="18" fill="#e11d48"/>
+  <use href="#i-x" x="447" y="158" width="20" height="20" style="color:#fff"/>
+  <text x="457" y="134" text-anchor="middle" font-size="22" font-weight="700" fill="#e11d48">no: fix and retry</text>
 
-  <div class="card use" style="left:515px; top:528px; height:306px;">
-    <div class="top">
-      <div class="icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-      <div><div class="kicker">Run</div><h3>Motel picks, runs, and records</h3></div>
-    </div>
-    <ul class="steps">
-      <li><span><b>Find</b> — search ranks established, tested tools first</span></li>
-      <li><span><b>Check</b> — typed inputs, units, stated validity limits</span></li>
-      <li><span><b>Run</b> — in the tool's own pinned environment, locally</span></li>
-      <li><span><b>Record</b> — version, source commit, inputs; repeats come from history</span></li>
-    </ul>
-    <div class="chips" style="margin-top:12px;"><span class="chip ok">no dependency conflicts</span><span class="chip ok">reproducible</span><span class="chip ok">data stays local</span><span class="chip ok">Linux · macOS · Windows</span></div>
-  </div>
+  <!-- example golden test -->
+  <rect class="sh" x="430" y="490" width="280" height="140" rx="20" fill="#fff" stroke="#bfe9d6" stroke-width="2" filter="url(#shadow)"/>
+  <text x="452" y="526" font-size="21" font-weight="600" fill="#55657c">CO₂ uptake, mmol/g</text>
+  <text x="452" y="567" font-size="22" font-weight="700" fill="#0b1220">Tool</text>
+  <rect x="512" y="550" width="122" height="22" rx="11" fill="#059669"/>
+  <text x="644" y="568" font-size="22" font-weight="700" fill="#0b1220">1.52</text>
+  <text x="452" y="609" font-size="22" font-weight="700" fill="#0b1220">Lab</text>
+  <rect x="512" y="592" width="118" height="22" rx="11" fill="#94a3b8"/>
+  <text x="644" y="610" font-size="22" font-weight="700" fill="#0b1220">1.48</text>
 
-  <div class="card use" style="left:986px; top:528px; height:306px;">
-    <div class="top">
-      <div class="icon"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
-      <div><div class="kicker">Compose</div><h3>The agent chains verified tools</h3></div>
-    </div>
-    <div class="call" style="margin-top:2px;"><div class="fn">zeopp.pore_geometry<i>(MFI.cif)</i></div><div class="out">cavities <b>6.3 Å</b>, windows <b>4.4–4.6 Å</b>, 3D channels</div></div>
-    <div class="call"><div class="fn">raspa3.adsorption_isotherm<i>(MFI, CO₂, 300 K)</i></div><div class="out">pure CO₂ at 1 bar: <b>1.52 mmol/g</b> <em>(measured 1.48)</em></div></div>
-    <div class="call"><div class="fn">raspa3.mixture_adsorption<i>(15% CO₂, 85% N₂)</i></div><div class="out">CO₂/N₂ selectivity <b>18.5</b></div></div>
-  </div>
+  <!-- yes: into the catalog -->
+  <line x1="652" y1="310" x2="740" y2="310" stroke="#059669" stroke-width="5" stroke-linecap="round" marker-end="url(#a-green)"/>
+  <circle cx="696" cy="310" r="18" fill="#059669"/>
+  <use href="#i-check" x="686" y="300" width="20" height="20" style="color:#fff"/>
 
-  <div class="card use" style="left:1457px; top:528px; height:306px;">
-    <div class="top">
-      <div class="icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-      <div><div class="kicker">Answer</div><h3>An answer you can check and cite</h3></div>
-    </div>
-    <div class="bubble a">Yes, selectively. Both gases fit MFI's 4.4–4.6 Å channels, but from flue gas it adsorbs CO₂ <b>18× over N₂</b>. Pure CO₂ loads <b>1.5 mmol/g</b> at 1 bar.</div>
-    <div class="meta">
-      <div><b>Trust</b><span><span class="badge est">Established</span> · golden-tested against NIST ISODB and IZA</span></div>
-      <div><b>Cites</b><span>Zeo++ (Willems 2012) · RASPA3 (Ran 2024)</span></div>
-      <div><b>Limits</b><span>rigid framework, generic force field</span></div>
-      <div><b>Record</b><span style="font-family: var(--mono); font-size: 12px;">raspa3 0.1.0 · pinned source commit</span></div>
-    </div>
-  </div>
+  <!-- hub: catalog of verified tools -->
+  <circle cx="900" cy="310" r="166" fill="none" stroke="#c7d2fe" stroke-width="2" stroke-dasharray="4 8"/>
+  <circle class="sh" cx="900" cy="310" r="150" fill="#fff" stroke="url(#ring)" stroke-width="7" filter="url(#shadow)"/>
+  <use href="#hex" x="850" y="260" width="100" height="100" fill="url(#brand)"/>
+  <use href="#i-house" x="879" y="289" width="42" height="42" style="color:#fff"/>
+  <g stroke-width="3">
+    <use href="#hex" x="889.5" y="191.6" width="100" height="100" fill="#f5f3ff" stroke="#c4b5fd"/>
+    <use href="#hex" x="929" y="260" width="100" height="100" fill="#ecfeff" stroke="#99e6f2"/>
+    <use href="#hex" x="889.5" y="328.4" width="100" height="100" fill="#fdf2f8" stroke="#f5b5d6"/>
+    <use href="#hex" x="810.5" y="328.4" width="100" height="100" fill="#f0fdf4" stroke="#a7e3bd"/>
+    <use href="#hex" x="771" y="260" width="100" height="100" fill="#fff7ed" stroke="#fdc79a"/>
+    <use href="#hex" x="810.5" y="191.6" width="100" height="100" fill="#eff6ff" stroke="#b3cdfb"/>
+  </g>
+  <use href="#i-atom" x="921.5" y="223.6" width="36" height="36" style="color:#7c3aed"/>
+  <use href="#i-molecule" x="961" y="292" width="36" height="36" style="color:#0891b2"/>
+  <use href="#i-wave" x="921.5" y="360.4" width="36" height="36" style="color:#db2777"/>
+  <use href="#i-battery" x="842.5" y="360.4" width="36" height="36" style="color:#16a34a"/>
+  <use href="#i-thermo" x="803" y="292" width="36" height="36" style="color:#ea580c"/>
+  <use href="#i-cube" x="842.5" y="223.6" width="36" height="36" style="color:#2563eb"/>
+  <rect x="764" y="480" width="272" height="86" rx="22" fill="#fff"/>
+  <text x="900" y="516" text-anchor="middle" font-size="30" font-weight="800" fill="#0b1220">50 verified tools</text>
+  <text x="900" y="550" text-anchor="middle" font-size="22" fill="#55657c">303 golden tests</text>
 
-  <!-- arrows -->
-  <svg class="arrows" viewBox="0 0 1920 1080">
-    <defs>
-      <marker id="hb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#4f46e5"/></marker>
-      <marker id="hg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#059669"/></marker>
-      <marker id="ho" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c2410c"/></marker>
-      <marker id="hu" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0369a1"/></marker>
-    </defs>
-    <!-- lane 1 -->
-    <line x1="467" y1="320" x2="509" y2="320" stroke="#4f46e5" stroke-width="3" marker-end="url(#hb)"/>
-    <line x1="938" y1="320" x2="980" y2="320" stroke="#4f46e5" stroke-width="3" marker-end="url(#hb)"/>
-    <line x1="1409" y1="320" x2="1451" y2="320" stroke="#059669" stroke-width="3" marker-end="url(#hg)"/>
-    <!-- lane 2 -->
-    <line x1="467" y1="681" x2="509" y2="681" stroke="#0369a1" stroke-width="3" marker-end="url(#hu)"/>
-    <line x1="938" y1="681" x2="980" y2="681" stroke="#0369a1" stroke-width="3" marker-end="url(#hu)"/>
-    <line x1="1409" y1="681" x2="1451" y2="681" stroke="#0369a1" stroke-width="3" marker-end="url(#hu)"/>
-    <!-- catalog feeds the tool chain -->
-    <path d="M1666 470 L1666 486 Q1666 494 1658 494 L1203 494 Q1195 494 1195 502 L1195 520" fill="none" stroke="#c2410c" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ho)"/>
-    <!-- failed golden test loops back to the agent -->
-    <path d="M1100 172 L1100 158 Q1100 150 1092 150 L732 150 Q724 150 724 158 L724 166" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#hb)"/>
-  </svg>
-  <div class="alabel" style="left:1336px; top:485px; color:#c2410c;">installed on demand</div>
-  <div class="alabel" style="left:812px; top:141px;">fails? the agent fixes it and re-checks</div>
+  <!-- connection to AI apps -->
+  <line x1="1053" y1="310" x2="1126" y2="310" stroke="#0284c7" stroke-width="5" stroke-linecap="round" marker-end="url(#a-sky)"/>
+  <circle cx="1088" cy="310" r="24" fill="#fff" stroke="#0284c7" stroke-width="3"/>
+  <use href="#i-plug" x="1075" y="297" width="26" height="26" style="color:#0284c7"/>
+  <text x="1088" y="366" text-anchor="middle" font-size="22" font-weight="800" letter-spacing="1.5" fill="#0284c7">MCP</text>
 
-  <!-- why it matters -->
-  <div class="why">
-    <div class="w"><div class="bar" style="background:#38bdf8;"></div>
-      <div class="k" style="color:#7dd3fc;">Impact</div>
-      <h4>Research code anyone can use by asking</h4>
-      <p>Students and researchers run real simulation and analysis codes from the AI assistant they already use: no installs, no environment conflicts, no rewrites. 10 hackathon projects already reusable.</p>
-    </div>
-    <div class="w"><div class="bar" style="background:#818cf8;"></div>
-      <div class="k" style="color:#a5b4fc;">Innovation</div>
-      <h4>Agents build the tools, Motel checks them</h4>
-      <p>Turning a repository into a tool becomes agent work, made trustworthy by pinned sources, saved patches, isolated environments, and golden tests.</p>
-    </div>
-    <div class="w"><div class="bar" style="background:#34d399;"></div>
-      <div class="k" style="color:#6ee7b7;">Novelty</div>
-      <h4>A tool layer that grows and proves itself</h4>
-      <p>Not a fixed toolkit: any repository can join, but only after it reproduces reference results, and agents see each tool's maturity and evidence when choosing.</p>
-    </div>
-    <div class="w"><div class="bar" style="background:#fb923c;"></div>
-      <div class="k" style="color:#fdba74;">Physical sciences &amp; math</div>
-      <h4>Real codes, checked against real data</h4>
-      <p>Quantum chemistry, molecular dynamics, phonons, adsorption, X-ray spectroscopy, batteries, CALPHAD, PDE solvers; checked against NIST, IZA, S66, textbooks, and exact solutions.</p>
-    </div>
-  </div>
+  <!-- AI assistant window -->
+  <rect class="sh" x="1140" y="84" width="620" height="466" rx="26" fill="#fff" stroke="#cfe6f4" stroke-width="2" filter="url(#shadow)"/>
+  <circle cx="1170" cy="112" r="7" fill="#fca5a5"/>
+  <circle cx="1192" cy="112" r="7" fill="#fcd34d"/>
+  <circle cx="1214" cy="112" r="7" fill="#86efac"/>
+  <text x="1450" y="120" text-anchor="middle" font-size="22" font-weight="600" fill="#55657c">Any AI assistant</text>
+  <line x1="1140" y1="140" x2="1760" y2="140" stroke="#e2e8f0" stroke-width="2"/>
 
-</div>
+  <rect x="1412" y="158" width="324" height="92" rx="24" fill="#0f172a"/>
+  <text x="1436" y="196" font-size="24" font-weight="500" fill="#f1f5f9">Can silicalite capture</text>
+  <text x="1436" y="230" font-size="24" font-weight="500" fill="#f1f5f9">CO₂ from flue gas?</text>
+
+  <rect x="1164" y="268" width="372" height="50" rx="25" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+  <use href="#i-terminal" x="1180" y="281" width="24" height="24" style="color:#0284c7"/>
+  <text class="mono" x="1216" y="301" font-size="22" font-weight="600" fill="#0b1220">zeopp<tspan fill="#94a3b8"> · </tspan><tspan font-weight="500" fill="#334155">pores</tspan></text>
+  <circle cx="1510" cy="293" r="15" fill="#059669"/>
+  <use href="#i-check" x="1501" y="284" width="18" height="18" style="color:#fff"/>
+
+  <rect x="1164" y="328" width="372" height="50" rx="25" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+  <use href="#i-terminal" x="1180" y="341" width="24" height="24" style="color:#0284c7"/>
+  <text class="mono" x="1216" y="361" font-size="22" font-weight="600" fill="#0b1220">raspa3<tspan fill="#94a3b8"> · </tspan><tspan font-weight="500" fill="#334155">adsorption</tspan></text>
+  <circle cx="1510" cy="353" r="15" fill="#059669"/>
+  <use href="#i-check" x="1501" y="344" width="18" height="18" style="color:#fff"/>
+
+  <rect x="1164" y="396" width="366" height="92" rx="24" fill="#e0f2fe" stroke="#bae6fd" stroke-width="2"/>
+  <text x="1188" y="434" font-size="24" font-weight="500" fill="#0c2a42">Yes: <tspan font-weight="800">18×</tspan> more selective</text>
+  <text x="1188" y="468" font-size="24" font-weight="500" fill="#0c2a42">for CO₂ than N₂</text>
+
+  <rect x="1164" y="502" width="150" height="34" rx="17" fill="#ecfdf5"/>
+  <use href="#i-shield" x="1176" y="508" width="22" height="22" style="color:#059669"/>
+  <text x="1206" y="527" font-size="20" font-weight="700" fill="#047857">Verified</text>
+  <rect x="1324" y="502" width="118" height="34" rx="17" fill="#eef0ff"/>
+  <use href="#i-book" x="1336" y="508" width="22" height="22" style="color:#4f46e5"/>
+  <text x="1366" y="527" font-size="20" font-weight="700" fill="#3730a3">Cited</text>
+  <rect x="1452" y="502" width="196" height="34" rx="17" fill="#e6f3fb"/>
+  <use href="#i-lock" x="1464" y="508" width="22" height="22" style="color:#0284c7"/>
+  <text x="1494" y="527" font-size="20" font-weight="700" fill="#075985">Reproducible</text>
+
+  <!-- apps -->
+  <g font-size="22" font-weight="600" fill="#075985" text-anchor="middle">
+    <rect x="1179" y="572" width="122" height="44" rx="22" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
+    <text x="1240" y="602">Claude</text>
+    <rect x="1313" y="572" width="112" height="44" rx="22" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
+    <text x="1369" y="602">Codex</text>
+    <rect x="1437" y="572" width="158" height="44" rx="22" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
+    <text x="1516" y="602">Gemini CLI</text>
+    <rect x="1607" y="572" width="114" height="44" rx="22" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
+    <text x="1664" y="602">Cursor</text>
+  </g>
+</svg>
 </body>
 </html>
