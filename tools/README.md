@@ -259,7 +259,3 @@ accepted when:
       and `maturity` is the level that evidence supports (new projects without a
       publication are `experimental`);
 - [ ] versions are pinned for every platform with `scipatch freeze tools/<name>`.
-
-The **Tools** CI workflow rebuilds every changed tool from scratch on Linux,
-macOS, and Windows (where its `scipatch.lock` says it can be installed) and runs its
-golden tests; all tools are re-checked weekly.

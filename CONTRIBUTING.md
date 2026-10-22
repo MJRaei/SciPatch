@@ -101,10 +101,6 @@ Tools live in [`tools/`](tools/README.md), one folder per tool. A new tool needs
 - a `validity` statement, a citation, and a license;
 - pinned versions: run `scipatch freeze tools/<name>` after a passing build.
 
-The **Tools** CI workflow rebuilds every changed tool from scratch on Linux and
-macOS and runs its golden tests; it also checks all tools weekly. Golden tests
-that need an API key run when the key is configured as a repository secret.
-
 The two built-in tools in `src/scipatch/catalog/` ship inside SciPatch itself, so the
 first-run demo needs nothing else; keep them small.
 

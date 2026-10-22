@@ -267,7 +267,7 @@ class GoldenTest(_Model):
     quick: bool = Field(
         False,
         description="Also run when the tool is installed (keep these to seconds). The "
-        "other tests run with 'scipatch check', 'scipatch test', and in CI.",
+        "other tests run with 'scipatch check' and 'scipatch test'.",
     )
 
     @field_validator("platforms")

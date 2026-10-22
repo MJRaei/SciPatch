@@ -178,10 +178,10 @@ The exact packages a tool was tested with, for every platform, written by
 
 Builds install exactly the locked conda packages and use the locked PyPI
 versions as constraints. On a platform marked unavailable, `scipatch add` stops at
-once with the reason, `scipatch catalog` shows the tool as not installable there,
-and CI skips it. `scipatch info` lists where a tool runs. On Windows, a tool with
+once with the reason, `scipatch catalog` shows the tool as not installable there.
+`scipatch info` lists where a tool runs. On Windows, a tool with
 Linux packages but no Windows ones is built and run inside WSL with its locked
-Linux packages (and CI checks it there); write such tools so they need nothing
+Linux packages; write such tools so they need nothing
 but their environment and the files they are given.
 
 The lock also records how much disk space the environment took on the
@@ -283,7 +283,7 @@ with `scipatch maturity <tool> <level>`.
 | `timeout` | Seconds (default 900). |
 | `requires` | Secrets the test needs, e.g. `[MP_API_KEY]`. Without them the test is skipped, not failed, so the tool still installs. |
 | `raises` | Text the call's error message must contain: the test passes only if the call *fails* this way. Use it to prove that inputs outside the tool's validity are refused, e.g. `raises: "no reliable parameters for Fe"`. |
-| `quick` | Also run when the tool is installed. Mark one fast test (seconds) that exercises the main computation; `scipatch add` runs only the quick tests (all of them if none is marked), while `scipatch check`, `scipatch test`, `scipatch add --all-tests`, and CI run every test. |
+| `quick` | Also run when the tool is installed. Mark one fast test (seconds) that exercises the main computation; `scipatch add` runs only the quick tests (all of them if none is marked), while `scipatch check`, `scipatch test`, and `scipatch add --all-tests` run every test. |
 | `platforms` | Run only on these platforms (e.g. `[linux-64, osx-arm64, osx-64]`), for tests that need a package some platform lacks. Elsewhere the test is skipped. Pair it with a test for the other platforms that checks the function explains what is missing. |
 
 Each check is a literal (numbers are compared to within about 1e-9) or a matcher:

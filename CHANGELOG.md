@@ -24,8 +24,7 @@ All notable changes to this project are documented here. The format follows
   hackathon project), narrated science videos (from the AtomicShorts hackathon
   project), and docking scored by machine-learned potentials (from the UMA-Dock
   hackathon project), each with golden tests against upstream test suites,
-  reference databases, or established physics, and a CI workflow that rebuilds
-  changed tools from scratch.
+  reference databases, or established physics.
 - Maturity levels: every tool is `established`, `published`, or `experimental`
   (the default), declared as `maturity` in `scipatch.yaml`, and refused when the
   evidence is missing (a publication, and golden tests whose new `against`
@@ -66,8 +65,7 @@ All notable changes to this project are documented here. The format follows
   (`"ambertools=23.3; sys_platform != 'win32'"`) to differ between platforms;
   `environment.platforms` restricts a tool to some platforms, and golden tests can
   run only on some (`platforms:`).
-- Tools CI runs on Linux, macOS, and Windows, choosing for each tool the runners
-  its `scipatch.lock` supports; SciPatch's own Windows tests are now required.
+- SciPatch's own Windows tests are now required in CI.
 - On Windows, tools that exist only for Linux (CREST, GPAW, LAMMPS, Quantum
   ESPRESSO) are built and run inside WSL, as their own documentation recommends:
   the environment is created on the Linux side from exactly the locked Linux
@@ -75,7 +73,7 @@ All notable changes to this project are documented here. The format follows
   paths translated both ways and variables passed through `WSLENV` (secrets never
   on a command line), and cancelling a run stops its Linux processes. Without
   WSL, `scipatch add` explains how to set it up; `scipatch doctor`, `scipatch info`, and
-  `scipatch catalog` show WSL support, and CI checks these tools on Windows in WSL.
+  `scipatch catalog` show WSL support.
 - Secrets for tools that call online services; each tool receives only the
   secrets it declares, which can name what they are and where to get one.
   `scipatch add` asks for missing keys (hidden), the dashboard has a Keys page, and
@@ -100,7 +98,7 @@ All notable changes to this project are documented here. The format follows
 - Faster installs: `scipatch add` and `scipatch rebuild` run only the golden tests
   marked `quick: true` (seconds), or all of them if a tool marks none; the
   status says how many more `scipatch test` runs. `--all-tests` runs every test, as
-  `scipatch check` and CI do. Every tool in `tools/` marks one quick test (OpenMM's
+  `scipatch check` does. Every tool in `tools/` marks one quick test (OpenMM's
   install check drops from about 8 minutes to under a minute).
 - Arguments are checked against each function's types before a run starts.
 - Progress for running jobs: `get_run`, `scipatch runs show`, and the dashboard show

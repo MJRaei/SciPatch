@@ -156,8 +156,8 @@ golden:
 ```
 
 Mark one fast test (seconds) that exercises the main computation with
-`quick: true`: installing a tool runs only the quick tests, while `scipatch check`,
-`scipatch test`, and CI run all of them.
+`quick: true`: installing a tool runs only the quick tests, while `scipatch check`
+and `scipatch test` run all of them.
 
 Set `against` on each test with expected values: `independent` (experiment,
 a reference database, or another program), `paper` (the tool's own
