@@ -275,12 +275,6 @@
   <text x="1060" y="481" text-anchor="middle" font-size="20" font-weight="500" fill="#55657c">serving 50 verified tools</text>
   <line x1="1060" y1="502" x2="1060" y2="680" stroke="#64748b" stroke-width="3.5" stroke-dasharray="8 8" stroke-linecap="round" marker-end="url(#a-slate)"/>
 
-  <!-- MCP connection -->
-  <line x1="1212" y1="246" x2="1320" y2="246" stroke="#0284c7" stroke-width="5" stroke-linecap="round" marker-start="url(#a-sky)" marker-end="url(#a-sky)"/>
-  <rect x="1218" y="224" width="96" height="44" rx="22" fill="#fff" stroke="#0284c7" stroke-width="3"/>
-  <image href="icons/mcp.svg" x="1230" y="234" width="24" height="24"/>
-  <text x="1260" y="254" font-size="20" font-weight="800" fill="#0284c7">MCP</text>
-
   <!-- agent harness -->
   <rect class="sh" x="1330" y="84" width="560" height="486" rx="26" fill="#fff" stroke="#cfe6f4" stroke-width="2" filter="url(#shadow)"/>
   <circle cx="1358" cy="112" r="7" fill="#fca5a5"/>
@@ -289,49 +283,72 @@
   <text x="1610" y="120" text-anchor="middle" font-size="21" font-weight="600" fill="#55657c">Harness</text>
   <line x1="1330" y1="140" x2="1890" y2="140" stroke="#e2e8f0" stroke-width="2"/>
 
-  <rect x="1542" y="154" width="324" height="84" rx="22" fill="#0f172a"/>
-  <text x="1564" y="189" font-size="23" font-weight="500" fill="#f1f5f9">Is silicon a direct-gap</text>
-  <text x="1564" y="222" font-size="23" font-weight="500" fill="#f1f5f9">semiconductor?</text>
+  <!-- MCP connection -->
+  <line x1="1180" y1="330" x2="1530" y2="330" stroke="#0284c7" stroke-width="5" stroke-linecap="round" marker-start="url(#a-sky)" marker-end="url(#a-sky)"/>
+  <rect x="1208" y="308" width="96" height="44" rx="22" fill="#fff" stroke="#0284c7" stroke-width="3"/>
+  <image href="icons/mcp.svg" x="1220" y="318" width="24" height="24"/>
+  <text x="1250" y="338" font-size="20" font-weight="800" fill="#0284c7">MCP</text>
+  <text class="mono" x="1256" y="280" text-anchor="middle" font-size="16" font-weight="600" fill="#0369a1">find_tools</text>
+  <text class="mono" x="1256" y="300" text-anchor="middle" font-size="16" font-weight="600" fill="#0369a1">run_tool</text>
 
-  <rect x="1354" y="252" width="512" height="44" rx="22" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
-  <image href="icons/mcp.svg" x="1367" y="263" width="22" height="22"/>
-  <text class="mono" x="1399" y="281" font-size="19" font-weight="600" fill="#0369a1">find_tools<tspan font-weight="500" fill="#64748b"> "band gap"</tspan></text>
-
-  <rect x="1354" y="304" width="512" height="44" rx="22" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
-  <image href="icons/mcp.svg" x="1367" y="315" width="22" height="22"/>
-  <text class="mono" x="1399" y="333" font-size="19" font-weight="600" fill="#0369a1">run_tool</text>
-  <g transform="translate(1502 311)"><image href="icons/materialsproject.png" width="30" height="30" clip-path="url(#rr)"/></g>
-  <text class="mono" x="1542" y="333" font-size="19" font-weight="600" fill="#0b1220">materials-project<tspan fill="#94a3b8"> · </tspan><tspan font-weight="500" fill="#334155">Si</tspan></text>
-  <circle cx="1838" cy="326" r="14" fill="#059669"/>
-  <use href="#i-check" x="1830" y="318" width="16" height="16" style="color:#fff"/>
-
-  <rect x="1354" y="356" width="512" height="44" rx="22" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
-  <image href="icons/mcp.svg" x="1367" y="367" width="22" height="22"/>
-  <text class="mono" x="1399" y="385" font-size="19" font-weight="600" fill="#0369a1">run_tool</text>
-  <rect x="1502" y="363" width="30" height="30" rx="8" fill="#f3effe"/>
-  <svg x="1507" y="368" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  <!-- the question -->
+  <rect x="1588" y="150" width="236" height="46" rx="20" fill="#0f172a"/>
+  <svg x="1604" y="161" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7dd3fc" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
   
-  <path d="M12 12v.01" />
-  <path d="M19.071 4.929c-1.562 -1.562 -6 .337 -9.9 4.243c-3.905 3.905 -5.804 8.337 -4.242 9.9c1.562 1.561 6 -.338 9.9 -4.244c3.905 -3.905 5.804 -8.337 4.242 -9.9" />
-  <path d="M4.929 4.929c-1.562 1.562 .337 6 4.243 9.9c3.905 3.905 8.337 5.804 9.9 4.242c1.561 -1.562 -.338 -6 -4.244 -9.9c-3.905 -3.905 -8.337 -5.804 -9.9 -4.242" />
+  <path d="M8 9h8" />
+  <path d="M8 13h6" />
+  <path d="M14 18h-1l-5 3v-3h-2a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v4.5" />
+  <path d="M19 22v.01" />
+  <path d="M19 19a2.003 2.003 0 0 0 .914 -3.782a1.98 1.98 0 0 0 -2.414 .483" />
 </svg>
-  <text class="mono" x="1542" y="385" font-size="19" font-weight="600" fill="#0b1220">gpaw<tspan fill="#94a3b8"> · </tspan><tspan font-weight="500" fill="#334155">band structure</tspan></text>
-  <circle cx="1838" cy="378" r="14" fill="#059669"/>
-  <use href="#i-check" x="1830" y="370" width="16" height="16" style="color:#fff"/>
+  <text x="1636" y="181" font-size="20" font-weight="600" fill="#f1f5f9">Science question</text>
+  <circle cx="1852" cy="173" r="20" fill="#e6f3fb"/>
+  <svg x="1840" y="161" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+  <line x1="1712.0" y1="198" x2="1712.0" y2="208" stroke="#0284c7" stroke-width="4" stroke-linecap="round" marker-end="url(#a-sky)"/>
 
-  <rect x="1354" y="414" width="420" height="84" rx="22" fill="#e0f2fe" stroke="#bae6fd" stroke-width="2"/>
-  <text x="1378" y="449" font-size="23" font-weight="500" fill="#0c2a42">No: <tspan font-weight="800">indirect</tspan> gap, Γ → X</text>
-  <text x="1378" y="482" font-size="23" font-weight="500" fill="#0c2a42"><tspan font-weight="800">0.59 eV</tspan> (PBE; measured 1.12 eV)</text>
+  <!-- the agent loop: plan, call a tool, read the result -->
+  <path d="M1675.9 231.0 A100 100 0 0 0 1569.3 292.5" fill="none" stroke="#0284c7" stroke-width="4" stroke-linecap="round" marker-end="url(#a-sky)"/>
+  <path d="M1569.3 367.5 A100 100 0 0 0 1675.9 429.0" fill="none" stroke="#0284c7" stroke-width="4" stroke-linecap="round" marker-end="url(#a-sky)"/>
+  <path d="M1740.8 391.6 A100 100 0 0 0 1740.8 268.4" fill="none" stroke="#0284c7" stroke-width="4" stroke-linecap="round" marker-end="url(#a-sky)"/>
+  <circle cx="1662" cy="330" r="38" fill="url(#brand)"/>
+  <text x="1662" y="337" text-anchor="middle" font-size="20" font-weight="800" fill="#fff">LLM</text>
+  <circle cx="1712.0" cy="243.4" r="28" fill="#fff" stroke="#0284c7" stroke-width="3"/>
+  <svg x="1698.0" y="229.4" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M3 12h1m8 -9v1m8 8h1m-15.4 -6.4l.7 .7m12.1 -.7l-.7 .7" />
+  <path d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0 -1 3a2 2 0 0 1 -4 0a3.5 3.5 0 0 0 -1 -3" />
+  <path d="M9.7 17l4.6 0" />
+</svg>
+  <text x="1750.0" y="250.4" font-size="20" font-weight="700" fill="#0b1220">Plan</text>
+  <circle cx="1562" cy="330" r="28" fill="#fff" stroke="#0284c7" stroke-width="3"/>
+  <image href="icons/mcp.svg" x="1548" y="316" width="28" height="28"/>
+  <text x="1536" y="292" text-anchor="end" font-size="20" font-weight="700" fill="#0b1220">Call tool</text>
+  <circle cx="1712.0" cy="416.6" r="28" fill="#fff" stroke="#0284c7" stroke-width="3"/>
+  <svg x="1698.0" y="402.6" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+  <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+</svg>
+  <text x="1750.0" y="423.6" font-size="20" font-weight="700" fill="#0b1220">Read result</text>
 
-  <rect x="1354" y="512" width="146" height="34" rx="17" fill="#ecfdf5"/>
-  <svg x="1366" y="518" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  <!-- the answer -->
+  <path d="M1712.0 446.6 V474 Q1712.0 486 1700.0 486 H1534" fill="none" stroke="#0284c7" stroke-width="4" stroke-linecap="round" marker-end="url(#a-sky)"/>
+  <rect x="1354" y="462" width="172" height="48" rx="22" fill="#e0f2fe" stroke="#bae6fd" stroke-width="2"/>
+  <text x="1440" y="493" text-anchor="middle" font-size="21" font-weight="700" fill="#0c2a42">Answer</text>
+
+  <rect x="1354" y="522" width="146" height="34" rx="17" fill="#ecfdf5"/>
+  <svg x="1366" y="528" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
   
   <path d="M11.46 20.846a12 12 0 0 1 -7.96 -14.846a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 -.09 7.06" />
   <path d="M15 19l2 2l4 -4" />
 </svg>
-  <text x="1396" y="536" font-size="19" font-weight="700" fill="#047857">Verified</text>
-  <rect x="1510" y="512" width="112" height="34" rx="17" fill="#eef0ff"/>
-  <svg x="1522" y="518" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  <text x="1396" y="546" font-size="19" font-weight="700" fill="#047857">Verified</text>
+  <rect x="1510" y="522" width="112" height="34" rx="17" fill="#eef0ff"/>
+  <svg x="1522" y="528" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
   
   <path d="M5 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14" />
   <path d="M9 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14" />
@@ -341,9 +358,9 @@
   <path d="M14 9l4 -1" />
   <path d="M16 16l3.923 -.98" />
 </svg>
-  <text x="1552" y="536" font-size="19" font-weight="700" fill="#3730a3">Cited</text>
-  <rect x="1632" y="512" width="188" height="34" rx="17" fill="#e6f3fb"/>
-  <svg x="1644" y="518" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  <text x="1552" y="546" font-size="19" font-weight="700" fill="#3730a3">Cited</text>
+  <rect x="1632" y="522" width="188" height="34" rx="17" fill="#e6f3fb"/>
+  <svg x="1644" y="528" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
   
   <path d="M14 3v4a1 1 0 0 0 1 1h4" />
   <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
@@ -351,7 +368,7 @@
   <path d="M9 13l6 0" />
   <path d="M9 17l6 0" />
 </svg>
-  <text x="1674" y="536" font-size="19" font-weight="700" fill="#075985">Reproducible</text>
+  <text x="1674" y="546" font-size="19" font-weight="700" fill="#075985">Reproducible</text>
 </svg>
 
 
