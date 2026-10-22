@@ -9,15 +9,15 @@ import yaml
 from pydantic import ValidationError
 from typer.testing import CliRunner
 
-from motel.app import Motel
-from motel.cli import app
-from motel.errors import MotelError
-from motel.manifest import Manifest
-from motel.maturity import evidence, paper_kind
-from motel.models import FunctionInfo, RunRecord, RunStatus, ToolState
-from motel.registry import InstalledTool, Registry
-from motel.skills import skill_description
-from motel.views import run_view, tool_view
+from scipatch.app import SciPatch
+from scipatch.cli import app
+from scipatch.errors import SciPatchError
+from scipatch.manifest import Manifest
+from scipatch.maturity import evidence, paper_kind
+from scipatch.models import FunctionInfo, RunRecord, RunStatus, ToolState
+from scipatch.registry import InstalledTool, Registry
+from scipatch.skills import skill_description
+from scipatch.views import run_view, tool_view
 
 from .test_gateway import call
 
@@ -97,8 +97,8 @@ def test_publications_are_told_apart_from_preprints_and_software_records(
 
 def install(name: str, summary: str, level: str) -> InstalledTool:
     """An installed tool with one function, ``run``, at a maturity level."""
-    motel = Motel()
-    package = motel.paths.tools / name
+    scipatch = SciPatch()
+    package = scipatch.paths.tools / name
     package.mkdir(parents=True)
     data = {
         "name": name,
@@ -107,33 +107,35 @@ def install(name: str, summary: str, level: str) -> InstalledTool:
         "source": {"paper": PAPER},
         "golden": [{**check("independent"), "function": "run"}],
     }
-    (package / "motel.yaml").write_text(yaml.safe_dump(data), encoding="utf-8")
+    (package / "scipatch.yaml").write_text(yaml.safe_dump(data), encoding="utf-8")
     state = ToolState(
         status="ready",
         installed_from=str(package),
         functions=[FunctionInfo(name="run", summary=summary)],
     )
-    Registry(motel.paths).save_state(name, state)
-    return motel.tool(name)
+    Registry(scipatch.paths).save_state(name, state)
+    return scipatch.tool(name)
 
 
 @pytest.fixture
-def two_md_tools() -> Motel:
+def two_md_tools() -> SciPatch:
     install(
         "classical-md", "Molecular dynamics of metals with classical potentials.", "established"
     )
     install("tiny-md", "Molecular dynamics of metals with classical potentials.", "experimental")
     install("dislocations", "Dislocation densities in deformed metal crystals.", "experimental")
-    return Motel()
+    return SciPatch()
 
 
-def test_search_prefers_established_tools_but_still_finds_the_only_fit(two_md_tools: Motel) -> None:
+def test_search_prefers_established_tools_but_still_finds_the_only_fit(
+    two_md_tools: SciPatch,
+) -> None:
     ranked = [match.tool.name for match in two_md_tools.find("molecular dynamics of metals")]
     assert ranked[:2] == ["classical-md", "tiny-md"]
     assert two_md_tools.find("dislocation density")[0].tool.name == "dislocations"
 
 
-def test_experimental_tools_come_with_a_caution_naming_alternatives(two_md_tools: Motel) -> None:
+def test_experimental_tools_come_with_a_caution_naming_alternatives(two_md_tools: SciPatch) -> None:
     tiny = two_md_tools.tool("tiny-md")
     alternatives = two_md_tools.stronger_alternatives(tiny)
     assert alternatives == ["classical-md"]
@@ -152,7 +154,7 @@ def test_experimental_tools_come_with_a_caution_naming_alternatives(two_md_tools
     assert "Experimental" not in skill_description(two_md_tools.tool("classical-md"))
 
 
-def test_agents_see_maturity_in_search_and_descriptions(two_md_tools: Motel) -> None:
+def test_agents_see_maturity_in_search_and_descriptions(two_md_tools: SciPatch) -> None:
     found, described = call(
         two_md_tools,
         ("find_tools", {"query": "molecular dynamics of metals"}),
@@ -163,12 +165,12 @@ def test_agents_see_maturity_in_search_and_descriptions(two_md_tools: Motel) -> 
     assert "classical-md" in described.structured_content["maturity"]["caution"]
 
 
-def test_users_can_lower_a_level_but_not_raise_it(two_md_tools: Motel) -> None:
+def test_users_can_lower_a_level_but_not_raise_it(two_md_tools: SciPatch) -> None:
     lowered = two_md_tools.lower_maturity("classical-md", "experimental")
     assert lowered.maturity == "experimental"
     assert "lowered on this computer" in tool_view(lowered)["maturity"]["lowered_by_user"]
     assert two_md_tools.lower_maturity("classical-md", None).maturity == "established"
-    with pytest.raises(MotelError, match="can only be lowered"):
+    with pytest.raises(SciPatchError, match="can only be lowered"):
         two_md_tools.lower_maturity("tiny-md", "published")
 
     runner = CliRunner()

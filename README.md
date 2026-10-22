@@ -1,4 +1,4 @@
-# Motel
+# SciPatch
 
 **Turn research code into tools that any AI agent can find, run, and remember.**
 
@@ -7,11 +7,11 @@ later you set up another one, and another, until you have a dozen separate
 installations that know nothing about each other, each with its own quirks,
 interface, and forgotten fixes.
 
-Motel gives every research repository its own *room*, an isolated environment
-where it works exactly as tested, and checks them all in at **one front desk**.
+SciPatch gives every research repository an isolated environment where it works
+exactly as tested, and serves them all through **one MCP server**.
 Your AI assistant (Claude, Codex, Gemini, Cursor, ...) can then find the right
 tool for a question, run it, combine it with others, and remember every result.
-Motel is built for science, with materials science and chemistry first.
+SciPatch is built for science, with materials science and chemistry first.
 
 ```text
   You: "Is this structure stable? What's its lattice constant?"
@@ -20,13 +20,13 @@ Motel is built for science, with materials science and chemistry first.
   Your AI app (Claude Desktop, Claude Code, Codex, Gemini CLI, Cursor)
         │  finds, reads, and runs tools through one connection
         ▼
-  ┌─────────────────────── Motel ────────────────────────┐
-  │  front desk:  search · descriptions · run · results   │
+  ┌────────────────────── SciPatch ───────────────────────┐
+  │  MCP server:  search · descriptions · run · results   │
   │                                                       │
-  │  room: ml-potentials   room: gpaw   room: rdkit  ...  │  ← each with its own environment
+  │  env: ml-potentials   env: gpaw   env: rdkit  ...     │  ← each with its own environment
   │                                                       │
-  │  guest book:  every run, its inputs, outputs, and     │  ← memory and provenance
-  │               the exact tool version                  │
+  │  run history:  every run, its inputs, outputs, and    │  ← memory and provenance
+  │                the exact tool version                 │
   └───────────────────────────────────────────────────────┘
 ```
 
@@ -37,19 +37,19 @@ Motel is built for science, with materials science and chemistry first.
 - **Works with every major AI app.** One command connects Claude Desktop, Claude
   Code, Codex, Gemini CLI, or Cursor, through the Model Context Protocol (MCP)
   and the Agent Skills standard (`SKILL.md`).
-- **Repositories become tools with your AI agent's help.** `motel onboard <url>`
+- **Repositories become tools with your AI agent's help.** `scipatch onboard <url>`
   hands a repository to your coding agent with step-by-step instructions: install
   it, wrap its key capabilities, and reproduce a number from the paper.
 - **Results you can trust and cite.** Each tool carries golden tests that check
   it reproduces known results, plus stated validity limits and citations. Every
   run records the exact tool version and source commit.
 - **Mature tools first.** Each tool is *established*, *published*, or
-  *experimental*, backed by evidence Motel checks. Agents prefer established
+  *experimental*, backed by evidence SciPatch checks. Agents prefer established
   tools and are told to cross-check results from experimental ones, such as a
   small lab's code without a paper.
 - **A memory.** Ask about something you computed last week; identical calls are
   answered instantly from the history instead of being recomputed.
-- **No terminal required for daily use.** `motel ui` opens a dashboard with a
+- **No terminal required for daily use.** `scipatch ui` opens a dashboard with a
   form for every tool, generated automatically.
 
 ## Quick start
@@ -62,12 +62,12 @@ From a copy of this repository:
 ```
 
 The script installs [uv](https://docs.astral.sh/uv/) if needed (it manages
-Python for you), installs Motel, and starts the guided setup.
+Python for you), installs SciPatch, and starts the guided setup.
 
 **2. Set up.** If the installer didn't already start it, run:
 
 ```bash
-motel setup
+scipatch setup
 ```
 
 It checks your computer, connects the AI apps it finds, and offers to install
@@ -75,7 +75,7 @@ an example tool. Restart your AI app afterwards.
 
 **3. Ask.** In your AI app, try:
 
-> *Use my Motel tools to find the equilibrium lattice constant and bulk modulus of copper.*
+> *Use my SciPatch tools to find the equilibrium lattice constant and bulk modulus of copper.*
 
 The assistant finds the `ase-emt` tool, reads its instructions, runs it, and
 reports the result with its limitations and citation.
@@ -84,10 +84,10 @@ reports the result with its limitations and citation.
 
 | You have | Run | What happens |
 |---|---|---|
-| A featured tool | `motel add ase-emt`, or just ask your AI app | Installs and verifies it (`motel catalog` lists them); AI apps suggest and install catalog tools on first use, after asking you |
-| A collection of tools | `motel catalog add <git-url>`, then `motel add <name>` | Adds a lab's or community collection; install its tools by name |
-| A research repository | `motel onboard https://github.com/org/repo --paper <doi>` | Your coding agent turns it into a tool, guided by Motel |
-| A ready tool package | `motel add ./folder` or `motel add <git-url>` | Installs and verifies it |
+| A featured tool | `scipatch add ase-emt`, or just ask your AI app | Installs and verifies it (`scipatch catalog` lists them); AI apps suggest and install catalog tools on first use, after asking you |
+| A collection of tools | `scipatch catalog add <git-url>`, then `scipatch add <name>` | Adds a lab's or community collection; install its tools by name |
+| A research repository | `scipatch onboard https://github.com/org/repo --paper <doi>` | Your coding agent turns it into a tool, guided by SciPatch |
+| A ready tool package | `scipatch add ./folder` or `scipatch add <git-url>` | Installs and verifies it |
 
 Built in: **ase-emt** (fast approximate simulations of metals) and
 **rdkit-descriptors** (molecular properties from SMILES). The [tool
@@ -139,11 +139,11 @@ own test suites.
 ## Using tools without an AI app
 
 ```bash
-motel ui                                         # dashboard in your browser
-motel find "lattice constant"                    # search all tools
-motel info ase-emt                               # parameters, notes, limits, citation
-motel run ase-emt equation_of_state element=Cu   # run a function
-motel runs                                       # history of runs
+scipatch ui                                         # dashboard in your browser
+scipatch find "lattice constant"                    # search all tools
+scipatch info ase-emt                               # parameters, notes, limits, citation
+scipatch run ase-emt equation_of_state element=Cu   # run a function
+scipatch runs                                       # history of runs
 ```
 
 Add `--json` to any of these for machine-readable output (agents use this).
@@ -151,9 +151,9 @@ Add `--json` to any of these for machine-readable output (agents use this).
 ## Learn more
 
 - [Getting started](docs/getting-started.md): installation on each system, and connecting each app
-- [Concepts](docs/concepts.md): how Motel works, and why
+- [Concepts](docs/concepts.md): how SciPatch works, and why
 - [Turning a repository into a tool](docs/onboarding.md)
-- [Tool package format](docs/tool-format.md): `motel.yaml`, `api.py`, golden tests, patches
+- [Tool package format](docs/tool-format.md): `scipatch.yaml`, `api.py`, golden tests, patches
 - [Connecting AI apps](docs/connecting-apps.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Contributing](CONTRIBUTING.md)
@@ -162,15 +162,15 @@ Add `--json` to any of these for machine-readable output (agents use this).
 
 Onboarding and installing tools runs code from the repositories you choose, on
 your computer, just like installing them by hand. Only add code you trust.
-Motel's servers listen only on your own computer (`127.0.0.1`), and the dashboard
+SciPatch's servers listen only on your own computer (`127.0.0.1`), and the dashboard
 requires a per-session token. API keys are stored only on your computer, given
 only to the tools that declare them, and entered on a local page rather than in
-the chat, so they never reach the AI model. Motel only ever edits its own entry in your AI
+the chat, so they never reach the AI model. SciPatch only ever edits its own entry in your AI
 apps' configuration files, and makes a backup first.
 
 ## Status
 
-Motel is early (version 0.1). Environments are built with uv or conda; Docker
+SciPatch is early (version 0.1). Environments are built with uv or conda; Docker
 and HPC (Slurm) backends are planned. Feedback and contributions are welcome.
 
 ## License

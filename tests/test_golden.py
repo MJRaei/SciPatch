@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from motel import golden
+from scipatch import golden
 
 RESULT = {
     "energy_ev": -3.7412,

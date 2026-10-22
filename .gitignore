@@ -14,9 +14,9 @@ dist/
 coverage.xml
 htmlcov/
 
-# Motel package build outputs (created by `motel check`)
+# SciPatch package build outputs (created by `scipatch check`)
 source/
-.motel/
+.scipatch/
 
 # Editors and OS
 .vscode/

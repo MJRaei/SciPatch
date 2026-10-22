@@ -57,7 +57,7 @@ def _ph(text: str) -> tuple[float, float] | None:
 
 @functools.cache
 def _records() -> list[dict[str, Any]]:
-    folder = Path(os.environ["MOTEL_SOURCE_DIR"]) / "data"
+    folder = Path(os.environ["SCIPATCH_SOURCE_DIR"]) / "data"
     records, seen = [], set()
     for name in ("train_split.csv", "test_split.csv"):
         with open(folder / name, encoding="utf-8", errors="replace", newline="") as handle:

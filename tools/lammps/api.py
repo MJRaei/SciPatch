@@ -471,7 +471,7 @@ def crystal_properties(
         raise ValueError("strain must be between 0 and 0.01.")
     atoms = _read_structure(structure)
     pot = _potential(potential, pair_style, pair_coeff, _elements(atoms))
-    with tempfile.TemporaryDirectory(prefix="motel-lammps-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="scipatch-lammps-") as tmp:
         directory = Path(tmp)
         data = directory / "start.data"
         _write_data(data, atoms, pot)
@@ -589,7 +589,7 @@ def simulate(
         f"{barostat} {pressure_bar} {pressure_bar} {1000 * dt}",
         "nve": "nve",
     }[ensemble]
-    with tempfile.TemporaryDirectory(prefix="motel-lammps-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="scipatch-lammps-") as tmp:
         directory = Path(tmp)
         data = directory / "start.data"
         _write_data(data, atoms, pot)

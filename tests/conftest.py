@@ -1,6 +1,6 @@
 """Shared fixtures.
 
-Every test runs with its own ``MOTEL_HOME`` and ``HOME``, so nothing touches the
+Every test runs with its own ``SCIPATCH_HOME`` and ``HOME``, so nothing touches the
 real user configuration. Integration tests build real environments with uv from
 tool packages that use only the standard library, so they work offline.
 """
@@ -17,8 +17,8 @@ from pathlib import Path
 import pytest
 import yaml
 
-from motel.app import Motel
-from motel.paths import MotelPaths
+from scipatch.app import SciPatch
+from scipatch.paths import SciPatchPaths
 
 #: Use the running interpreter's version so uv finds it locally (no download).
 PYTHON = f"{sys.version_info.major}.{sys.version_info.minor}"
@@ -27,7 +27,7 @@ requires_uv = pytest.mark.skipif(shutil.which("uv") is None, reason="uv is not i
 requires_git = pytest.mark.skipif(shutil.which("git") is None, reason="git is not installed")
 
 SAMPLE_API = '''
-"""Sample tool used by Motel's tests."""
+"""Sample tool used by SciPatch's tests."""
 
 from __future__ import annotations
 
@@ -97,7 +97,7 @@ def count(n: int = 3, delay: float = 0.2) -> int:
         delay: Seconds per step.
     """
     for step in range(n):
-        print(f"step {step + 1}/{n}")  # no flush: Motel makes output line-buffered
+        print(f"step {step + 1}/{n}")  # no flush: SciPatch makes output line-buffered
         time.sleep(delay)
     return n
 
@@ -109,7 +109,7 @@ def secret_values() -> dict:
 
 def source_file() -> str:
     """Read DATA.txt from the upstream source checkout."""
-    with open(os.path.join(os.environ["MOTEL_SOURCE_DIR"], "DATA.txt")) as handle:
+    with open(os.path.join(os.environ["SCIPATCH_SOURCE_DIR"], "DATA.txt")) as handle:
         return handle.read().strip()
 '''
 
@@ -132,21 +132,21 @@ _UV_DIRS = _uv_dirs()
 
 @pytest.fixture(autouse=True)
 def isolated_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Point HOME and MOTEL_HOME at temporary folders for every test."""
+    """Point HOME and SCIPATCH_HOME at temporary folders for every test."""
     home = tmp_path / "home"
     home.mkdir()
     for variable, value in _UV_DIRS.items():
         monkeypatch.setenv(variable, value)
     monkeypatch.setenv("HOME", str(home))
-    monkeypatch.setenv("MOTEL_HOME", str(home / ".motel"))
+    monkeypatch.setenv("SCIPATCH_HOME", str(home / ".scipatch"))
     for variable in ("CLAUDE_CONFIG_DIR", "CODEX_HOME", "XDG_CONFIG_HOME", "APPDATA"):
         monkeypatch.delenv(variable, raising=False)
     return home
 
 
 @pytest.fixture
-def motel() -> Motel:
-    return Motel(MotelPaths.from_env())
+def scipatch() -> SciPatch:
+    return SciPatch(SciPatchPaths.from_env())
 
 
 ManifestFactory = Callable[..., Path]
@@ -173,7 +173,7 @@ def make_package(tmp_path: Path) -> ManifestFactory:
             "environment": {"manager": "uv", "python": PYTHON},
         }
         data.update(manifest)
-        (package / "motel.yaml").write_text(yaml.safe_dump(data, sort_keys=False))
+        (package / "scipatch.yaml").write_text(yaml.safe_dump(data, sort_keys=False))
         (package / "api.py").write_text(textwrap.dedent(api))
         return package
 

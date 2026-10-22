@@ -1,4 +1,4 @@
-"""Write the ideal crystals and defects in tests/data (not run by Motel).
+"""Write the ideal crystals and defects in tests/data (not run by SciPatch).
 
 Usage: python make_data.py OUT_DIR
 """

@@ -1,4 +1,4 @@
-"""The featured tools that ship with Motel must be valid packages."""
+"""The featured tools that ship with SciPatch must be valid packages."""
 
 from __future__ import annotations
 
@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from motel import frontmatter
-from motel.catalog import catalog_entries, catalog_path
-from motel.manifest import MANIFEST_FILENAME, Manifest, load_manifest
+from scipatch import frontmatter
+from scipatch.catalog import catalog_entries, catalog_path
+from scipatch.manifest import MANIFEST_FILENAME, Manifest, load_manifest
 
 ENTRIES = catalog_entries()
 

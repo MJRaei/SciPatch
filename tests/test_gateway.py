@@ -11,10 +11,10 @@ import pytest
 from mcp import Client
 from mcp_types import ElicitResult
 
-from motel import gateway
-from motel.app import Motel
-from motel.gateway import build_server
-from motel.views import preview
+from scipatch import gateway
+from scipatch.app import SciPatch
+from scipatch.gateway import build_server
+from scipatch.views import preview
 
 from .conftest import ManifestFactory, requires_uv
 
@@ -25,19 +25,19 @@ FUNCTIONS = {
 }
 
 
-def call(motel: Motel, *calls: tuple[str, dict[str, Any]]) -> list[Any]:
+def call(scipatch: SciPatch, *calls: tuple[str, dict[str, Any]]) -> list[Any]:
     """Run tool calls against a fresh server and return the raw results."""
 
     async def session() -> list[Any]:
-        async with Client(build_server(motel)) as client:
+        async with Client(build_server(scipatch)) as client:
             return [await client.call_tool(name, arguments) for name, arguments in calls]
 
     return anyio.run(session)
 
 
-def test_tool_list_is_small_and_fixed(motel: Motel) -> None:
+def test_tool_list_is_small_and_fixed(scipatch: SciPatch) -> None:
     async def names() -> list[str]:
-        async with Client(build_server(motel)) as client:
+        async with Client(build_server(scipatch)) as client:
             return [tool.name for tool in (await client.list_tools()).tools]
 
     assert anyio.run(names) == [
@@ -46,9 +46,9 @@ def test_tool_list_is_small_and_fixed(motel: Motel) -> None:
     ]  # fmt: skip
 
 
-def test_empty_motel_gives_helpful_answers(motel: Motel) -> None:
+def test_empty_scipatch_gives_helpful_answers(scipatch: SciPatch) -> None:
     found, nothing, missing, not_installed = call(
-        motel,
+        scipatch,
         ("find_tools", {"query": "relax a metal"}),
         ("find_tools", {"query": "zebra crossing"}),
         ("describe_tool", {"tool": "x"}),
@@ -58,7 +58,7 @@ def test_empty_motel_gives_helpful_answers(motel: Motel) -> None:
     suggestion = found.structured_content["not_installed"][0]
     assert suggestion["tool"] == "ase-emt" and suggestion["installable_here"]
     assert "install_tool" in found.structured_content["hint"]
-    assert "motel onboard" in nothing.structured_content["hint"]
+    assert "scipatch onboard" in nothing.structured_content["hint"]
     assert not_installed.is_error
     assert "call install_tool(tool='ase-emt')" in not_installed.content[0].text
     assert missing.is_error
@@ -68,10 +68,10 @@ def test_empty_motel_gives_helpful_answers(motel: Motel) -> None:
 
 @pytest.mark.integration
 @requires_uv
-def test_find_describe_run_and_collect(motel: Motel, make_package: ManifestFactory) -> None:
-    motel.add(str(make_package(functions=FUNCTIONS)))
+def test_find_describe_run_and_collect(scipatch: SciPatch, make_package: ManifestFactory) -> None:
+    scipatch.add(str(make_package(functions=FUNCTIONS)))
     found, described, ran, bad, failed, slow, listed = call(
-        motel,
+        scipatch,
         ("find_tools", {"query": "add numbers"}),
         ("describe_tool", {"tool": "sample"}),
         ("run_tool", {"tool": "sample", "function": "add", "arguments": {"a": 2}}),
@@ -99,7 +99,7 @@ def test_find_describe_run_and_collect(motel: Motel, make_package: ManifestFacto
     assert run["status"] == "running"
     assert "get_run" in run["next_step"]
     [collected, history] = call(
-        motel,
+        scipatch,
         ("get_run", {"run_id": run["run_id"], "wait_seconds": 30}),
         ("search_history", {"query": "nope"}),
     )
@@ -113,12 +113,12 @@ def test_find_describe_run_and_collect(motel: Motel, make_package: ManifestFacto
 @pytest.mark.integration
 @requires_uv
 def test_missing_keys_are_entered_outside_the_chat(
-    motel: Motel, make_package: ManifestFactory, monkeypatch: pytest.MonkeyPatch
+    scipatch: SciPatch, make_package: ManifestFactory, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.delenv("DEMO_KEY", raising=False)
     described = {"name": "DEMO_KEY", "description": "Demo service key", "url": "https://x.org"}
     environment = {"manager": "uv", "python": "3.12", "secrets": [described]}
-    motel.add(str(make_package(functions=["secret_values"], environment=environment)))
+    scipatch.add(str(make_package(functions=["secret_values"], environment=environment)))
     run = {"tool": "sample", "function": "secret_values", "use_cache": False}
 
     async def enter_key(context: Any, params: Any) -> ElicitResult:
@@ -137,11 +137,11 @@ def test_missing_keys_are_entered_outside_the_chat(
 
     def call_with(callback: Any = None, mode: str = "auto") -> Any:
         async def session() -> Any:
-            server = build_server(motel)
+            server = build_server(scipatch)
             async with Client(server, elicitation_callback=callback, mode=mode) as client:
                 return await client.call_tool("run_tool", run)
 
-        motel.secrets.remove("DEMO_KEY")
+        scipatch.secrets.remove("DEMO_KEY")
         return anyio.run(session)
 
     # Apps that cannot open links: the agent gets one to pass on.
@@ -153,7 +153,7 @@ def test_missing_keys_are_entered_outside_the_chat(
     assert link is not None
     saved = httpx.post(link.group(0), data={"DEMO_KEY": "s3cret"})
     assert saved.status_code == 200 and "Saved" in saved.text
-    [ran] = call(motel, ("run_tool", run))
+    [ran] = call(scipatch, ("run_tool", run))
     assert ran.structured_content["result"]["demo"] == "s3cret"
 
     # Apps that can open the page themselves: the run continues once the key is
@@ -184,23 +184,23 @@ def test_preview_truncates_large_results() -> None:
 
 @pytest.mark.integration
 @requires_uv
-def test_tools_can_be_installed_from_the_ai_app(motel: Motel) -> None:
+def test_tools_can_be_installed_from_the_ai_app(scipatch: SciPatch) -> None:
     started, unknown = call(
-        motel,
+        scipatch,
         ("install_tool", {"tool": "ase-emt", "wait_seconds": 600}),
         ("install_tool", {"tool": "no-such-tool"}),
     )
     assert started.structured_content["status"] == "ready", started.structured_content
-    assert motel.tool("ase-emt").usable
+    assert scipatch.tool("ase-emt").usable
     assert unknown.is_error and "No catalog has a tool named" in unknown.content[0].text
-    (again,) = call(motel, ("install_tool", {"tool": "ase-emt"}))
+    (again,) = call(scipatch, ("install_tool", {"tool": "ase-emt"}))
     assert again.structured_content["status"] == "ready"
 
 
 @pytest.mark.integration
 @requires_uv
-def test_a_long_install_is_collected_by_calling_again(motel: Motel) -> None:
-    server = build_server(motel)
+def test_a_long_install_is_collected_by_calling_again(scipatch: SciPatch) -> None:
+    server = build_server(scipatch)
 
     async def install_twice() -> tuple[Any, Any]:
         async with Client(server) as client:

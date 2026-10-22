@@ -25,7 +25,7 @@ _EMPTY = {None, "", "not reported", "none", "n/a", "null", "unknown"}
 
 @functools.cache
 def _data() -> dict[str, list[dict[str, Any]]]:
-    path = Path(os.environ["MOTEL_SOURCE_DIR"]) / "outputs" / "combined_doping_data.json"
+    path = Path(os.environ["SCIPATCH_SOURCE_DIR"]) / "outputs" / "combined_doping_data.json"
     with open(path, encoding="utf-8") as handle:
         data: dict[str, list[dict[str, Any]]] = json.load(handle)
     return data

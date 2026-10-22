@@ -1,6 +1,6 @@
-# Motel tools
+# SciPatch tools
 
-A collection of research tools for [Motel](../README.md), each one a tool
+A collection of research tools for [SciPatch](../README.md), each one a tool
 package: pinned upstream code, an isolated environment, typed functions, usage
 notes for AI agents, stated validity limits, and **golden tests** that
 reproduce published or upstream-tested values on every build.
@@ -63,8 +63,8 @@ widely used code, checked against independent references or exact results),
 several fit and cross-check experimental ones; see
 [Tool package format](../docs/tool-format.md#maturity).
 
-**Runs on** comes from each tool's `motel.lock` (Linux x86-64, macOS on Apple
-silicon, Windows); `motel info <tool>` also covers ARM Linux and Intel Macs, and
+**Runs on** comes from each tool's `scipatch.lock` (Linux x86-64, macOS on Apple
+silicon, Windows); `scipatch info <tool>` also covers ARM Linux and Intel Macs, and
 names what is missing where a tool cannot be installed. On Windows, OpenMM
 handles proteins, nucleic acids, and water; its small-molecule features need
 AmberTools, which has no Windows build; AutoDock Vina uses the official
@@ -73,7 +73,7 @@ GPAW, LAMMPS, and Quantum ESPRESSO, as their own documentation recommends, and
 Zeo++) run inside WSL with the same Linux packages; set it up once with
 `wsl --install`.
 
-Two more tools ship inside Motel itself: `ase-emt` (fast approximate
+Two more tools ship inside SciPatch itself: `ase-emt` (fast approximate
 simulations of metals) and `rdkit-descriptors` (molecular properties from
 SMILES).
 
@@ -82,22 +82,22 @@ SMILES).
 From a copy of this repository:
 
 ```bash
-motel add tools/ml-potentials
+scipatch add tools/ml-potentials
 ```
 
 From the published collection, add it once and install tools by name:
 
 ```bash
-motel catalog add <repository-url>
-motel catalog                      # browse
-motel add ml-potentials
-motel catalog update               # fetch new and updated tools
+scipatch catalog add https://github.com/MJRaei/SciPatch
+scipatch catalog                      # browse
+scipatch add ml-potentials
+scipatch catalog update               # fetch new and updated tools
 ```
 
 The Materials Project and structural-analogs tools need a free API key from
-<https://next-gen.materialsproject.org/api>. `motel add materials-project` asks
+<https://next-gen.materialsproject.org/api>. `scipatch add materials-project` asks
 for it; you can also add it later on the dashboard's Keys page, through the link
-your AI app shows when the key is missing, or with `motel secret set MP_API_KEY`.
+your AI app shows when the key is missing, or with `scipatch secret set MP_API_KEY`.
 
 ## Workflows
 
@@ -227,7 +227,7 @@ accepts.
 
 ## Licenses
 
-Each tool's `motel.yaml` states its license. Note especially: MACE-OFF models
+Each tool's `scipatch.yaml` states its license. Note especially: MACE-OFF models
 are for non-commercial use only (Academic Software License), Materials Project
 data is CC BY 4.0, xtb is LGPL-3.0, and LAMMPS and Open Babel are GPL-2.0.
 Upstream code, potential files, and pseudopotentials are downloaded from their
@@ -247,7 +247,7 @@ terms; each golden test names its source.
 See [Turning a repository into a tool](../docs/onboarding.md). A tool is
 accepted when:
 
-- [ ] `motel check tools/<name> --clean` passes;
+- [ ] `scipatch check tools/<name> --clean` passes;
 - [ ] at least one golden test reproduces a published or upstream-tested value,
       and its `reference` names the exact source (never an invented one);
 - [ ] one fast golden test exercising the main computation is marked
@@ -258,8 +258,8 @@ accepted when:
 - [ ] every golden test with expected values says what it is checked `against`,
       and `maturity` is the level that evidence supports (new projects without a
       publication are `experimental`);
-- [ ] versions are pinned for every platform with `motel freeze tools/<name>`.
+- [ ] versions are pinned for every platform with `scipatch freeze tools/<name>`.
 
 The **Tools** CI workflow rebuilds every changed tool from scratch on Linux,
-macOS, and Windows (where its `motel.lock` says it can be installed) and runs its
+macOS, and Windows (where its `scipatch.lock` says it can be installed) and runs its
 golden tests; all tools are re-checked weekly.

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from motel.clients import (
+from scipatch.clients import (
     ClaudeCode,
     ClaudeDesktop,
     Codex,
@@ -19,9 +19,9 @@ from motel.clients import (
     _remove_toml_table,
     update_json_file,
 )
-from motel.errors import ClientConfigError
+from scipatch.errors import ClientConfigError
 
-SERVER = ServerCommand("/opt/bin/motel", ["serve"])
+SERVER = ServerCommand("/opt/bin/scipatch", ["serve"])
 
 
 @pytest.mark.parametrize("app", [ClaudeDesktop(), Cursor(), GeminiCli()])
@@ -33,12 +33,12 @@ def test_json_apps_add_and_remove_only_their_entry(app: ClaudeDesktop) -> None:
 
     app.connect(SERVER)
     data = json.loads(config.read_text())
-    assert data["mcpServers"]["motel"] == {"command": "/opt/bin/motel", "args": ["serve"]}
+    assert data["mcpServers"]["scipatch"] == {"command": "/opt/bin/scipatch", "args": ["serve"]}
     assert data["mcpServers"]["other"] == {"command": "x"}
     assert data["theme"] == "dark"
     assert app.is_connected()
-    # The file as it was before Motel touched it is kept.
-    backup = config.with_name(config.name + ".motel-backup")
+    # The file as it was before SciPatch touched it is kept.
+    backup = config.with_name(config.name + ".scipatch-backup")
     assert json.loads(backup.read_text()) == original
 
     app.disconnect()
@@ -47,16 +47,16 @@ def test_json_apps_add_and_remove_only_their_entry(app: ClaudeDesktop) -> None:
 
 
 def test_claude_code_without_cli_edits_user_config(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("motel.clients.shutil.which", lambda _: None)
+    monkeypatch.setattr("scipatch.clients.shutil.which", lambda _: None)
     app = ClaudeCode()
     app.config_path.write_text(json.dumps({"projects": {"/x": {}}}))
-    app.connect(ServerCommand("/opt/bin/motel", ["serve"], {"MOTEL_HOME": "/data"}))
+    app.connect(ServerCommand("/opt/bin/scipatch", ["serve"], {"SCIPATCH_HOME": "/data"}))
     data = json.loads(app.config_path.read_text())
-    assert data["mcpServers"]["motel"] == {
+    assert data["mcpServers"]["scipatch"] == {
         "type": "stdio",
-        "command": "/opt/bin/motel",
+        "command": "/opt/bin/scipatch",
         "args": ["serve"],
-        "env": {"MOTEL_HOME": "/data"},
+        "env": {"SCIPATCH_HOME": "/data"},
     }
     assert data["projects"] == {"/x": {}}
 
@@ -80,12 +80,12 @@ def test_codex_toml_is_updated_in_place() -> None:
     app.config_path.parent.mkdir(parents=True)
     app.config_path.write_text(
         'model = "o5"\n\n[mcp_servers.other]\ncommand = "x"\n\n'
-        '[mcp_servers.motel]\ncommand = "old"\n\n[mcp_servers.motel.env]\nA = "1"\n\n'
+        '[mcp_servers.scipatch]\ncommand = "old"\n\n[mcp_servers.scipatch.env]\nA = "1"\n\n'
         '[profiles.fast]\nmodel = "mini"\n'
     )
     app.connect(SERVER)
     data = tomllib.loads(app.config_path.read_text())
-    assert data["mcp_servers"]["motel"] == {"command": "/opt/bin/motel", "args": ["serve"]}
+    assert data["mcp_servers"]["scipatch"] == {"command": "/opt/bin/scipatch", "args": ["serve"]}
     assert data["mcp_servers"]["other"] == {"command": "x"}
     assert data["profiles"]["fast"] == {"model": "mini"}
     assert data["model"] == "o5"
@@ -93,16 +93,18 @@ def test_codex_toml_is_updated_in_place() -> None:
 
     app.disconnect()
     data = tomllib.loads(app.config_path.read_text())
-    assert "motel" not in data["mcp_servers"]
+    assert "scipatch" not in data["mcp_servers"]
     assert data["profiles"]["fast"] == {"model": "mini"}
 
 
 def test_codex_creates_config_with_env() -> None:
     app = Codex()
-    app.connect(ServerCommand("C:\\motel\\motel.exe", ["serve"], {"MOTEL_HOME": "D:\\data"}))
+    app.connect(
+        ServerCommand("C:\\scipatch\\scipatch.exe", ["serve"], {"SCIPATCH_HOME": "D:\\data"})
+    )
     data = tomllib.loads(app.config_path.read_text())
-    assert data["mcp_servers"]["motel"]["command"] == "C:\\motel\\motel.exe"
-    assert data["mcp_servers"]["motel"]["env"] == {"MOTEL_HOME": "D:\\data"}
+    assert data["mcp_servers"]["scipatch"]["command"] == "C:\\scipatch\\scipatch.exe"
+    assert data["mcp_servers"]["scipatch"]["env"] == {"SCIPATCH_HOME": "D:\\data"}
 
 
 def test_remove_toml_table_keeps_other_tables() -> None:

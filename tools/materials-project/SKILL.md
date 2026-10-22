@@ -21,7 +21,7 @@ description: >-
 ## Setup
 
 The user needs a free key from https://next-gen.materialsproject.org/api,
-stored once with `motel secret set MP_API_KEY`. If a call fails because the key
+stored once with `scipatch secret set MP_API_KEY`. If a call fails because the key
 is missing, tell the user exactly that.
 
 ## Pitfalls

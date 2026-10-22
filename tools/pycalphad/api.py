@@ -47,7 +47,9 @@ def _database(name: str) -> Any:
 
     if name in DATABASES:
         path = (
-            Path(os.environ["MOTEL_SOURCE_DIR"]) / "pycalphad/tests/databases" / DATABASES[name][0]
+            Path(os.environ["SCIPATCH_SOURCE_DIR"])
+            / "pycalphad/tests/databases"
+            / DATABASES[name][0]
         )
     else:
         path = Path(name)

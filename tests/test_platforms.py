@@ -1,4 +1,4 @@
-"""Platforms, per-platform locks, and resolving other platforms in ``motel freeze``."""
+"""Platforms, per-platform locks, and resolving other platforms in ``scipatch freeze``."""
 
 from __future__ import annotations
 
@@ -8,10 +8,17 @@ from pathlib import Path
 
 import pytest
 
-from motel import freeze, platforms
-from motel.errors import BuildError, ManifestError
-from motel.lock import LEGACY_LOCK_FILENAME, Lock, PlatformLock, inputs_hash, pins_for_build, save
-from motel.manifest import Environment, Manifest, load_manifest
+from scipatch import freeze, platforms
+from scipatch.errors import BuildError, ManifestError
+from scipatch.lock import (
+    LEGACY_LOCK_FILENAME,
+    Lock,
+    PlatformLock,
+    inputs_hash,
+    pins_for_build,
+    save,
+)
+from scipatch.manifest import Environment, Manifest, load_manifest
 
 from .conftest import ManifestFactory
 

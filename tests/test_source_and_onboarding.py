@@ -6,12 +6,12 @@ from pathlib import Path
 
 import pytest
 
-from motel.environments import BuildLog
-from motel.errors import BuildError, MotelError
-from motel.manifest import load_manifest
-from motel.onboarding import install_project_skills, name_from_repo, scaffold
-from motel.reporting import NullReporter
-from motel.source import SourceCheckout, patch_files, resolve_remote_ref
+from scipatch.environments import BuildLog
+from scipatch.errors import BuildError, SciPatchError
+from scipatch.manifest import load_manifest
+from scipatch.onboarding import install_project_skills, name_from_repo, scaffold
+from scipatch.reporting import NullReporter
+from scipatch.source import SourceCheckout, patch_files, resolve_remote_ref
 
 from .conftest import requires_git
 
@@ -35,7 +35,7 @@ def test_scaffold_creates_a_valid_package_without_overwriting(tmp_path: Path) ->
     created = scaffold(
         folder, "chgnet", repo="https://github.com/x/chgnet", ref="abc", paper="doi:1"
     )
-    assert {p.name for p in created} == {"motel.yaml", "api.py", "SKILL.md", ".gitignore"}
+    assert {p.name for p in created} == {"scipatch.yaml", "api.py", "SKILL.md", ".gitignore"}
     manifest = load_manifest(folder)
     assert manifest.source.repo == "https://github.com/x/chgnet"
     assert manifest.source.ref == "abc"
@@ -56,15 +56,15 @@ def test_scaffold_without_repo_is_valid(tmp_path: Path) -> None:
 
 
 def test_scaffold_rejects_bad_names(tmp_path: Path) -> None:
-    with pytest.raises(MotelError, match="not a valid tool name"):
+    with pytest.raises(SciPatchError, match="not a valid tool name"):
         scaffold(tmp_path / "x", "Bad_Name")
 
 
 def test_project_skills_are_installed_for_agents(tmp_path: Path) -> None:
     install_project_skills(tmp_path)
     for folder in (".claude/skills", ".agents/skills"):
-        assert (tmp_path / folder / "motel-onboard" / "SKILL.md").is_file()
-        assert (tmp_path / folder / "motel-onboard" / "references" / "manifest.md").is_file()
+        assert (tmp_path / folder / "scipatch-onboard" / "SKILL.md").is_file()
+        assert (tmp_path / folder / "scipatch-onboard" / "references" / "manifest.md").is_file()
 
 
 @requires_git

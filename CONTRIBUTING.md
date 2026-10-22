@@ -1,4 +1,4 @@
-# Contributing to Motel
+# Contributing to SciPatch
 
 Thanks for helping. This guide covers the development setup, the project
 layout, and the conventions the code follows.
@@ -8,8 +8,8 @@ layout, and the conventions the code follows.
 You need [uv](https://docs.astral.sh/uv/) and git.
 
 ```bash
-uv sync                          # creates .venv with Motel and the dev tools
-uv run motel --help              # run the CLI from your checkout
+uv sync                          # creates .venv with SciPatch and the dev tools
+uv run scipatch --help           # run the CLI from your checkout
 uv run pre-commit install        # optional: run the checks on every commit
 ```
 
@@ -27,16 +27,16 @@ Every pull request must pass all four; CI runs them on Linux and macOS with
 Python 3.11 to 3.13.
 
 Tests never touch your real configuration: each one gets its own temporary
-`HOME` and `MOTEL_HOME`. Integration tests build real environments with uv from
+`HOME` and `SCIPATCH_HOME`. Integration tests build real environments with uv from
 packages that use only the standard library, so they also work offline once uv
 has Python available.
 
 ## Project layout
 
 ```text
-src/motel/
-├── app.py            Motel facade: the one object behind the CLI, MCP, and dashboard
-├── manifest.py       motel.yaml models and validation
+src/scipatch/
+├── app.py            SciPatch facade: the one object behind the CLI, MCP, and dashboard
+├── manifest.py       scipatch.yaml models and validation
 ├── registry.py       installed tools (folders) and their build state
 ├── installer.py      add / rebuild / check / test / patch
 ├── build.py          source → environment → introspection → golden tests
@@ -63,16 +63,16 @@ src/motel/
 
 ## Conventions
 
-- **Errors are for people.** Raise a `MotelError` subclass with a message that
+- **Errors are for people.** Raise a `SciPatchError` subclass with a message that
   says what happened and a `hint` that says what to do. The CLI, MCP gateway, and
   dashboard all show both. Never show a traceback for an anticipated problem.
 - **One source of truth.** Function signatures come from `api.py`; JSON views
-  come from `views.py`; operations go through `app.Motel`. Interfaces stay thin.
+  come from `views.py`; operations go through `app.SciPatch`. Interfaces stay thin.
 - **The shim stays portable.** `runtime/shim.py` runs inside arbitrary tool
   environments: standard library only, Python 3.8 syntax at runtime (annotations
   are fine; they are never evaluated). `tests/test_integration.py` checks this
   against real 3.8 and 3.9 interpreters.
-- **Never damage user files.** Edit only Motel's own entries in configuration
+- **Never damage user files.** Edit only SciPatch's own entries in configuration
   files, back them up first, write atomically, and leave anything you cannot
   parse untouched.
 - **Typed and documented.** `mypy --strict` passes; public functions have
@@ -97,15 +97,15 @@ Tools live in [`tools/`](tools/README.md), one folder per tool. A new tool needs
 
 - golden tests whose `reference` says exactly where each expected value comes
   from (the paper, or the upstream test suite), and that pass with
-  `motel check tools/<name> --clean`;
+  `scipatch check tools/<name> --clean`;
 - a `validity` statement, a citation, and a license;
-- pinned versions: run `motel freeze tools/<name>` after a passing build.
+- pinned versions: run `scipatch freeze tools/<name>` after a passing build.
 
 The **Tools** CI workflow rebuilds every changed tool from scratch on Linux and
 macOS and runs its golden tests; it also checks all tools weekly. Golden tests
 that need an API key run when the key is configured as a repository secret.
 
-The two built-in tools in `src/motel/catalog/` ship inside Motel itself, so the
+The two built-in tools in `src/scipatch/catalog/` ship inside SciPatch itself, so the
 first-run demo needs nothing else; keep them small.
 
 ## Releasing

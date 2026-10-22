@@ -1,10 +1,10 @@
 # Concepts
 
-Motel solves one problem: research code is valuable but scattered. Each
+SciPatch solves one problem: research code is valuable but scattered. Each
 repository needs its own setup, has its own interface, and knows nothing about
 the others, so as your collection grows it becomes harder to use, not easier.
 
-Motel's answer has four parts.
+SciPatch's answer has four parts.
 
 ## 1. A tool package: one repository, made reliable
 
@@ -13,7 +13,7 @@ research code:
 
 ```text
 chgnet/
-├── motel.yaml        manifest: source, environment, functions, validity, golden tests
+├── scipatch.yaml        manifest: source, environment, functions, validity, golden tests
 ├── api.py            typed Python functions: the tool's capabilities
 ├── SKILL.md          usage notes for AI agents
 ├── patches/          fixes to the upstream code, re-applied on every rebuild
@@ -26,7 +26,7 @@ needed to make the code work are kept as patch files rather than lost in a local
 checkout.
 
 `api.py` is the only file that touches the research code. It exposes a handful
-of functions with type hints and docstrings. Motel reads those to generate
+of functions with type hints and docstrings. SciPatch reads those to generate
 everything else: the command line, the MCP interface, the dashboard forms, and
 the agent skill. All of them come from one source of truth, so they cannot drift
 apart.
@@ -41,32 +41,32 @@ Not all research code deserves the same trust. Each tool has a **maturity**
 level: *established* (mature, widely used code, checked against independent
 references), *published* (research code from a publication, less widely
 tested), or *experimental* (little outside validation, such as a small project
-without a paper). Motel checks the claim against evidence in the manifest (a
+without a paper). SciPatch checks the claim against evidence in the manifest (a
 publication, and golden tests that say what they are checked against). Agents
 see the level with its evidence, search ranks established tools first among
 similar matches, and experimental tools come with a caution to say so and
 cross-check their numbers. You can lower a tool's level on your computer with
-`motel maturity <tool> experimental`.
+`scipatch maturity <tool> experimental`.
 
 Tools also declare what they need from the computer (**resources**: a GPU,
-memory, an internet connection). Motel compares that with the computer before
+memory, an internet connection). SciPatch compares that with the computer before
 installing a tool and before each run: a tool that requires a missing GPU is not
 installed, shortfalls such as low memory are shown to agents before a large
 run, and each run is told which device to use. GPUs speed up tools only when
-you allow it (`motel config gpu on`); tools that require one always use it.
+you allow it (`scipatch config gpu on`); tools that require one always use it.
 
-## 2. Rooms: isolated environments
+## 2. Isolated environments
 
 Every tool gets its own environment, built with uv (PyPI packages) or conda
 (conda-forge packages). Tools that need different versions of NumPy, PyTorch, or
 anything else live side by side. Conda environments are created with your own
-micromamba or mamba if you have one, otherwise with a micromamba that Motel
-downloads once, checks against a pinned checksum, and keeps in `~/.motel/bin`;
+micromamba or mamba if you have one, otherwise with a micromamba that SciPatch
+downloads once, checks against a pinned checksum, and keeps in `~/.scipatch/bin`;
 your own conda installation and settings are never touched. Set
-`MOTEL_SYSTEM_CONDA=1` to use your conda instead. Only the channels in the tool's
+`SCIPATCH_SYSTEM_CONDA=1` to use your conda instead. Only the channels in the tool's
 manifest are used, so a tool's environment is the same on every computer.
 
-Each tool's `motel.lock` pins its packages for Linux, macOS, and Windows, and says
+Each tool's `scipatch.lock` pins its packages for Linux, macOS, and Windows, and says
 where it cannot be installed. On Windows, a tool that exists only for Linux is
 built and run inside WSL (the Windows Subsystem for Linux) with exactly its
 locked Linux packages: the environment lives on the Linux side, and the tool
@@ -74,14 +74,14 @@ reads and writes files on Windows through `/mnt/c/...`. Paths are translated bot
 ways, and secrets reach the Linux process as environment variables, never on a
 command line.
 
-Motel never imports tool code into its own process. To call a function it starts
+SciPatch never imports tool code into its own process. To call a function it starts
 the tool's own Python interpreter with a tiny standard-library-only *shim*, which
 imports `api.py`, calls the function, and writes the result as JSON. This is why
-one Motel can host tools that would never coexist in one environment, including
+one SciPatch can host tools that would never coexist in one environment, including
 tools that need old Python versions (3.8+).
 
 ```text
-Motel process                         tool environment (its own Python)
+SciPatch process                         tool environment (its own Python)
 ─────────────                         ─────────────────────────────────
 run_tool("chgnet", "relax", {...})
   └─ writes request.json ───────────► python -I shim.py call request.json
@@ -89,14 +89,14 @@ run_tool("chgnet", "relax", {...})
      reads response.json ◄────────────  └─ writes response.json
 ```
 
-Each run happens in its own folder (`~/.motel/runs/<run-id>/`), which holds the
+Each run happens in its own folder (`~/.scipatch/runs/<run-id>/`), which holds the
 output files, the tool's printed output (`stdout.log`, `stderr.log`), and the
 request and response.
 
-## 3. One front desk: the MCP gateway
+## 3. One connection: the MCP gateway
 
-AI apps connect to Motel through the Model Context Protocol (MCP), the open
-standard for giving AI models tools. Motel runs **one** MCP server for all your
+AI apps connect to SciPatch through the Model Context Protocol (MCP), the open
+standard for giving AI models tools. SciPatch runs **one** MCP server for all your
 tools, with a fixed set of operations:
 
 | Operation | Purpose |
@@ -113,20 +113,20 @@ Registering every function as its own MCP tool would flood the model's context
 as your collection grows. With a search-then-describe-then-run pattern, ten
 tools and three hundred tools cost the same.
 
-The same operations are available on the command line (`motel find`,
-`motel info`, `motel run`, `motel runs`) with `--json` output, and in the
-dashboard (`motel ui`).
+The same operations are available on the command line (`scipatch find`,
+`scipatch info`, `scipatch run`, `scipatch runs`) with `--json` output, and in the
+dashboard (`scipatch ui`).
 
-**Skills** complement MCP. Motel installs Agent Skills (`SKILL.md` files) into
+**Skills** complement MCP. SciPatch installs Agent Skills (`SKILL.md` files) into
 the apps that support them: one that teaches the workflow above, one per tool
-(generated from its manifest and functions), and `motel-onboard`, which teaches
+(generated from its manifest and functions), and `scipatch-onboard`, which teaches
 a coding agent how to turn a repository into a tool package. Agents read only
 each skill's one-line description until a task needs it, so many skills cost
 little context.
 
 ## 4. A memory: the run history
 
-Every run is recorded in `~/.motel/motel.db`: the tool and its version, the
+Every run is recorded in `~/.scipatch/scipatch.db`: the tool and its version, the
 source commit, the exact arguments, the result, output files, timing, and any
 error. This gives you:
 
@@ -149,10 +149,10 @@ immediately with a run id.
 
 Turning arbitrary research code into a reliable tool needs judgment: which
 capabilities matter, why an install fails, which published number to reproduce.
-Motel leaves those decisions to a coding agent (Claude Code, Codex, Gemini CLI)
-guided by the `motel-onboard` skill. Motel itself provides the deterministic
-parts: scaffolding (`motel new`), building and checking (`motel check`),
-recording fixes (`motel patch save`), and installing (`motel add`). See
+SciPatch leaves those decisions to a coding agent (Claude Code, Codex, Gemini CLI)
+guided by the `scipatch-onboard` skill. SciPatch itself provides the deterministic
+parts: scaffolding (`scipatch new`), building and checking (`scipatch check`),
+recording fixes (`scipatch patch save`), and installing (`scipatch add`). See
 [Turning a repository into a tool](onboarding.md).
 
 ## Design principles
@@ -163,6 +163,6 @@ recording fixes (`motel patch save`), and installing (`motel add`). See
   and per-run provenance.
 - **Honest results.** Validity limits travel with every tool, and agents are
   instructed to report them.
-- **Safe with your files.** Motel edits only its own entries in apps'
+- **Safe with your files.** SciPatch edits only its own entries in apps'
   configuration files, backs them up first, and never touches skills it did not
   create.

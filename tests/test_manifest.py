@@ -5,8 +5,8 @@ from typing import Any
 
 import pytest
 
-from motel.errors import ManifestError
-from motel.manifest import Manifest, load_manifest
+from scipatch.errors import ManifestError
+from scipatch.manifest import Manifest, load_manifest
 
 
 def minimal(**overrides: Any) -> dict[str, Any]:
@@ -90,12 +90,12 @@ def test_golden_matchers_must_be_numbers() -> None:
 
 
 def test_newer_schema_asks_for_upgrade() -> None:
-    with pytest.raises(ValueError, match="upgrade Motel"):
+    with pytest.raises(ValueError, match="upgrade SciPatch"):
         Manifest.model_validate(minimal(schema=99))
 
 
 def test_load_reports_unknown_fields_readably(tmp_path: Path) -> None:
-    (tmp_path / "motel.yaml").write_text("name: x\nsumary: typo in the field name\n")
+    (tmp_path / "scipatch.yaml").write_text("name: x\nsumary: typo in the field name\n")
     with pytest.raises(ManifestError) as caught:
         load_manifest(tmp_path)
     message = caught.value.message
@@ -104,7 +104,7 @@ def test_load_reports_unknown_fields_readably(tmp_path: Path) -> None:
 
 
 def test_load_reports_yaml_errors(tmp_path: Path) -> None:
-    (tmp_path / "motel.yaml").write_text("name: [unclosed\n")
+    (tmp_path / "scipatch.yaml").write_text("name: [unclosed\n")
     with pytest.raises(ManifestError, match="not valid YAML"):
         load_manifest(tmp_path)
 
@@ -113,4 +113,4 @@ def test_missing_manifest_has_a_hint(tmp_path: Path) -> None:
     with pytest.raises(ManifestError) as caught:
         load_manifest(tmp_path)
     assert caught.value.hint is not None
-    assert "motel new" in caught.value.hint
+    assert "scipatch new" in caught.value.hint

@@ -7,7 +7,7 @@ pymatgen-analysis-diffusion's own test suite uses
 the golden test checks this tool against the values asserted there:
 
 ```bash
-motel exec . -- python tests/data/make_lgps_trajectory.py \
+scipatch exec . -- python tests/data/make_lgps_trajectory.py \
     source/tests/pymatgen/analysis/diffusion/DiffusionAnalyzer.json \
     tests/data/LGPS_600K_AIMD.extxyz.gz
 ```

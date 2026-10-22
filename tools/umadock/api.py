@@ -35,7 +35,7 @@ AIMNET2_ELEMENTS = {"H", "B", "C", "N", "O", "F", "Si", "P", "S", "Cl", "As", "S
 @functools.cache
 def _source() -> Path:
     warnings.filterwarnings("ignore")
-    code = Path(os.environ["MOTEL_SOURCE_DIR"]) / "code"
+    code = Path(os.environ["SCIPATCH_SOURCE_DIR"]) / "code"
     if str(code) not in sys.path:
         sys.path.insert(0, str(code))
     return code

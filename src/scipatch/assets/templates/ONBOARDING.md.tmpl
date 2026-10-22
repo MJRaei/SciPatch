@@ -1,0 +1,24 @@
+# Onboarding brief: $name
+
+**Goal:** turn the research code in `source/` into a SciPatch tool package in this
+folder, so people and AI agents can use it reliably from one place.
+
+| | |
+|---|---|
+| Repository | $repo |
+| Pinned commit | `$ref` |
+| Paper | $paper |
+| Requested focus | $focus |
+
+Follow the **scipatch-onboard** skill (in `.claude/skills/` and `.agents/skills/`
+of this folder). In short:
+
+1. Understand what the code does; pick 1 to 5 capabilities worth exposing.
+2. Make the environment build: `scipatch check .` (fix by editing `scipatch.yaml`, or
+   edit `source/` and save the fix with `scipatch patch save . -m "why"`).
+3. Reproduce one published or documented number.
+4. Write typed, documented functions in `api.py`.
+5. Add golden tests, usage notes (`SKILL.md`), validity limits, and citation.
+6. Verify from scratch with `scipatch check . --clean`, then install with `scipatch add .`.
+
+Ask the user before making scientific choices (models, methods, datasets).

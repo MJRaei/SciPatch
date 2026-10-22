@@ -47,7 +47,7 @@ def _rester() -> Iterator[Any]:
         if "401" in str(exc) or "403" in str(exc):
             raise ValueError(
                 f"The Materials Project rejected the API key. Check it at {_KEY_URL} and "
-                "store it again with 'motel secret set MP_API_KEY'."
+                "store it again with 'scipatch secret set MP_API_KEY'."
             ) from exc
         raise
 

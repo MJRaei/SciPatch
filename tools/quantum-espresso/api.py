@@ -130,7 +130,7 @@ def _run_pw(
         atoms.set_initial_magnetic_moments(None)
     # Wave functions are large and never kept: write them to the system's temporary
     # folder (on the Linux file system even when the run folder is on Windows, in WSL).
-    scratch = tempfile.mkdtemp(prefix="motel-qe-")
+    scratch = tempfile.mkdtemp(prefix="scipatch-qe-")
     input_data = {
         "control": {
             "calculation": calculation,

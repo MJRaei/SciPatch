@@ -13,7 +13,7 @@ from typing import Annotated, Any, Literal, Optional
 
 import pytest
 
-from motel.runtime import shim
+from scipatch.runtime import shim
 
 
 class Functional(enum.Enum):
@@ -163,7 +163,7 @@ def test_public_functions_respect_dunder_all_and_explicit_names() -> None:
     module = _module("__all__ = ['b']\ndef a():\n    pass\ndef b():\n    pass\n")
     assert [f.__name__ for f in shim.public_functions(module)] == ["b"]
     assert [f.__name__ for f in shim.public_functions(module, ["a"])] == ["a"]
-    with pytest.raises(LookupError, match=r"'missing' is listed in motel\.yaml"):
+    with pytest.raises(LookupError, match=r"'missing' is listed in scipatch\.yaml"):
         shim.public_functions(module, ["missing"])
 
 
@@ -188,7 +188,7 @@ def test_call_reports_argument_problems() -> None:
 
     with pytest.raises(TypeError) as caught:
         shim.call_function([target], "target", {"c": 1})
-    assert getattr(caught.value, "motel_type", None) == "InvalidArguments"
+    assert getattr(caught.value, "scipatch_type", None) == "InvalidArguments"
     assert "unknown argument(s): c" in str(caught.value)
     assert "missing required argument(s): a" in str(caught.value)
     with pytest.raises(LookupError, match="Unknown function 'nope'"):

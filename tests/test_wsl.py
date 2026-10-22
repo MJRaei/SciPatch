@@ -15,15 +15,15 @@ from pathlib import Path
 
 import pytest
 
-from motel import platforms, wsl
-from motel.app import Motel
-from motel.environments import micromamba
-from motel.errors import BuildError
-from motel.lock import Lock, PlatformLock, inputs_hash, save
-from motel.manifest import load_manifest
-from motel.models import RunStatus
-from motel.runtime import executor
-from motel.runtime.executor import ToolRuntime, pid_alive
+from scipatch import platforms, wsl
+from scipatch.app import SciPatch
+from scipatch.environments import micromamba
+from scipatch.errors import BuildError
+from scipatch.lock import Lock, PlatformLock, inputs_hash, save
+from scipatch.manifest import load_manifest
+from scipatch.models import RunStatus
+from scipatch.runtime import executor
+from scipatch.runtime.executor import ToolRuntime, pid_alive
 
 from .conftest import ManifestFactory
 
@@ -72,21 +72,23 @@ def test_variables_and_secrets_reach_linux_through_wslenv_not_argv(
     distro = wsl.Distro(name="Ubuntu", home="/home/ada")
     runtime = ToolRuntime(
         python=Path("unused"),
-        env_dir=Path("C:\\motel\\envs\\gpaw"),
-        package_dir=Path("C:\\motel\\tools\\gpaw"),
+        env_dir=Path("C:\\scipatch\\envs\\gpaw"),
+        package_dir=Path("C:\\scipatch\\tools\\gpaw"),
         entrypoint="api",
         variables={"OMP_NUM_THREADS": "1"},
         secrets={"MP_API_KEY": "s3cret"},
-        linux=wsl.LinuxEnvironment(distro=distro, prefix="/home/ada/.motel/envs/gpaw-1"),
+        linux=wsl.LinuxEnvironment(distro=distro, prefix="/home/ada/.scipatch/envs/gpaw-1"),
     )
     env = runtime.child_environment()
     shared = env["WSLENV"].split(":")
     assert shared[0] == "USERPROFILE/p"
-    assert {"MP_API_KEY", "OMP_NUM_THREADS", "MOTEL_PREPEND_PATH", "MOTEL_WSL_ROOT"} <= set(shared)
-    assert env["MOTEL_PREPEND_PATH"] == "/home/ada/.motel/envs/gpaw-1/bin"
-    command = executor._command(runtime, "call", Path("C:\\motel\\runs\\r1\\request.json"))
+    assert {"MP_API_KEY", "OMP_NUM_THREADS", "SCIPATCH_PREPEND_PATH", "SCIPATCH_WSL_ROOT"} <= set(
+        shared
+    )
+    assert env["SCIPATCH_PREPEND_PATH"] == "/home/ada/.scipatch/envs/gpaw-1/bin"
+    command = executor._command(runtime, "call", Path("C:\\scipatch\\runs\\r1\\request.json"))
     assert command[:3] == ["wsl.exe", "-d", "Ubuntu"]
-    assert command[-2:] == ["call", "/mnt/c/motel/runs/r1/request.json"]
+    assert command[-2:] == ["call", "/mnt/c/scipatch/runs/r1/request.json"]
     assert "s3cret" not in " ".join(command)
 
 
@@ -109,19 +111,22 @@ def _linux_only_lock(package: Path) -> None:
 
 
 def test_without_wsl_the_user_is_told_how_to_get_it(
-    motel: Motel, make_package: ManifestFactory, monkeypatch: pytest.MonkeyPatch
+    scipatch: SciPatch, make_package: ManifestFactory, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     package = make_package(functions=["add"])
     _linux_only_lock(package)
     _pretend_windows(monkeypatch, None)
     with pytest.raises(BuildError) as caught:
-        motel.check(package)
+        scipatch.check(package)
     assert "runs on Windows inside WSL" in caught.value.message
     assert caught.value.hint == wsl.INSTALL_HINT
 
 
 def test_a_linux_only_tool_is_built_and_run_inside_wsl(
-    motel: Motel, make_package: ManifestFactory, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    scipatch: SciPatch,
+    make_package: ManifestFactory,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     fake_wsl = tmp_path / "wsl.exe"
     fake_wsl.write_text(FAKE_WSL)
@@ -146,36 +151,36 @@ def test_a_linux_only_tool_is_built_and_run_inside_wsl(
                      "secrets": ["DEMO_KEY"], "variables": {"OTHER_KEY": "from-manifest"}},
     )  # fmt: skip
     _linux_only_lock(package)
-    motel.secrets.set("DEMO_KEY", "s3cret")
-    motel.add(str(package))
+    scipatch.secrets.set("DEMO_KEY", "s3cret")
+    scipatch.add(str(package))
 
     assert downloads == ["linux-64"]  # copied into WSL, executable there
-    assert os.access(Path(distro.motel_home) / "bin" / "micromamba", os.X_OK)
-    tool = motel.tool("sample")
+    assert os.access(Path(distro.scipatch_home) / "bin" / "micromamba", os.X_OK)
+    tool = scipatch.tool("sample")
     pointer = wsl.read_pointer(tool.layout.env_dir)
     assert pointer is not None and pointer.distro.name == "Test"
-    assert pointer.prefix.startswith(f"{distro.home}/.motel/envs/sample-")
+    assert pointer.prefix.startswith(f"{distro.home}/.scipatch/envs/sample-")
     assert tool.state is not None and tool.state.golden_summary == "1/1 golden tests passed"
 
-    record = motel.run("sample", "secret_values")
+    record = scipatch.run("sample", "secret_values")
     assert record.result == {"demo": "s3cret", "other": "from-manifest"}
     assert (Path(record.run_dir) / wsl.PID_FILE).exists()  # the Linux process group
 
-    long = motel.run("sample", "sleep", {"seconds": 60}, wait=0)
+    long = scipatch.run("sample", "sleep", {"seconds": 60}, wait=0)
     deadline = time.monotonic() + 20
     while not (Path(long.run_dir) / wsl.PID_FILE).exists() and time.monotonic() < deadline:
         time.sleep(0.1)
-    cancelled = motel.cancel_run(long.id)
+    cancelled = scipatch.cancel_run(long.id)
     assert cancelled.status is RunStatus.CANCELLED
     assert not pid_alive(long.pid)
 
-    motel.remove("sample")
+    scipatch.remove("sample")
     assert not Path(pointer.prefix).exists()  # the Linux side is deleted too
     assert os.environ.get("WSLENV") is None or "DEMO_KEY" not in os.environ["WSLENV"]
 
 
 def test_the_shim_translates_paths_inside_wsl(tmp_path: Path) -> None:
-    from motel.runtime import shim
+    from scipatch.runtime import shim
 
     root = "/mnt/"
     assert (

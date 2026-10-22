@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SciPatch</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --panel: #ffffff; --text: #1d1d1f; --muted: #6b6b70; --line: #e4e4e0;
+    --accent: #2f5bea; --accent-soft: #e8eefe; --ok: #1a7f37; --ok-soft: #e6f4ea;
+    --warn: #9a6700; --warn-soft: #fff4d6; --bad: #c62828; --bad-soft: #fdecea;
+    --code: #f2f2ef; --radius: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141416; --panel: #1c1c1f; --text: #ececee; --muted: #9a9aa2; --line: #2c2c31;
+      --accent: #7b9cff; --accent-soft: #232a45; --ok: #5cc777; --ok-soft: #1b2e21;
+      --warn: #e2b340; --warn-soft: #33290f; --bad: #ff7b72; --bad-soft: #3a1d1b; --code: #232327;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.45; }
+  header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--line);
+           background: var(--panel); position: sticky; top: 0; z-index: 2; }
+  header h1 { font-size: 18px; margin: 0; letter-spacing: .2px; }
+  header h1 span { color: var(--accent); }
+  header input { flex: 1; max-width: 520px; }
+  nav button { background: none; border: 0; color: var(--muted); font-size: 15px; padding: 6px 10px; cursor: pointer; border-radius: 8px; }
+  nav button.active { color: var(--text); background: var(--accent-soft); }
+  main { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 57px); }
+  aside { border-right: 1px solid var(--line); padding: 14px; overflow-y: auto; }
+  section#content { padding: 22px 28px; max-width: 1000px; }
+  input, select, textarea { font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line);
+                            border-radius: 8px; padding: 7px 10px; width: 100%; }
+  textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; min-height: 64px; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  button.primary { background: var(--accent); color: white; border: 0; border-radius: 8px; padding: 9px 18px; font: inherit;
+                   font-weight: 600; cursor: pointer; }
+  button.primary:disabled { opacity: .5; cursor: default; }
+  button.small { font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 7px; border: 1px solid var(--line);
+                 background: var(--panel); color: var(--text); cursor: pointer; white-space: nowrap; }
+  .tool-card { padding: 10px 12px; border-radius: var(--radius); cursor: pointer; margin-bottom: 4px; }
+  .tool-card:hover { background: var(--accent-soft); }
+  .tool-card.selected { background: var(--accent-soft); }
+  .tool-card b { display: block; }
+  .tool-card small { color: var(--muted); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chip { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  .chip.succeeded, .chip.ready { color: var(--ok); background: var(--ok-soft); }
+  .chip.running { color: var(--accent); background: var(--accent-soft); }
+  .chip.failed, .chip.broken, .chip.cancelled { color: var(--bad); background: var(--bad-soft); }
+  .chip.failing-tests { color: var(--warn); background: var(--warn-soft); }
+  .chip.established { color: var(--muted); background: var(--code); }
+  .chip.published { color: var(--accent); background: var(--accent-soft); }
+  .chip.experimental { color: var(--warn); background: var(--warn-soft); }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 16px; }
+  .muted { color: var(--muted); }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 16px 0 10px; }
+  .tabs button { border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 999px;
+                 padding: 5px 14px; cursor: pointer; font: inherit; font-size: 14px; }
+  .tabs button.active { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-weight: 600; margin-bottom: 4px; }
+  .field label .unit { font-weight: 400; color: var(--muted); }
+  .field .help { color: var(--muted); font-size: 13px; margin-top: 3px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  pre { background: var(--code); border-radius: 8px; padding: 12px; overflow-x: auto; font-size: 13px; margin: 8px 0 0;
+        white-space: pre-wrap; word-break: break-word; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: top; }
+  tr.clickable { cursor: pointer; } tr.clickable:hover { background: var(--accent-soft); }
+  details { margin-top: 8px; } summary { cursor: pointer; font-weight: 600; }
+  .error { color: var(--bad); }
+  a { color: var(--accent); }
+  .files a { display: block; color: var(--accent); cursor: pointer; text-decoration: none; margin-top: 4px; word-break: break-all; }
+  .empty { text-align: center; color: var(--muted); padding: 60px 20px; }
+  .empty code, .panel code { background: var(--code); padding: 1px 6px; border-radius: 5px; }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid var(--line); max-height: 40vh; } }
+</style>
+</head>
+<body>
+<header>
+  <h1><span>●</span> SciPatch</h1>
+  <input id="search" type="search" placeholder="What do you want to do? e.g. “relax a crystal structure”" aria-label="Search tools">
+  <nav>
+    <button id="nav-tools" class="active">Tools</button>
+    <button id="nav-runs">Runs</button>
+    <button id="nav-keys">Keys</button>
+  </nav>
+</header>
+<main>
+  <aside id="sidebar"></aside>
+  <section id="content"></section>
+</main>
+<script>
+"use strict";
+const hashParams = new URLSearchParams(location.hash.slice(1));
+const token = hashParams.get("token") || sessionStorage.getItem("scipatch-token") || "";
+sessionStorage.setItem("scipatch-token", token);
+const PATH_KINDS = new Set(["structure", "trajectory", "spectrum", "table", "image", "file", "directory", "molecule"]);
+const state = { tools: [], selected: null, view: "tools" };
+
+// ---------------------------------------------------------------- helpers
+function h(tag, attrs = {}, ...children) {
+  const el = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (key.startsWith("on")) el.addEventListener(key.slice(2), value);
+    else if (value === true) el.setAttribute(key, "");
+    else if (value !== false && value != null) el.setAttribute(key, value);
+  }
+  for (const child of children.flat()) {
+    if (child == null || child === false) continue;
+    el.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  }
+  return el;
+}
+async function api(path, options = {}) {
+  const response = await fetch(path, { ...options, headers: { ...(options.headers || {}), "X-SciPatch-Token": token } });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error((data.error || response.statusText) + (data.hint ? "\nHint: " + data.hint : ""));
+  return data;
+}
+const chip = (status) => h("span", { class: `chip ${status}` }, status.replace("-", " "));
+const pretty = (value) => h("pre", {}, JSON.stringify(value, null, 2));
+const safeLink = (url) => /^https?:\/\//.test(url) ? h("a", { href: url, target: "_blank", rel: "noopener noreferrer" }, url) : url;
+function typeOf(schema) {
+  const options = (schema.anyOf || []).filter((o) => o.type !== "null");
+  return options.length === 1 ? { ...options[0], ...schema, anyOf: undefined, optional: true } : schema;
+}
+function unitOf(schema) { return schema["x-unit"] ? h("span", { class: "unit" }, ` [${schema["x-unit"]}]`) : null; }
+
+// ---------------------------------------------------------------- tools
+async function loadTools() {
+  try { state.tools = await api("/api/tools"); } catch (error) { return showError(error); }
+  renderSidebar(state.tools.map((t) => ({ tool: t.name, summary: t.summary, status: t.status })));
+  if (!state.tools.length) {
+    setContent(h("div", { class: "empty" }, h("h2", {}, "No tools yet"),
+      h("p", {}, "Install a featured tool from a terminal: ", h("code", {}, "scipatch add ase-emt")),
+      h("p", {}, "Or turn a research repository into a tool: ", h("code", {}, "scipatch onboard <repository-url>"))));
+  } else if (!state.selected) {
+    selectTool(state.tools[0].name);
+  }
+}
+function renderSidebar(items, focusFunction) {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.replaceChildren(...items.map((item) => h("div", {
+    class: "tool-card" + (item.tool === state.selected ? " selected" : ""),
+    onclick: () => selectTool(item.tool, item.function),
+  }, h("b", {}, item.function ? `${item.tool} · ${item.function}` : item.tool), h("small", {}, item.summary))));
+  if (!items.length) sidebar.replaceChildren(h("p", { class: "muted" }, "Nothing matches."));
+}
+async function search(query) {
+  if (!query.trim()) return loadTools();
+  try {
+    const matches = await api("/api/find?q=" + encodeURIComponent(query));
+    renderSidebar(matches.map((m) => ({ tool: m.tool, function: m.function, summary: m.summary })));
+  } catch (error) { showError(error); }
+}
+async function selectTool(name, functionName) {
+  state.selected = name;
+  showView("tools", false);
+  let tool;
+  try { tool = await api("/api/tools/" + encodeURIComponent(name)); } catch (error) { return showError(error); }
+  document.querySelectorAll(".tool-card").forEach((card) =>
+    card.classList.toggle("selected", card.querySelector("b").textContent.split(" · ")[0] === name));
+  const formArea = h("div");
+  const tabs = h("div", { class: "tabs" });
+  const pick = (fn) => {
+    tabs.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b.dataset.fn === fn.name));
+    formArea.replaceChildren(functionForm(tool, fn));
+  };
+  tool.functions.forEach((fn) => tabs.append(h("button", { "data-fn": fn.name, onclick: () => pick(fn) }, fn.name)));
+  const citation = tool.citation || {};
+  const missingKeys = (tool.secrets_needed || []).filter((s) => !s.set);
+  setContent(
+    h("div", { class: "panel" },
+      h("div", { class: "row" }, h("h2", { style: "margin:0;flex:1" }, tool.title),
+        chip(tool.maturity.level), chip(tool.status)),
+      h("p", {}, tool.summary),
+      tool.maturity.caution && h("p", { class: "muted" }, tool.maturity.caution),
+      h("p", { class: "muted" }, "Needs: ", tool.resources.needs.join(", "),
+        tool.resources.disk_space ? ` · uses ${tool.resources.disk_space}` : ""),
+      (tool.resources.cannot_run_here || []).map((text) => h("p", { class: "error" }, text)),
+      (tool.resources.warnings || []).map((text) => h("p", { class: "muted" }, "⚠ ", text)),
+      missingKeys.length > 0 && h("p", { class: "error" },
+        `Needs ${missingKeys.map((s) => s.description || s.name).join(" and ")} before it can run. `,
+        h("a", { href: "#", onclick: (event) => { event.preventDefault(); showView("keys"); } }, "Add it on the Keys page")),
+      h("small", { class: "muted", title: tool.maturity.meaning },
+        `${tool.name} ${tool.version} · ${tool.golden_tests} · ${tool.maturity.evidence}`),
+      tabs, formArea),
+    tool.usage_notes && h("div", { class: "panel" }, h("details", { open: true }, h("summary", {}, "Usage notes"),
+      h("pre", {}, tool.usage_notes))),
+    tool.validity && h("div", { class: "panel" }, h("details", {}, h("summary", {}, "Before trusting a result"),
+      h("p", {}, tool.validity))),
+    h("div", { class: "panel" }, h("details", {}, h("summary", {}, "Provenance and citation"),
+      citation.cite_as && h("p", {}, citation.cite_as),
+      citation.paper && h("p", {}, "Paper: ", citation.paper),
+      citation.code && h("p", {}, "Code: ", citation.code, citation.commit ? ` @ ${String(citation.commit).slice(0, 12)}` : ""),
+      citation.license && h("p", {}, "License: ", citation.license))));
+  const initial = tool.functions.find((f) => f.name === functionName) || tool.functions[0];
+  if (initial) pick(initial);
+}
+
+// ---------------------------------------------------------------- forms
+function fieldFor(name, rawSchema, required) {
+  const schema = typeOf(rawSchema);
+  const id = "field-" + name;
+  const hasDefault = Object.prototype.hasOwnProperty.call(rawSchema, "default") && rawSchema.default !== null;
+  let input, read;
+  if (schema.enum) {
+    input = h("select", { id }, ...(required ? [] : [h("option", { value: "" }, "(default)")]),
+      ...schema.enum.map((v) => h("option", { value: JSON.stringify(v), selected: hasDefault && v === rawSchema.default }, String(v))));
+    read = () => input.value === "" ? undefined : JSON.parse(input.value);
+  } else if (schema.type === "boolean") {
+    input = h("input", { id, type: "checkbox", checked: hasDefault && rawSchema.default === true, style: "width:auto" });
+    read = () => input.checked;
+  } else if (schema.type === "number" || schema.type === "integer") {
+    input = h("input", { id, type: "number", step: schema.type === "integer" ? "1" : "any", value: hasDefault ? rawSchema.default : "" });
+    read = () => input.value === "" ? undefined : Number(input.value);
+  } else if (schema.type === "string" || PATH_KINDS.has(schema["x-kind"])) {
+    input = h("input", { id, type: "text", value: hasDefault ? rawSchema.default : "", placeholder: schema["x-kind"] ? `${schema["x-kind"]} file path` : "" });
+    read = () => input.value === "" ? undefined : input.value;
+  } else {
+    input = h("textarea", { id, placeholder: "JSON value" }, hasDefault ? JSON.stringify(rawSchema.default) : "");
+    read = () => { if (input.value.trim() === "") return undefined; try { return JSON.parse(input.value); }
+                   catch { throw new Error(`"${name}" must be valid JSON, e.g. [1, 2] or {"a": 1}`); } };
+  }
+  let control = input;
+  if (PATH_KINDS.has(schema["x-kind"]) || schema.format === "path") {
+    const picker = h("input", { type: "file", style: "display:none", onchange: async () => {
+      const data = new FormData(); data.append("file", picker.files[0]);
+      try { input.value = (await api("/api/upload", { method: "POST", body: data })).path; } catch (error) { alert(error.message); }
+    } });
+    control = h("div", { class: "row" }, input, picker, h("button", { class: "small", type: "button", onclick: () => picker.click() }, "Upload…"));
+  }
+  const field = h("div", { class: "field" },
+    h("label", { for: id }, name, required ? " *" : "", unitOf(schema)), control,
+    schema.description && h("div", { class: "help" }, schema.description));
+  return { field, read };
+}
+function functionForm(tool, fn) {
+  const props = fn.parameters.properties || {};
+  const required = new Set(fn.parameters.required || []);
+  const fields = Object.entries(props).map(([name, schema]) => [name, fieldFor(name, schema, required.has(name))]);
+  const output = h("div");
+  const button = h("button", { class: "primary", type: "submit" }, "Run");
+  const form = h("form", { onsubmit: async (event) => {
+    event.preventDefault();
+    const args = {};
+    try {
+      for (const [name, { read }] of fields) { const value = read(); if (value !== undefined) args[name] = value; }
+      for (const name of required) if (!(name in args)) throw new Error(`Please fill in "${name}".`);
+    } catch (error) { output.replaceChildren(h("p", { class: "error" }, error.message)); return; }
+    button.disabled = true;
+    output.replaceChildren(h("p", { class: "muted" }, "Running…"));
+    try { await followRun(await api("/api/run", { method: "POST", body: JSON.stringify({ tool: tool.name, function: fn.name, arguments: args }) }), output); }
+    catch (error) { output.replaceChildren(h("pre", { class: "error" }, error.message)); }
+    finally { button.disabled = false; }
+  } },
+    h("p", {}, fn.summary, fn.long_running ? h("span", { class: "chip running", style: "margin-left:8px" }, "long-running") : null),
+    fn.description && h("p", { class: "muted" }, fn.description),
+    ...fields.map(([, f]) => f.field), button, output);
+  return form;
+}
+async function followRun(run, output) {
+  while (run.status === "running") {
+    output.replaceChildren(runDetails(run, output));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    run = await api("/api/runs/" + run.run_id);
+  }
+  output.replaceChildren(runDetails(run, output));
+}
+function runDetails(run, container) {
+  const files = (run.files || []).map((path, index) => h("a", { onclick: () => download(run.run_id, index, path) }, "⤓ " + path));
+  return h("div", { class: "panel", style: "margin-top:16px" },
+    h("div", { class: "row" }, chip(run.status), h("b", { style: "flex:1" }, `${run.tool} · ${run.function}`),
+      run.status === "running" && h("button", { class: "small", onclick: async () =>
+        followRun(await api(`/api/runs/${run.run_id}/cancel`, { method: "POST" }), container) }, "Cancel"),
+      h("small", { class: "muted" }, run.run_id)),
+    run.cached && h("p", { class: "muted" }, "Reused an identical earlier run."),
+    run.duration_seconds != null && h("p", { class: "muted" }, `Took ${run.duration_seconds.toFixed(2)} s`),
+    run.status === "running" && h("p", { class: "muted" }, `Running for ${Math.round(run.elapsed_seconds)} s`),
+    run.latest_output && h("pre", {}, run.latest_output),
+    "result" in run && pretty(run.result),
+    run.error && h("div", {}, h("p", { class: "error" }, `${run.error.type}: ${run.error.message}`),
+      run.error.traceback && h("details", {}, h("summary", {}, "Technical details"), h("pre", {}, run.error.traceback))),
+    files.length ? h("div", { class: "files" }, h("b", {}, "Files"), ...files) : null,
+    h("details", {}, h("summary", {}, "Arguments"), pretty(run.arguments)));
+}
+async function download(runId, index, path) {
+  const response = await fetch(`/api/runs/${runId}/files/${index}`, { headers: { "X-SciPatch-Token": token } });
+  if (!response.ok) return alert("The file is no longer available.");
+  const url = URL.createObjectURL(await response.blob());
+  h("a", { href: url, download: path.split(/[\\/]/).pop() }).click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+// ---------------------------------------------------------------- runs
+async function loadRuns() {
+  let runs;
+  try { runs = await api("/api/runs?limit=100"); } catch (error) { return showError(error); }
+  document.getElementById("sidebar").replaceChildren(h("p", { class: "muted" }, "Every run is recorded with its inputs, outputs, and tool version."));
+  if (!runs.length) return setContent(h("div", { class: "empty" }, h("h2", {}, "No runs yet"), h("p", {}, "Run a tool and it will appear here.")));
+  const detail = h("div");
+  const rows = runs.map((run) => h("tr", { class: "clickable", onclick: async () => followRun(await api("/api/runs/" + run.run_id), detail) },
+    h("td", {}, chip(run.status)), h("td", {}, h("b", {}, run.tool), " · ", run.function),
+    h("td", { class: "muted" }, new Date(run.started_at).toLocaleString()),
+    h("td", { class: "muted" }, run.duration_seconds != null ? `${run.duration_seconds.toFixed(1)} s` : "")));
+  setContent(detail, h("div", { class: "panel" }, h("table", {}, h("thead", {}, h("tr", {}, h("th", {}, "Status"), h("th", {}, "Tool"), h("th", {}, "Started"), h("th", {}, "Took"))), h("tbody", {}, ...rows))));
+}
+
+// ---------------------------------------------------------------- keys
+async function loadKeys() {
+  let keys;
+  try { keys = await api("/api/secrets"); } catch (error) { return showError(error); }
+  document.getElementById("sidebar").replaceChildren(h("p", { class: "muted" },
+    "API keys for tools that use online services. They stay on this computer, are given only to the tools " +
+    "that need them, and are never shown again after you save them."));
+  if (!keys.length) return setContent(h("div", { class: "empty" }, h("h2", {}, "No keys needed"),
+    h("p", {}, "None of your tools uses an online service that needs a key.")));
+  setContent(...keys.map(keyPanel));
+}
+function keyPanel(key) {
+  const input = h("input", { type: "password", autocomplete: "off", spellcheck: "false",
+    "aria-label": `Value for ${key.name}`, placeholder: key.source ? "Paste a new key to replace it" : "Paste the key here" });
+  const message = h("p", { class: "error" });
+  const attempt = async (action) => { try { await action(); loadKeys(); } catch (error) { message.textContent = error.message; } };
+  const save = (event) => {
+    event.preventDefault();
+    if (!input.value.trim()) return;
+    attempt(() => api("/api/secrets", { method: "POST", body: JSON.stringify({ name: key.name, value: input.value.trim() }) }));
+  };
+  const remove = () => { if (confirm(`Remove ${key.name} from this computer?`))
+    attempt(() => api("/api/secrets/" + encodeURIComponent(key.name), { method: "DELETE" })); };
+  return h("div", { class: "panel" },
+    h("div", { class: "row" }, h("h3", { style: "margin:0;flex:1" }, key.description || key.name),
+      h("span", { class: `chip ${key.source ? "ready" : "failed"}` }, key.source ? "set" : "not set")),
+    h("p", { class: "muted" }, key.name, key.used_by.length ? ` · used by ${key.used_by.join(", ")}` : " · not used by any installed tool"),
+    key.get_one_at && h("p", {}, "Get one at ", safeLink(key.get_one_at)),
+    key.source === "environment" && h("p", { class: "muted" }, "Set by an environment variable, which takes precedence over a key saved here."),
+    h("form", { class: "row", onsubmit: save }, input, h("button", { class: "small", type: "submit" }, "Save"),
+      key.source === "stored" && h("button", { class: "small", type: "button", onclick: remove }, "Remove")),
+    message);
+}
+
+// ---------------------------------------------------------------- layout
+function setContent(...children) { document.getElementById("content").replaceChildren(...children.filter(Boolean)); }
+function showError(error) { setContent(h("div", { class: "panel" }, h("pre", { class: "error" }, error.message))); }
+function showView(view, load = true) {
+  state.view = view;
+  for (const name of ["tools", "runs", "keys"]) document.getElementById("nav-" + name).classList.toggle("active", view === name);
+  if (load) ({ tools: loadTools, runs: loadRuns, keys: loadKeys })[view]();
+}
+document.getElementById("nav-tools").onclick = () => { state.selected = null; showView("tools"); };
+document.getElementById("nav-runs").onclick = () => showView("runs");
+document.getElementById("nav-keys").onclick = () => showView("keys");
+let searchTimer;
+document.getElementById("search").addEventListener("input", (event) => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { if (state.view !== "tools") showView("tools", false); search(event.target.value); }, 200);
+});
+if (!token) showError(new Error("This page needs the link printed by 'scipatch ui' (it includes a session token)."));
+else if (hashParams.get("view") === "keys") showView("keys");
+else loadTools();
+</script>
+</body>
+</html>

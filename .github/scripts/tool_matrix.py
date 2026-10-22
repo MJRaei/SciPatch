@@ -1,8 +1,8 @@
 """Print the CI matrix for the given tools: one job per tool and supported runner.
 
-A tool's motel.lock says which platforms it can be installed on; tools without
+A tool's scipatch.lock says which platforms it can be installed on; tools without
 a lock are checked on every runner. A tool with Linux packages but no Windows
-ones is checked on Windows inside WSL, as Motel runs it there.
+ones is checked on Windows inside WSL, as SciPatch runs it there.
 """
 
 import json
@@ -13,7 +13,7 @@ RUNNERS = {"linux-64": "ubuntu-latest", "osx-arm64": "macos-latest", "win-64": "
 
 include = []
 for tool in sys.argv[1:]:
-    lock = Path("tools") / tool / "motel.lock"
+    lock = Path("tools") / tool / "scipatch.lock"
     platforms = json.loads(lock.read_text())["platforms"] if lock.is_file() else {}
     for platform, runner in RUNNERS.items():
         if not platforms.get(platform, {}).get("unavailable"):

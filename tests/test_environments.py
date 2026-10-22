@@ -7,12 +7,12 @@ from pathlib import Path
 
 import pytest
 
-from motel.environments import BuildLog, CondaBackend, micromamba
-from motel.environments.conda import find_conda
-from motel.errors import BuildError
-from motel.manifest import Environment
-from motel.paths import MotelPaths
-from motel.reporting import NullReporter
+from scipatch.environments import BuildLog, CondaBackend, micromamba
+from scipatch.environments.conda import find_conda
+from scipatch.errors import BuildError
+from scipatch.manifest import Environment
+from scipatch.paths import SciPatchPaths
+from scipatch.reporting import NullReporter
 
 FAKE_CONDA = f"""#!/bin/sh
 # Fails like a conda whose libmamba solver plugin is missing, unless CONDA_SOLVER=classic.
@@ -146,10 +146,10 @@ def test_a_tampered_micromamba_is_refused(tmp_path: Path, monkeypatch: pytest.Mo
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="uses a POSIX shell script")
-def test_conda_tools_use_motels_micromamba_before_plain_conda(
+def test_conda_tools_use_scipatch_micromamba_before_plain_conda(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    home = MotelPaths.from_env().home
+    home = SciPatchPaths.from_env().home
     fake = micromamba.executable(home)
     fake.parent.mkdir(parents=True, exist_ok=True)
     record = f'#!/bin/sh\necho "$MAMBA_ROOT_PREFIX $@" > "{tmp_path}/args"\n'
@@ -163,7 +163,7 @@ def test_conda_tools_use_motels_micromamba_before_plain_conda(
     monkeypatch.delenv("MAMBA_EXE", raising=False)
     monkeypatch.delenv(micromamba.OPT_OUT_VARIABLE, raising=False)
     monkeypatch.setattr(micromamba, "platform_name", lambda: "linux-64")
-    monkeypatch.setattr("motel.environments.conda.shutil.which", lambda name: None)
+    monkeypatch.setattr("scipatch.environments.conda.shutil.which", lambda name: None)
 
     assert find_conda() == str(fake)
     CondaBackend().create(

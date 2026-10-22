@@ -4,9 +4,9 @@ from typing import Any
 
 import pytest
 
-from motel.cli.running import parse_assignments, parse_value
-from motel.errors import MotelError
-from motel.models import FunctionInfo
+from scipatch.cli.running import parse_assignments, parse_value
+from scipatch.errors import SciPatchError
+from scipatch.models import FunctionInfo
 
 
 @pytest.mark.parametrize(
@@ -52,5 +52,5 @@ def test_parse_assignments_uses_the_function_schema() -> None:
         "fmax": 0.01,
         "note": "a=b",
     }
-    with pytest.raises(MotelError, match="key=value"):
+    with pytest.raises(SciPatchError, match="key=value"):
         parse_assignments(["fmax"], function)

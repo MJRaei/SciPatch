@@ -60,6 +60,6 @@ jobs:
       - name: Install the wheel and install a featured tool
         run: |
           uv tool install --python 3.12 dist/*.whl
-          motel --version
-          motel add ase-emt
-          motel run ase-emt equation_of_state element=Cu --json
+          scipatch --version
+          scipatch add ase-emt
+          scipatch run ase-emt equation_of_state element=Cu --json

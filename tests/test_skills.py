@@ -5,12 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from motel import frontmatter
-from motel.models import FunctionInfo, ToolState
-from motel.paths import MotelPaths
-from motel.registry import InstalledTool, Registry
-from motel.schema import type_label
-from motel.skills import (
+from scipatch import frontmatter
+from scipatch.models import FunctionInfo, ToolState
+from scipatch.paths import SciPatchPaths
+from scipatch.registry import InstalledTool, Registry
+from scipatch.schema import type_label
+from scipatch.skills import (
     DESCRIPTION_LIMIT,
     MARKER_FILE,
     SkillManager,
@@ -23,10 +23,10 @@ from motel.skills import (
 
 @pytest.fixture
 def installed_tool(tmp_path: Path) -> InstalledTool:
-    paths = MotelPaths.from_env().ensure()
+    paths = SciPatchPaths.from_env().ensure()
     package = paths.tools / "chgnet"
     package.mkdir(parents=True)
-    (package / "motel.yaml").write_text(
+    (package / "scipatch.yaml").write_text(
         "name: chgnet\nsummary: Relax crystals with a universal ML potential.\n"
         "validity: Trained on PBE data.\n"
         "source: {repo: 'https://github.com/x/chgnet', ref: v1, license: BSD-3-Clause, "
@@ -69,13 +69,13 @@ def test_tool_skill_is_valid_and_complete(installed_tool: InstalledTool) -> None
     files = render_tool_skill(installed_tool)
     text = str(files["SKILL.md"])
     meta = frontmatter.read(text)
-    assert meta["name"] == "motel-chgnet"
+    assert meta["name"] == "scipatch-chgnet"
     assert meta["description"].startswith("Use for fast pre-relaxation before DFT.")
-    assert "Runs locally through Motel" in meta["description"]
+    assert "Runs locally through SciPatch" in meta["description"]
     assert len(meta["description"]) <= DESCRIPTION_LIMIT
     assert meta["license"] == "BSD-3-Clause"
     assert all(isinstance(v, str) for v in meta["metadata"].values())
-    assert "motel run chgnet relax structure=... --json" in text
+    assert "scipatch run chgnet relax structure=... --json" in text
     assert "| `structure` | structure | *required* | CIF \\| POSCAR |" in text
     assert "| `fmax` | number [eV/Å] | `0.05` |" in text
     assert "### Recipes" in text  # package headings are nested under "Usage notes"
@@ -85,21 +85,21 @@ def test_tool_skill_is_valid_and_complete(installed_tool: InstalledTool) -> None
 
 
 def test_tool_skill_explains_keys(installed_tool: InstalledTool) -> None:
-    manifest = installed_tool.package_dir / "motel.yaml"
+    manifest = installed_tool.package_dir / "scipatch.yaml"
     manifest.write_text(
         manifest.read_text()
         + "environment: {secrets: [{name: DEMO_KEY, description: Demo key, url: 'https://x.org'}]}\n"
     )
-    text = str(render_tool_skill(Registry(MotelPaths.from_env()).get("chgnet"))["SKILL.md"])
+    text = str(render_tool_skill(Registry(SciPatchPaths.from_env()).get("chgnet"))["SKILL.md"])
     assert "## API keys" in text
     assert "- `DEMO_KEY` (Demo key; get one at https://x.org)" in text
     assert "Never ask the user to type a key into the chat." in text
-    assert "`motel secret set DEMO_KEY`: it opens that page" in text
+    assert "`scipatch secret set DEMO_KEY`: it opens that page" in text
 
 
 def test_bundled_skills_have_valid_frontmatter() -> None:
     skills = bundled_skills()
-    assert {"motel", "motel-onboard"} <= set(skills)
+    assert {"scipatch", "scipatch-onboard"} <= set(skills)
     for name, files in skills.items():
         meta = frontmatter.read(
             files["SKILL.md"].decode()
@@ -117,30 +117,30 @@ def test_sync_writes_updates_and_removes_only_managed_skills(
     target = tmp_path / "skills"
     (target / "my-own-skill").mkdir(parents=True)
     (target / "my-own-skill" / "SKILL.md").write_text("mine")
-    (target / "motel-onboard").mkdir()  # same name as a bundled skill, but not ours
-    (target / "motel-onboard" / "SKILL.md").write_text("user's version")
-    (target / "motel-stale").mkdir()
-    (target / "motel-stale" / MARKER_FILE).write_text("{}")
+    (target / "scipatch-onboard").mkdir()  # same name as a bundled skill, but not ours
+    (target / "scipatch-onboard" / "SKILL.md").write_text("user's version")
+    (target / "scipatch-stale").mkdir()
+    (target / "scipatch-stale" / MARKER_FILE).write_text("{}")
 
     report = manager.sync(target)
-    assert set(report.written) == {"motel", "motel-chgnet"}
-    assert report.skipped == ["motel-onboard"]
-    assert report.removed == ["motel-stale"]
+    assert set(report.written) == {"scipatch", "scipatch-chgnet"}
+    assert report.skipped == ["scipatch-onboard"]
+    assert report.removed == ["scipatch-stale"]
     assert (target / "my-own-skill" / "SKILL.md").read_text() == "mine"
-    assert (target / "motel-onboard" / "SKILL.md").read_text() == "user's version"
-    assert (target / "motel-chgnet" / "references" / "paper.md").exists()
-    assert (target / "motel-chgnet" / MARKER_FILE).exists()
+    assert (target / "scipatch-onboard" / "SKILL.md").read_text() == "user's version"
+    assert (target / "scipatch-chgnet" / "references" / "paper.md").exists()
+    assert (target / "scipatch-chgnet" / MARKER_FILE).exists()
 
-    assert SkillManager.remove_all(target) == ["motel", "motel-chgnet"]
-    assert sorted(p.name for p in target.iterdir()) == ["motel-onboard", "my-own-skill"]
+    assert SkillManager.remove_all(target) == ["scipatch", "scipatch-chgnet"]
+    assert sorted(p.name for p in target.iterdir()) == ["my-own-skill", "scipatch-onboard"]
 
 
 def test_export_as_zip(installed_tool: InstalledTool, tmp_path: Path) -> None:
     manager = SkillManager(Registry(installed_tool.paths))
     paths = manager.export(tmp_path / "out", as_zip=True)
-    archive = next(p for p in paths if p.name == "motel-chgnet.zip")
+    archive = next(p for p in paths if p.name == "scipatch-chgnet.zip")
     with zipfile.ZipFile(archive) as zipped:
-        assert "motel-chgnet/SKILL.md" in zipped.namelist()
+        assert "scipatch-chgnet/SKILL.md" in zipped.namelist()
         assert MARKER_FILE not in " ".join(zipped.namelist())
 
 

@@ -1,6 +1,6 @@
-# Rebuilt by Motel from motel.yaml and patches/
+# Rebuilt by SciPatch from scipatch.yaml and patches/
 source/
-.motel/
+.scipatch/
 .claude/
 .agents/
 __pycache__/

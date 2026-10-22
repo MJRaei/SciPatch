@@ -35,8 +35,10 @@ Robot = Literal["auto", "ot2", "flex"]
 def _source() -> Path:
     warnings.filterwarnings("ignore")
     # Keep Opentrons' settings and calibration files out of the user's home folder.
-    os.environ.setdefault("OT_API_CONFIG_DIR", str(Path(tempfile.gettempdir()) / "motel-opentrons"))
-    root = Path(os.environ["MOTEL_SOURCE_DIR"])
+    os.environ.setdefault(
+        "OT_API_CONFIG_DIR", str(Path(tempfile.gettempdir()) / "scipatch-opentrons")
+    )
+    root = Path(os.environ["SCIPATCH_SOURCE_DIR"])
     if str(root) not in sys.path:
         sys.path.insert(0, str(root))
     return root

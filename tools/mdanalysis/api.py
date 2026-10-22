@@ -2,7 +2,7 @@
 
 Reads GROMACS (TPR, GRO, XTC, TRR), AMBER (PRMTOP, NetCDF), CHARMM/NAMD (PSF,
 DCD), LAMMPS (data, DCD, dump), OpenMM and PDB files, and more. Extended XYZ and
-ASE trajectories (as written by Motel's lammps and ml-potentials tools) are read
+ASE trajectories (as written by SciPatch's lammps and ml-potentials tools) are read
 through ASE. Atom selections use the MDAnalysis selection language, e.g.
 "protein and name CA", "resname SOL and name OW", "element Li". Distances are in
 Angstrom and times in ps.

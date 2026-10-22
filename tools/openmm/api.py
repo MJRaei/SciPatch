@@ -43,8 +43,8 @@ def _platform(name: Platform) -> Any:
     available = {
         openmm.Platform.getPlatform(i).getName() for i in range(openmm.Platform.getNumPlatforms())
     }
-    # A GPU only when Motel chose one for this run (the user turned GPU use on).
-    gpu = os.environ.get("MOTEL_DEVICE") == "cuda"
+    # A GPU only when SciPatch chose one for this run (the user turned GPU use on).
+    gpu = os.environ.get("SCIPATCH_DEVICE") == "cuda"
     for candidate in ("CUDA", "CPU") if gpu else ("CPU",):
         if candidate in available:
             return openmm.Platform.getPlatformByName(candidate)

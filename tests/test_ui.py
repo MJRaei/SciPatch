@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 from starlette.testclient import TestClient
 
-from motel.app import Motel
-from motel.ui import TOKEN_HEADER, create_app
+from scipatch.app import SciPatch
+from scipatch.ui import TOKEN_HEADER, create_app
 
 from .conftest import ManifestFactory, requires_uv
 
@@ -17,30 +17,30 @@ TOKEN = "test-token"  # noqa: S105 - a fixed token for tests
 
 
 @pytest.fixture
-def client(motel: Motel) -> TestClient:
-    app = create_app(motel, TOKEN, allowed_hosts=["testserver"])
+def client(scipatch: SciPatch) -> TestClient:
+    app = create_app(scipatch, TOKEN, allowed_hosts=["testserver"])
     return TestClient(app, headers={TOKEN_HEADER: TOKEN})
 
 
-def test_page_is_served_without_token(motel: Motel) -> None:
-    client = TestClient(create_app(motel, TOKEN, allowed_hosts=["testserver"]))
+def test_page_is_served_without_token(scipatch: SciPatch) -> None:
+    client = TestClient(create_app(scipatch, TOKEN, allowed_hosts=["testserver"]))
     response = client.get("/")
     assert response.status_code == 200
-    assert "<title>Motel</title>" in response.text
+    assert "<title>SciPatch</title>" in response.text
     assert response.headers["cache-control"] == "no-store"
 
 
-def test_api_requires_the_session_token(motel: Motel) -> None:
-    app = create_app(motel, TOKEN, allowed_hosts=["testserver"])
+def test_api_requires_the_session_token(scipatch: SciPatch) -> None:
+    app = create_app(scipatch, TOKEN, allowed_hosts=["testserver"])
     assert TestClient(app).get("/api/tools").status_code == 403
     wrong = TestClient(app, headers={TOKEN_HEADER: "guess"})
     assert wrong.get("/api/tools").status_code == 403
     assert wrong.post("/api/run", json={"tool": "x", "function": "y"}).status_code == 403
 
 
-def test_unknown_hosts_are_rejected(motel: Motel) -> None:
+def test_unknown_hosts_are_rejected(scipatch: SciPatch) -> None:
     """Protects against DNS rebinding: only local host names are served."""
-    client = TestClient(create_app(motel, TOKEN), headers={TOKEN_HEADER: TOKEN})
+    client = TestClient(create_app(scipatch, TOKEN), headers={TOKEN_HEADER: TOKEN})
     assert client.get("/api/tools", headers={"host": "evil.example"}).status_code == 400
     assert client.get("/api/tools", headers={"host": "127.0.0.1"}).status_code == 200
 
@@ -53,7 +53,7 @@ def test_errors_are_json_with_hints(client: TestClient) -> None:
 
 
 def test_keys_can_be_set_and_removed_but_never_read(
-    client: TestClient, motel: Motel, monkeypatch: pytest.MonkeyPatch
+    client: TestClient, scipatch: SciPatch, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.delenv("DEMO_KEY", raising=False)
     assert client.get("/api/secrets").json() == []
@@ -64,18 +64,18 @@ def test_keys_can_be_set_and_removed_but_never_read(
          "source": "stored"},
     ]  # fmt: skip
     assert "s3cret" not in saved.text
-    assert motel.secrets.resolve(["DEMO_KEY"]) == {"DEMO_KEY": "s3cret"}
+    assert scipatch.secrets.resolve(["DEMO_KEY"]) == {"DEMO_KEY": "s3cret"}
     bad = client.post("/api/secrets", json={"name": "bad name", "value": "x"})
     assert bad.status_code == 400 and "not a valid secret name" in bad.json()["error"]
     assert client.delete("/api/secrets/DEMO_KEY").json() == []
-    assert motel.secrets.names() == []
+    assert scipatch.secrets.names() == []
 
 
-def test_upload_stores_files_with_safe_names(client: TestClient, motel: Motel) -> None:
+def test_upload_stores_files_with_safe_names(client: TestClient, scipatch: SciPatch) -> None:
     response = client.post("/api/upload", files={"file": ("../../evil name.cif", b"data_x")})
     assert response.status_code == 200
     path = response.json()["path"]
-    assert path.startswith(str(motel.paths.home / "uploads"))
+    assert path.startswith(str(scipatch.paths.home / "uploads"))
     assert path.endswith("evil_name.cif")
     assert Path(path).read_bytes() == b"data_x"
 
@@ -83,9 +83,9 @@ def test_upload_stores_files_with_safe_names(client: TestClient, motel: Motel) -
 @pytest.mark.integration
 @requires_uv
 def test_run_and_collect_through_the_dashboard(
-    client: TestClient, motel: Motel, make_package: ManifestFactory
+    client: TestClient, scipatch: SciPatch, make_package: ManifestFactory
 ) -> None:
-    motel.add(str(make_package(functions=["add", "write_text", "sleep"])))
+    scipatch.add(str(make_package(functions=["add", "write_text", "sleep"])))
     assert [t["name"] for t in client.get("/api/tools").json()] == ["sample"]
     assert client.get("/api/find", params={"q": "add numbers"}).json()[0]["function"] == "add"
 

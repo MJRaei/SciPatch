@@ -20,7 +20,7 @@ description: >-
   → first peak and coordination number.
 - **Diffusion:** `msd(top, traj, selection="element Li")`; check `fit_r_squared`
   and the MSD plot, then refit with `fit_start_ps`/`fit_end_ps` on the linear part.
-- **Motel MD outputs:** pass the `.extxyz` trajectory alone as `topology`, with
+- **SciPatch MD outputs:** pass the `.extxyz` trajectory alone as `topology`, with
   `timestep_ps` = the tool's `frame_interval_fs` / 1000.
 
 ## Selections

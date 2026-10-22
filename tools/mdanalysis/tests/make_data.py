@@ -1,4 +1,4 @@
-"""Recreate the files in tests/data (not run by Motel; kept so the data can be checked).
+"""Recreate the files in tests/data (not run by SciPatch; kept so the data can be checked).
 
 Usage: python make_data.py ADK_DIR OUT_DIR, where ADK_DIR holds adk.psf and
 adk_dims.dcd from MDAnalysisTests 2.10.0 (testsuite/MDAnalysisTests/data).

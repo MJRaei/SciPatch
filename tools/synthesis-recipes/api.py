@@ -31,7 +31,7 @@ _HOURS = {"h": 1.0, "hr": 1.0, "hrs": 1.0, "min": 1 / 60, "s": 1 / 3600, "day": 
 
 
 def _assets() -> Path:
-    return Path(os.environ["MOTEL_SOURCE_DIR"]) / "assets"
+    return Path(os.environ["SCIPATCH_SOURCE_DIR"]) / "assets"
 
 
 def _composition(formula: str) -> Any:

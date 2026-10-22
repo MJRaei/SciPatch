@@ -11,13 +11,13 @@ from pathlib import Path
 
 import pytest
 
-from motel import platforms
-from motel.app import Motel
-from motel.errors import BuildError, InvalidArgumentsError, RunError, ToolExistsError
-from motel.installer import dev_layout
-from motel.models import RunStatus
-from motel.runtime.executor import SHIM_PATH, environment_python, pid_alive
-from motel.views import run_view
+from scipatch import platforms
+from scipatch.app import SciPatch
+from scipatch.errors import BuildError, InvalidArgumentsError, RunError, ToolExistsError
+from scipatch.installer import dev_layout
+from scipatch.models import RunStatus
+from scipatch.runtime.executor import SHIM_PATH, environment_python, pid_alive
+from scipatch.views import run_view
 
 from .conftest import ManifestFactory, requires_git, requires_uv
 
@@ -28,12 +28,12 @@ CORE = ["add", "write_text", "fail", "sleep", "mode"]
 
 
 @pytest.fixture
-def installed(motel: Motel, make_package: ManifestFactory) -> Motel:
-    motel.add(str(make_package(functions=CORE, golden=GOLDEN)))
-    return motel
+def installed(scipatch: SciPatch, make_package: ManifestFactory) -> SciPatch:
+    scipatch.add(str(make_package(functions=CORE, golden=GOLDEN)))
+    return scipatch
 
 
-def test_install_describes_functions_and_runs_golden_tests(installed: Motel) -> None:
+def test_install_describes_functions_and_runs_golden_tests(installed: SciPatch) -> None:
     tool = installed.tool("sample")
     assert tool.status == "ready"
     assert [f.name for f in tool.functions] == CORE
@@ -50,7 +50,7 @@ def test_install_describes_functions_and_runs_golden_tests(installed: Motel) -> 
     assert installed.paths.envs.joinpath("sample").is_dir()
 
 
-def test_runs_record_results_files_and_errors(installed: Motel, tmp_path: Path) -> None:
+def test_runs_record_results_files_and_errors(installed: SciPatch, tmp_path: Path) -> None:
     ok = installed.run("sample", "add", {"a": 1.5})
     assert ok.status is RunStatus.SUCCEEDED
     assert ok.result == {"sum": 2.5}
@@ -78,7 +78,7 @@ def test_runs_record_results_files_and_errors(installed: Motel, tmp_path: Path) 
     assert installed.history_list(query="bad input")[0].id == failed.id
 
 
-def test_identical_calls_are_served_from_cache(installed: Motel) -> None:
+def test_identical_calls_are_served_from_cache(installed: SciPatch) -> None:
     first = installed.run("sample", "add", {"a": 1, "b": 2})
     second = installed.run("sample", "add", {"b": 2, "a": 1})
     assert second.cached
@@ -88,7 +88,7 @@ def test_identical_calls_are_served_from_cache(installed: Motel) -> None:
     assert third.id != first.id
 
 
-def test_cache_follows_file_contents(installed: Motel, tmp_path: Path) -> None:
+def test_cache_follows_file_contents(installed: SciPatch, tmp_path: Path) -> None:
     data = tmp_path / "input.txt"
     data.write_text("one")
     first = installed.run("sample", "write_text", {"text": str(data)})
@@ -98,7 +98,7 @@ def test_cache_follows_file_contents(installed: Motel, tmp_path: Path) -> None:
     assert first.status is RunStatus.SUCCEEDED
 
 
-def test_arguments_are_checked_before_running(installed: Motel) -> None:
+def test_arguments_are_checked_before_running(installed: SciPatch) -> None:
     with pytest.raises(InvalidArgumentsError, match="missing required argument"):
         installed.run("sample", "add", {})
     with pytest.raises(InvalidArgumentsError, match="unknown argument"):
@@ -109,7 +109,7 @@ def test_arguments_are_checked_before_running(installed: Motel) -> None:
         installed.run("sample", "mode", {"kind": "medium"})
 
 
-def test_background_runs_can_be_collected_or_cancelled(installed: Motel) -> None:
+def test_background_runs_can_be_collected_or_cancelled(installed: SciPatch) -> None:
     running = installed.run("sample", "sleep", {"seconds": 0.5}, wait=0)
     assert running.status is RunStatus.RUNNING
     done = installed.get_run(running.id, wait=30)
@@ -126,35 +126,37 @@ def test_background_runs_can_be_collected_or_cancelled(installed: Motel) -> None
         installed.get_run("20260101-000000-000000")
 
 
-def test_runs_finished_after_the_starter_exited_are_finalized(installed: Motel) -> None:
+def test_runs_finished_after_the_starter_exited_are_finalized(installed: SciPatch) -> None:
     started = installed.run("sample", "sleep", {"seconds": 0.3}, wait=0)
-    # A different Motel instance (e.g. a later CLI call) sees and finalizes the run.
-    observer = Motel(installed.paths)
+    # A different SciPatch instance (e.g. a later CLI call) sees and finalizes the run.
+    observer = SciPatch(installed.paths)
     assert observer.get_run(started.id, wait=30).status is RunStatus.SUCCEEDED
     assert installed.get_run(started.id).status is RunStatus.SUCCEEDED
 
 
 def test_failed_golden_test_aborts_install_and_cleans_up(
-    motel: Motel, make_package: ManifestFactory
+    scipatch: SciPatch, make_package: ManifestFactory
 ) -> None:
     golden = [{"name": "wrong", "function": "add", "args": {"a": 1}, "expect": {"sum": 3}}]
     package = make_package(golden=golden)
     with pytest.raises(BuildError, match="Golden tests failed: 'wrong'"):
-        motel.add(str(package))
-    assert motel.tools() == []
-    assert not (motel.paths.envs / "sample").exists()
-    assert list(motel.paths.tools.iterdir()) == []
+        scipatch.add(str(package))
+    assert scipatch.tools() == []
+    assert not (scipatch.paths.envs / "sample").exists()
+    assert list(scipatch.paths.tools.iterdir()) == []
 
-    tool = motel.add(str(package), allow_failing_tests=True)
+    tool = scipatch.add(str(package), allow_failing_tests=True)
     assert tool.status == "failing-tests"
     with pytest.raises(ToolExistsError):
-        motel.add(str(package))
+        scipatch.add(str(package))
 
 
-def test_import_errors_explain_what_to_do(motel: Motel, make_package: ManifestFactory) -> None:
+def test_import_errors_explain_what_to_do(
+    scipatch: SciPatch, make_package: ManifestFactory
+) -> None:
     package = make_package(api="import not_a_real_package\n\ndef f() -> int:\n    return 1\n")
     with pytest.raises(BuildError) as caught:
-        motel.add(str(package))
+        scipatch.add(str(package))
     assert "ModuleNotFoundError" in caught.value.message
     assert caught.value.hint is not None
     assert "environment.packages" in caught.value.hint
@@ -162,13 +164,13 @@ def test_import_errors_explain_what_to_do(motel: Motel, make_package: ManifestFa
 
 @requires_git
 def test_source_checkout_and_patches(
-    motel: Motel, make_package: ManifestFactory, upstream_repo: tuple[str, str]
+    scipatch: SciPatch, make_package: ManifestFactory, upstream_repo: tuple[str, str]
 ) -> None:
     url, commit = upstream_repo
     package = make_package(source={"repo": url, "ref": commit, "install": False})
 
     # Develop in place: the source is checked out next to the package.
-    outcome = motel.check(package)
+    outcome = scipatch.check(package)
     assert outcome.source_commit == commit
     layout = dev_layout(package)
     assert (layout.source_dir / "DATA.txt").exists()
@@ -177,18 +179,18 @@ def test_source_checkout_and_patches(
 
     # Fix something in the source and keep the fix as a patch.
     (layout.source_dir / "DATA.txt").write_text("patched upstream\n")
-    assert motel.save_patch(str(package), "fix data") is not None
+    assert scipatch.save_patch(str(package), "fix data") is not None
     assert (package / "patches" / "0001-fix-data.patch").exists()
 
     # Installing rebuilds from the pinned commit plus patches.
-    tool = motel.add(str(package))
+    tool = scipatch.add(str(package))
     assert tool.state is not None
     assert tool.state.source_commit == commit
-    assert motel.run("sample", "source_file").result == "patched upstream"
-    assert not (motel.paths.tools / "sample" / "source").exists()  # never copied
+    assert scipatch.run("sample", "source_file").result == "patched upstream"
+    assert not (scipatch.paths.tools / "sample" / "source").exists()  # never copied
 
 
-def test_rebuild_reuses_an_unchanged_environment(installed: Motel) -> None:
+def test_rebuild_reuses_an_unchanged_environment(installed: SciPatch) -> None:
     marker = installed.paths.envs / "sample" / "keep-me"
     marker.write_text("x")
     installed.rebuild("sample")
@@ -199,18 +201,18 @@ def test_rebuild_reuses_an_unchanged_environment(installed: Motel) -> None:
 
 
 def test_linked_install_uses_the_folder_in_place(
-    motel: Motel, make_package: ManifestFactory
+    scipatch: SciPatch, make_package: ManifestFactory
 ) -> None:
     package = make_package(functions=["add"])
-    motel.add(str(package), link=True)
-    tool = motel.tool("sample")
+    scipatch.add(str(package), link=True)
+    tool = scipatch.tool("sample")
     assert tool.linked
     assert tool.package_dir.resolve() == package.resolve()
-    motel.remove("sample")
+    scipatch.remove("sample")
     assert package.exists()  # removing a link keeps the original folder
 
 
-def test_remove_deletes_everything_but_history(installed: Motel) -> None:
+def test_remove_deletes_everything_but_history(installed: SciPatch) -> None:
     run = installed.run("sample", "add", {"a": 1})
     installed.remove("sample")
     assert installed.tools() == []
@@ -219,12 +221,12 @@ def test_remove_deletes_everything_but_history(installed: Motel) -> None:
     assert installed.get_run(run.id).status is RunStatus.SUCCEEDED
 
 
-def test_exec_runs_inside_the_environment(installed: Motel) -> None:
+def test_exec_runs_inside_the_environment(installed: SciPatch) -> None:
     code = "import sys, os; sys.exit(0 if 'envs/sample' in sys.prefix.replace(os.sep, '/') else 3)"
     assert installed.exec("sample", ["python", "-c", code]) == 0
 
 
-def test_broken_rebuild_marks_the_tool(installed: Motel) -> None:
+def test_broken_rebuild_marks_the_tool(installed: SciPatch) -> None:
     (installed.paths.tools / "sample" / "api.py").write_text("raise RuntimeError('broken')\n")
     with pytest.raises(BuildError):
         installed.rebuild("sample")
@@ -235,9 +237,9 @@ def test_broken_rebuild_marks_the_tool(installed: Motel) -> None:
         installed.run("sample", "add", {"a": 1})
 
 
-def test_check_reports_function_warnings(motel: Motel, make_package: ManifestFactory) -> None:
+def test_check_reports_function_warnings(scipatch: SciPatch, make_package: ManifestFactory) -> None:
     package = make_package(api="def undocumented(x):\n    return x\n")
-    outcome = motel.check(package, run_tests=False)
+    outcome = scipatch.check(package, run_tests=False)
     assert "undocumented: has no docstring" in outcome.warnings
     assert "undocumented: parameter 'x' has no type hint" in outcome.warnings
 
@@ -280,24 +282,24 @@ def test_shim_runs_on_old_pythons(version: str, tmp_path: Path) -> None:
 
 
 def test_editing_a_tools_code_invalidates_cached_results(
-    motel: Motel, make_package: ManifestFactory
+    scipatch: SciPatch, make_package: ManifestFactory
 ) -> None:
     package = make_package(functions=["add"])
-    motel.add(str(package), link=True)
-    first = motel.run("sample", "add", {"a": 1})
-    assert motel.run("sample", "add", {"a": 1}).cached
+    scipatch.add(str(package), link=True)
+    first = scipatch.run("sample", "add", {"a": 1})
+    assert scipatch.run("sample", "add", {"a": 1}).cached
     api = package / "api.py"
     api.write_text(api.read_text().replace('return {"sum": a + b}', 'return {"sum": a + b + 100}'))
-    changed = motel.run("sample", "add", {"a": 1})
+    changed = scipatch.run("sample", "add", {"a": 1})
     assert not changed.cached
     assert changed.id != first.id
     assert changed.result == {"sum": 102.0}
 
 
-def test_stale_runs_are_closed(installed: Motel) -> None:
+def test_stale_runs_are_closed(installed: SciPatch) -> None:
     """A run whose process is gone (e.g. after a reboot) is marked failed, not 'running'."""
     record = installed.run("sample", "sleep", {"seconds": 60}, wait=0)
-    observer = Motel(installed.paths)  # does not own the child process
+    observer = SciPatch(installed.paths)  # does not own the child process
     # Simulate a reboot: the stored pid now belongs to an unrelated process (this one).
     with installed.history._connect() as db:
         db.execute("UPDATE runs SET pid = ? WHERE id = ?", (os.getpid(), record.id))
@@ -310,25 +312,25 @@ def test_stale_runs_are_closed(installed: Motel) -> None:
 
 
 def test_running_jobs_report_their_latest_output(
-    motel: Motel, make_package: ManifestFactory
+    scipatch: SciPatch, make_package: ManifestFactory
 ) -> None:
-    motel.add(str(make_package(functions=["count"])))
-    record = motel.run("sample", "count", {"n": 100, "delay": 0.1}, wait=0)
+    scipatch.add(str(make_package(functions=["count"])))
+    record = scipatch.run("sample", "count", {"n": 100, "delay": 0.1}, wait=0)
     deadline = time.monotonic() + 15
     view: dict[str, object] = {}
     while time.monotonic() < deadline:
-        view = run_view(motel.get_run(record.id))
+        view = run_view(scipatch.get_run(record.id))
         if "step 3/100" in str(view.get("latest_output", "")):
             break
         time.sleep(0.2)
     assert view["status"] == "running"
     assert "step 3/100" in str(view["latest_output"])
     assert float(str(view["elapsed_seconds"])) > 0
-    motel.cancel_run(record.id)
+    scipatch.cancel_run(record.id)
 
 
 def test_golden_tests_can_require_a_clear_error(
-    motel: Motel, make_package: ManifestFactory
+    scipatch: SciPatch, make_package: ManifestFactory
 ) -> None:
     golden = [
         {"name": "refuses", "function": "fail", "args": {"message": "Fe is not supported"},
@@ -337,7 +339,7 @@ def test_golden_tests_can_require_a_clear_error(
          "raises": "not supported"},
         {"name": "does not fail", "function": "add", "args": {"a": 1}, "raises": "anything"},
     ]  # fmt: skip
-    outcome = motel.check(make_package(functions=["add", "fail"], golden=golden))
+    outcome = scipatch.check(make_package(functions=["add", "fail"], golden=golden))
     passed = {result.name: result.passed for result in outcome.golden}
     assert passed == {"refuses": True, "wrong message": False, "does not fail": False}
     failures = {result.name: result.failures for result in outcome.golden}
@@ -346,7 +348,7 @@ def test_golden_tests_can_require_a_clear_error(
 
 
 def test_golden_tests_can_be_limited_to_some_platforms(
-    motel: Motel, make_package: ManifestFactory
+    scipatch: SciPatch, make_package: ManifestFactory
 ) -> None:
     here = platforms.current()
     elsewhere = next(name for name in platforms.PLATFORMS if name != here)
@@ -356,7 +358,7 @@ def test_golden_tests_can_be_limited_to_some_platforms(
         {"name": "elsewhere", "function": "add", "args": {"a": 1}, "expect": {"sum": 99},
          "platforms": [elsewhere]},
     ]  # fmt: skip
-    outcome = motel.check(make_package(functions=["add"], golden=golden))
+    outcome = scipatch.check(make_package(functions=["add"], golden=golden))
     results = {result.name: result for result in outcome.golden}
     assert results["here"].passed
     assert results["elsewhere"].skipped and not results["elsewhere"].passed
@@ -364,7 +366,7 @@ def test_golden_tests_can_be_limited_to_some_platforms(
 
 
 def test_install_runs_only_the_quick_golden_tests(
-    motel: Motel, make_package: ManifestFactory
+    scipatch: SciPatch, make_package: ManifestFactory
 ) -> None:
     golden = [
         {"name": "quick", "function": "add", "args": {"a": 1}, "expect": {"sum": 2},
@@ -372,12 +374,12 @@ def test_install_runs_only_the_quick_golden_tests(
         {"name": "slow", "function": "add", "args": {"a": 2}, "expect": {"sum": 3}},
     ]  # fmt: skip
     package = make_package(functions=["add"], golden=golden)
-    tool = motel.add(str(package))
+    tool = scipatch.add(str(package))
     assert tool.state is not None
-    assert tool.state.golden_summary == "1/1 golden tests passed, 1 more run with 'motel test'"
-    tested = motel.test("sample")
+    assert tool.state.golden_summary == "1/1 golden tests passed, 1 more run with 'scipatch test'"
+    tested = scipatch.test("sample")
     assert tested.state is not None
     assert tested.state.golden_summary == "2/2 golden tests passed"
-    everything = motel.add(str(package), force=True, all_tests=True)
+    everything = scipatch.add(str(package), force=True, all_tests=True)
     assert everything.state is not None
     assert everything.state.golden_summary == "2/2 golden tests passed"

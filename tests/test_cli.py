@@ -11,20 +11,20 @@ import httpx
 import pytest
 from typer.testing import CliRunner
 
-from motel import __version__
-from motel.cli import app, hoist_global_flags
-from motel.cli import tools as cli_tools
-from motel.cli._app import get_motel
+from scipatch import __version__
+from scipatch.cli import app, hoist_global_flags
+from scipatch.cli import tools as cli_tools
+from scipatch.cli._app import get_scipatch
 
 from .conftest import ManifestFactory, requires_uv
 
 runner = CliRunner()
 
 
-def motel(*args: str) -> subprocess.CompletedProcess[str]:
+def scipatch(*args: str) -> subprocess.CompletedProcess[str]:
     """Run the real entry point (including error handling) in a subprocess."""
     return subprocess.run(
-        [sys.executable, "-m", "motel", *args], capture_output=True, text=True, check=False
+        [sys.executable, "-m", "scipatch", *args], capture_output=True, text=True, check=False
     )
 
 
@@ -39,7 +39,7 @@ def test_help_and_version() -> None:
 def test_empty_list_suggests_next_steps() -> None:
     result = runner.invoke(app, ["list"])
     assert "No tools installed yet" in result.output
-    assert "motel add ase-emt" in result.output
+    assert "scipatch add ase-emt" in result.output
     assert json.loads(runner.invoke(app, ["list", "--json"]).output) == []
 
 
@@ -63,7 +63,7 @@ def test_without_a_terminal_secrets_are_piped_or_entered_in_the_browser(
     monkeypatch.delenv("DEMO_KEY", raising=False)
     piped = runner.invoke(app, ["secret", "set", "DEMO_KEY"], input="from-pipe\n")
     assert piped.exit_code == 0 and "Saved DEMO_KEY" in piped.output
-    assert get_motel().secrets.resolve(["DEMO_KEY"]) == {"DEMO_KEY": "from-pipe"}
+    assert get_scipatch().secrets.resolve(["DEMO_KEY"]) == {"DEMO_KEY": "from-pipe"}
 
     # An AI agent's shell has neither: the user gets a page on this computer instead.
     opened: list[str] = []
@@ -77,7 +77,7 @@ def test_without_a_terminal_secrets_are_piped_or_entered_in_the_browser(
     agent = runner.invoke(app, ["secret", "set", "DEMO_KEY"], input="")
     assert agent.exit_code == 0, agent.output
     assert opened and opened[0] in agent.output and "from-browser" not in agent.output
-    assert get_motel().secrets.resolve(["DEMO_KEY"]) == {"DEMO_KEY": "from-browser"}
+    assert get_scipatch().secrets.resolve(["DEMO_KEY"]) == {"DEMO_KEY": "from-browser"}
 
     monkeypatch.setattr(cli_tools, "BROWSER_WAIT_SECONDS", 0.5)
     monkeypatch.setattr(cli_tools.webbrowser, "open", lambda url: False)
@@ -92,7 +92,7 @@ def test_catalog_lists_featured_tools() -> None:
 
 
 def test_errors_are_friendly_with_exit_code_1() -> None:
-    result = motel("info", "nothing-here")
+    result = scipatch("info", "nothing-here")
     assert result.returncode == 1
     assert "Error: No tool named 'nothing-here' is installed." in result.stderr
     assert "Hint:" in result.stderr
@@ -103,8 +103,8 @@ def test_new_creates_a_package(tmp_path: Path) -> None:
     target = tmp_path / "my-tool"
     result = runner.invoke(app, ["new", "my-tool", "--dir", str(target)])
     assert result.exit_code == 0, result.output
-    assert (target / "motel.yaml").exists()
-    again = motel("new", "my-tool", "--dir", str(target))
+    assert (target / "scipatch.yaml").exists()
+    again = scipatch("new", "my-tool", "--dir", str(target))
     assert again.returncode == 1
     assert "nothing was overwritten" in again.stderr
 
@@ -112,7 +112,7 @@ def test_new_creates_a_package(tmp_path: Path) -> None:
 def test_connect_show_prints_config() -> None:
     result = runner.invoke(app, ["connect", "--show"])
     assert result.exit_code == 0
-    assert '"motel"' in result.output
+    assert '"scipatch"' in result.output
     assert '"serve"' in result.output
 
 
@@ -120,16 +120,16 @@ def test_connect_writes_app_config_and_skills(isolated_home: Path) -> None:
     result = runner.invoke(app, ["connect", "cursor"])
     assert result.exit_code == 0, result.output
     config = json.loads((isolated_home / ".cursor" / "mcp.json").read_text())
-    assert config["mcpServers"]["motel"]["args"][-1] == "serve"
-    assert (isolated_home / ".cursor" / "skills" / "motel" / "SKILL.md").exists()
+    assert config["mcpServers"]["scipatch"]["args"][-1] == "serve"
+    assert (isolated_home / ".cursor" / "skills" / "scipatch" / "SKILL.md").exists()
 
     result = runner.invoke(app, ["disconnect", "cursor"])
     assert result.exit_code == 0
     assert (
-        "motel"
+        "scipatch"
         not in json.loads((isolated_home / ".cursor" / "mcp.json").read_text())["mcpServers"]
     )
-    assert not (isolated_home / ".cursor" / "skills" / "motel").exists()
+    assert not (isolated_home / ".cursor" / "skills" / "scipatch").exists()
 
 
 @pytest.mark.integration
@@ -173,7 +173,7 @@ def test_global_flags_are_accepted_anywhere() -> None:
     assert hoist_global_flags(["exec", ".", "--", "python", "-v"]) == [
         "exec", ".", "--", "python", "-v",
     ]  # fmt: skip
-    result = motel("list", "--debug")
+    result = scipatch("list", "--debug")
     assert result.returncode == 0, result.stderr
 
 
@@ -212,5 +212,5 @@ def test_human_readable_views_render(make_package: ManifestFactory, tmp_path: Pa
         )
         assert expected in result.output, (args, result.output)
     run_id = json.loads(runner.invoke(app, ["runs", "--json", "-n", "1"]).output)[0]["run_id"]
-    shown = motel("runs", "show", run_id, "--verbose")  # real entry point: flag after command
+    shown = scipatch("runs", "show", run_id, "--verbose")  # real entry point: flag after command
     assert "Traceback" in shown.stdout

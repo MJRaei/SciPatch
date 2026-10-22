@@ -25,7 +25,7 @@ def _vina(arguments: list[str]) -> str:
     program = shutil.which("vina")
     if program is None:
         raise RuntimeError(
-            "The vina program is missing; reinstall the tool (motel add vina --force)."
+            "The vina program is missing; reinstall the tool (scipatch add vina --force)."
         )
     completed = subprocess.run([program, *arguments], capture_output=True, text=True, check=False)
     if completed.returncode != 0:
@@ -218,7 +218,7 @@ def dock(
     box_center, box_size = _box(center, size or [20.0, 20.0, 20.0], box_from_ligand, padding)
     receptor_pdbqt = _receptor(receptor, "receptor.pdbqt")
     molecule, generated = _rdkit_ligand(ligand, seed)
-    with tempfile.TemporaryDirectory(prefix="motel-vina-") as scratch:
+    with tempfile.TemporaryDirectory(prefix="scipatch-vina-") as scratch:
         ligand_file = Path(scratch) / "ligand.pdbqt"
         ligand_file.write_text(_ligand_pdbqt(molecule))
         result_file = Path(scratch) / "poses.pdbqt"
@@ -312,7 +312,7 @@ def score(
     box = _box_arguments(((low + high) / 2).tolist(), (high - low + 2 * padding).tolist())
     common = ["--receptor", receptor_pdbqt, *box, "--scoring", scoring, "--cpu", "1"]
     moved = None
-    with tempfile.TemporaryDirectory(prefix="motel-vina-") as scratch:
+    with tempfile.TemporaryDirectory(prefix="scipatch-vina-") as scratch:
         scored_file = Path(scratch) / "ligand.pdbqt"
         scored_file.write_text(_ligand_pdbqt(molecule))
         pose = molecule

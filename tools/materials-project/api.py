@@ -1,7 +1,7 @@
 """The Materials Project database: search known materials, check stability, get structures.
 
 Needs a free API key from https://next-gen.materialsproject.org/api (stored once
-with `motel secret set MP_API_KEY`). Every result reports the database version,
+with `scipatch secret set MP_API_KEY`). Every result reports the database version,
 because computed values change between releases.
 """
 
@@ -40,7 +40,7 @@ def _rester():
         if "401" in str(exc) or "403" in str(exc):
             raise ValueError(
                 "The Materials Project rejected the API key. Check it at "
-                f"{_KEY_URL} and store it again with 'motel secret set MP_API_KEY'."
+                f"{_KEY_URL} and store it again with 'scipatch secret set MP_API_KEY'."
             ) from exc
         raise
 

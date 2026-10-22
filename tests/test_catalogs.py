@@ -8,9 +8,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from motel.app import Motel
-from motel.catalogs import BUILT_IN, CatalogStore
-from motel.errors import MotelError
+from scipatch.app import SciPatch
+from scipatch.catalogs import BUILT_IN, CatalogStore
+from scipatch.errors import SciPatchError
 
 from .conftest import ManifestFactory, requires_git, requires_uv
 
@@ -37,8 +37,8 @@ def tools_repo(tmp_path: Path, make_package: ManifestFactory) -> Path:
     return repo
 
 
-def test_add_list_find_update_remove(motel: Motel, tools_repo: Path) -> None:
-    store = CatalogStore(motel.paths)
+def test_add_list_find_update_remove(scipatch: SciPatch, tools_repo: Path) -> None:
+    store = CatalogStore(scipatch.paths)
     catalog = store.add(str(tools_repo))
     assert catalog.name == "lab-tools"
 
@@ -53,7 +53,7 @@ def test_add_list_find_update_remove(motel: Motel, tools_repo: Path) -> None:
     assert store.find("nothing") is None
 
     # A new commit in the collection shows up after an update.
-    manifest = tools_repo / "tools" / "sample" / "motel.yaml"
+    manifest = tools_repo / "tools" / "sample" / "scipatch.yaml"
     data = yaml.safe_load(manifest.read_text())
     data["version"] = "2.0.0"
     manifest.write_text(yaml.safe_dump(data))
@@ -65,36 +65,36 @@ def test_add_list_find_update_remove(motel: Motel, tools_repo: Path) -> None:
 
     store.remove("lab-tools")
     assert store.find("sample") is None
-    assert not (motel.paths.home / "catalogs" / "lab-tools").exists()
+    assert not (scipatch.paths.home / "catalogs" / "lab-tools").exists()
 
 
-def test_same_name_in_two_catalogs_must_be_qualified(motel: Motel, tools_repo: Path) -> None:
-    store = CatalogStore(motel.paths)
+def test_same_name_in_two_catalogs_must_be_qualified(scipatch: SciPatch, tools_repo: Path) -> None:
+    store = CatalogStore(scipatch.paths)
     store.add(str(tools_repo))
     store.add(str(tools_repo), name="mirror")
-    with pytest.raises(MotelError, match="several catalogs"):
+    with pytest.raises(SciPatchError, match="several catalogs"):
         store.find("sample")
     found = store.find("mirror/sample")
     assert found is not None and found.catalog == "mirror"
 
 
-def test_rejected_catalogs_leave_nothing_behind(motel: Motel, tools_repo: Path) -> None:
-    store = CatalogStore(motel.paths)
-    with pytest.raises(MotelError, match="No tool packages found"):
+def test_rejected_catalogs_leave_nothing_behind(scipatch: SciPatch, tools_repo: Path) -> None:
+    store = CatalogStore(scipatch.paths)
+    with pytest.raises(SciPatchError, match="No tool packages found"):
         store.add(str(tools_repo), path="nowhere")
     assert store.catalogs() == []
     store.add(str(tools_repo))
-    with pytest.raises(MotelError, match="already exists"):
+    with pytest.raises(SciPatchError, match="already exists"):
         store.add(str(tools_repo))
-    with pytest.raises(MotelError, match="not a valid catalog name"):
+    with pytest.raises(SciPatchError, match="not a valid catalog name"):
         store.add(str(tools_repo), name=BUILT_IN)
 
 
 @pytest.mark.integration
 @requires_uv
-def test_install_by_name_records_the_catalog_commit(motel: Motel, tools_repo: Path) -> None:
-    CatalogStore(motel.paths).add(str(tools_repo))
-    tool = motel.add("lab-tools/sample")
+def test_install_by_name_records_the_catalog_commit(scipatch: SciPatch, tools_repo: Path) -> None:
+    CatalogStore(scipatch.paths).add(str(tools_repo))
+    tool = scipatch.add("lab-tools/sample")
     assert tool.state is not None
     assert tool.state.installed_from.endswith("#subdirectory=tools/sample")
-    assert motel.run("sample", "add", {"a": 1}).result == {"sum": 2.0}
+    assert scipatch.run("sample", "add", {"a": 1}).result == {"sum": 2.0}

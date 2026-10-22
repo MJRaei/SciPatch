@@ -1,7 +1,7 @@
 name: Tools
 
 # Rebuild tool packages from scratch and run their golden tests on Linux, macOS,
-# and Windows (where each tool's motel.lock says it can be installed): on every
+# and Windows (where each tool's scipatch.lock says it can be installed): on every
 # change to a tool, and weekly for all tools, to catch upstream breakage early.
 on:
   pull_request:
@@ -30,12 +30,12 @@ jobs:
           case "${{ github.event_name }}" in
             pull_request) changed=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" HEAD -- tools) ;;
             # The first push of a branch has no "before" commit: check every tool.
-            push) if [ -z "${before//0/}" ]; then changed=$(ls tools/*/motel.yaml)
+            push) if [ -z "${before//0/}" ]; then changed=$(ls tools/*/scipatch.yaml)
                   else changed=$(git diff --name-only "$before" HEAD -- tools); fi ;;
-            *) changed=$(ls tools/*/motel.yaml) ;;
+            *) changed=$(ls tools/*/scipatch.yaml) ;;
           esac
           tools=$(echo "$changed" | cut -d/ -f2 | sort -u | while read -r t; do
-            [ -n "$t" ] && [ -f "tools/$t/motel.yaml" ] && echo "$t"; done)
+            [ -n "$t" ] && [ -f "tools/$t/scipatch.yaml" ] && echo "$t"; done)
           matrix=$(python3 .github/scripts/tool_matrix.py $tools)
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
           echo "any=$(python3 -c 'import json, sys; print(str(bool(json.loads(sys.argv[1])["include"])).lower())' "$matrix")" >> "$GITHUB_OUTPUT"
@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      # conda tools need no setup: Motel downloads its own micromamba.
+      # conda tools need no setup: SciPatch downloads its own micromamba.
       # Tools without Windows builds run inside WSL on Windows, as for users.
       - if: matrix.wsl
         uses: Vampire/setup-wsl@v7.0.0
@@ -59,7 +59,7 @@ jobs:
           distribution: Ubuntu-24.04
       - run: uv tool install --python 3.12 .
       - name: Build from scratch and run golden tests
-        run: motel check tools/${{ matrix.tool }} --clean
+        run: scipatch check tools/${{ matrix.tool }} --clean
         env:
           # Golden tests that need a secret are skipped when it is not configured.
           MP_API_KEY: ${{ secrets.MP_API_KEY }}

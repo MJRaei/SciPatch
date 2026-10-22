@@ -121,7 +121,7 @@ def phonons(
     phonon.generate_displacements(distance=displacement_angstrom)
     displaced = phonon.supercells_with_displacements
     if device == "auto":
-        device = "cuda" if os.environ.get("MOTEL_DEVICE") == "cuda" else "cpu"
+        device = "cuda" if os.environ.get("SCIPATCH_DEVICE") == "cuda" else "cpu"
     force_field = _calculator(calculator, device)
     forces = []
     for index, cell in enumerate(displaced, start=1):

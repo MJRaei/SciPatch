@@ -1,0 +1,280 @@
+"""The ``SciPatch`` facade: one object behind the CLI, the MCP gateway, and the Python API.
+
+Example::
+
+    from scipatch.app import SciPatch
+
+    scipatch = SciPatch()
+    hits = scipatch.find("relax a crystal structure")
+    record = scipatch.run("ase-emt", "relax", {"structure": "Cu.cif"}, wait=60)
+    print(record.status, record.result)
+"""
+
+from __future__ import annotations
+
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+from scipatch.build import BuildOutcome, runtime_for
+from scipatch.catalogs import CatalogEntry, CatalogStore
+from scipatch.clients import APPS, AppIntegration, ConnectionStore, get_app, server_command
+from scipatch.errors import SciPatchError
+from scipatch.freeze import FreezeResult
+from scipatch.history import RunStore
+from scipatch.installer import Installer, dev_layout
+from scipatch.manifest import MANIFEST_FILENAME, load_manifest
+from scipatch.maturity import WEIGHTS, MaturityOverrides, rank
+from scipatch.models import FunctionInfo, RunRecord, RunStatus
+from scipatch.paths import SciPatchPaths
+from scipatch.registry import InstalledTool, Registry
+from scipatch.reporting import NullReporter, Reporter
+from scipatch.runs import RunManager
+from scipatch.search import SearchHit, ToolIndex, catalog_document
+from scipatch.secrets import SecretStore
+from scipatch.skills import SkillManager, SyncReport
+
+#: How closely another tool must match a tool's description (relative to the tool
+#: itself) to be suggested for cross-checking it; 0.25 keeps, e.g., mdanalysis for
+#: pymatgen-diffusion but not cantera for an NMR tool.
+ALTERNATIVE_RELEVANCE = 0.25
+
+
+@dataclass(frozen=True)
+class Match:
+    """A search result with its tool and function resolved."""
+
+    hit: SearchHit
+    tool: InstalledTool
+    function: FunctionInfo
+
+
+@dataclass(frozen=True)
+class ConnectResult:
+    app: AppIntegration
+    message: str
+    skills: SyncReport | None
+
+
+class SciPatch:
+    def __init__(
+        self, paths: SciPatchPaths | None = None, reporter: Reporter | None = None
+    ) -> None:
+        self.paths = (paths or SciPatchPaths.from_env()).ensure()
+        self.reporter: Reporter = reporter or NullReporter()
+        self.registry = Registry(self.paths)
+        self.history = RunStore(self.paths.database)
+        self.runs = RunManager(self.paths, self.history)
+        self.installer = Installer(self.paths, self.registry, self.reporter)
+        self.skills = SkillManager(self.registry)
+        self.connections = ConnectionStore(self.paths.connections)
+        self.secrets = SecretStore(self.paths.secrets)
+
+    # ------------------------------------------------------------------ tools
+
+    def tools(self) -> list[InstalledTool]:
+        return self.registry.tools()
+
+    def tool(self, name: str) -> InstalledTool:
+        return self.registry.get(name)
+
+    def find(self, query: str, limit: int = 10) -> list[Match]:
+        tools = {tool.name: tool for tool in self.tools() if tool.usable}
+        index = ToolIndex(list(tools.values()))
+        matches = []
+        for hit in index.search(query, limit=limit):
+            tool = tools[hit.tool]
+            matches.append(Match(hit, tool, tool.function(hit.function)))
+        return matches
+
+    def find_installable(self, query: str, limit: int = 3) -> list[tuple[CatalogEntry, float]]:
+        """Catalog tools that are not installed yet, best matches first."""
+        installed = set(self.registry.names())
+        entries = {
+            entry.manifest.name: entry
+            for entry in CatalogStore(self.paths).entries()
+            if entry.manifest.name not in installed
+        }
+        index = ToolIndex.of_documents(
+            (((name, ""), catalog_document(entry.manifest)) for name, entry in entries.items()),
+            {name: WEIGHTS[entry.manifest.maturity] for name, entry in entries.items()},
+        )
+        return [(entries[hit.tool], hit.score) for hit in index.search(query, limit=limit)]
+
+    def stronger_alternatives(self, tool: InstalledTool, limit: int = 3) -> list[str]:
+        """Installed tools of a higher maturity level that cover the same ground.
+
+        A tool qualifies when it matches the tool's own description at least
+        ``ALTERNATIVE_RELEVANCE`` times as well as the tool itself does, so that
+        loosely related tools are not suggested for cross-checks.
+        """
+        candidates = {
+            other.name: other
+            for other in self.tools()
+            if other.usable and rank(other.maturity) < rank(tool.maturity)
+        }
+        if not candidates or not tool.functions:
+            return []
+        candidates[tool.name] = tool
+        manifest = tool.manifest
+        query = " ".join([manifest.summary, *manifest.domains, *manifest.tags])
+        relevance: dict[str, float] = {}
+        for hit in ToolIndex(list(candidates.values())).search(query, limit=1000):
+            score = hit.score / WEIGHTS[candidates[hit.tool].maturity]  # undo the ranking boost
+            relevance[hit.tool] = max(relevance.get(hit.tool, 0.0), score)
+        own = relevance.pop(tool.name, 0.0)
+        close = [name for name, score in relevance.items() if score >= ALTERNATIVE_RELEVANCE * own]
+        return sorted(close, key=lambda name: -relevance[name])[:limit] if own else []
+
+    def lower_maturity(self, name: str, level: str | None) -> InstalledTool:
+        """Lower a tool's maturity level on this computer; None restores the declared one."""
+        tool = self.tool(name)
+        declared = tool.manifest.maturity
+        if level is not None and rank(level) < rank(declared):
+            raise SciPatchError(
+                f"'{name}' is declared '{declared}'; levels can only be lowered here.",
+                hint=(
+                    "A higher level needs evidence in its scipatch.yaml (see docs/tool-format.md)."
+                ),
+            )
+        MaturityOverrides(self.paths.maturity).set(name, None if level == declared else level)
+        self.sync_skills()
+        return self.tool(name)
+
+    def catalog_entry(self, name: str) -> CatalogEntry | None:
+        """The catalog package of a tool, if a catalog (or SciPatch itself) has one."""
+        return CatalogStore(self.paths).find(name)
+
+    def add(self, spec: str, **options: Any) -> InstalledTool:
+        """Install a tool package (folder, featured tool name, or git URL)."""
+        tool = self.installer.install(spec, **options)
+        self.sync_skills()
+        return tool
+
+    def remove(self, name: str) -> None:
+        self.registry.get(name)  # raises a helpful error for unknown names
+        self.registry.remove(name)
+        self.sync_skills()
+
+    def rebuild(
+        self, name: str, *, clean: bool = False, run_tests: bool = True, all_tests: bool = False
+    ) -> InstalledTool:
+        tool = self.installer.rebuild(name, clean=clean, run_tests=run_tests, all_tests=all_tests)
+        self.sync_skills()
+        return tool
+
+    def test(self, name: str) -> InstalledTool:
+        tool = self.installer.test(name)
+        self.sync_skills()
+        return tool
+
+    def check(
+        self, package_dir: Path, *, clean: bool = False, run_tests: bool = True
+    ) -> BuildOutcome:
+        return self.installer.check(package_dir, clean=clean, run_tests=run_tests)
+
+    def save_patch(self, target: str, label: str) -> Path | None:
+        return self.installer.save_patch(target, label)
+
+    def freeze(self, target: str) -> FreezeResult:
+        return self.installer.freeze(target)
+
+    def exec(self, target: str, command: list[str]) -> int:
+        """Run a command inside a tool's environment (package folder or installed tool)."""
+        folder = Path(target).expanduser()
+        if (folder / MANIFEST_FILENAME).is_file():
+            manifest = load_manifest(folder)
+            layout = dev_layout(folder.resolve())
+            hint = f"Build it first with 'scipatch check {target}'."
+        else:
+            tool = self.tool(target)
+            manifest, layout = tool.manifest, tool.layout
+            hint = f"Rebuild it with 'scipatch rebuild {target}'."
+        secrets = SecretStore(self.paths.secrets).resolve(manifest.environment.secret_names)
+        runtime = runtime_for(manifest, layout, secrets)
+        if not runtime.ready():
+            raise SciPatchError(f"The environment for '{target}' does not exist yet.", hint=hint)
+        env = runtime.child_environment()
+        if runtime.linux is not None:  # inside WSL, with the environment first on PATH
+            script = 'PATH="$SCIPATCH_PREPEND_PATH:$PATH"; export PATH; exec "$@"'
+            command = runtime.linux.distro.command(["sh", "-c", script, "sh", *command], Path.cwd())
+        try:
+            return subprocess.call(command, env=env)
+        except FileNotFoundError as exc:
+            raise SciPatchError(f"Command not found: {command[0]}") from exc
+
+    # ------------------------------------------------------------------- runs
+
+    def run(
+        self,
+        tool: str,
+        function: str,
+        args: dict[str, Any] | None = None,
+        *,
+        wait: float | None = None,
+        output_dir: Path | None = None,
+        use_cache: bool = True,
+        origin: str = "python",
+        base_dir: Path | None = None,
+    ) -> RunRecord:
+        """Run a function, waiting up to ``wait`` seconds (``None``: until it finishes)."""
+        record = self.runs.start(
+            self.tool(tool),
+            function,
+            args,
+            output_dir=output_dir,
+            use_cache=use_cache,
+            origin=origin,
+            base_dir=base_dir,
+        )
+        if record.cached or record.status.finished:
+            return record
+        return self.runs.wait(record.id, timeout=wait)
+
+    def get_run(self, run_id: str, *, wait: float = 0) -> RunRecord:
+        return self.runs.wait(run_id, timeout=wait) if wait > 0 else self.runs.get(run_id)
+
+    def cancel_run(self, run_id: str) -> RunRecord:
+        return self.runs.cancel(run_id)
+
+    def history_list(
+        self,
+        *,
+        tool: str | None = None,
+        status: RunStatus | None = None,
+        query: str | None = None,
+        limit: int = 20,
+    ) -> list[RunRecord]:
+        records = self.history.query(tool=tool, status=status, query=query, limit=limit)
+        return [self.runs.get(r.id) if r.status is RunStatus.RUNNING else r for r in records]
+
+    # ----------------------------------------------------------------- skills
+
+    def sync_skills(self) -> list[SyncReport]:
+        """Refresh skills in every connected app's skills folder."""
+        return [self.skills.sync(directory) for directory in self.connections.skills_dirs()]
+
+    # ---------------------------------------------------------------- clients
+
+    def connect(self, app_key: str, *, skills: bool = True) -> ConnectResult:
+        app = get_app(app_key)
+        message = app.connect(server_command())
+        self.connections.add(app)
+        report = self.skills.sync(app.skills_dir) if skills and app.skills_dir else None
+        return ConnectResult(app, message, report)
+
+    def disconnect(self, app_key: str) -> str:
+        app = get_app(app_key)
+        message = app.disconnect()
+        self.connections.remove(app.key)
+        # Keep skills that another connected app still reads from the same folder.
+        if app.skills_dir and app.skills_dir not in self.connections.skills_dirs():
+            removed = self.skills.remove_all(app.skills_dir)
+            if removed:
+                message += f"; removed {len(removed)} skill(s) from {app.skills_dir}"
+        return message
+
+    @staticmethod
+    def apps() -> list[AppIntegration]:
+        return list(APPS.values())

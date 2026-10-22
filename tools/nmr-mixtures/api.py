@@ -37,7 +37,7 @@ MAX_COUPLED_PROTONS = 11
 @functools.cache
 def _script(skill: str, module: str) -> ModuleType:
     """A MixSense script, imported from the pinned source checkout."""
-    folder = str(Path(os.environ["MOTEL_SOURCE_DIR"]) / ".agents" / "skills" / skill / "scripts")
+    folder = str(Path(os.environ["SCIPATCH_SOURCE_DIR"]) / ".agents" / "skills" / skill / "scripts")
     if folder not in sys.path:
         sys.path.insert(0, folder)
     return importlib.import_module(module)

@@ -24,7 +24,7 @@ import numpy as np
 @functools.cache
 def _source() -> Path:
     warnings.filterwarnings("ignore")
-    root = Path(os.environ["MOTEL_SOURCE_DIR"])
+    root = Path(os.environ["SCIPATCH_SOURCE_DIR"])
     if str(root) not in sys.path:
         sys.path.insert(0, str(root))
     return root

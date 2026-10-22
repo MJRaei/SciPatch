@@ -284,7 +284,7 @@ def _terms(text: str, max_terms: int) -> list[str]:
         if index == 3:  # chemical formulas: NaCl, H2O, Fe2O3 (not ordinary capitalized words)
             matches = [m for m in matches if FORMULA.fullmatch(m)]
         found.update(matches)
-    source = os.environ.get("MOTEL_SOURCE_DIR")
+    source = os.environ.get("SCIPATCH_SOURCE_DIR")
     keywords_file = Path(source) / "chemistry_keywords.txt" if source else None
     if keywords_file and keywords_file.is_file():
         lowered = text.lower()

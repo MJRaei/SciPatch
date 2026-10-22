@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from motel.manifest import Manifest
-from motel.models import FunctionInfo, ToolState
-from motel.paths import MotelPaths
-from motel.registry import InstalledTool
-from motel.schema import matches, normalize, type_label
-from motel.search import ToolIndex, describe_inputs, tokenize
+from scipatch.manifest import Manifest
+from scipatch.models import FunctionInfo, ToolState
+from scipatch.paths import SciPatchPaths
+from scipatch.registry import InstalledTool
+from scipatch.schema import matches, normalize, type_label
+from scipatch.search import ToolIndex, describe_inputs, tokenize
 
 
 def tool(name: str, summary: str, functions: dict[str, str], **manifest: Any) -> InstalledTool:
@@ -20,7 +20,7 @@ def tool(name: str, summary: str, functions: dict[str, str], **manifest: Any) ->
         name,
         Manifest.model_validate({"name": name, "summary": summary, **manifest}),
         state,
-        MotelPaths.from_env(),
+        SciPatchPaths.from_env(),
     )
 
 

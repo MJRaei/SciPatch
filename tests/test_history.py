@@ -4,8 +4,8 @@ import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from motel.history import RunStore, new_run_id
-from motel.models import RunRecord, RunStatus
+from scipatch.history import RunStore, new_run_id
+from scipatch.models import RunRecord, RunStatus
 
 
 def record(run_id: str, *, tool: str = "ase-emt", minutes: int = 0, **fields: object) -> RunRecord:
@@ -29,7 +29,7 @@ def test_run_ids_are_sortable_and_unique() -> None:
 
 
 def test_insert_get_and_finish(tmp_path: Path) -> None:
-    store = RunStore(tmp_path / "motel.db")
+    store = RunStore(tmp_path / "scipatch.db")
     store.insert(record("r1"))
     loaded = store.get("r1")
     assert loaded is not None
@@ -57,7 +57,7 @@ def test_insert_get_and_finish(tmp_path: Path) -> None:
 
 
 def test_list_filters_and_searches(tmp_path: Path) -> None:
-    store = RunStore(tmp_path / "motel.db")
+    store = RunStore(tmp_path / "scipatch.db")
     store.insert(record("a", minutes=1, args={"element": "Cu"}))
     store.insert(record("b", minutes=2, args={"element": "Au"}, function="equation_of_state"))
     store.insert(record("c", minutes=3, tool="rdkit-descriptors", args={"smiles": "CCO"}))
@@ -76,7 +76,7 @@ def test_list_filters_and_searches(tmp_path: Path) -> None:
 
 
 def test_cache_lookup_returns_newest_success(tmp_path: Path) -> None:
-    store = RunStore(tmp_path / "motel.db")
+    store = RunStore(tmp_path / "scipatch.db")
     store.insert(record("old", minutes=1, cache_key="k"))
     store.insert(record("new", minutes=2, cache_key="k"))
     store.insert(record("failed", minutes=3, cache_key="k"))
@@ -90,6 +90,6 @@ def test_cache_lookup_returns_newest_success(tmp_path: Path) -> None:
 
 
 def test_database_reopens_without_remigrating(tmp_path: Path) -> None:
-    path = tmp_path / "motel.db"
+    path = tmp_path / "scipatch.db"
     RunStore(path).insert(record("a"))
     assert RunStore(path).count() == 1

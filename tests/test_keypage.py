@@ -9,10 +9,10 @@ from urllib.parse import urlencode, urlsplit
 
 import pytest
 
-from motel import keypage
-from motel.keypage import KeyPage
-from motel.manifest import Secret
-from motel.secrets import SecretStore
+from scipatch import keypage
+from scipatch.keypage import KeyPage
+from scipatch.manifest import Secret
+from scipatch.secrets import SecretStore
 
 DEMO = Secret(name="DEMO_KEY", description="Demo service API key", url="https://example.org/key")
 

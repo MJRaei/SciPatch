@@ -8,14 +8,14 @@ from typing import Any
 import pytest
 from typer.testing import CliRunner
 
-from motel import hardware
-from motel.app import Motel
-from motel.cli import app
-from motel.errors import BuildError, RunError
-from motel.hardware import Gpu, Machine, assess, describe_needs, parse_nvidia_smi
-from motel.manifest import DEFAULT_RESOURCES, Manifest, Resources
-from motel.settings import Settings
-from motel.views import tool_view
+from scipatch import hardware
+from scipatch.app import SciPatch
+from scipatch.cli import app
+from scipatch.errors import BuildError, RunError
+from scipatch.hardware import Gpu, Machine, assess, describe_needs, parse_nvidia_smi
+from scipatch.manifest import DEFAULT_RESOURCES, Manifest, Resources
+from scipatch.settings import Settings
+from scipatch.views import tool_view
 
 from .conftest import ManifestFactory, requires_uv
 
@@ -28,13 +28,13 @@ import os
 
 
 def device() -> str:
-    """Report the device Motel chose for this run."""
-    return os.environ.get("MOTEL_DEVICE", "unset")
+    """Report the device SciPatch chose for this run."""
+    return os.environ.get("SCIPATCH_DEVICE", "unset")
 
 
 def train() -> str:
     """Pretend to train a model on a GPU."""
-    return os.environ.get("MOTEL_DEVICE", "unset")
+    return os.environ.get("SCIPATCH_DEVICE", "unset")
 '''
 
 
@@ -88,7 +88,7 @@ def test_a_required_gpu_blocks_without_one_and_is_used_with_one() -> None:
 def test_an_optional_gpu_is_used_only_when_the_user_allows_it() -> None:
     optional = needs(gpu="optional", gpu_types=["cuda", "mps"])
     off = assess(optional, APPLE, use_gpu=False)
-    assert off.device == "cpu" and "motel config gpu on" in off.notes[0]
+    assert off.device == "cpu" and "scipatch config gpu on" in off.notes[0]
     assert assess(optional, APPLE, use_gpu=True).device == "mps"
     cuda_only = assess(needs(gpu="optional"), APPLE, use_gpu=True)
     assert cuda_only.device == "cpu" and "would make it faster" in cuda_only.notes[0]
@@ -117,19 +117,19 @@ def test_folder_sizes_are_measured(tmp_path: Path) -> None:
 
 
 def test_tools_that_require_a_missing_gpu_are_not_installed(
-    motel: Motel, make_package: ManifestFactory, monkeypatch: pytest.MonkeyPatch
+    scipatch: SciPatch, make_package: ManifestFactory, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(hardware, "detect", lambda: NO_GPU)
     package = make_package("big-model", api=GPU_API, resources={"gpu": "required"})
     with pytest.raises(BuildError, match=r"needs an NVIDIA GPU \(CUDA\); this computer has none"):
-        motel.add(str(package))
-    assert not motel.registry.exists("big-model")
+        scipatch.add(str(package))
+    assert not scipatch.registry.exists("big-model")
 
 
 @pytest.mark.integration
 @requires_uv
 def test_runs_get_a_device_and_gpu_only_functions_are_refused_without_one(
-    motel: Motel, make_package: ManifestFactory, monkeypatch: pytest.MonkeyPatch
+    scipatch: SciPatch, make_package: ManifestFactory, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(hardware, "detect", lambda: NO_GPU)
     package = make_package(
@@ -138,20 +138,20 @@ def test_runs_get_a_device_and_gpu_only_functions_are_refused_without_one(
         resources={"gpu": "optional"},
         functions={"device": {}, "train": {"resources": {"gpu": "required"}}},
     )
-    motel.add(str(package))
-    assert motel.run("trainer", "device", wait=60).result == "cpu"
+    scipatch.add(str(package))
+    assert scipatch.run("trainer", "device", wait=60).result == "cpu"
     with pytest.raises(RunError, match=r"'trainer.train' cannot run on this computer"):
-        motel.run("trainer", "train")
-    resources = tool_view(motel.tool("trainer"))["resources"]
+        scipatch.run("trainer", "train")
+    resources = tool_view(scipatch.tool("trainer"))["resources"]
     assert resources["needs"] == ["faster with an NVIDIA GPU (CUDA)"]
     assert resources["functions"]["train"]["cannot_run_here"][0].startswith("needs an NVIDIA GPU")
     assert resources["disk_space"].endswith("for its environment, plus files it downloads")
 
     monkeypatch.setattr(hardware, "detect", lambda: NVIDIA)
-    assert motel.run("trainer", "device", wait=60, use_cache=False).result == "cpu"
-    Settings(motel.paths.config).set("gpu", True)
-    assert motel.run("trainer", "device", wait=60, use_cache=False).result == "cuda"
-    assert motel.run("trainer", "train", wait=60).result == "cuda"
+    assert scipatch.run("trainer", "device", wait=60, use_cache=False).result == "cpu"
+    Settings(scipatch.paths.config).set("gpu", True)
+    assert scipatch.run("trainer", "device", wait=60, use_cache=False).result == "cuda"
+    assert scipatch.run("trainer", "train", wait=60).result == "cuda"
 
 
 def test_gpu_use_is_a_setting() -> None:
@@ -159,6 +159,6 @@ def test_gpu_use_is_a_setting() -> None:
     shown = runner.invoke(app, ["config"])
     assert shown.exit_code == 0 and "gpu off" in shown.output and "This computer:" in shown.output
     assert runner.invoke(app, ["config", "gpu", "on"]).exit_code == 0
-    assert Settings(Motel().paths.config).use_gpu
+    assert Settings(SciPatch().paths.config).use_gpu
     assert runner.invoke(app, ["config", "gpu", "maybe"]).exit_code != 0
     assert runner.invoke(app, ["config", "speed", "on"]).exit_code != 0

@@ -63,10 +63,10 @@ _FRAME_INTERVAL = 10  # MD steps between saved trajectory frames
 
 
 def _device(device: str) -> str:
-    """ "auto": the device Motel chose for this run (an NVIDIA GPU only if the user allows it)."""
+    """ "auto": the device SciPatch chose (an NVIDIA GPU only if the user allows it)."""
     if device != "auto":
         return device
-    return "cuda" if os.environ.get("MOTEL_DEVICE") == "cuda" else "cpu"
+    return "cuda" if os.environ.get("SCIPATCH_DEVICE") == "cuda" else "cpu"
 
 
 @functools.lru_cache(maxsize=6)

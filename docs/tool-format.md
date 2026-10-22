@@ -4,18 +4,18 @@ A tool package is a folder:
 
 ```text
 my-tool/
-├── motel.yaml       required: the manifest
+├── scipatch.yaml       required: the manifest
 ├── api.py           required: the functions (name set by `entrypoint`)
 ├── SKILL.md         recommended: usage notes for agents
 ├── references/      optional: extra documents copied into the agent skill
 ├── patches/         optional: *.patch / *.diff applied to the source, in name order
 ├── tests/data/      optional: input files for golden tests
-└── requirements.txt / environment.yml   optional, if referenced from motel.yaml
+└── requirements.txt / environment.yml   optional, if referenced from scipatch.yaml
 ```
 
-`motel new <name>` creates this skeleton; `motel check <folder>` validates it.
+`scipatch new <name>` creates this skeleton; `scipatch check <folder>` validates it.
 
-## `motel.yaml`
+## `scipatch.yaml`
 
 ```yaml
 schema: 1
@@ -84,7 +84,7 @@ golden:
 | Field | Meaning |
 |---|---|
 | `schema` | Manifest format version (currently 1). |
-| `name` | Lowercase letters, digits, and single hyphens; at most 48 characters. Used for folders, commands, and the skill name `motel-<name>`. |
+| `name` | Lowercase letters, digits, and single hyphens; at most 48 characters. Used for folders, commands, and the skill name `scipatch-<name>`. |
 | `version` | Version of this package (your wrapper), not of the upstream code. |
 | `title`, `summary`, `description` | Shown to people and agents. The summary is searched; make it specific. |
 | `domains`, `tags` | Search keywords. |
@@ -97,9 +97,9 @@ packages (like the featured `ase-emt`).
 | Field | Meaning |
 |---|---|
 | `repo` | Git URL (https, ssh, or a local `file://` path). |
-| `ref` | Branch, tag, or commit, **required** with `repo`. Prefer a commit or tag so rebuilds are identical; `motel new` and `motel onboard` pin the commit for you. |
+| `ref` | Branch, tag, or commit, **required** with `repo`. Prefer a commit or tag so rebuilds are identical; `scipatch new` and `scipatch onboard` pin the commit for you. |
 | `subdirectory` | Install from this subfolder of the repository. |
-| `install` | Install the checkout into the environment (editable). Set `false` for repositories that are not pip-installable; at run time, the checkout's path is in the `MOTEL_SOURCE_DIR` environment variable. |
+| `install` | Install the checkout into the environment (editable). Set `false` for repositories that are not pip-installable; at run time, the checkout's path is in the `SCIPATCH_SOURCE_DIR` environment variable. |
 | `paper`, `citation`, `license`, `homepage` | Shown with every result, so users can cite correctly. |
 
 ### `environment`
@@ -111,10 +111,10 @@ packages (like the featured `ase-emt`).
 | `packages` | PyPI requirement strings, e.g. `["numpy<2", "torch==2.5.1"]`. |
 | `requirements` | Path to a requirements file in the package. |
 | `conda_packages`, `channels`, `conda_file` | Conda only. |
-| `platforms` | Platforms the tool supports, if fewer than its packages allow: `linux-64`, `linux-aarch64`, `osx-arm64`, `osx-64`, `win-64`. Usually left out; `motel freeze` finds where the packages exist. |
+| `platforms` | Platforms the tool supports, if fewer than its packages allow: `linux-64`, `linux-aarch64`, `osx-arm64`, `osx-64`, `win-64`. Usually left out; `scipatch freeze` finds where the packages exist. |
 | `post_install` | Shell commands run in the activated environment after installing (e.g. downloading model weights). |
 | `variables` | Environment variables set for every run. |
-| `secrets` | Secrets the tool needs, such as API keys: names (`[MP_API_KEY]`) or, better, objects with `name`, `description`, and `url` (where to get one), so Motel can ask for them clearly. Each tool receives only the secrets it declares, as environment variables. See [API keys](#api-keys). |
+| `secrets` | Secrets the tool needs, such as API keys: names (`[MP_API_KEY]`) or, better, objects with `name`, `description`, and `url` (where to get one), so SciPatch can ask for them clearly. Each tool receives only the secrets it declares, as environment variables. See [API keys](#api-keys). |
 
 The environment is rebuilt only when something that affects it changes: this
 section, the source commit, the patches, the lock file, or the referenced files.
@@ -150,21 +150,21 @@ environment:
 Read the key with `os.environ["MP_API_KEY"]` in `api.py`. Keys never go into
 tool packages, run records, or the chat with an AI app. A user can provide one:
 
-- when installing: `motel add` asks for it, hidden, with the `url`;
-- on the **Keys** page of the dashboard (`motel ui`);
+- when installing: `scipatch add` asks for it, hidden, with the `url`;
+- on the **Keys** page of the dashboard (`scipatch ui`);
 - from a run in an AI app: if the key is missing, the app gets a one-time link
   to a page on the user's computer where they enter it (apps that support MCP
   URL elicitation open it themselves);
-- from a terminal: `motel secret set MP_API_KEY` asks for it, hidden. Run by an
+- from a terminal: `scipatch secret set MP_API_KEY` asks for it, hidden. Run by an
   AI agent (no terminal to type in), the same command opens the page in the
   user's browser instead and waits until they have entered the key.
 
 An environment variable with the same name takes precedence, which suits CI.
 
-### `motel.lock`
+### `scipatch.lock`
 
 The exact packages a tool was tested with, for every platform, written by
-`motel freeze` after `motel check` passes:
+`scipatch freeze` after `scipatch check` passes:
 
 - the platform you tested on gets the packages of that working environment;
 - Linux (x86-64 and ARM), macOS (Apple silicon and Intel), and Windows are
@@ -177,9 +177,9 @@ The exact packages a tool was tested with, for every platform, written by
   crest =2.12".
 
 Builds install exactly the locked conda packages and use the locked PyPI
-versions as constraints. On a platform marked unavailable, `motel add` stops at
-once with the reason, `motel catalog` shows the tool as not installable there,
-and CI skips it. `motel info` lists where a tool runs. On Windows, a tool with
+versions as constraints. On a platform marked unavailable, `scipatch add` stops at
+once with the reason, `scipatch catalog` shows the tool as not installable there,
+and CI skips it. `scipatch info` lists where a tool runs. On Windows, a tool with
 Linux packages but no Windows ones is built and run inside WSL with its locked
 Linux packages (and CI checks it there); write such tools so they need nothing
 but their environment and the files they are given.
@@ -192,7 +192,7 @@ The lock records a hash of the environment section; when you change the
 requested packages, it is out of date and is not applied until you test and
 freeze again. Freeze every tool you share, so others build what you tested.
 Older packages may still have a `requirements.lock` (one list of PyPI versions);
-it is applied as before until the next `motel freeze` replaces it.
+it is applied as before until the next `scipatch freeze` replaces it.
 
 ### `functions`
 
@@ -232,17 +232,17 @@ functions:
     resources: {gpu: required, memory_gb: 32}   # a function can need more (or less)
 ```
 
-Motel compares this with the computer (`motel doctor` shows what it found):
+SciPatch compares this with the computer (`scipatch doctor` shows what it found):
 
 - A tool that **requires** a GPU the computer lacks is not installed (catalogs
   and agents see why); a function that requires one is refused with the reason
   before it starts, and its golden tests are skipped there.
 - Short memory, a GPU smaller than needed, and needing the internet are shown
-  to agents and people (`describe_tool`, `motel info`) before they run anything.
+  to agents and people (`describe_tool`, `scipatch info`) before they run anything.
 - Each run is told which device to use in the environment variable
-  `MOTEL_DEVICE`: `cuda`, `mps`, or `cpu`. Tools that require a GPU always get
+  `SCIPATCH_DEVICE`: `cuda`, `mps`, or `cpu`. Tools that require a GPU always get
   one; tools that are only faster with one use it when the user allows it
-  (`motel config gpu on`), and the CPU otherwise. Golden tests run on the CPU
+  (`scipatch config gpu on`), and the CPU otherwise. Golden tests run on the CPU
   unless the tool requires a GPU, so their values stay reproducible.
 
 ### `validity`
@@ -254,7 +254,7 @@ the relevant caveats.
 ### `maturity`
 
 How much evidence backs the tool's results. Agents see the level with the
-evidence behind it (`describe_tool`, `motel info`); search ranks
+evidence behind it (`describe_tool`, `scipatch info`); search ranks
 better-established tools first among similar matches; and experimental tools
 carry a caution telling agents to say so and cross-check key numbers with
 better-established tools.
@@ -269,7 +269,7 @@ The manifest is refused when the evidence for its level is missing. Whether code
 is "widely used" cannot be checked automatically: whoever adds a tool to a
 catalog decides, and `established` should not be claimed for a project only its
 authors use. On their own computer, users can lower a level (never raise it)
-with `motel maturity <tool> <level>`.
+with `scipatch maturity <tool> <level>`.
 
 ### `golden`
 
@@ -283,7 +283,7 @@ with `motel maturity <tool> <level>`.
 | `timeout` | Seconds (default 900). |
 | `requires` | Secrets the test needs, e.g. `[MP_API_KEY]`. Without them the test is skipped, not failed, so the tool still installs. |
 | `raises` | Text the call's error message must contain: the test passes only if the call *fails* this way. Use it to prove that inputs outside the tool's validity are refused, e.g. `raises: "no reliable parameters for Fe"`. |
-| `quick` | Also run when the tool is installed. Mark one fast test (seconds) that exercises the main computation; `motel add` runs only the quick tests (all of them if none is marked), while `motel check`, `motel test`, `motel add --all-tests`, and CI run every test. |
+| `quick` | Also run when the tool is installed. Mark one fast test (seconds) that exercises the main computation; `scipatch add` runs only the quick tests (all of them if none is marked), while `scipatch check`, `scipatch test`, `scipatch add --all-tests`, and CI run every test. |
 | `platforms` | Run only on these platforms (e.g. `[linux-64, osx-arm64, osx-64]`), for tests that need a package some platform lacks. Elsewhere the test is skipped. Pair it with a test for the other platforms that checks the function explains what is missing. |
 
 Each check is a literal (numbers are compared to within about 1e-9) or a matcher:
@@ -298,7 +298,7 @@ Each check is a literal (numbers are compared to within about 1e-9) or a matcher
 | `{exists: true}` | the value is a path to an existing file |
 | `{type: t}` | JSON type: `number`, `integer`, `string`, `boolean`, `array`, `object`, `null` |
 
-Golden tests run on every build. A failing test stops `motel add` unless you pass
+Golden tests run on every build. A failing test stops `scipatch add` unless you pass
 `--allow-failing-tests`, in which case the tool is marked as failing its tests
 everywhere it appears.
 
@@ -342,11 +342,11 @@ def relax(
   values (NumPy values, dataclasses, paths, and objects with
   `as_dict()`/`todict()` are converted automatically). Put units in key names.
 - Write output files into the **current directory** (each run has its own) and
-  return their relative paths; Motel returns them as absolute paths.
+  return their relative paths; SciPatch returns them as absolute paths.
 - Raise `ValueError` with a clear message for bad input. The message is shown
   to the user and the agent.
-- A `device` parameter should default to `"auto"`, meaning the device Motel
-  chose: `os.environ.get("MOTEL_DEVICE", "cpu")`. Then the user's GPU setting
+- A `device` parameter should default to `"auto"`, meaning the device SciPatch
+  chose: `os.environ.get("SCIPATCH_DEVICE", "cpu")`. Then the user's GPU setting
   applies, and golden tests stay on the CPU.
 - No prompts, windows, or `plt.show()`. Printing is fine; it goes to the run's
   log. While a long job runs, its latest printed lines are shown to agents and
@@ -355,8 +355,8 @@ def relax(
 ## `SKILL.md`
 
 Usage notes in the [Agent Skills](https://agentskills.io/specification) format.
-Motel combines them with the manifest and function signatures into the skill
-`motel-<name>` that it installs for your agents.
+SciPatch combines them with the manifest and function signatures into the skill
+`scipatch-<name>` that it installs for your agents.
 
 ```markdown
 ---
@@ -376,4 +376,4 @@ description: >-
 
 The `description` decides when an agent picks the tool, so say what it does
 **and when to use it**, using the words a user would. Don't repeat function
-signatures in the body; Motel adds them.
+signatures in the body; SciPatch adds them.

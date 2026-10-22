@@ -3,7 +3,7 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [project]
-name = "motel"
+name = "scipatch"
 version = "0.1.0"
 description = "Turn research repositories into tools that any AI agent can find, run, and remember."
 readme = "README.md"
@@ -36,7 +36,7 @@ dependencies = [
 ]
 
 [project.scripts]
-motel = "motel.cli:main"
+scipatch = "scipatch.cli:main"
 
 [dependency-groups]
 dev = [
@@ -55,10 +55,10 @@ dev = [
 cache-keys = [{ file = "pyproject.toml" }, { file = "src/**/*" }]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/motel"]
+packages = ["src/scipatch"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/motel", "tests", "docs", "README.md", "LICENSE", "CHANGELOG.md"]
+include = ["src/scipatch", "tests", "docs", "README.md", "LICENSE", "CHANGELOG.md"]
 
 # ---------------------------------------------------------------- linting ---
 
@@ -89,8 +89,8 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S108"]
 # The shim runs inside tool environments on Python 3.8+, so it keeps old idioms.
-"src/motel/runtime/shim.py" = ["UP", "PTH", "S110", "S112"]
-"src/motel/catalog/**" = ["UP", "PTH", "N"]
+"src/scipatch/runtime/shim.py" = ["UP", "PTH", "S110", "S112"]
+"src/scipatch/catalog/**" = ["UP", "PTH", "N"]
 # Tool packages follow the conventions of the scientific code they wrap (α, μ in docstrings).
 "tools/**" = ["PTH", "N", "RUF002"]
 
@@ -104,9 +104,9 @@ python_version = "3.11"
 plugins = ["pydantic.mypy"]
 strict = true
 warn_unreachable = true
-packages = ["motel"]
+packages = ["scipatch"]
 mypy_path = "src"
-exclude = ["src/motel/catalog/", "src/motel/assets/"]
+exclude = ["src/scipatch/catalog/", "src/scipatch/assets/"]
 
 # ---------------------------------------------------------------- tests -----
 
@@ -116,8 +116,8 @@ addopts = ["-ra", "--strict-markers"]
 markers = [
     "integration: builds real environments with uv (slower; needs uv on PATH)",
 ]
-filterwarnings = ["error::DeprecationWarning:motel.*"]
+filterwarnings = ["error::DeprecationWarning:scipatch.*"]
 
 [tool.coverage.run]
-source = ["motel"]
-omit = ["src/motel/catalog/*"]
+source = ["scipatch"]
+omit = ["src/scipatch/catalog/*"]
