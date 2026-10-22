@@ -1,0 +1,422 @@
+[
+ {
+  "key": "chgnet|HfS",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/HfS.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|Hf2S",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/Hf2S.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf2S__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|Hf",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/Hf.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/HfS.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|Hf2S",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/Hf2S.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf2S__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|Hf",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/Hf.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "orb|HfS",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/HfS.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS__orb.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "orb|Hf2S",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/Hf2S.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf2S__orb.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "orb|Hf",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/Hf.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf__orb.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "mace|HfS",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/HfS.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS__mace.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "mace|Hf2S",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/Hf2S.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf2S__mace.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "mace|Hf",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/Hf.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf__mace.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.25_0",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.25_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_0__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.25_1",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.25_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_1__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.25_2",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.25_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_2__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.50_0",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_0__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.50_1",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_1__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.50_2",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_2__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.50_3",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_3__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.50_4",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_4.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_4__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.50_5",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_5.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_5__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.75_0",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.75_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_0__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.75_1",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.75_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_1__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O1_x0.75_2",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.75_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_2__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.25_0",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.25_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_0__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.25_1",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.25_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_1__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.25_2",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.25_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_2__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.50_0",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_0__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.50_1",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_1__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.50_2",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_2__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.50_3",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_3__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.50_4",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_4.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_4__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.50_5",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_5.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_5__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.75_0",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.75_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_0__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.75_1",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.75_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_1__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "chgnet|HfS2enum_O3_x0.75_2",
+  "model": "CHGNet-0.3.0",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.75_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_2__chgnet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.25_0",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.25_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_0__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.25_1",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.25_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_1__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.25_2",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.25_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_2__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.50_0",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_0__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.50_1",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_1__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.50_2",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_2__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.50_3",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_3__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.50_4",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_4.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_4__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.50_5",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_5.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_5__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.75_0",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.75_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_0__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.75_1",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.75_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_1__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O1_x0.75_2",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.75_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_2__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.25_0",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.25_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_0__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.25_1",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.25_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_1__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.25_2",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.25_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_2__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.50_0",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_0__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.50_1",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_1__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.50_2",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_2__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.50_3",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_3__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.50_4",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_4.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_4__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.50_5",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_5.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_5__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.75_0",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.75_0.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_0__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.75_1",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.75_1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_1__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|HfS2enum_O3_x0.75_2",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.75_2.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_2__tensornet.cif",
+  "fmax": 0.02
+ }
+]

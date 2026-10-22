@@ -1,0 +1,33 @@
+data_image0
+_chemical_formula_structural       Nb2S4Na2
+_chemical_formula_sum              "Nb2 S4 Na2"
+_cell_length_a       3.4357816889396027
+_cell_length_b       3.4355342537735476
+_cell_length_c       14.264725050158136
+_cell_angle_alpha    90.00077133849008
+_cell_angle_beta     89.99980993678649
+_cell_angle_gamma    120.002404490166
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Nb  Nb1       1.0  0.9999740090946668  0.9999266830490587  0.7500088717446702  1.0000
+  Nb  Nb2       1.0  0.9999861001863155  0.9999437322022232  0.2500078363938364  1.0000
+  S   S1        1.0  0.3334037323789706  0.6667115676930513  0.3592071416102019  1.0000
+  S   S2        1.0  0.6666882933081205  0.33334835687931763  0.8592090582420608  1.0000
+  S   S3        1.0  0.33330004630585075  0.6666765988762596  0.1407909206633975  1.0000
+  S   S4        1.0  0.666656610948519  0.33325814871015225  0.6407913209195242  1.0000
+  Na  Na1       1.0  5.4464845646719776e-05  0.000106366514951246  0.4999890021702965  1.0000
+  Na  Na2       1.0  0.9999367383824673  2.8547096359729714e-05  0.9999958497026197  1.0000

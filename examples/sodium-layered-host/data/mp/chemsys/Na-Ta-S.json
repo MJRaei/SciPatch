@@ -1,0 +1,52 @@
+{
+  "run_id": "20261022-121008-be872f",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "Na-Ta-S",
+    "max_results": 30
+  },
+  "started_at": "2026-10-22T18:10:08.088701+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 2,
+    "materials": [
+      {
+        "material_id": "mp-1221434",
+        "formula": "Na2(TaS2)3",
+        "space_group_symbol": "R32",
+        "space_group_number": 155,
+        "crystal_system": "Trigonal",
+        "n_sites": 22,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -1.4686247149780562,
+        "band_gap_ev": 0.0,
+        "is_stable": true,
+        "density_g_cm3": 6.113669380006954,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-1202226",
+        "formula": "Na3TaS4",
+        "space_group_symbol": "Fdd2",
+        "space_group_number": 43,
+        "crystal_system": "Orthorhombic",
+        "n_sites": 64,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -1.3839922958089081,
+        "band_gap_ev": 2.6447000000000003,
+        "is_stable": true,
+        "density_g_cm3": 3.1702039599638034,
+        "theoretical": false
+      }
+    ]
+  },
+  "duration_seconds": 4.242,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-121008-be872f",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

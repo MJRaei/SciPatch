@@ -1,0 +1,136 @@
+{
+  "run_id": "20261022-122402-385afd",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "Fe-O-Cl",
+    "max_results": 60
+  },
+  "started_at": "2026-10-22T18:24:02.811591+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 8,
+    "materials": [
+      {
+        "material_id": "mp-540828",
+        "formula": "FeClO",
+        "space_group_symbol": "Pmmn",
+        "space_group_number": 59,
+        "crystal_system": "Orthorhombic",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.20460894425926046,
+        "formation_energy_ev_per_atom": -1.288289401666665,
+        "band_gap_ev": 1.9133,
+        "is_stable": false,
+        "density_g_cm3": 3.4554866094708125,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-1225401",
+        "formula": "Fe6ClO12",
+        "space_group_symbol": "I4/m",
+        "space_group_number": 87,
+        "crystal_system": "Tetragonal",
+        "n_sites": 38,
+        "energy_above_hull_ev_per_atom": 0.25360216973684135,
+        "formation_energy_ev_per_atom": -1.1655157471052633,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 3.932852724302211,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-1213228",
+        "formula": "Fe(ClO2)2",
+        "space_group_symbol": "P2_1/c",
+        "space_group_number": 14,
+        "crystal_system": "Monoclinic",
+        "n_sites": 14,
+        "energy_above_hull_ev_per_atom": 0.3535520859880945,
+        "formation_energy_ev_per_atom": -0.48592941214285695,
+        "band_gap_ev": 2.294112425881475,
+        "is_stable": false,
+        "density_g_cm3": 2.6962727313733375,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-1103030",
+        "formula": "Fe2ClO3",
+        "space_group_symbol": "R-3m",
+        "space_group_number": 166,
+        "crystal_system": "Trigonal",
+        "n_sites": 12,
+        "energy_above_hull_ev_per_atom": 0.3642405638287043,
+        "formation_energy_ev_per_atom": -1.121751644166667,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 3.7905197119317013,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-1225276",
+        "formula": "Fe(ClO7)2",
+        "space_group_symbol": "P3m1",
+        "space_group_number": 156,
+        "crystal_system": "Trigonal",
+        "n_sites": 17,
+        "energy_above_hull_ev_per_atom": 0.47949716514705987,
+        "formation_energy_ev_per_atom": 0.06826098411764793,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 2.2516497061094607,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-1079439",
+        "formula": "Fe(ClO2)3",
+        "space_group_symbol": "C2/m",
+        "space_group_number": 12,
+        "crystal_system": "Monoclinic",
+        "n_sites": 10,
+        "energy_above_hull_ev_per_atom": 0.842105592066666,
+        "formation_energy_ev_per_atom": 0.14860696399999967,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 2.376776872492009,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-1201978",
+        "formula": "Fe2Cl6O5",
+        "space_group_symbol": "Pca2_1",
+        "space_group_number": 29,
+        "crystal_system": "Orthorhombic",
+        "n_sites": 52,
+        "energy_above_hull_ev_per_atom": 0.9495500289316232,
+        "formation_energy_ev_per_atom": 0.06519964634615313,
+        "band_gap_ev": 0.5600999999999998,
+        "is_stable": false,
+        "density_g_cm3": 2.0116502150098032,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-1238907",
+        "formula": "Fe2Cl6O5",
+        "space_group_symbol": "Pca2_1",
+        "space_group_number": 29,
+        "crystal_system": "Orthorhombic",
+        "n_sites": 52,
+        "energy_above_hull_ev_per_atom": 1.0420041908547004,
+        "formation_energy_ev_per_atom": 0.15765380826923037,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 2.0032303560248086,
+        "theoretical": true
+      }
+    ]
+  },
+  "duration_seconds": 6.257,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-122402-385afd",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

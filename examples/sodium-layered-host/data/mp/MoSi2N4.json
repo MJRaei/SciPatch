@@ -1,0 +1,25 @@
+{
+  "run_id": "20261022-115946-2ca890",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "formula": "MoSi2N4",
+    "max_results": 4
+  },
+  "started_at": "2026-10-22T17:59:46.203689+00:00",
+  "cached": true,
+  "note": "Identical earlier run; result reused from the history.",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 0,
+    "materials": []
+  },
+  "duration_seconds": 155.752,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-115946-2ca890",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

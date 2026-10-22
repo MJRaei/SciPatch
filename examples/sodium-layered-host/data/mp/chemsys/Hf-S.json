@@ -1,0 +1,80 @@
+{
+  "run_id": "20261022-121939-431fdd",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "Hf-S",
+    "max_results": 60
+  },
+  "started_at": "2026-10-22T18:19:39.695017+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 4,
+    "materials": [
+      {
+        "material_id": "mp-10000",
+        "formula": "Hf2S",
+        "space_group_symbol": "P6_3/mmc",
+        "space_group_number": 194,
+        "crystal_system": "Hexagonal",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -1.1713992576041694,
+        "band_gap_ev": 0.0,
+        "is_stable": true,
+        "density_g_cm3": 11.182943531118282,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-1206743",
+        "formula": "HfS",
+        "space_group_symbol": "P-6m2",
+        "space_group_number": 187,
+        "crystal_system": "Hexagonal",
+        "n_sites": 2,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -1.6913453814062542,
+        "band_gap_ev": 0.0,
+        "is_stable": true,
+        "density_g_cm3": 10.273513834193148,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-985829",
+        "formula": "HfS2",
+        "space_group_symbol": "P-3m1",
+        "space_group_number": 164,
+        "crystal_system": "Trigonal",
+        "n_sites": 3,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -1.8069951685416683,
+        "band_gap_ev": 1.2325,
+        "is_stable": true,
+        "density_g_cm3": 5.799198864447752,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-9922",
+        "formula": "HfS3",
+        "space_group_symbol": "P2_1/m",
+        "space_group_number": 11,
+        "crystal_system": "Monoclinic",
+        "n_sites": 8,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -1.3738044858593739,
+        "band_gap_ev": 1.1185,
+        "is_stable": true,
+        "density_g_cm3": 5.431896679435213,
+        "theoretical": false
+      }
+    ]
+  },
+  "duration_seconds": 5.498,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-121939-431fdd",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

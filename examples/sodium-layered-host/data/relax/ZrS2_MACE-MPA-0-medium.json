@@ -1,0 +1,42 @@
+{
+  "run_id": "20261022-121352-a9265f",
+  "status": "succeeded",
+  "tool": "ml-potentials",
+  "function": "relax",
+  "arguments": {
+    "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/ZrS2.cif",
+    "model": "MACE-MPA-0-medium",
+    "fmax": 0.01,
+    "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/ZrS2_MACE-MPA-0-medium.cif"
+  },
+  "started_at": "2026-10-22T18:13:52.649387+00:00",
+  "result": {
+    "model": "MACE-MPA-0-medium",
+    "formula": "ZrS2",
+    "initial_energy_ev": -21.335301401720283,
+    "final_energy_ev": -21.34862260789485,
+    "final_energy_ev_per_atom": -7.11620753596495,
+    "steps": 21,
+    "converged": true,
+    "magmoms_mu_b": null,
+    "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/ZrS2_MACE-MPA-0-medium.cif",
+    "initial_volume_angstrom3": 71.28910063616532,
+    "final_volume_angstrom3": 73.56602520443064,
+    "lattice": {
+      "a_angstrom": 3.667033191614217,
+      "b_angstrom": 3.6670332029746664,
+      "c_angstrom": 6.317088531899876,
+      "alpha_deg": 90.00001247540537,
+      "beta_deg": 89.99998712941358,
+      "gamma_deg": 119.99999696671576,
+      "volume_per_atom_angstrom3": 24.52200840147688
+    }
+  },
+  "duration_seconds": 5.769,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-121352-a9265f",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "published"
+}

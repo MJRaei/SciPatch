@@ -1,0 +1,31 @@
+data_image0
+_chemical_formula_structural       Cr2S2Br2
+_chemical_formula_sum              "Cr2 S2 Br2"
+_cell_length_a       3.558943075477379
+_cell_length_b       4.752428927897385
+_cell_length_c       9.239861991448175
+_cell_angle_alpha    89.99999823521816
+_cell_angle_beta     89.99999821359037
+_cell_angle_gamma    89.9999900882713
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Cr  Cr1       1.0  0.49999994777353  0.9999999692742861  0.8920929670431474  1.0000
+  Cr  Cr2       1.0  4.107218242771385e-08  0.5000000047523079  0.10790697597717562  1.0000
+  S   S1        1.0  0.5000000575714605  0.5000000143556113  0.9337137796636463  1.0000
+  S   S2        1.0  4.398857116218707e-08  3.0459080188320876e-08  0.0662862338169235  1.0000
+  Br  Br1       1.0  9.407804626512197e-09  0.999999990579283  0.6973832134562694  1.0000
+  Br  Br2       1.0  0.4999999700218397  0.5000000042743498  0.3026168450872248  1.0000

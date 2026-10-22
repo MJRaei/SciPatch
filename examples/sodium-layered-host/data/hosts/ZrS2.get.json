@@ -1,0 +1,33 @@
+{
+  "run_id": "20261022-121233-d04dab",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "get_structure",
+  "arguments": {
+    "material_id": "mp-1186",
+    "conventional": false,
+    "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/ZrS2.cif"
+  },
+  "started_at": "2026-10-22T18:12:33.863847+00:00",
+  "result": {
+    "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/ZrS2.cif",
+    "formula": "ZrS2",
+    "n_sites": 3,
+    "lattice": {
+      "a_angstrom": 3.69138227,
+      "b_angstrom": 3.6913828296375653,
+      "c_angstrom": 6.04107701,
+      "alpha_deg": 90.0,
+      "beta_deg": 90.0,
+      "gamma_deg": 119.99999489528469
+    },
+    "database_version": "2026.09.28"
+  },
+  "duration_seconds": 3.052,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-121233-d04dab",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

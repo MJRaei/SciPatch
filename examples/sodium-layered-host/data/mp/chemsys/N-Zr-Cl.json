@@ -1,0 +1,94 @@
+{
+  "run_id": "20261022-122114-eba38b",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "N-Zr-Cl",
+    "max_results": 60
+  },
+  "started_at": "2026-10-22T18:21:14.322734+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 5,
+    "materials": [
+      {
+        "material_id": "mp-531184",
+        "formula": "Zr6NCl15",
+        "space_group_symbol": "Ia-3d",
+        "space_group_number": 230,
+        "crystal_system": "Cubic",
+        "n_sites": 176,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -2.2353044468181817,
+        "band_gap_ev": 1.5104000000000002,
+        "is_stable": true,
+        "density_g_cm3": 2.9455953104437844,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-568592",
+        "formula": "ZrNCl",
+        "space_group_symbol": "R-3m",
+        "space_group_number": 166,
+        "crystal_system": "Trigonal",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -1.9694542916666684,
+        "band_gap_ev": 1.7450999999999999,
+        "is_stable": true,
+        "density_g_cm3": 4.299708002557099,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-542791",
+        "formula": "ZrNCl",
+        "space_group_symbol": "R-3m",
+        "space_group_number": 166,
+        "crystal_system": "Trigonal",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 1.4276666666646065e-05,
+        "formation_energy_ev_per_atom": -1.9694400150000024,
+        "band_gap_ev": 1.7306000000000004,
+        "is_stable": false,
+        "density_g_cm3": 4.339474677446737,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-632657",
+        "formula": "ZrNCl",
+        "space_group_symbol": "P-3m1",
+        "space_group_number": 164,
+        "crystal_system": "Trigonal",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.2333373200000013,
+        "formation_energy_ev_per_atom": -1.736116971666668,
+        "band_gap_ev": 3.0325,
+        "is_stable": false,
+        "density_g_cm3": 3.700826540052983,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-672350",
+        "formula": "ZrNCl",
+        "space_group_symbol": "P-3m1",
+        "space_group_number": 164,
+        "crystal_system": "Trigonal",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.4812769183333341,
+        "formation_energy_ev_per_atom": -1.488177373333335,
+        "band_gap_ev": 1.3532,
+        "is_stable": false,
+        "density_g_cm3": 3.883590094412195,
+        "theoretical": true
+      }
+    ]
+  },
+  "duration_seconds": 4.777,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-122114-eba38b",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

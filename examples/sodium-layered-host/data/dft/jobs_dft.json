@@ -1,0 +1,7 @@
+[
+ {"name":"NaZrS2_O3_chgnet","structure":"/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/dft/NaZrS2_O3_prim_chgnet.cif","kd":5},
+ {"name":"ZrS2_host_chgnet","structure":"/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrS2__host__chgnet.cif","kd":5},
+ {"name":"Na_bcc_chgnet","structure":"/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Na_bcc__chgnet.cif","kd":6},
+ {"name":"NaTiS2_O3_chgnet","structure":"/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/dft/NaTiS2_O3_prim_chgnet.cif","kd":5},
+ {"name":"TiS2_host_chgnet","structure":"/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiS2__host__chgnet.cif","kd":5}
+]

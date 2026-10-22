@@ -1,0 +1,146 @@
+[
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.25_0.cif",
+  "stacking": "O1",
+  "x": 0.25,
+  "natoms": 26
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.25_1.cif",
+  "stacking": "O1",
+  "x": 0.25,
+  "natoms": 26
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.25_2.cif",
+  "stacking": "O1",
+  "x": 0.25,
+  "natoms": 26
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_0.cif",
+  "stacking": "O1",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_1.cif",
+  "stacking": "O1",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_2.cif",
+  "stacking": "O1",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_3.cif",
+  "stacking": "O1",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_4.cif",
+  "stacking": "O1",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.50_5.cif",
+  "stacking": "O1",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.75_0.cif",
+  "stacking": "O1",
+  "x": 0.75,
+  "natoms": 30
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.75_1.cif",
+  "stacking": "O1",
+  "x": 0.75,
+  "natoms": 30
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O1_x0.75_2.cif",
+  "stacking": "O1",
+  "x": 0.75,
+  "natoms": 30
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.25_0.cif",
+  "stacking": "O3",
+  "x": 0.25,
+  "natoms": 26
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.25_1.cif",
+  "stacking": "O3",
+  "x": 0.25,
+  "natoms": 26
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.25_2.cif",
+  "stacking": "O3",
+  "x": 0.25,
+  "natoms": 26
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_0.cif",
+  "stacking": "O3",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_1.cif",
+  "stacking": "O3",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_2.cif",
+  "stacking": "O3",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_3.cif",
+  "stacking": "O3",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_4.cif",
+  "stacking": "O3",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.50_5.cif",
+  "stacking": "O3",
+  "x": 0.5,
+  "natoms": 28
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.75_0.cif",
+  "stacking": "O3",
+  "x": 0.75,
+  "natoms": 30
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.75_1.cif",
+  "stacking": "O3",
+  "x": 0.75,
+  "natoms": 30
+ },
+ {
+  "file": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/enum/HfS2/O3_x0.75_2.cif",
+  "stacking": "O3",
+  "x": 0.75,
+  "natoms": 30
+ }
+]

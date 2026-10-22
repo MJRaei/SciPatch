@@ -1,0 +1,82 @@
+{
+  "run_id": "20261022-115945-08a852",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "formula": "FeSe",
+    "max_results": 4
+  },
+  "started_at": "2026-10-22T17:59:45.721056+00:00",
+  "cached": true,
+  "note": "Identical earlier run; result reused from the history.",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 4,
+    "materials": [
+      {
+        "material_id": "mp-20311",
+        "formula": "FeSe",
+        "space_group_symbol": "P4/nmm",
+        "space_group_number": 129,
+        "crystal_system": "Tetragonal",
+        "n_sites": 4,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -0.24090977203124808,
+        "band_gap_ev": 0.0,
+        "is_stable": true,
+        "density_g_cm3": 4.9411519137714865,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-1090",
+        "formula": "FeSe",
+        "space_group_symbol": "P6_3/mmc",
+        "space_group_number": 194,
+        "crystal_system": "Hexagonal",
+        "n_sites": 4,
+        "energy_above_hull_ev_per_atom": 0.1907644674999993,
+        "formation_energy_ev_per_atom": -0.05014530453124877,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 7.095137711872776,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-1078945",
+        "formula": "FeSe",
+        "space_group_symbol": "Pnma",
+        "space_group_number": 62,
+        "crystal_system": "Orthorhombic",
+        "n_sites": 8,
+        "energy_above_hull_ev_per_atom": 0.2073033387499983,
+        "formation_energy_ev_per_atom": -0.03360643328124979,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 7.130692907098293,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-1978272",
+        "formula": "FeSe",
+        "space_group_symbol": "Cmcm",
+        "space_group_number": 63,
+        "crystal_system": "Orthorhombic",
+        "n_sites": 4,
+        "energy_above_hull_ev_per_atom": 0.25055427999999935,
+        "formation_energy_ev_per_atom": 0.00964450796875127,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 6.583729010732363,
+        "theoretical": true
+      }
+    ]
+  },
+  "duration_seconds": 156.526,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-115945-08a852",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

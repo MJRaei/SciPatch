@@ -1,0 +1,49 @@
+CHGNet v0.3.0 initialized with 412,525 parameters
+CHGNet will run on cpu
+ZrS2 chgnet vac {"barrier_ev": 0.531, "asym_ev": 0.0, "converged": true, "hop_distance_A": 3.681, "natoms": 107}
+ZrS2 chgnet dil {"barrier_ev": 0.367, "asym_ev": 0.006, "converged": true, "hop_distance_A": 3.673, "natoms": 55}
+cuequivariance or cuequivariance_torch is not available. Cuequivariance acceleration will be disabled.
+Using medium MPA-0 model as default MACE-MP model, to use previous (before 3.10) default model please specify 'medium' as model argument
+Using Materials Project MACE for MACECalculator with /Users/mjraei/.cache/mace/macempa0mediummodel
+Using float64 for MACECalculator, which is slower but more accurate. Recommended for geometry optimization.
+ZrS2 mace vac {"barrier_ev": 0.649, "asym_ev": -0.0, "converged": true, "hop_distance_A": 3.675, "natoms": 107}
+ZrS2 mace dil {"barrier_ev": 0.534, "asym_ev": 0.003, "converged": true, "hop_distance_A": 3.675, "natoms": 55}
+Warp 1.18.0 initialized:
+   CUDA not enabled in this build
+   Devices:
+     "cpu"      : "arm"
+   Kernel cache:
+     /Users/mjraei/Library/Caches/warp/1.18.0
+Module nvalchemiops.neighbors.cell_list 4c7015f load on device 'cpu' took 5.88 ms  (cached)
+Module nvalchemiops.neighbors.neighbor_utils f1eb641 load on device 'cpu' took 0.84 ms  (cached)
+ZrS2 tensornet vac {"barrier_ev": 0.61, "asym_ev": 0.0, "converged": true, "hop_distance_A": 3.669, "natoms": 107}
+ZrS2 tensornet dil {"barrier_ev": 0.282, "asym_ev": 0.003, "converged": true, "hop_distance_A": 3.691, "natoms": 55}
+Warp 1.18.0 initialized:
+   CUDA not enabled in this build
+   Devices:
+     "cpu"      : "arm"
+   Kernel cache:
+     /Users/mjraei/Library/Caches/warp/1.18.0
+Module nvalchemiops.neighbors.neighbor_utils 32c40ea load on device 'cpu' took 3.15 ms  (cached)
+Module nvalchemiops.neighbors.naive 51a3e5a load on device 'cpu' took 1.38 ms  (cached)
+TiS2 orb vac {"barrier_ev": 0.593, "asym_ev": 0.0, "converged": true, "hop_distance_A": 3.568, "natoms": 107}
+TiS2 orb dil {"barrier_ev": 0.32, "asym_ev": 0.002, "converged": true, "hop_distance_A": 3.417, "natoms": 55}
+Warp 1.18.0 initialized:
+   CUDA not enabled in this build
+   Devices:
+     "cpu"      : "arm"
+   Kernel cache:
+     /Users/mjraei/Library/Caches/warp/1.18.0
+Module nvalchemiops.neighbors.neighbor_utils 32c40ea load on device 'cpu' took 2.07 ms  (cached)
+Module nvalchemiops.neighbors.naive 51a3e5a load on device 'cpu' took 1.26 ms  (cached)
+HfS2 orb vac {"barrier_ev": 0.608, "asym_ev": -0.0, "converged": true, "hop_distance_A": 3.63, "natoms": 107}
+Warp 1.18.0 initialized:
+   CUDA not enabled in this build
+   Devices:
+     "cpu"      : "arm"
+   Kernel cache:
+     /Users/mjraei/Library/Caches/warp/1.18.0
+Module nvalchemiops.neighbors.neighbor_utils 32c40ea load on device 'cpu' took 17.50 ms  (cached)
+Module nvalchemiops.neighbors.naive 51a3e5a load on device 'cpu' took 3.26 ms  (cached)
+ZrSe2 orb vac {"barrier_ev": 0.458, "asym_ev": -0.0, "converged": true, "hop_distance_A": 3.832, "natoms": 107}
+NEB ALL DONE

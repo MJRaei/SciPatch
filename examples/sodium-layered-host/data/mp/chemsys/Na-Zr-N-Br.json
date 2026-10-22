@@ -1,0 +1,23 @@
+{
+  "run_id": "20261022-121031-511677",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "Na-Zr-N-Br",
+    "max_results": 30
+  },
+  "started_at": "2026-10-22T18:10:31.603244+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 0,
+    "materials": []
+  },
+  "duration_seconds": 4.035,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-121031-511677",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

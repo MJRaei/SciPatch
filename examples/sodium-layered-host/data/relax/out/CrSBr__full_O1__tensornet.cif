@@ -1,0 +1,32 @@
+data_image0
+_chemical_formula_structural       Cr2S2Br2Na
+_chemical_formula_sum              "Cr2 S2 Br2 Na1"
+_cell_length_a       3.708348679658553
+_cell_length_b       4.72324301078896
+_cell_length_c       9.019911800035935
+_cell_angle_alpha    76.53773680916535
+_cell_angle_beta     90.0000006419653
+_cell_angle_gamma    90.00000070321005
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Cr  Cr1       1.0  0.4999999826245438  0.06289699604179703  0.8995660181134565  1.0000
+  Cr  Cr2       1.0  0.9999999701128003  0.47681546470235187  0.09609102380757972  1.0000
+  S   S1        1.0  0.4999999995519977  0.5552255592693722  0.9179365839151067  1.0000
+  S   S2        1.0  0.9999999757159688  0.9877548172463152  0.07073666185517226  1.0000
+  Br  Br1       1.0  0.9999999928730433  0.16816991799897027  0.6689253772528372  1.0000
+  Br  Br2       1.0  0.49999998973124105  0.3790625864220271  0.3099884818604428  1.0000
+  Na  Na1       1.0  0.5000000198380296  0.7589635622321396  0.5367557837640536  1.0000

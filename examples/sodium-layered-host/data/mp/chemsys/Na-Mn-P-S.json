@@ -1,0 +1,23 @@
+{
+  "run_id": "20261022-121059-0d15ff",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "Na-Mn-P-S",
+    "max_results": 30
+  },
+  "started_at": "2026-10-22T18:10:59.481560+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 0,
+    "materials": []
+  },
+  "duration_seconds": 4.013,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-121059-0d15ff",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

@@ -1,0 +1,527 @@
+[
+ {
+  "key": "mace|Na_bcc",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/Na_bcc.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Na_bcc__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|HfS2__full_O1",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/HfS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2__full_O1__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|HfS2__full_O3",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/HfS2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2__full_O3__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|HfS2__host",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/HfS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2__host__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|MoS2__full_O1",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/MoS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/MoS2__full_O1__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|MoS2__host",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/MoS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/MoS2__host__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|NbS2__full_O1",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/NbS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/NbS2__full_O1__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|NbS2__full_O3",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/NbS2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/NbS2__full_O3__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|NbS2__host",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/NbS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/NbS2__host__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|TiS2__full_O1",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiS2__full_O1__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|TiS2__full_O3",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiS2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiS2__full_O3__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|TiS2__host",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiS2__host__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|TiSe2__full_O1",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiSe2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiSe2__full_O1__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|TiSe2__full_O3",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiSe2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiSe2__full_O3__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|TiSe2__host",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiSe2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiSe2__host__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|VS2__full_O1",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/VS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/VS2__full_O1__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|VS2__full_O3",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/VS2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/VS2__full_O3__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|VS2__host",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/VS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/VS2__host__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|ZrS2__full_O1",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrS2__full_O1__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|ZrS2__full_O3",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrS2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrS2__full_O3__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|ZrS2__host",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrS2__host__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|ZrSe2__full_O1",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrSe2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrSe2__full_O1__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|ZrSe2__full_O3",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrSe2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrSe2__full_O3__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|ZrSe2__host",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrSe2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrSe2__host__mace.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|Na_bcc",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/Na_bcc.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Na_bcc__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|HfS2__full_O1",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/HfS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2__full_O1__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|HfS2__full_O3",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/HfS2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2__full_O3__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|HfS2__host",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/HfS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2__host__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|MoS2__full_O1",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/MoS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/MoS2__full_O1__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|MoS2__host",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/MoS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/MoS2__host__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|NbS2__full_O1",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/NbS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/NbS2__full_O1__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|NbS2__full_O3",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/NbS2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/NbS2__full_O3__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|NbS2__host",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/NbS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/NbS2__host__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|TiS2__full_O1",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiS2__full_O1__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|TiS2__full_O3",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiS2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiS2__full_O3__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|TiS2__host",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiS2__host__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|TiSe2__full_O1",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiSe2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiSe2__full_O1__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|TiSe2__full_O3",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiSe2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiSe2__full_O3__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|TiSe2__host",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiSe2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiSe2__host__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|VS2__full_O1",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/VS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/VS2__full_O1__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|VS2__full_O3",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/VS2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/VS2__full_O3__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|VS2__host",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/VS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/VS2__host__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|ZrS2__full_O1",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrS2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrS2__full_O1__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|ZrS2__full_O3",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrS2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrS2__full_O3__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|ZrS2__host",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrS2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrS2__host__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|ZrSe2__full_O1",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrSe2__full_O1.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrSe2__full_O1__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|ZrSe2__full_O3",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrSe2__full_O3.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrSe2__full_O3__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "orb|ZrSe2__host",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrSe2__host.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrSe2__host__orb.cif",
+  "fmax": 0.01
+ },
+ {
+  "key": "mace|ZrS2__dilute",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrS2__dilute__mace.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "orb|ZrS2__dilute",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrS2__dilute__orb.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|ZrS2__dilute",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrS2__dilute__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "mace|TiS2__dilute",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiS2__dilute__mace.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "orb|TiS2__dilute",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiS2__dilute__orb.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|TiS2__dilute",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiS2__dilute__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "mace|HfS2__dilute",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/HfS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2__dilute__mace.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "orb|HfS2__dilute",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/HfS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2__dilute__orb.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "mace|ZrSe2__dilute",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrSe2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrSe2__dilute__mace.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "orb|ZrSe2__dilute",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrSe2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrSe2__dilute__orb.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|ZrSe2__dilute",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrSe2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrSe2__dilute__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "mace|TiSe2__dilute",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiSe2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiSe2__dilute__mace.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "orb|TiSe2__dilute",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiSe2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiSe2__dilute__orb.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|TiSe2__dilute",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiSe2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiSe2__dilute__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "mace|NbS2__dilute",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/NbS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/NbS2__dilute__mace.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "orb|NbS2__dilute",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/NbS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/NbS2__dilute__orb.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|NbS2__dilute",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/NbS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/NbS2__dilute__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "mace|VS2__dilute",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/VS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/VS2__dilute__mace.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "orb|VS2__dilute",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/VS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/VS2__dilute__orb.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|VS2__dilute",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/VS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/VS2__dilute__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "mace|MoS2__dilute",
+  "model": "MACE-MPA-0-medium",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/MoS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/MoS2__dilute__mace.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "orb|MoS2__dilute",
+  "model": "Orb-v3-conservative-inf-mpa",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/MoS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/MoS2__dilute__orb.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|MoS2__dilute",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/MoS2__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/MoS2__dilute__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|NiPS3__dilute",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/NiPS3__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/NiPS3__dilute__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|TiNCl__dilute",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/TiNCl__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/TiNCl__dilute__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|VOCl__dilute",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/VOCl__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/VOCl__dilute__tensornet.cif",
+  "fmax": 0.02
+ },
+ {
+  "key": "tensornet|ZrNCl__dilute",
+  "model": "TensorNet-MatPES-PBE-2025.2",
+  "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/structs/ZrNCl__dilute.cif",
+  "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrNCl__dilute__tensornet.cif",
+  "fmax": 0.02
+ }
+]

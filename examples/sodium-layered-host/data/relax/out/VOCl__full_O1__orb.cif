@@ -1,0 +1,32 @@
+data_image0
+_chemical_formula_structural       V2Cl2O2Na
+_chemical_formula_sum              "V2 Cl2 O2 Na1"
+_cell_length_a       3.468306265749846
+_cell_length_b       4.041883826396316
+_cell_length_c       8.70729984818693
+_cell_angle_alpha    103.30061529529289
+_cell_angle_beta     89.69659071578486
+_cell_angle_gamma    89.83632375838773
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  V   V1        1.0  0.5108024939207885  0.07125266973418615  0.08777456467128988  1.0000
+  V   V2        1.0  0.9852621660846175  0.48861167906875375  0.918469871752495  1.0000
+  Cl  Cl1       1.0  0.4870361140753677  0.3753738807694268  0.6945503050365859  1.0000
+  Cl  Cl2       1.0  0.007684969955149239  0.1876626591001896  0.323535855906637  1.0000
+  O   O1        1.0  0.007781423308611031  0.004452849151857014  0.9502700140908348  1.0000
+  O   O2        1.0  0.49286770600994595  0.5578635647766835  0.06031788743862996  1.0000
+  Na  Na1       1.0  0.50856514700315  0.7592271258789579  0.46508149185867537  1.0000

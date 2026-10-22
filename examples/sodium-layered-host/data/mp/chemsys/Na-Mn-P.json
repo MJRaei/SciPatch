@@ -1,0 +1,52 @@
+{
+  "run_id": "20261022-122503-ebbe6d",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "Na-Mn-P",
+    "max_results": 60
+  },
+  "started_at": "2026-10-22T18:25:03.153220+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 2,
+    "materials": [
+      {
+        "material_id": "mp-20227",
+        "formula": "NaMnP",
+        "space_group_symbol": "P4/nmm",
+        "space_group_number": 129,
+        "crystal_system": "Tetragonal",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.02282162018518452,
+        "formation_energy_ev_per_atom": -0.42577371631773414,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 3.567974853946335,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-1210435",
+        "formula": "Na2MnP2",
+        "space_group_symbol": "P4/mmm",
+        "space_group_number": 123,
+        "crystal_system": "Tetragonal",
+        "n_sites": 5,
+        "energy_above_hull_ev_per_atom": 0.8802850407500005,
+        "formation_energy_ev_per_atom": 0.4334728140049265,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 2.739854506983948,
+        "theoretical": true
+      }
+    ]
+  },
+  "duration_seconds": 6.637,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-122503-ebbe6d",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

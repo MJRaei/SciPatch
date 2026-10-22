@@ -1,0 +1,16 @@
+13:05:21 mace|NbS2__host succeeded -42.82552883031771 True 36.12
+13:05:34 mace|TiS2__full_O1 succeeded -22.852237020170772 True 38.786
+13:06:06 mace|TiS2__full_O3 succeeded -68.6393923554801 True 28.554
+13:06:30 mace|TiS2__host succeeded -19.990499376347252 True 21.207
+13:06:59 mace|TiSe2__full_O1 succeeded -20.914363568326046 True 25.501
+13:07:54 mace|TiSe2__full_O3 succeeded -62.62670732125218 True 51.978
+13:08:14 mace|TiSe2__host succeeded -18.197957631864405 True 16.776
+13:08:37 mace|VS2__full_O1 succeeded -22.72031358569898 True 18.259
+13:09:35 mace|VS2__full_O3 succeeded -68.18566133546936 True 55.344
+13:10:06 mace|VS2__host succeeded -19.873309279698837 True 27.456
+13:10:50 mace|ZrS2__full_O1 succeeded -24.025530069895932 True 36.654
+13:11:44 mace|ZrS2__full_O3 succeeded -72.31816894780566 True 45.93
+13:12:18 mace|ZrS2__host succeeded -21.348622607444963 True 30.502
+13:12:59 mace|ZrSe2__full_O1 succeeded -22.081150469732364 True 34.202
+13:14:17 mace|ZrSe2__full_O3 succeeded -66.23808661393126 True 71.863
+13:14:52 mace|ZrSe2__host succeeded -19.50782162541025 True 31.394

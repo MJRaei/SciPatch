@@ -1,0 +1,52 @@
+{
+  "run_id": "20261022-122022-52ca32",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "Na-Hf",
+    "max_results": 60
+  },
+  "started_at": "2026-10-22T18:20:22.858177+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 2,
+    "materials": [
+      {
+        "material_id": "mp-1186043",
+        "formula": "Na3Hf",
+        "space_group_symbol": "Pm-3m",
+        "space_group_number": 221,
+        "crystal_system": "Cubic",
+        "n_sites": 4,
+        "energy_above_hull_ev_per_atom": 0.8824590150862068,
+        "formation_energy_ev_per_atom": 0.8824590150862068,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 3.5682770261326326,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-1186057",
+        "formula": "Na3Hf",
+        "space_group_symbol": "P6_3/mmc",
+        "space_group_number": 194,
+        "crystal_system": "Hexagonal",
+        "n_sites": 8,
+        "energy_above_hull_ev_per_atom": 0.8872417900862075,
+        "formation_energy_ev_per_atom": 0.8872417900862075,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 3.5010476807759434,
+        "theoretical": true
+      }
+    ]
+  },
+  "duration_seconds": 5.442,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-122022-52ca32",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

@@ -1,0 +1,31 @@
+{
+  "run_id": "20261022-123301-263599",
+  "status": "succeeded",
+  "tool": "clue",
+  "function": "predict_metallicity",
+  "arguments": {
+    "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2__full_O3__chgnet.cif"
+  },
+  "started_at": "2026-10-22T18:33:01.914856+00:00",
+  "result": {
+    "structure": "HfS2__full_O3__chgnet.cif",
+    "formula": "NaHfS2",
+    "is_metal": true,
+    "prediction": "metal",
+    "metal_vote_fraction": 0.6,
+    "model": "random forest (100 trees) on matminer and SOAP features, trained on JARVIS-DFT 3D",
+    "reported_test_performance": {
+      "accuracy": 0.92,
+      "matthews_corrcoef": 0.81,
+      "f1": 0.94
+    }
+  },
+  "duration_seconds": 3.933,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-123301-263599",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": "02e3e1c87fa406e4181473f71e44933ad47450bd"
+  },
+  "maturity": "experimental",
+  "caution": "Experimental tool: its results are less vetted than those of published or established tools. Tell the user when reporting them, and present its numbers as provisional."
+}

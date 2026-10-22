@@ -1,0 +1,1082 @@
+{
+ "chgnet|HfS": {
+  "status": "succeeded",
+  "run_id": "20261022-140015-0e021c",
+  "error": null,
+  "final_energy_ev": -17.378110885620117,
+  "converged": true,
+  "steps": 16,
+  "lattice": {
+   "a_angstrom": 3.406458275704756,
+   "b_angstrom": 3.4064582764381033,
+   "c_angstrom": 3.4453476857754364,
+   "alpha_deg": 89.9999999918196,
+   "beta_deg": 90.00000127724569,
+   "gamma_deg": 120.00000378459627,
+   "volume_per_atom_angstrom3": 17.311704178499912
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS__chgnet.cif"
+ },
+ "chgnet|Hf2S": {
+  "status": "succeeded",
+  "run_id": "20261022-140028-6f969d",
+  "error": null,
+  "final_energy_ev": -54.999237060546875,
+  "converged": true,
+  "steps": 26,
+  "lattice": {
+   "a_angstrom": 3.3928001226630675,
+   "b_angstrom": 3.3927997212754866,
+   "c_angstrom": 11.73386512736963,
+   "alpha_deg": 90.00000001763254,
+   "beta_deg": 90.00000040444992,
+   "gamma_deg": 119.99999415581603,
+   "volume_per_atom_angstrom3": 19.49561760405739
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf2S__chgnet.cif"
+ },
+ "chgnet|Hf": {
+  "status": "succeeded",
+  "run_id": "20261022-140041-0e7dc7",
+  "error": null,
+  "final_energy_ev": -19.827152252197266,
+  "converged": true,
+  "steps": 12,
+  "lattice": {
+   "a_angstrom": 3.1625268170394523,
+   "b_angstrom": 3.162526464797522,
+   "c_angstrom": 5.164646765067966,
+   "alpha_deg": 90.00000324132337,
+   "beta_deg": 89.99999133078741,
+   "gamma_deg": 119.99996055776253,
+   "volume_per_atom_angstrom3": 22.367107104637025
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf__chgnet.cif"
+ },
+ "tensornet|HfS": {
+  "status": "succeeded",
+  "run_id": "20261022-140049-519bc8",
+  "error": null,
+  "final_energy_ev": -16.897462844848633,
+  "converged": true,
+  "steps": 4,
+  "lattice": {
+   "a_angstrom": 3.379628289792121,
+   "b_angstrom": 3.379628274473391,
+   "c_angstrom": 3.4445753971731636,
+   "alpha_deg": 90.00000008335896,
+   "beta_deg": 90.00000003928704,
+   "gamma_deg": 120.00001011312503,
+   "volume_per_atom_angstrom3": 17.036256047903315
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS__tensornet.cif"
+ },
+ "tensornet|Hf2S": {
+  "status": "succeeded",
+  "run_id": "20261022-140118-34e959",
+  "error": null,
+  "final_energy_ev": -54.09315872192383,
+  "converged": true,
+  "steps": 14,
+  "lattice": {
+   "a_angstrom": 3.363266315582168,
+   "b_angstrom": 3.3632661666319157,
+   "c_angstrom": 11.807372307448642,
+   "alpha_deg": 90.00000010903419,
+   "beta_deg": 90.00000004715943,
+   "gamma_deg": 119.99999531689764,
+   "volume_per_atom_angstrom3": 19.277697247218764
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf2S__tensornet.cif"
+ },
+ "tensornet|Hf": {
+  "status": "succeeded",
+  "run_id": "20261022-140136-a4234d",
+  "error": null,
+  "final_energy_ev": -19.6887264251709,
+  "converged": true,
+  "steps": 15,
+  "lattice": {
+   "a_angstrom": 3.160546008577461,
+   "b_angstrom": 3.160545995272657,
+   "c_angstrom": 5.168589395938009,
+   "alpha_deg": 90.000000684506,
+   "beta_deg": 89.99999945860395,
+   "gamma_deg": 119.99998577278559,
+   "volume_per_atom_angstrom3": 22.356147293739753
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf__tensornet.cif"
+ },
+ "orb|HfS": {
+  "status": "succeeded",
+  "run_id": "20261022-140151-2351d9",
+  "error": null,
+  "final_energy_ev": -17.082907915115356,
+  "converged": true,
+  "steps": 7,
+  "lattice": {
+   "a_angstrom": 3.3988536046538687,
+   "b_angstrom": 3.3983183506149635,
+   "c_angstrom": 3.4459530951841875,
+   "alpha_deg": 90.00271169481924,
+   "beta_deg": 89.9999636962202,
+   "gamma_deg": 119.9970280702257,
+   "volume_per_atom_angstrom3": 17.2353267772493
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS__orb.cif"
+ },
+ "orb|Hf2S": {
+  "status": "succeeded",
+  "run_id": "20261022-140203-899a81",
+  "error": null,
+  "final_energy_ev": -54.257158279418945,
+  "converged": true,
+  "steps": 15,
+  "lattice": {
+   "a_angstrom": 3.383740570612523,
+   "b_angstrom": 3.3840189743646634,
+   "c_angstrom": 11.806002950974033,
+   "alpha_deg": 90.00255787015669,
+   "beta_deg": 89.98703785059337,
+   "gamma_deg": 120.00240912539634,
+   "volume_per_atom_angstrom3": 19.511989827424248
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf2S__orb.cif"
+ },
+ "orb|Hf": {
+  "status": "succeeded",
+  "run_id": "20261022-140218-63f55a",
+  "error": null,
+  "final_energy_ev": -19.90156126022339,
+  "converged": true,
+  "steps": 3,
+  "lattice": {
+   "a_angstrom": 3.200897845908312,
+   "b_angstrom": 3.2008035986813708,
+   "c_angstrom": 5.06571527522586,
+   "alpha_deg": 90.00045281290333,
+   "beta_deg": 90.00164998821093,
+   "gamma_deg": 119.99756923881951,
+   "volume_per_atom_angstrom3": 22.474130053695923
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf__orb.cif"
+ },
+ "mace|HfS": {
+  "status": "succeeded",
+  "run_id": "20261022-140229-9ce871",
+  "error": null,
+  "final_energy_ev": -16.951673379204536,
+  "converged": true,
+  "steps": 7,
+  "lattice": {
+   "a_angstrom": 3.3956293397118618,
+   "b_angstrom": 3.3956293397118604,
+   "c_angstrom": 3.4398562693431156,
+   "alpha_deg": 90.0,
+   "beta_deg": 90.0,
+   "gamma_deg": 120.0000073517871,
+   "volume_per_atom_angstrom3": 17.174395314539346
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS__mace.cif"
+ },
+ "mace|Hf2S": {
+  "status": "succeeded",
+  "run_id": "20261022-140240-c961d9",
+  "error": null,
+  "final_energy_ev": -54.29811274554619,
+  "converged": true,
+  "steps": 15,
+  "lattice": {
+   "a_angstrom": 3.3882691792759627,
+   "b_angstrom": 3.3882690510200097,
+   "c_angstrom": 11.834812532464683,
+   "alpha_deg": 90.0,
+   "beta_deg": 90.0,
+   "gamma_deg": 119.99999564799366,
+   "volume_per_atom_angstrom3": 19.610857209688422
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf2S__mace.cif"
+ },
+ "mace|Hf": {
+  "status": "succeeded",
+  "run_id": "20261022-140251-455a64",
+  "error": null,
+  "final_energy_ev": -19.899328329045144,
+  "converged": true,
+  "steps": 7,
+  "lattice": {
+   "a_angstrom": 3.200179970081118,
+   "b_angstrom": 3.2001794392389122,
+   "c_angstrom": 5.059689184973629,
+   "alpha_deg": 89.99999999999999,
+   "beta_deg": 90.00000000000003,
+   "gamma_deg": 119.99999367149539,
+   "volume_per_atom_angstrom3": 22.43743645988005
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Hf__mace.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.25_0": {
+  "status": "succeeded",
+  "run_id": "20261022-140303-8d51ae",
+  "error": null,
+  "final_energy_ev": -197.62692260742188,
+  "converged": true,
+  "steps": 60,
+  "lattice": {
+   "a_angstrom": 7.224481515202844,
+   "b_angstrom": 7.224476365460535,
+   "c_angstrom": 13.990851681398981,
+   "alpha_deg": 89.99995293517662,
+   "beta_deg": 90.00004089127339,
+   "gamma_deg": 120.00010831377824,
+   "volume_per_atom_angstrom3": 24.322825338967505
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_0__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.25_1": {
+  "status": "succeeded",
+  "run_id": "20261022-140317-0da589",
+  "error": null,
+  "final_energy_ev": -197.49261474609375,
+  "converged": true,
+  "steps": 56,
+  "lattice": {
+   "a_angstrom": 7.224408212314098,
+   "b_angstrom": 7.244110385341473,
+   "c_angstrom": 13.756725891148708,
+   "alpha_deg": 89.99998969266507,
+   "beta_deg": 89.8665871726205,
+   "gamma_deg": 120.09025809184186,
+   "volume_per_atom_angstrom3": 23.958654345816083
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_1__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.25_2": {
+  "status": "succeeded",
+  "run_id": "20261022-140332-2eb248",
+  "error": null,
+  "final_energy_ev": -197.66209411621094,
+  "converged": true,
+  "steps": 61,
+  "lattice": {
+   "a_angstrom": 7.227482806348036,
+   "b_angstrom": 7.224313960498042,
+   "c_angstrom": 13.956766314057651,
+   "alpha_deg": 90.00000820754342,
+   "beta_deg": 90.09409877272829,
+   "gamma_deg": 119.98549413840446,
+   "volume_per_atom_angstrom3": 24.276632906498257
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_2__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.50_0": {
+  "status": "succeeded",
+  "run_id": "20261022-140347-492e33",
+  "error": null,
+  "final_energy_ev": -202.91201782226562,
+  "converged": true,
+  "steps": 28,
+  "lattice": {
+   "a_angstrom": 7.173641247421398,
+   "b_angstrom": 7.210236977441131,
+   "c_angstrom": 14.130781055173369,
+   "alpha_deg": 90.00000379596922,
+   "beta_deg": 89.9956756614847,
+   "gamma_deg": 120.1688963230075,
+   "volume_per_atom_angstrom3": 22.567648525560973
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_0__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.50_1": {
+  "status": "succeeded",
+  "run_id": "20261022-140358-64dcf2",
+  "error": null,
+  "final_energy_ev": -202.7356414794922,
+  "converged": true,
+  "steps": 37,
+  "lattice": {
+   "a_angstrom": 7.2011666550470155,
+   "b_angstrom": 7.201166655810151,
+   "c_angstrom": 14.086027640777,
+   "alpha_deg": 89.95854224765536,
+   "beta_deg": 90.04145908239975,
+   "gamma_deg": 119.9823794373021,
+   "volume_per_atom_angstrom3": 22.596636172320018
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_1__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.50_2": {
+  "status": "succeeded",
+  "run_id": "20261022-140410-f83ed5",
+  "error": null,
+  "final_energy_ev": -202.9357452392578,
+  "converged": true,
+  "steps": 33,
+  "lattice": {
+   "a_angstrom": 7.204480697027164,
+   "b_angstrom": 7.204480517456359,
+   "c_angstrom": 14.101156498036984,
+   "alpha_deg": 90.03360615372408,
+   "beta_deg": 89.96639612359938,
+   "gamma_deg": 120.21118232885746,
+   "volume_per_atom_angstrom3": 22.5893879216594
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_2__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.50_3": {
+  "status": "succeeded",
+  "run_id": "20261022-140421-b90699",
+  "error": null,
+  "final_energy_ev": -202.21499633789062,
+  "converged": true,
+  "steps": 103,
+  "lattice": {
+   "a_angstrom": 7.243357398097845,
+   "b_angstrom": 7.2433576618317295,
+   "c_angstrom": 13.698494347309794,
+   "alpha_deg": 90.00000198006957,
+   "beta_deg": 89.99999538894103,
+   "gamma_deg": 119.99999862501666,
+   "volume_per_atom_angstrom3": 22.229274355328386
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_3__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.50_4": {
+  "status": "succeeded",
+  "run_id": "20261022-140447-9f4edb",
+  "error": null,
+  "final_energy_ev": -202.75765991210938,
+  "converged": true,
+  "steps": 38,
+  "lattice": {
+   "a_angstrom": 7.203977903801574,
+   "b_angstrom": 7.2039777390919015,
+   "c_angstrom": 14.074267856540246,
+   "alpha_deg": 89.9999984267448,
+   "beta_deg": 89.9999916250154,
+   "gamma_deg": 119.99999909508738,
+   "volume_per_atom_angstrom3": 22.59140028324621
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_4__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.50_5": {
+  "status": "succeeded",
+  "run_id": "20261022-140458-5d32b3",
+  "error": null,
+  "final_energy_ev": -202.9665985107422,
+  "converged": true,
+  "steps": 49,
+  "lattice": {
+   "a_angstrom": 7.179869919428719,
+   "b_angstrom": 7.236562750677093,
+   "c_angstrom": 14.072278367744495,
+   "alpha_deg": 89.99999446444542,
+   "beta_deg": 89.84721449728248,
+   "gamma_deg": 120.26154850601192,
+   "volume_per_atom_angstrom3": 22.55450050796188
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_5__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.75_0": {
+  "status": "succeeded",
+  "run_id": "20261022-140513-01a9e0",
+  "error": null,
+  "final_energy_ev": -207.28578186035156,
+  "converged": true,
+  "steps": 23,
+  "lattice": {
+   "a_angstrom": 7.152506817117181,
+   "b_angstrom": 7.152506837042716,
+   "c_angstrom": 14.175033995617255,
+   "alpha_deg": 90.00000023749361,
+   "beta_deg": 90.0000007035933,
+   "gamma_deg": 119.99999920062143,
+   "volume_per_atom_angstrom3": 20.933895487553148
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_0__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.75_1": {
+  "status": "succeeded",
+  "run_id": "20261022-140524-31acd1",
+  "error": null,
+  "final_energy_ev": -207.13311767578125,
+  "converged": true,
+  "steps": 28,
+  "lattice": {
+   "a_angstrom": 7.164473277945449,
+   "b_angstrom": 7.177847380976027,
+   "c_angstrom": 14.139024420650584,
+   "alpha_deg": 90.00000167531105,
+   "beta_deg": 89.96820021508285,
+   "gamma_deg": 120.06176951764239,
+   "volume_per_atom_angstrom3": 20.976670892907748
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_1__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O1_x0.75_2": {
+  "status": "succeeded",
+  "run_id": "20261022-140536-4b5f67",
+  "error": null,
+  "final_energy_ev": -207.3048095703125,
+  "converged": true,
+  "steps": 44,
+  "lattice": {
+   "a_angstrom": 7.163024494028318,
+   "b_angstrom": 7.160431985033608,
+   "c_angstrom": 14.133232721078306,
+   "alpha_deg": 90.0000004796145,
+   "beta_deg": 90.0011447182154,
+   "gamma_deg": 119.98802806295133,
+   "volume_per_atom_angstrom3": 20.928539714996152
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_2__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.25_0": {
+  "status": "succeeded",
+  "run_id": "20261022-140551-6838d8",
+  "error": null,
+  "final_energy_ev": -197.75485229492188,
+  "converged": true,
+  "steps": 31,
+  "lattice": {
+   "a_angstrom": 14.33261782043085,
+   "b_angstrom": 14.332618364595193,
+   "c_angstrom": 14.330190700785689,
+   "alpha_deg": 29.279687715951873,
+   "beta_deg": 29.279687545670292,
+   "gamma_deg": 29.290122852142343,
+   "volume_per_atom_angstrom3": 23.968564053373516
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_0__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.25_1": {
+  "status": "succeeded",
+  "run_id": "20261022-140602-ce540c",
+  "error": null,
+  "final_energy_ev": -197.60084533691406,
+  "converged": true,
+  "steps": 51,
+  "lattice": {
+   "a_angstrom": 14.101351423632808,
+   "b_angstrom": 14.089209989467333,
+   "c_angstrom": 14.089211653233548,
+   "alpha_deg": 29.97923891119584,
+   "beta_deg": 29.825414648304438,
+   "gamma_deg": 29.825415522525976,
+   "volume_per_atom_angstrom3": 23.658901869224184
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_1__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.25_2": {
+  "status": "succeeded",
+  "run_id": "20261022-140617-79f361",
+  "error": null,
+  "final_energy_ev": -197.7425994873047,
+  "converged": true,
+  "steps": 41,
+  "lattice": {
+   "a_angstrom": 14.332122618181156,
+   "b_angstrom": 14.332122526029586,
+   "c_angstrom": 14.33212152670655,
+   "alpha_deg": 29.28352765780302,
+   "beta_deg": 29.283527617906568,
+   "gamma_deg": 29.283528370853585,
+   "volume_per_atom_angstrom3": 23.970690547556266
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_2__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.50_0": {
+  "status": "succeeded",
+  "run_id": "20261022-140629-a950a9",
+  "error": null,
+  "final_energy_ev": -203.1641387939453,
+  "converged": true,
+  "steps": 40,
+  "lattice": {
+   "a_angstrom": 14.34831113003787,
+   "b_angstrom": 14.344502507194761,
+   "c_angstrom": 14.344502852576795,
+   "alpha_deg": 29.229780396657294,
+   "beta_deg": 29.12709195408325,
+   "gamma_deg": 29.12709175399795,
+   "volume_per_atom_angstrom3": 22.148476694765503
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_0__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.50_1": {
+  "status": "succeeded",
+  "run_id": "20261022-140640-a445f5",
+  "error": null,
+  "final_energy_ev": -202.9833984375,
+  "converged": true,
+  "steps": 27,
+  "lattice": {
+   "a_angstrom": 14.335446920180889,
+   "b_angstrom": 14.335446909092543,
+   "c_angstrom": 14.335446786263944,
+   "alpha_deg": 29.23324111664203,
+   "beta_deg": 29.233241583897684,
+   "gamma_deg": 29.233241215869672,
+   "volume_per_atom_angstrom3": 22.20269343158866
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_1__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.50_2": {
+  "status": "succeeded",
+  "run_id": "20261022-140651-8ade6c",
+  "error": null,
+  "final_energy_ev": -203.15536499023438,
+  "converged": true,
+  "steps": 36,
+  "lattice": {
+   "a_angstrom": 14.351834518031506,
+   "b_angstrom": 14.351834140955177,
+   "c_angstrom": 14.352646461220512,
+   "alpha_deg": 29.1344684348355,
+   "beta_deg": 29.134468252738912,
+   "gamma_deg": 29.11063221524382,
+   "volume_per_atom_angstrom3": 22.128627863007
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_2__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.50_3": {
+  "status": "succeeded",
+  "run_id": "20261022-140702-c6b229",
+  "error": null,
+  "final_energy_ev": -202.9759063720703,
+  "converged": true,
+  "steps": 25,
+  "lattice": {
+   "a_angstrom": 14.343948573043813,
+   "b_angstrom": 14.343306468646121,
+   "c_angstrom": 14.343306671444653,
+   "alpha_deg": 29.180343524989606,
+   "beta_deg": 29.185225072349347,
+   "gamma_deg": 29.18522497269303,
+   "volume_per_atom_angstrom3": 22.169808325601856
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_3__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.50_4": {
+  "status": "succeeded",
+  "run_id": "20261022-140713-8b637a",
+  "error": null,
+  "final_energy_ev": -203.15267944335938,
+  "converged": true,
+  "steps": 42,
+  "lattice": {
+   "a_angstrom": 14.346546168241895,
+   "b_angstrom": 14.346546575122478,
+   "c_angstrom": 14.342454591269627,
+   "alpha_deg": 29.14230430490233,
+   "beta_deg": 29.14230408975843,
+   "gamma_deg": 29.253742011245322,
+   "volume_per_atom_angstrom3": 22.171412611378845
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_4__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.50_5": {
+  "status": "succeeded",
+  "run_id": "20261022-140724-84e80b",
+  "error": null,
+  "final_energy_ev": -202.46119689941406,
+  "converged": true,
+  "steps": 75,
+  "lattice": {
+   "a_angstrom": 14.116267466593548,
+   "b_angstrom": 14.116267594069674,
+   "c_angstrom": 14.116267621656378,
+   "alpha_deg": 29.851285099188136,
+   "beta_deg": 29.851285485575,
+   "gamma_deg": 29.851285346942575,
+   "volume_per_atom_angstrom3": 22.04227058855251
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_5__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.75_0": {
+  "status": "succeeded",
+  "run_id": "20261022-140738-c6fe19",
+  "error": null,
+  "final_energy_ev": -207.6712188720703,
+  "converged": true,
+  "steps": 14,
+  "lattice": {
+   "a_angstrom": 14.359110726020067,
+   "b_angstrom": 14.359110725350922,
+   "c_angstrom": 14.358901588553245,
+   "alpha_deg": 29.090776062100296,
+   "beta_deg": 29.090776062223632,
+   "gamma_deg": 29.09114422803984,
+   "volume_per_atom_angstrom3": 20.636152263413496
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_0__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.75_1": {
+  "status": "succeeded",
+  "run_id": "20261022-140746-71142e",
+  "error": null,
+  "final_energy_ev": -207.50445556640625,
+  "converged": true,
+  "steps": 20,
+  "lattice": {
+   "a_angstrom": 14.356353833917256,
+   "b_angstrom": 14.356582550847603,
+   "c_angstrom": 14.356582584542176,
+   "alpha_deg": 29.11855795073548,
+   "beta_deg": 29.105201693032956,
+   "gamma_deg": 29.105201611655456,
+   "volume_per_atom_angstrom3": 20.650054611337346
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_1__chgnet.cif"
+ },
+ "chgnet|HfS2enum_O3_x0.75_2": {
+  "status": "succeeded",
+  "run_id": "20261022-140753-eb84e1",
+  "error": null,
+  "final_energy_ev": -207.6654815673828,
+  "converged": true,
+  "steps": 4,
+  "lattice": {
+   "a_angstrom": 14.35974935461446,
+   "b_angstrom": 14.359749356083329,
+   "c_angstrom": 14.359749399059666,
+   "alpha_deg": 29.088597484454123,
+   "beta_deg": 29.08859747878444,
+   "gamma_deg": 29.088597473211262,
+   "volume_per_atom_angstrom3": 20.636158268073846
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_2__chgnet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.25_0": {
+  "status": "succeeded",
+  "run_id": "20261022-140801-1c8d97",
+  "error": null,
+  "final_energy_ev": -189.7899932861328,
+  "converged": true,
+  "steps": 25,
+  "lattice": {
+   "a_angstrom": 7.273718413133993,
+   "b_angstrom": 7.273718438810829,
+   "c_angstrom": 14.184406812497636,
+   "alpha_deg": 89.99999949523917,
+   "beta_deg": 90.00000006787445,
+   "gamma_deg": 119.99999982410814,
+   "volume_per_atom_angstrom3": 24.996628337970186
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_0__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.25_1": {
+  "status": "succeeded",
+  "run_id": "20261022-140820-599735",
+  "error": null,
+  "final_energy_ev": -189.63682556152344,
+  "converged": true,
+  "steps": 60,
+  "lattice": {
+   "a_angstrom": 7.284240193939337,
+   "b_angstrom": 7.299001498175099,
+   "c_angstrom": 14.11529914662545,
+   "alpha_deg": 89.99999953973139,
+   "beta_deg": 90.03960243665517,
+   "gamma_deg": 120.06705780655692,
+   "volume_per_atom_angstrom3": 24.980497586785557
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_1__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.25_2": {
+  "status": "succeeded",
+  "run_id": "20261022-140842-44d448",
+  "error": null,
+  "final_energy_ev": -189.83372497558594,
+  "converged": true,
+  "steps": 37,
+  "lattice": {
+   "a_angstrom": 7.287544808755993,
+   "b_angstrom": 7.288143849983417,
+   "c_angstrom": 14.184904318067506,
+   "alpha_deg": 89.9999996967747,
+   "beta_deg": 90.040485065953,
+   "gamma_deg": 120.00271922052349,
+   "volume_per_atom_angstrom3": 25.093995934307575
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.25_2__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.50_0": {
+  "status": "succeeded",
+  "run_id": "20261022-140901-b2c443",
+  "error": null,
+  "final_energy_ev": -194.62403869628906,
+  "converged": true,
+  "steps": 31,
+  "lattice": {
+   "a_angstrom": 7.241873485837227,
+   "b_angstrom": 7.269701669837854,
+   "c_angstrom": 14.17383695835508,
+   "alpha_deg": 89.99999992340935,
+   "beta_deg": 90.13626177781612,
+   "gamma_deg": 120.12719664900185,
+   "volume_per_atom_angstrom3": 23.049836154215495
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_0__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.50_1": {
+  "status": "succeeded",
+  "run_id": "20261022-140919-937f7c",
+  "error": null,
+  "final_energy_ev": -194.46119689941406,
+  "converged": true,
+  "steps": 28,
+  "lattice": {
+   "a_angstrom": 7.257840201274445,
+   "b_angstrom": 7.257840206665201,
+   "c_angstrom": 14.14299734073166,
+   "alpha_deg": 89.9741898115777,
+   "beta_deg": 90.02581000473808,
+   "gamma_deg": 120.00345304326056,
+   "volume_per_atom_angstrom3": 23.041656242713383
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_1__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.50_2": {
+  "status": "succeeded",
+  "run_id": "20261022-140937-51ecfc",
+  "error": null,
+  "final_energy_ev": -194.66041564941406,
+  "converged": true,
+  "steps": 31,
+  "lattice": {
+   "a_angstrom": 7.25624857422744,
+   "b_angstrom": 7.256248532093564,
+   "c_angstrom": 14.165238770050099,
+   "alpha_deg": 89.96310804600468,
+   "beta_deg": 90.03689194836907,
+   "gamma_deg": 120.12092264482995,
+   "volume_per_atom_angstrom3": 23.040410039516747
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_2__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.50_3": {
+  "status": "succeeded",
+  "run_id": "20261022-141000-0cc946",
+  "error": null,
+  "final_energy_ev": -193.93856811523438,
+  "converged": true,
+  "steps": 88,
+  "lattice": {
+   "a_angstrom": 7.293621592823539,
+   "b_angstrom": 7.2936214682928435,
+   "c_angstrom": 13.778308859456883,
+   "alpha_deg": 90.00000016205921,
+   "beta_deg": 89.99999995041304,
+   "gamma_deg": 120.00000034514164,
+   "volume_per_atom_angstrom3": 22.670179681000217
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_3__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.50_4": {
+  "status": "succeeded",
+  "run_id": "20261022-141026-72afc3",
+  "error": null,
+  "final_energy_ev": -194.50428771972656,
+  "converged": true,
+  "steps": 45,
+  "lattice": {
+   "a_angstrom": 7.262317014701045,
+   "b_angstrom": 7.262316981061623,
+   "c_angstrom": 14.127924580776778,
+   "alpha_deg": 90.00000003040732,
+   "beta_deg": 90.00000003334978,
+   "gamma_deg": 119.99999998413021,
+   "volume_per_atom_angstrom3": 23.046308541972543
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_4__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.50_5": {
+  "status": "succeeded",
+  "run_id": "20261022-141044-d1a3cd",
+  "error": null,
+  "final_energy_ev": -194.70240783691406,
+  "converged": true,
+  "steps": 33,
+  "lattice": {
+   "a_angstrom": 7.246623419223839,
+   "b_angstrom": 7.27270624748092,
+   "c_angstrom": 14.154960486198044,
+   "alpha_deg": 89.99999995066138,
+   "beta_deg": 90.0128958368121,
+   "gamma_deg": 120.11913545760856,
+   "volume_per_atom_angstrom3": 23.045724640585576
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.50_5__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.75_0": {
+  "status": "succeeded",
+  "run_id": "20261022-141102-758e48",
+  "error": null,
+  "final_energy_ev": -198.7145233154297,
+  "converged": true,
+  "steps": 29,
+  "lattice": {
+   "a_angstrom": 7.224081394544603,
+   "b_angstrom": 7.224081335802151,
+   "c_angstrom": 14.126967162576195,
+   "alpha_deg": 90.00000015129652,
+   "beta_deg": 90.00000006824753,
+   "gamma_deg": 120.00000022809385,
+   "volume_per_atom_angstrom3": 21.28254543758513
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_0__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.75_1": {
+  "status": "succeeded",
+  "run_id": "20261022-141117-291b3c",
+  "error": null,
+  "final_energy_ev": -198.53933715820312,
+  "converged": true,
+  "steps": 46,
+  "lattice": {
+   "a_angstrom": 7.238763524319551,
+   "b_angstrom": 7.2541719212033975,
+   "c_angstrom": 14.126016610784996,
+   "alpha_deg": 89.99999990454818,
+   "beta_deg": 90.04436414063997,
+   "gamma_deg": 120.07043854474254,
+   "volume_per_atom_angstrom3": 21.397964139507355
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_1__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O1_x0.75_2": {
+  "status": "succeeded",
+  "run_id": "20261022-141139-581862",
+  "error": null,
+  "final_energy_ev": -198.762451171875,
+  "converged": true,
+  "steps": 41,
+  "lattice": {
+   "a_angstrom": 7.227254304510203,
+   "b_angstrom": 7.228632485246525,
+   "c_angstrom": 14.095201628771319,
+   "alpha_deg": 89.9999999432839,
+   "beta_deg": 90.10044399827777,
+   "gamma_deg": 120.00630824340942,
+   "volume_per_atom_angstrom3": 21.25600538703552
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O1_x0.75_2__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.25_0": {
+  "status": "succeeded",
+  "run_id": "20261022-141157-fbb5b0",
+  "error": null,
+  "final_energy_ev": -189.9011993408203,
+  "converged": true,
+  "steps": 45,
+  "lattice": {
+   "a_angstrom": 14.478603680203147,
+   "b_angstrom": 14.478603681635965,
+   "c_angstrom": 14.478289956657346,
+   "alpha_deg": 29.14339218831571,
+   "beta_deg": 29.1433923252293,
+   "gamma_deg": 29.143164233772808,
+   "volume_per_atom_angstrom3": 24.4923491515775
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_0__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.25_1": {
+  "status": "succeeded",
+  "run_id": "20261022-141215-f2332f",
+  "error": null,
+  "final_energy_ev": -189.74905395507812,
+  "converged": true,
+  "steps": 40,
+  "lattice": {
+   "a_angstrom": 14.370273864190047,
+   "b_angstrom": 14.378549785664285,
+   "c_angstrom": 14.378549789030222,
+   "alpha_deg": 29.423935056681035,
+   "beta_deg": 29.3805890379122,
+   "gamma_deg": 29.3805889973329,
+   "volume_per_atom_angstrom3": 24.362477326752035
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_1__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.25_2": {
+  "status": "succeeded",
+  "run_id": "20261022-141234-b72643",
+  "error": null,
+  "final_energy_ev": -189.89935302734375,
+  "converged": true,
+  "steps": 45,
+  "lattice": {
+   "a_angstrom": 14.487093361881094,
+   "b_angstrom": 14.487093339183733,
+   "c_angstrom": 14.487093382740026,
+   "alpha_deg": 29.122702095519713,
+   "beta_deg": 29.122702143340952,
+   "gamma_deg": 29.122701908374694,
+   "volume_per_atom_angstrom3": 24.503604539919017
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.25_2__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.50_0": {
+  "status": "succeeded",
+  "run_id": "20261022-141252-490b9c",
+  "error": null,
+  "final_energy_ev": -194.8251495361328,
+  "converged": true,
+  "steps": 26,
+  "lattice": {
+   "a_angstrom": 14.382399651685336,
+   "b_angstrom": 14.400425439354137,
+   "c_angstrom": 14.400425398851938,
+   "alpha_deg": 29.31884376256027,
+   "beta_deg": 29.22754162886242,
+   "gamma_deg": 29.227541520738757,
+   "volume_per_atom_angstrom3": 22.51315107532279
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_0__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.50_1": {
+  "status": "succeeded",
+  "run_id": "20261022-141307-c31ad9",
+  "error": null,
+  "final_energy_ev": -194.66033935546875,
+  "converged": true,
+  "steps": 28,
+  "lattice": {
+   "a_angstrom": 14.378953616370143,
+   "b_angstrom": 14.378953594668792,
+   "c_angstrom": 14.378953533185701,
+   "alpha_deg": 29.37758482334341,
+   "beta_deg": 29.37758457327435,
+   "gamma_deg": 29.377585016586274,
+   "volume_per_atom_angstrom3": 22.61221981757648
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_1__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.50_2": {
+  "status": "succeeded",
+  "run_id": "20261022-141325-5ac34b",
+  "error": null,
+  "final_energy_ev": -194.8206787109375,
+  "converged": true,
+  "steps": 27,
+  "lattice": {
+   "a_angstrom": 14.393906682611231,
+   "b_angstrom": 14.393906751550494,
+   "c_angstrom": 14.40283390986847,
+   "alpha_deg": 29.264838233221298,
+   "beta_deg": 29.26483837657251,
+   "gamma_deg": 29.21834127503404,
+   "volume_per_atom_angstrom3": 22.51244003143287
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_2__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.50_3": {
+  "status": "succeeded",
+  "run_id": "20261022-141343-ea0a5d",
+  "error": null,
+  "final_energy_ev": -194.65846252441406,
+  "converged": true,
+  "steps": 28,
+  "lattice": {
+   "a_angstrom": 14.382238365396937,
+   "b_angstrom": 14.381971080354424,
+   "c_angstrom": 14.381971106309162,
+   "alpha_deg": 29.368871275791598,
+   "beta_deg": 29.369653329767047,
+   "gamma_deg": 29.36965344264097,
+   "volume_per_atom_angstrom3": 22.61511741011962
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_3__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.50_4": {
+  "status": "succeeded",
+  "run_id": "20261022-141401-b41611",
+  "error": null,
+  "final_energy_ev": -194.8207550048828,
+  "converged": true,
+  "steps": 27,
+  "lattice": {
+   "a_angstrom": 14.406424163194957,
+   "b_angstrom": 14.406424243169681,
+   "c_angstrom": 14.388484926855353,
+   "alpha_deg": 29.210678371515108,
+   "beta_deg": 29.2106783035854,
+   "gamma_deg": 29.306077209035653,
+   "volume_per_atom_angstrom3": 22.51916212513019
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_4__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.50_5": {
+  "status": "succeeded",
+  "run_id": "20261022-141419-0c3e7e",
+  "error": null,
+  "final_energy_ev": -194.20077514648438,
+  "converged": true,
+  "steps": 37,
+  "lattice": {
+   "a_angstrom": 14.295631561951502,
+   "b_angstrom": 14.295631587015102,
+   "c_angstrom": 14.295631609346529,
+   "alpha_deg": 29.68349309113464,
+   "beta_deg": 29.683493152023306,
+   "gamma_deg": 29.68349308318485,
+   "volume_per_atom_angstrom3": 22.654374761312603
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.50_5__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.75_0": {
+  "status": "succeeded",
+  "run_id": "20261022-141437-83e811",
+  "error": null,
+  "final_energy_ev": -198.9534149169922,
+  "converged": true,
+  "steps": 18,
+  "lattice": {
+   "a_angstrom": 14.407125991640724,
+   "b_angstrom": 14.407126024766322,
+   "c_angstrom": 14.406416946394371,
+   "alpha_deg": 29.223305917557322,
+   "beta_deg": 29.22330585793751,
+   "gamma_deg": 29.22539022617902,
+   "volume_per_atom_angstrom3": 21.021478332752785
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_0__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.75_1": {
+  "status": "succeeded",
+  "run_id": "20261022-141452-3660e9",
+  "error": null,
+  "final_energy_ev": -198.78517150878906,
+  "converged": true,
+  "steps": 24,
+  "lattice": {
+   "a_angstrom": 14.38856698677741,
+   "b_angstrom": 14.396862807757948,
+   "c_angstrom": 14.396862746289862,
+   "alpha_deg": 29.30459177846865,
+   "beta_deg": 29.260367727842826,
+   "gamma_deg": 29.260367795077094,
+   "volume_per_atom_angstrom3": 21.033948625920985
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_1__tensornet.cif"
+ },
+ "tensornet|HfS2enum_O3_x0.75_2": {
+  "status": "succeeded",
+  "run_id": "20261022-141507-31d8ea",
+  "error": null,
+  "final_energy_ev": -198.9506072998047,
+  "converged": true,
+  "steps": 37,
+  "lattice": {
+   "a_angstrom": 14.399328240851492,
+   "b_angstrom": 14.39932823743332,
+   "c_angstrom": 14.399328223708597,
+   "alpha_deg": 29.183349784153382,
+   "beta_deg": 29.1833497187994,
+   "gamma_deg": 29.18334983808071,
+   "volume_per_atom_angstrom3": 20.933953118597284
+  },
+  "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/HfS2enum_O3_x0.75_2__tensornet.cif"
+ }
+}

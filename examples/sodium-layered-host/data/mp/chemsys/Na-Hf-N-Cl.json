@@ -1,0 +1,80 @@
+{
+  "run_id": "20261022-121022-7eccc5",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "Na-Hf-N-Cl",
+    "max_results": 30
+  },
+  "started_at": "2026-10-22T18:10:22.176862+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 4,
+    "materials": [
+      {
+        "material_id": "mp-1220797",
+        "formula": "NaHf8(NCl)8",
+        "space_group_symbol": "P2/m",
+        "space_group_number": 10,
+        "crystal_system": "Monoclinic",
+        "n_sites": 25,
+        "energy_above_hull_ev_per_atom": 0.05400067380000095,
+        "formation_energy_ev_per_atom": -2.009429264855172,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 6.873775163042916,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-1220753",
+        "formula": "NaHf6(NCl)6",
+        "space_group_symbol": "C2/m",
+        "space_group_number": 12,
+        "crystal_system": "Monoclinic",
+        "n_sites": 19,
+        "energy_above_hull_ev_per_atom": 0.061552859736842436,
+        "formation_energy_ev_per_atom": -1.9988936669146995,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 6.822821563531349,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-1220754",
+        "formula": "NaHf4(NCl)4",
+        "space_group_symbol": "P2/m",
+        "space_group_number": 10,
+        "crystal_system": "Monoclinic",
+        "n_sites": 13,
+        "energy_above_hull_ev_per_atom": 0.10853479653845888,
+        "formation_energy_ev_per_atom": -1.9461743993368708,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 6.7294896699074505,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-1220765",
+        "formula": "NaHf3(NCl)3",
+        "space_group_symbol": "C2/m",
+        "space_group_number": 12,
+        "crystal_system": "Monoclinic",
+        "n_sites": 20,
+        "energy_above_hull_ev_per_atom": 0.15557953299999916,
+        "formation_energy_ev_per_atom": -1.8936791986379298,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 6.645973220393237,
+        "theoretical": true
+      }
+    ]
+  },
+  "duration_seconds": 4.046,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-121022-7eccc5",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

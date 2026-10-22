@@ -1,0 +1,33 @@
+data_image0
+_chemical_formula_structural       Mo2S4Na2
+_chemical_formula_sum              "Mo2 S4 Na2"
+_cell_length_a       3.284501548404212
+_cell_length_b       3.2845015709869947
+_cell_length_c       14.650660246969654
+_cell_angle_alpha    89.99999972623642
+_cell_angle_beta     89.99999948728326
+_cell_angle_gamma    119.99999999526071
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Mo  Mo1       1.0  0.6666667452091386  0.3333333188698168  0.25000001057327215  1.0000
+  Mo  Mo2       1.0  0.33333334413645493  0.6666667232752024  0.7500000682521901  1.0000
+  S   S1        1.0  0.6666666455756868  0.3333332805639692  0.6436654479335798  1.0000
+  S   S2        1.0  0.33333329485405927  0.6666666649074314  0.35633456391958024  1.0000
+  S   S3        1.0  0.6666666795385434  0.3333333282033412  0.8563344787982109  1.0000
+  S   S4        1.0  0.3333332925859472  0.6666666678929919  0.14366544069466636  1.0000
+  Na  Na1       1.0  9.963910261792382e-09  1.0039285947455888e-08  0.49999998149449104  1.0000
+  Na  Na2       1.0  0.9999999905261913  0.999999995663927  9.482346109814503e-09  1.0000

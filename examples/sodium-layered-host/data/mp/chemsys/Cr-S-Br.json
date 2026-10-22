@@ -1,0 +1,38 @@
+{
+  "run_id": "20261022-122300-cb46a0",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "Cr-S-Br",
+    "max_results": 60
+  },
+  "started_at": "2026-10-22T18:23:00.152629+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 1,
+    "materials": [
+      {
+        "material_id": "mp-22998",
+        "formula": "CrSBr",
+        "space_group_symbol": "Pmmn",
+        "space_group_number": 59,
+        "crystal_system": "Orthorhombic",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -1.113927550833332,
+        "band_gap_ev": 0.0,
+        "is_stable": true,
+        "density_g_cm3": 3.8530666559295637,
+        "theoretical": false
+      }
+    ]
+  },
+  "duration_seconds": 7.055,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-122300-cb46a0",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

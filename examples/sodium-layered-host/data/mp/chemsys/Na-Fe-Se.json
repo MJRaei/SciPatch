@@ -1,0 +1,66 @@
+{
+  "run_id": "20261022-121040-17be4c",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "Na-Fe-Se",
+    "max_results": 30
+  },
+  "started_at": "2026-10-22T18:10:40.869013+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 3,
+    "materials": [
+      {
+        "material_id": "mp-5125",
+        "formula": "Na3FeSe3",
+        "space_group_symbol": "P2_1/c",
+        "space_group_number": 14,
+        "crystal_system": "Monoclinic",
+        "n_sites": 28,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -0.9917008713839286,
+        "band_gap_ev": 0.0,
+        "is_stable": true,
+        "density_g_cm3": 3.5385006461132704,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-505443",
+        "formula": "Na3(FeSe2)2",
+        "space_group_symbol": "Pnma",
+        "space_group_number": 62,
+        "crystal_system": "Orthorhombic",
+        "n_sites": 36,
+        "energy_above_hull_ev_per_atom": 0.12072178916666587,
+        "formation_energy_ev_per_atom": -0.7041366156944472,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 3.8745048024952617,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-15071",
+        "formula": "Na6FeSe4",
+        "space_group_symbol": "P6_3mc",
+        "space_group_number": 186,
+        "crystal_system": "Hexagonal",
+        "n_sites": 22,
+        "energy_above_hull_ev_per_atom": 0.15151391772727507,
+        "formation_energy_ev_per_atom": -0.9617043239015133,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 3.083008836351777,
+        "theoretical": false
+      }
+    ]
+  },
+  "duration_seconds": 4.07,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-121040-17be4c",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

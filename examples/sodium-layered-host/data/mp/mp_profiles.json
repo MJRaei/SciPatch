@@ -1,0 +1,427 @@
+{
+ "TiS2": {
+  "ehull": 0.0,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 4.0,
+    "reaction": "TiS2 + 4 Na -> 2 Na2S + Ti"
+   },
+   {
+    "V": 0.126,
+    "x_na": 3.0,
+    "reaction": "TiS2 + 3 Na -> 0.5 Ti2S + 1.5 Na2S"
+   },
+   {
+    "V": 0.441,
+    "x_na": 2.0,
+    "reaction": "TiS2 + 2 Na -> Na2S + TiS"
+   },
+   {
+    "V": 0.726,
+    "x_na": 1.0,
+    "reaction": "TiS2 + Na -> NaTiS2"
+   },
+   {
+    "V": 1.778,
+    "x_na": 0.3,
+    "reaction": "TiS2 + 0.3 Na -> 0.1 Na3(TiS2)10"
+   },
+   {
+    "V": 2.198,
+    "x_na": 0.0,
+    "reaction": "TiS2 -> TiS2"
+   }
+  ]
+ },
+ "ZrS2": {
+  "ehull": 0.0,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 3.556,
+    "reaction": "ZrS2 + 3.556 Na -> 0.1111 Zr9S2 + 1.778 Na2S"
+   },
+   {
+    "V": 0.032,
+    "x_na": 3.0,
+    "reaction": "ZrS2 + 3 Na -> 0.5 Zr2S + 1.5 Na2S"
+   },
+   {
+    "V": 0.429,
+    "x_na": 1.163,
+    "reaction": "ZrS2 + 1.163 Na -> 0.06122 Na19Zr11S30 + 0.1633 Zr2S"
+   },
+   {
+    "V": 0.435,
+    "x_na": 1.0,
+    "reaction": "ZrS2 + Na -> 0.4211 ZrS + 0.05263 Na19Zr11S30"
+   },
+   {
+    "V": 0.462,
+    "x_na": 0.826,
+    "reaction": "ZrS2 + 0.8261 Na -> 0.04348 Na19Zr11S30 + 0.1739 Zr3S4"
+   },
+   {
+    "V": 0.734,
+    "x_na": 0.8,
+    "reaction": "ZrS2 + 0.8 Na -> 0.4 Na2ZrS3 + 0.2 Zr3S4"
+   },
+   {
+    "V": 1.381,
+    "x_na": 0.0,
+    "reaction": "ZrS2 -> ZrS2"
+   }
+  ]
+ },
+ "ZrSe2": {
+  "ehull": 0.0,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 4.0,
+    "reaction": "ZrSe2 + 4 Na -> 2 Na2Se + Zr"
+   },
+   {
+    "V": 0.311,
+    "x_na": 3.0,
+    "reaction": "ZrSe2 + 3 Na -> 0.5 Zr2Se + 1.5 Na2Se"
+   },
+   {
+    "V": 0.384,
+    "x_na": 2.0,
+    "reaction": "ZrSe2 + 2 Na -> ZrSe + Na2Se"
+   },
+   {
+    "V": 0.7,
+    "x_na": 1.0,
+    "reaction": "ZrSe2 + Na -> 0.5 Na2ZrSe3 + 0.5 ZrSe"
+   },
+   {
+    "V": 1.424,
+    "x_na": 0.667,
+    "reaction": "ZrSe2 + 0.6667 Na -> 0.3333 Na2ZrSe3 + 0.3333 Zr2Se3"
+   },
+   {
+    "V": 1.51,
+    "x_na": 0.0,
+    "reaction": "ZrSe2 -> ZrSe2"
+   }
+  ]
+ },
+ "HfS2": {
+  "ehull": 0.0,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 4.0,
+    "reaction": "HfS2 + 4 Na -> 2 Na2S + Hf"
+   },
+   {
+    "V": 0.147,
+    "x_na": 3.0,
+    "reaction": "HfS2 + 3 Na -> 0.5 Hf2S + 1.5 Na2S"
+   },
+   {
+    "V": 0.278,
+    "x_na": 2.0,
+    "reaction": "HfS2 + 2 Na -> HfS + Na2S"
+   },
+   {
+    "V": 0.885,
+    "x_na": 0.0,
+    "reaction": "HfS2 -> HfS2"
+   }
+  ]
+ },
+ "TiSe2": {
+  "ehull": 0.0,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 4.0,
+    "reaction": "TiSe2 + 4 Na -> 2 Na2Se + Ti"
+   },
+   {
+    "V": 0.419,
+    "x_na": 3.289,
+    "reaction": "TiSe2 + 3.289 Na -> 0.02222 Ti45Se16 + 1.644 Na2Se"
+   },
+   {
+    "V": 0.439,
+    "x_na": 3.0,
+    "reaction": "TiSe2 + 3 Na -> 0.5 Ti2Se + 1.5 Na2Se"
+   },
+   {
+    "V": 0.561,
+    "x_na": 2.4,
+    "reaction": "TiSe2 + 2.4 Na -> 0.2 Ti5Se4 + 1.2 Na2Se"
+   },
+   {
+    "V": 0.802,
+    "x_na": 1.333,
+    "reaction": "TiSe2 + 1.333 Na -> 0.6667 Na2Se + 0.3333 Ti3Se4"
+   },
+   {
+    "V": 1.199,
+    "x_na": 1.0,
+    "reaction": "TiSe2 + Na -> 0.25 Na4TiSe4 + 0.25 Ti3Se4"
+   },
+   {
+    "V": 1.322,
+    "x_na": 0.0,
+    "reaction": "TiSe2 -> TiSe2"
+   }
+  ]
+ },
+ "NbS2": {
+  "ehull": 0.0,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 4.0,
+    "reaction": "NbS2 + 4 Na -> 2 Na2S + Nb"
+   },
+   {
+    "V": 0.6,
+    "x_na": 1.0,
+    "reaction": "NbS2 + Na -> NaNbS2"
+   },
+   {
+    "V": 1.16,
+    "x_na": 0.667,
+    "reaction": "NbS2 + 0.6667 Na -> 0.3333 Na2(NbS2)3"
+   },
+   {
+    "V": 2.074,
+    "x_na": 0.0,
+    "reaction": "NbS2 -> NbS2"
+   }
+  ]
+ },
+ "VS2": {
+  "ehull": 0.0,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 4.0,
+    "reaction": "VS2 + 4 Na -> 2 Na2S + V"
+   },
+   {
+    "V": 0.689,
+    "x_na": 3.333,
+    "reaction": "VS2 + 3.333 Na -> 0.3333 V3S + 1.667 Na2S"
+   },
+   {
+    "V": 0.804,
+    "x_na": 2.4,
+    "reaction": "VS2 + 2.4 Na -> 0.2 V5S4 + 1.2 Na2S"
+   },
+   {
+    "V": 0.838,
+    "x_na": 1.0,
+    "reaction": "VS2 + Na -> NaVS2"
+   },
+   {
+    "V": 2.178,
+    "x_na": 0.5,
+    "reaction": "VS2 + 0.5 Na -> 0.5 Na(VS2)2"
+   },
+   {
+    "V": 2.232,
+    "x_na": 0.0,
+    "reaction": "VS2 -> VS2"
+   }
+  ]
+ },
+ "MoS2": {
+  "ehull": 0.0,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 4.0,
+    "reaction": "MoS2 + 4 Na -> 2 Na2S + Mo"
+   },
+   {
+    "V": 1.002,
+    "x_na": 1.75,
+    "reaction": "MoS2 + 1.75 Na -> 0.01667 Na17(Mo15S19)4 + 0.7333 Na2S"
+   },
+   {
+    "V": 1.408,
+    "x_na": 0.0,
+    "reaction": "MoS2 -> MoS2"
+   }
+  ]
+ },
+ "ZrNCl": {
+  "ehull": 0.05598355062499927,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 1.0,
+    "reaction": "ZrNCl + Na -> ZrN + NaCl"
+   },
+   {
+    "V": 2.075,
+    "x_na": 0.0,
+    "reaction": "ZrNCl -> 0.25 Zr3N4 + 0.25 ZrCl4"
+   }
+  ]
+ },
+ "TiNCl": {
+  "ehull": 0.09968801718749987,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 1.0,
+    "reaction": "TiNCl + Na -> TiN + NaCl"
+   },
+   {
+    "V": 2.57,
+    "x_na": 0.0,
+    "reaction": "TiNCl -> 0.75 TiN + 0.25 TiCl4 + 0.125 N2"
+   }
+  ]
+ },
+ "CrSBr": {
+  "ehull": 0.0,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 3.0,
+    "reaction": "CrSBr + 3 Na -> Na2S + NaBr + Cr"
+   },
+   {
+    "V": 0.868,
+    "x_na": 1.5,
+    "reaction": "CrSBr + 1.5 Na -> 0.5 NaCrS2 + NaBr + 0.5 Cr"
+   },
+   {
+    "V": 1.534,
+    "x_na": 1.0,
+    "reaction": "CrSBr + Na -> 0.25 Cr3S4 + NaBr + 0.25 Cr"
+   },
+   {
+    "V": 2.047,
+    "x_na": 0.25,
+    "reaction": "CrSBr + 0.25 Na -> 0.25 Cr3S4 + 0.25 CrBr3 + 0.25 NaBr"
+   },
+   {
+    "V": 2.126,
+    "x_na": 0.0,
+    "reaction": "CrSBr -> CrSBr"
+   }
+  ]
+ },
+ "FeOCl": {
+  "ehull": 0.2046089442592609,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 3.0,
+    "reaction": "FeClO + 3 Na -> Na2O + NaCl + Fe"
+   },
+   {
+    "V": 0.268,
+    "x_na": 2.25,
+    "reaction": "FeClO + 2.25 Na -> 0.25 Na5FeO4 + NaCl + 0.75 Fe"
+   },
+   {
+    "V": 0.419,
+    "x_na": 2.143,
+    "reaction": "FeClO + 2.143 Na -> 0.1429 Na8Fe2O7 + NaCl + 0.7143 Fe"
+   },
+   {
+    "V": 0.425,
+    "x_na": 2.0,
+    "reaction": "FeClO + 2 Na -> 0.3333 Na3FeO3 + NaCl + 0.6667 Fe"
+   },
+   {
+    "V": 0.749,
+    "x_na": 1.5,
+    "reaction": "FeClO + 1.5 Na -> 0.5 NaFeO2 + NaCl + 0.5 Fe"
+   },
+   {
+    "V": 1.265,
+    "x_na": 1.0,
+    "reaction": "FeClO + Na -> FeO + NaCl"
+   },
+   {
+    "V": 2.655,
+    "x_na": 0.333,
+    "reaction": "FeClO + 0.3333 Na -> 0.3333 FeCl2 + 0.3333 NaCl + 0.3333 Fe2O3"
+   },
+   {
+    "V": 2.658,
+    "x_na": 0.167,
+    "reaction": "FeClO + 0.1667 Na -> 0.1667 NaFeCl4 + 0.1667 FeCl2 + 0.3333 Fe2O3"
+   },
+   {
+    "V": 2.827,
+    "x_na": 0.0,
+    "reaction": "FeClO -> 0.3333 FeCl3 + 0.3333 Fe2O3"
+   }
+  ]
+ },
+ "FeSe": {
+  "ehull": 0.0,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 2.0,
+    "reaction": "FeSe + 2 Na -> Na2Se + Fe"
+   },
+   {
+    "V": 1.495,
+    "x_na": 1.0,
+    "reaction": "FeSe + Na -> 0.3333 Na3FeSe3 + 0.6667 Fe"
+   },
+   {
+    "V": 1.832,
+    "x_na": -0.0,
+    "reaction": "FeSe -> FeSe"
+   }
+  ]
+ },
+ "MnPS3": {
+  "ehull": 0.0,
+  "steps": [
+   {
+    "V": -0.0,
+    "x_na": 7.5,
+    "reaction": "MnPS3 + 7.5 Na -> 0.5 Na3P + 3 Na2S + 0.5 Mn2P"
+   },
+   {
+    "V": 0.416,
+    "x_na": 6.0,
+    "reaction": "MnPS3 + 6 Na -> MnP + 3 Na2S"
+   },
+   {
+    "V": 1.094,
+    "x_na": 4.5,
+    "reaction": "MnPS3 + 4.5 Na -> 0.25 MnP4 + 0.75 Na6MnS4"
+   },
+   {
+    "V": 1.358,
+    "x_na": 2.0,
+    "reaction": "MnPS3 + 2 Na -> 0.4444 Na2Mn2S3 + 0.1111 MnP4 + 0.5556 Na2PS3"
+   },
+   {
+    "V": 1.4,
+    "x_na": 1.385,
+    "reaction": "MnPS3 + 1.385 Na -> 0.07692 MnP4 + 0.6923 Na2PS3 + 0.9231 MnS"
+   },
+   {
+    "V": 2.187,
+    "x_na": 0.692,
+    "reaction": "MnPS3 + 0.6923 Na -> 0.6923 NaPS3 + 0.07692 MnP4 + 0.9231 MnS"
+   },
+   {
+    "V": 2.464,
+    "x_na": 0.0,
+    "reaction": "MnPS3 -> MnPS3"
+   }
+  ]
+ }
+}

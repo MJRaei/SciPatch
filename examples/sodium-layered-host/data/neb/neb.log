@@ -1,0 +1,9 @@
+Warp 1.18.0 initialized:
+   CUDA not enabled in this build
+   Devices:
+     "cpu"      : "arm"
+   Kernel cache:
+     /Users/mjraei/Library/Caches/warp/1.18.0
+Module nvalchemiops.neighbors.neighbor_utils 32c40ea load on device 'cpu' took 42.25 ms  (cached)
+Module nvalchemiops.neighbors.naive 51a3e5a load on device 'cpu' took 0.93 ms  (cached)
+ZrS2 orb vac {"barrier_ev": 0.635, "asym_ev": -0.0, "converged": true, "hop_distance_A": 3.676, "natoms": 107}

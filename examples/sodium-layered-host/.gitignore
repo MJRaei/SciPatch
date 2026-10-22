@@ -1,0 +1,3 @@
+# Large binaries kept locally only: MD trajectories and GPAW wavefunctions
+*.traj
+*.gpw

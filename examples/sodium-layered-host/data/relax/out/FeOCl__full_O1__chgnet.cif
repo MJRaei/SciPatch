@@ -1,0 +1,32 @@
+data_image0
+_chemical_formula_structural       Fe2Cl2O2Na
+_chemical_formula_sum              "Fe2 Cl2 O2 Na1"
+_cell_length_a       3.4793342663296216
+_cell_length_b       3.9681395604065353
+_cell_length_c       8.930748593478771
+_cell_angle_alpha    77.40609027691781
+_cell_angle_beta     90.00012975516543
+_cell_angle_gamma    90.00001164944862
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Fe  Fe1       1.0  0.5000029376050843  0.9283560277713995  0.08891642312076328  1.0000
+  Fe  Fe2       1.0  6.898324221657134e-07  0.5126053666182977  0.9169945552991924  1.0000
+  Cl  Cl1       1.0  0.999994001014926  0.8075893871960163  0.3338067071809028  1.0000
+  Cl  Cl2       1.0  0.49999981414006023  0.6209172349239117  0.6995733892511116  1.0000
+  O   O1        1.0  1.2626439406166806e-06  0.9986701391801464  0.9456297083812233  1.0000
+  O   O2        1.0  0.5000011149603747  0.4502501996051255  0.04389724730036695  1.0000
+  Na  Na1       1.0  0.5000002123616821  0.2371672302026763  0.47118211137452976  1.0000

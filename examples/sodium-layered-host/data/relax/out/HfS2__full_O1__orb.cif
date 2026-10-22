@@ -1,0 +1,29 @@
+data_image0
+_chemical_formula_structural       HfS2Na
+_chemical_formula_sum              "Hf1 S2 Na1"
+_cell_length_a       3.6055453101188326
+_cell_length_b       3.6049023695302793
+_cell_length_c       7.0363637173234554
+_cell_angle_alpha    90.0032769593725
+_cell_angle_beta     89.99751108533916
+_cell_angle_gamma    120.00075708095639
+
+_space_group_name_H-M_alt    "P 1"
+_space_group_IT_number       1
+
+loop_
+  _space_group_symop_operation_xyz
+  'x, y, z'
+
+loop_
+  _atom_site_type_symbol
+  _atom_site_label
+  _atom_site_symmetry_multiplicity
+  _atom_site_fract_x
+  _atom_site_fract_y
+  _atom_site_fract_z
+  _atom_site_occupancy
+  Hf  Hf1       1.0  0.9999935019690196  2.1632678234639077e-05  1.1024057445142425e-05  1.0000
+  S   S1        1.0  0.6665719260360485  0.3332208782845182  0.780340970766588  1.0000
+  S   S2        1.0  0.33337697865853594  0.6667110333496682  0.21971150531271766  1.0000
+  Na  Na1       1.0  5.759376433677009e-05  4.645689844916666e-05  0.49993649851758515  1.0000

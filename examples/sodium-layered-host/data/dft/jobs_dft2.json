@@ -1,0 +1,5 @@
+[
+ {"name":"NaZrS2_O3_orb","structure":"/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/xrd/NaZrS2_O3_orb_primitive.cif","kd":4},
+ {"name":"ZrS2_host_orb","structure":"/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/ZrS2__host__orb.cif","kd":4},
+ {"name":"Na_bcc_orb","structure":"/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/out/Na_bcc__orb.cif","kd":5}
+]

@@ -1,0 +1,68 @@
+{
+  "run_id": "20261022-115945-712d3e",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "formula": "ZrNBr",
+    "max_results": 4
+  },
+  "started_at": "2026-10-22T17:59:45.548679+00:00",
+  "cached": true,
+  "note": "Identical earlier run; result reused from the history.",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 3,
+    "materials": [
+      {
+        "material_id": "mp-541912",
+        "formula": "ZrBrN",
+        "space_group_symbol": "R-3m",
+        "space_group_number": 166,
+        "crystal_system": "Trigonal",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.0015913247916614637,
+        "formation_energy_ev_per_atom": -1.7245169500000017,
+        "band_gap_ev": 1.4686999999999997,
+        "is_stable": false,
+        "density_g_cm3": 5.238049763484092,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-570157",
+        "formula": "ZrBrN",
+        "space_group_symbol": "Pmmn",
+        "space_group_number": 59,
+        "crystal_system": "Orthorhombic",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.015914234791662096,
+        "formation_energy_ev_per_atom": -1.710194040000001,
+        "band_gap_ev": 1.7035,
+        "is_stable": false,
+        "density_g_cm3": 4.57031169596794,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-1172825",
+        "formula": "ZrBrN",
+        "space_group_symbol": "P-3m1",
+        "space_group_number": 164,
+        "crystal_system": "Trigonal",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.25798652145833056,
+        "formation_energy_ev_per_atom": -1.4681217533333328,
+        "band_gap_ev": 2.784,
+        "is_stable": false,
+        "density_g_cm3": 4.185906463224172,
+        "theoretical": true
+      }
+    ]
+  },
+  "duration_seconds": 121.98,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-115945-712d3e",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

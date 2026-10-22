@@ -1,0 +1,342 @@
+{
+ "ZrS2": {
+  "host_atoms": 3,
+  "fu": 1,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 3.17,
+    "n": 1,
+    "clearance_A": 2.65
+   }
+  ],
+  "x_full": 1.0,
+  "sc": [
+   3,
+   3,
+   2
+  ],
+  "sc_atoms": 54
+ },
+ "ZrSe2": {
+  "host_atoms": 3,
+  "fu": 1,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 3.28,
+    "n": 1,
+    "clearance_A": 2.74
+   }
+  ],
+  "x_full": 1.0,
+  "sc": [
+   3,
+   3,
+   2
+  ],
+  "sc_atoms": 54
+ },
+ "HfS2": {
+  "host_atoms": 3,
+  "fu": 1,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 3.2,
+    "n": 1,
+    "clearance_A": 2.64
+   }
+  ],
+  "x_full": 1.0,
+  "sc": [
+   3,
+   3,
+   2
+  ],
+  "sc_atoms": 54
+ },
+ "TiSe2": {
+  "host_atoms": 3,
+  "fu": 1,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 3.3,
+    "n": 1,
+    "clearance_A": 2.63
+   }
+  ],
+  "x_full": 1.0,
+  "sc": [
+   3,
+   3,
+   2
+  ],
+  "sc_atoms": 54
+ },
+ "NbS2": {
+  "host_atoms": 6,
+  "fu": 2,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 3.19,
+    "n": 1,
+    "clearance_A": 2.51
+   },
+   {
+    "z": 0.0,
+    "gap_A": 3.19,
+    "n": 1,
+    "clearance_A": 2.51
+   }
+  ],
+  "x_full": 1.0,
+  "sc": [
+   3,
+   3,
+   1
+  ],
+  "sc_atoms": 54
+ },
+ "VS2": {
+  "host_atoms": 3,
+  "fu": 1,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 3.09,
+    "n": 1,
+    "clearance_A": 2.44
+   }
+  ],
+  "x_full": 1.0,
+  "sc": [
+   3,
+   3,
+   2
+  ],
+  "sc_atoms": 54
+ },
+ "MoS2": {
+  "host_atoms": 6,
+  "fu": 2,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 3.56,
+    "n": 1,
+    "clearance_A": 2.56
+   },
+   {
+    "z": 0.0,
+    "gap_A": 3.56,
+    "n": 1,
+    "clearance_A": 2.56
+   }
+  ],
+  "x_full": 1.0,
+  "sc": [
+   3,
+   3,
+   1
+  ],
+  "sc_atoms": 54
+ },
+ "ZrNCl": {
+  "host_atoms": 18,
+  "fu": 6,
+  "gaps": [
+   {
+    "z": 0.333,
+    "gap_A": 3.28,
+    "n": 1,
+    "clearance_A": 2.65
+   },
+   {
+    "z": 0.667,
+    "gap_A": 3.28,
+    "n": 1,
+    "clearance_A": 2.65
+   },
+   {
+    "z": 0.0,
+    "gap_A": 3.28,
+    "n": 1,
+    "clearance_A": 2.65
+   }
+  ],
+  "x_full": 0.5,
+  "sc": [
+   2,
+   3,
+   1
+  ],
+  "sc_atoms": 108
+ },
+ "HfNCl": {
+  "host_atoms": 18,
+  "fu": 6,
+  "gaps": [
+   {
+    "z": 0.333,
+    "gap_A": 3.32,
+    "n": 1,
+    "clearance_A": 2.64
+   },
+   {
+    "z": 0.667,
+    "gap_A": 3.32,
+    "n": 1,
+    "clearance_A": 2.64
+   },
+   {
+    "z": 0.0,
+    "gap_A": 3.32,
+    "n": 1,
+    "clearance_A": 2.64
+   }
+  ],
+  "x_full": 0.5,
+  "sc": [
+   2,
+   3,
+   1
+  ],
+  "sc_atoms": 108
+ },
+ "TiNCl": {
+  "host_atoms": 6,
+  "fu": 2,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 2.88,
+    "n": 1,
+    "clearance_A": 2.19
+   }
+  ],
+  "x_full": 0.5,
+  "sc": [
+   3,
+   3,
+   1
+  ],
+  "sc_atoms": 54
+ },
+ "FeOCl": {
+  "host_atoms": 6,
+  "fu": 2,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 2.95,
+    "n": 1,
+    "clearance_A": 2.22
+   }
+  ],
+  "x_full": 0.5,
+  "sc": [
+   3,
+   3,
+   1
+  ],
+  "sc_atoms": 54
+ },
+ "VOCl": {
+  "host_atoms": 6,
+  "fu": 2,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 2.89,
+    "n": 1,
+    "clearance_A": 2.21
+   }
+  ],
+  "x_full": 0.5,
+  "sc": [
+   3,
+   3,
+   1
+  ],
+  "sc_atoms": 54
+ },
+ "CrSBr": {
+  "host_atoms": 6,
+  "fu": 2,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 2.79,
+    "n": 1,
+    "clearance_A": 2.31
+   }
+  ],
+  "x_full": 0.5,
+  "sc": [
+   3,
+   2,
+   1
+  ],
+  "sc_atoms": 36
+ },
+ "MnPS3": {
+  "host_atoms": 20,
+  "fu": 4,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 3.53,
+    "n": 6,
+    "clearance_A": 2.67
+   }
+  ],
+  "x_full": 1.5,
+  "sc": [
+   2,
+   1,
+   2
+  ],
+  "sc_atoms": 80
+ },
+ "NiPS3": {
+  "host_atoms": 20,
+  "fu": 4,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 3.58,
+    "n": 6,
+    "clearance_A": 2.59
+   }
+  ],
+  "x_full": 1.5,
+  "sc": [
+   2,
+   1,
+   2
+  ],
+  "sc_atoms": 80
+ },
+ "FeSe": {
+  "host_atoms": 4,
+  "fu": 2,
+  "gaps": [
+   {
+    "z": 0.5,
+    "gap_A": 2.84,
+    "n": 1,
+    "clearance_A": 2.43
+   }
+  ],
+  "x_full": 0.5,
+  "sc": [
+   3,
+   3,
+   2
+  ],
+  "sc_atoms": 72
+ }
+}

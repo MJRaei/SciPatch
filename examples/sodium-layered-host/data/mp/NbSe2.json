@@ -1,0 +1,82 @@
+{
+  "run_id": "20261022-115945-5c487f",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "formula": "NbSe2",
+    "max_results": 4
+  },
+  "started_at": "2026-10-22T17:59:45.101963+00:00",
+  "cached": true,
+  "note": "Identical earlier run; result reused from the history.",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 4,
+    "materials": [
+      {
+        "material_id": "mp-2207",
+        "formula": "NbSe2",
+        "space_group_symbol": "P6_3/mmc",
+        "space_group_number": 194,
+        "crystal_system": "Hexagonal",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -0.9834434577083329,
+        "band_gap_ev": 0.0,
+        "is_stable": true,
+        "density_g_cm3": 5.856957026298352,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-7597",
+        "formula": "NbSe2",
+        "space_group_symbol": "R3m",
+        "space_group_number": 160,
+        "crystal_system": "Trigonal",
+        "n_sites": 3,
+        "energy_above_hull_ev_per_atom": 0.00010916500000135443,
+        "formation_energy_ev_per_atom": -0.9833342927083327,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 5.853377991486152,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-1072113",
+        "formula": "NbSe2",
+        "space_group_symbol": "P6_3/mmc",
+        "space_group_number": 194,
+        "crystal_system": "Hexagonal",
+        "n_sites": 6,
+        "energy_above_hull_ev_per_atom": 0.00015933666666612112,
+        "formation_energy_ev_per_atom": -0.9832841210416655,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 5.829314081541366,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-571133",
+        "formula": "NbSe2",
+        "space_group_symbol": "P-6m2",
+        "space_group_number": 187,
+        "crystal_system": "Hexagonal",
+        "n_sites": 12,
+        "energy_above_hull_ev_per_atom": 0.0010508058333336123,
+        "formation_energy_ev_per_atom": -0.9823926518750005,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 5.854300608988784,
+        "theoretical": false
+      }
+    ]
+  },
+  "duration_seconds": 157.273,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-115945-5c487f",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}

@@ -1,0 +1,42 @@
+{
+  "run_id": "20261022-121343-aea283",
+  "status": "succeeded",
+  "tool": "ml-potentials",
+  "function": "relax",
+  "arguments": {
+    "structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/hosts/ZrS2.cif",
+    "model": "Orb-v3-conservative-inf-mpa",
+    "fmax": 0.01,
+    "output": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/ZrS2_Orb-v3-conservative-inf-mpa.cif"
+  },
+  "started_at": "2026-10-22T18:13:43.087878+00:00",
+  "result": {
+    "model": "Orb-v3-conservative-inf-mpa",
+    "formula": "ZrS2",
+    "initial_energy_ev": -21.327251434326172,
+    "final_energy_ev": -21.35288643836975,
+    "final_energy_ev_per_atom": -7.117628812789917,
+    "steps": 36,
+    "converged": true,
+    "magmoms_mu_b": null,
+    "relaxed_structure": "/private/tmp/claude-501/-Users-mjraei/e145cffd-d223-4597-bc8b-5cef3f6d1863/scratchpad/relax/ZrS2_Orb-v3-conservative-inf-mpa.cif",
+    "initial_volume_angstrom3": 71.28910063616532,
+    "final_volume_angstrom3": 80.80853434676006,
+    "lattice": {
+      "a_angstrom": 3.690932654614991,
+      "b_angstrom": 3.6906623525481472,
+      "c_angstrom": 6.849898268637044,
+      "alpha_deg": 90.00617320560214,
+      "beta_deg": 89.98369261105607,
+      "gamma_deg": 119.99952956355907,
+      "volume_per_atom_angstrom3": 26.936178115586685
+    }
+  },
+  "duration_seconds": 8.196,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-121343-aea283",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "published"
+}

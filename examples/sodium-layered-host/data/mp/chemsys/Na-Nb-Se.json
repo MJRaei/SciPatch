@@ -1,0 +1,80 @@
+{
+  "run_id": "20261022-120953-a7da78",
+  "status": "succeeded",
+  "tool": "materials-project",
+  "function": "search",
+  "arguments": {
+    "chemsys": "Na-Nb-Se",
+    "max_results": 30
+  },
+  "started_at": "2026-10-22T18:09:53.439291+00:00",
+  "result": {
+    "database_version": "2026.09.28",
+    "n_results": 4,
+    "materials": [
+      {
+        "material_id": "mp-7939",
+        "formula": "NaNbSe2",
+        "space_group_symbol": "P6_3/mmc",
+        "space_group_number": 194,
+        "crystal_system": "Hexagonal",
+        "n_sites": 8,
+        "energy_above_hull_ev_per_atom": 0.0,
+        "formation_energy_ev_per_atom": -1.1840839107812506,
+        "band_gap_ev": 0.5017000000000005,
+        "is_stable": true,
+        "density_g_cm3": 5.549090468446231,
+        "theoretical": false
+      },
+      {
+        "material_id": "mp-1221482",
+        "formula": "Na2(NbSe2)3",
+        "space_group_symbol": "P3m1",
+        "space_group_number": 156,
+        "crystal_system": "Trigonal",
+        "n_sites": 22,
+        "energy_above_hull_ev_per_atom": 0.008946799772726166,
+        "formation_energy_ev_per_atom": -1.136170488579557,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 5.320490080271338,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-1221416",
+        "formula": "Na(Nb3Se4)2",
+        "space_group_symbol": "P-3",
+        "space_group_number": 147,
+        "crystal_system": "Trigonal",
+        "n_sites": 15,
+        "energy_above_hull_ev_per_atom": 0.011366311904744464,
+        "formation_energy_ev_per_atom": -1.0126194908333332,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 6.4691757806892,
+        "theoretical": true
+      },
+      {
+        "material_id": "mp-1221396",
+        "formula": "Na(NbSe2)2",
+        "space_group_symbol": "P3m1",
+        "space_group_number": 156,
+        "crystal_system": "Trigonal",
+        "n_sites": 7,
+        "energy_above_hull_ev_per_atom": 0.04614691892858502,
+        "formation_energy_ev_per_atom": -1.0767037280357141,
+        "band_gap_ev": 0.0,
+        "is_stable": false,
+        "density_g_cm3": 5.349203872308401,
+        "theoretical": true
+      }
+    ]
+  },
+  "duration_seconds": 4.213,
+  "output_folder": "/Users/mjraei/.scipatch/runs/20261022-120953-a7da78",
+  "provenance": {
+    "tool_version": "0.1.0",
+    "source_commit": null
+  },
+  "maturity": "established"
+}
