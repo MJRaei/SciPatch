@@ -5,7 +5,7 @@
 <h3 align="center">Turn research code into tools that any AI agent can find, run, and remember.</h3>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-3776AB?logo=python&logoColor=white" alt="Python 3.11 | 3.12 | 3.13">
+  <img src="https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white" alt="Python 3.11+">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-555555" alt="macOS | Linux | Windows">
   <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-server-2EA87E" alt="MCP server"></a>
   <a href="tools/README.md"><img src="https://img.shields.io/badge/tools-50%20verified-2EA87E" alt="50 verified tools"></a>
@@ -22,15 +22,18 @@
 
 ---
 
-SciPatch wraps research code as tools your AI assistant can use. Each tool runs in
-its own isolated environment, is checked against published results before it
-installs, and is served to Claude, Codex, Gemini CLI, Cursor, and other agents
-through **one MCP server**. Ask a scientific question in your AI app: it finds the
-right tool, runs it, and answers with units, validity limits, and a citation.
-Every run is recorded.
+SciPatch gives your AI assistant a verified toolbox for materials science and
+chemistry. Ask a question in Claude, Codex, Gemini CLI, or Cursor, and it runs the
+right tool on your computer and answers with units, limits, and a citation.
 
-SciPatch is built for materials science and chemistry first, with 50 tools from
-DFT and molecular dynamics to docking and X-ray spectroscopy.
+## Why SciPatch
+
+- **Just ask.** No input files, scripts, or installing codes by hand.
+- **50 tools, one install.** DFT, molecular dynamics, ML potentials, phonons, phase diagrams, docking, and more, each in its own environment.
+- **Verified.** Every tool reproduces known results (experiment, NIST, published benchmarks) before it installs.
+- **Trustworthy answers.** Units, validity limits, and a citation with every number; every run is recorded and reproducible.
+- **Bring your own code.** `scipatch onboard` turns a repository and its paper into a verified tool.
+- **Works everywhere.** Any MCP-capable AI app, on macOS, Linux, or Windows, or the `scipatch ui` dashboard.
 
 ## How it works
 
@@ -45,15 +48,6 @@ DFT and molecular dynamics to docking and X-ray spectroscopy.
    SciPatch MCP server: the agent plans, calls a tool, reads the result, and answers.
 3. **Grow the catalog.** Install verified tools by name, or let your AI app
    install one when it needs it.
-
-## Highlights
-
-- **Isolated environments.** Tools with conflicting dependencies live side by side, each exactly as tested.
-- **Verified results.** Golden tests reproduce published or reference values; each tool states its validity limits and citation.
-- **Maturity levels.** Tools are *established*, *published*, or *experimental*; agents prefer established ones and cross-check the rest.
-- **Run history.** Every run records its inputs, outputs, and exact tool version; identical calls are answered from history.
-- **Works with your AI app.** One command connects Claude Desktop, Claude Code, Codex, Gemini CLI, and Cursor.
-- **No terminal needed.** `scipatch ui` opens a dashboard with a form for every tool.
 
 ## Quick start
 
