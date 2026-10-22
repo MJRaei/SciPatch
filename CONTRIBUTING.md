@@ -23,8 +23,7 @@ uv run ruff format src tests     # format
 uv run mypy                      # strict type checking
 ```
 
-Every pull request must pass all four; CI runs them on Linux and macOS with
-Python 3.11 to 3.13.
+Every pull request must pass all four.
 
 Tests never touch your real configuration: each one gets its own temporary
 `HOME` and `SCIPATCH_HOME`. Integration tests build real environments with uv from

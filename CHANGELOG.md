@@ -65,7 +65,6 @@ All notable changes to this project are documented here. The format follows
   (`"ambertools=23.3; sys_platform != 'win32'"`) to differ between platforms;
   `environment.platforms` restricts a tool to some platforms, and golden tests can
   run only on some (`platforms:`).
-- SciPatch's own Windows tests are now required in CI.
 - On Windows, tools that exist only for Linux (CREST, GPAW, LAMMPS, Quantum
   ESPRESSO) are built and run inside WSL, as their own documentation recommends:
   the environment is created on the Linux side from exactly the locked Linux
