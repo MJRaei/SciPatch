@@ -17,6 +17,11 @@
   .mono { font-family: "JetBrains Mono", Menlo, monospace; }
   @media print { .sh { filter: none; } }
 
+  .harness { position: absolute; left: 1040px; top: 572px; width: 740px; display: flex; justify-content: center; gap: 7px; }
+  .h { display: inline-flex; align-items: center; gap: 7px; height: 46px; padding: 0 13px 0 10px; background: #fff; border: 2px solid #cfe6f4;
+       border-radius: 999px; font-size: 19px; font-weight: 600; color: #0b1220; white-space: nowrap; }
+  .h img { width: 26px; height: 26px; }
+  .h img.wide { width: 38px; }
   .catalog { position: absolute; left: 10px; top: 690px; width: 1780px; height: 556px; background: #f8fafc;
              border: 2px solid #e5e9f0; border-radius: 36px; padding: 18px 22px 20px; }
   .cat-head { display: flex; align-items: center; justify-content: space-between; height: 40px; }
@@ -209,7 +214,7 @@
   <circle cx="1170" cy="112" r="7" fill="#fca5a5"/>
   <circle cx="1192" cy="112" r="7" fill="#fcd34d"/>
   <circle cx="1214" cy="112" r="7" fill="#86efac"/>
-  <text x="1450" y="120" text-anchor="middle" font-size="22" font-weight="600" fill="#55657c">Any AI assistant</text>
+  <text x="1450" y="120" text-anchor="middle" font-size="22" font-weight="600" fill="#55657c">Any agent harness</text>
   <line x1="1140" y1="140" x2="1760" y2="140" stroke="#e2e8f0" stroke-width="2"/>
 
   <rect x="1412" y="158" width="324" height="92" rx="24" fill="#0f172a"/>
@@ -269,38 +274,20 @@
 </svg>
   <text x="1494" y="527" font-size="20" font-weight="700" fill="#075985">Reproducible</text>
 
-  <!-- AI apps -->
-  <g font-size="22" font-weight="600" fill="#0b1220">
-    <rect x="1158" y="570" width="134" height="48" rx="24" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
-    <image href="icons/claude-color.svg" x="1170" y="580" width="28" height="28"/>
-    <text x="1206" y="602">Claude</text>
-    <rect x="1304" y="570" width="128" height="48" rx="24" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
-    <image href="icons/codex-color.svg" x="1316" y="580" width="28" height="28"/>
-    <text x="1352" y="602">Codex</text>
-    <rect x="1444" y="570" width="170" height="48" rx="24" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
-    <image href="icons/gemini-color.svg" x="1456" y="580" width="28" height="28"/>
-    <text x="1492" y="602">Gemini CLI</text>
-    <rect x="1626" y="570" width="128" height="48" rx="24" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
-    <image href="icons/cursor.svg" x="1638" y="580" width="28" height="28"/>
-    <text x="1674" y="602">Cursor</text>
-  </g>
 </svg>
 
+
+<div class="harness">
+  <span class="h"><img src="icons/claude-color.svg" alt="">Claude</span>
+  <span class="h"><img src="icons/codex-color.svg" alt="">Codex</span>
+  <span class="h"><img src="icons/gemini-color.svg" alt="">Gemini CLI</span>
+  <span class="h"><img src="icons/cursor.svg" alt="">Cursor</span>
+  <span class="h"><img class="wide" src="icons/langgraph-color.svg" alt="">LangGraph</span>
+</div>
 
 <div class="catalog">
   <div class="cat-head">
     <div class="cat-title"><span class="num">3</span>THE CATALOG</div>
-    <div class="legend">
-      <span class="item"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
-  
-  <path d="M8 21l8 0" />
-  <path d="M12 17l0 4" />
-  <path d="M7 4l10 0" />
-  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
-  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-</svg></span>hackathon project</span>
-    </div>
   </div>
   <div class="grid"><div class="card" style="--c:#7c3aed"><div class="head"><span class="cicon" style="background:#f3effe"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
   
