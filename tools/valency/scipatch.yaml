@@ -1,0 +1,30 @@
+schema: 1
+name: valency
+version: 0.1.0
+title: Valency literature search
+summary: >-
+  Search the scientific literature through Valency's MCP Bond: find papers by
+  meaning, look up a paper, follow who cites it, and export BibTeX.
+domains: [materials, chemistry, physics, biology]
+tags: [literature, papers, search, citations, bibtex, arxiv, preprints, valency]
+
+source:
+  homepage: https://valency.io
+  citation: >-
+    Valency MCP Bond (https://valency.io). Cite the papers it returns, not the
+    search service.
+  license: proprietary web service; paper metadata as licensed by each source
+
+environment:
+  manager: uv
+  python: "3.12"
+  packages: ["httpx==0.28.1"]
+  secrets:
+    - name: VALENCY_API_TOKEN
+      description: Valency Bond bearer token
+      url: https://app.valency.io
+
+resources:
+  network: true  # every function queries Valency's MCP server
+
+entrypoint: api
