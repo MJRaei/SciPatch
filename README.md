@@ -1,177 +1,158 @@
-# SciPatch
+<p align="center">
+  <img src="docs/images/SciPatch-logo.png" alt="SciPatch" width="560">
+</p>
 
-**Turn research code into tools that any AI agent can find, run, and remember.**
+<h3 align="center">Turn research code into tools that any AI agent can find, run, and remember.</h3>
 
-You find a promising paper with code. Setting it up takes an afternoon. A month
-later you set up another one, and another, until you have a dozen separate
-installations that know nothing about each other, each with its own quirks,
-interface, and forgotten fixes.
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-3776AB?logo=python&logoColor=white" alt="Python 3.11 | 3.12 | 3.13">
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-555555" alt="macOS | Linux | Windows">
+  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-server-2EA87E" alt="MCP server"></a>
+  <a href="tools/README.md"><img src="https://img.shields.io/badge/tools-50%20verified-2EA87E" alt="50 verified tools"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT license"></a>
+</p>
 
-SciPatch gives every research repository an isolated environment where it works
-exactly as tested, and serves them all through **one MCP server**.
-Your AI assistant (Claude, Codex, Gemini, Cursor, ...) can then find the right
-tool for a question, run it, combine it with others, and remember every result.
-SciPatch is built for science, with materials science and chemistry first.
+<p align="center">
+  <a href="#quick-start">Quick start</a> •
+  <a href="docs/getting-started.md">Getting started</a> •
+  <a href="tools/README.md">Tool catalog</a> •
+  <a href="docs/onboarding.md">Add your own code</a> •
+  <a href="docs/concepts.md">Concepts</a>
+</p>
 
-```text
-  You: "Is this structure stable? What's its lattice constant?"
-        │
-        ▼
-  Your AI app (Claude Desktop, Claude Code, Codex, Gemini CLI, Cursor)
-        │  finds, reads, and runs tools through one connection
-        ▼
-  ┌────────────────────── SciPatch ───────────────────────┐
-  │  MCP server:  search · descriptions · run · results   │
-  │                                                       │
-  │  env: ml-potentials   env: gpaw   env: rdkit  ...     │  ← each with its own environment
-  │                                                       │
-  │  run history:  every run, its inputs, outputs, and    │  ← memory and provenance
-  │                the exact tool version                 │
-  └───────────────────────────────────────────────────────┘
-```
+---
 
-## What you get
+SciPatch wraps research code as tools your AI assistant can use. Each tool runs in
+its own isolated environment, is checked against published results before it
+installs, and is served to Claude, Codex, Gemini CLI, Cursor, and other agents
+through **one MCP server**. Ask a scientific question in your AI app: it finds the
+right tool, runs it, and answers with units, validity limits, and a citation.
+Every run is recorded.
 
-- **One place for all your research tools.** Each tool runs in its own
-  environment, so tools with conflicting requirements live side by side.
-- **Works with every major AI app.** One command connects Claude Desktop, Claude
-  Code, Codex, Gemini CLI, or Cursor, through the Model Context Protocol (MCP)
-  and the Agent Skills standard (`SKILL.md`).
-- **Repositories become tools with your AI agent's help.** `scipatch onboard <url>`
-  hands a repository to your coding agent with step-by-step instructions: install
-  it, wrap its key capabilities, and reproduce a number from the paper.
-- **Results you can trust and cite.** Each tool carries golden tests that check
-  it reproduces known results, plus stated validity limits and citations. Every
-  run records the exact tool version and source commit.
-- **Mature tools first.** Each tool is *established*, *published*, or
-  *experimental*, backed by evidence SciPatch checks. Agents prefer established
-  tools and are told to cross-check results from experimental ones, such as a
-  small lab's code without a paper.
-- **A memory.** Ask about something you computed last week; identical calls are
-  answered instantly from the history instead of being recomputed.
-- **No terminal required for daily use.** `scipatch ui` opens a dashboard with a
-  form for every tool, generated automatically.
+SciPatch is built for materials science and chemistry first, with 50 tools from
+DFT and molecular dynamics to docking and X-ray spectroscopy.
+
+## How it works
+
+<p align="center">
+  <img src="docs/images/scipatch-workflow.png" alt="SciPatch workflow: research code becomes a verified tool package, served through one MCP server to any AI app, from a catalog of 50 tools" width="100%">
+</p>
+
+1. **Build once.** `scipatch onboard` gives a repository and its paper to your
+   coding agent, which wraps it as a tool package. `scipatch check` builds it
+   from scratch and confirms it reproduces known results.
+2. **Use everywhere.** Every connected AI app reaches the same tools through the
+   SciPatch MCP server: the agent plans, calls a tool, reads the result, and answers.
+3. **Grow the catalog.** Install verified tools by name, or let your AI app
+   install one when it needs it.
+
+## Highlights
+
+- **Isolated environments.** Tools with conflicting dependencies live side by side, each exactly as tested.
+- **Verified results.** Golden tests reproduce published or reference values; each tool states its validity limits and citation.
+- **Maturity levels.** Tools are *established*, *published*, or *experimental*; agents prefer established ones and cross-check the rest.
+- **Run history.** Every run records its inputs, outputs, and exact tool version; identical calls are answered from history.
+- **Works with your AI app.** One command connects Claude Desktop, Claude Code, Codex, Gemini CLI, and Cursor.
+- **No terminal needed.** `scipatch ui` opens a dashboard with a form for every tool.
 
 ## Quick start
 
-**1. Install** (macOS or Linux; Windows: see [Getting started](docs/getting-started.md)).
-From a copy of this repository:
+**1. Install.** On macOS or Linux:
 
 ```bash
+git clone https://github.com/MJRaei/SciPatch.git
+cd SciPatch
 ./install.sh
 ```
 
-The script installs [uv](https://docs.astral.sh/uv/) if needed (it manages
-Python for you), installs SciPatch, and starts the guided setup.
+On Windows (experimental), in PowerShell:
 
-**2. Set up.** If the installer didn't already start it, run:
-
-```bash
-scipatch setup
+```powershell
+git clone https://github.com/MJRaei/SciPatch.git
+cd SciPatch
+powershell -ExecutionPolicy ByPass -File install.ps1
 ```
 
-It checks your computer, connects the AI apps it finds, and offers to install
-an example tool. Restart your AI app afterwards.
+The installer sets up [uv](https://docs.astral.sh/uv/) (it manages Python for
+you), installs SciPatch, and starts the guided setup.
 
-**3. Ask.** In your AI app, try:
+**2. Connect your AI app.** The setup (`scipatch setup`) checks your computer,
+connects the AI apps it finds, and offers an example tool. Restart your AI app
+afterwards.
+
+**3. Ask a question.** In your AI app:
 
 > *Use my SciPatch tools to find the equilibrium lattice constant and bulk modulus of copper.*
 
-The assistant finds the `ase-emt` tool, reads its instructions, runs it, and
-reports the result with its limitations and citation.
+The assistant finds the `ase-emt` tool, runs it, and reports a lattice constant
+near 3.59 Å, noting that EMT is an approximate method.
 
-## Adding tools
+For Windows details and setting up each app by hand, see
+[Getting started](docs/getting-started.md).
 
-| You have | Run | What happens |
-|---|---|---|
-| A featured tool | `scipatch add ase-emt`, or just ask your AI app | Installs and verifies it (`scipatch catalog` lists them); AI apps suggest and install catalog tools on first use, after asking you |
-| A collection of tools | `scipatch catalog add <git-url>`, then `scipatch add <name>` | Adds a lab's or community collection; install its tools by name |
-| A research repository | `scipatch onboard https://github.com/org/repo --paper <doi>` | Your coding agent turns it into a tool, guided by SciPatch |
-| A ready tool package | `scipatch add ./folder` or `scipatch add <git-url>` | Installs and verifies it |
+## Add tools
 
-Built in: **ase-emt** (fast approximate simulations of metals) and
-**rdkit-descriptors** (molecular properties from SMILES). The [tool
-collection](tools/README.md) adds, for materials, **ML potentials** (Orb, MACE,
-CHGNet, and MatGL in one tool: relaxation, MD, elastic and thermal properties,
-model comparison), **GPAW** and **Quantum ESPRESSO** (DFT for crystals),
-**LAMMPS** (classical MD), **OVITO** (crystal structure, defects, dislocations),
-**phonopy** (phonons and stability), **phono3py** (thermal conductivity),
-**pycalphad** (alloy phase diagrams and solidification), **FiPy** (diffusion
-profiles and phase-field microstructures), **PyBaMM** (lithium-ion battery
-cells), **impedance.py** (electrochemical impedance spectra), **RASPA3** (gas
-adsorption in zeolites and MOFs), **Zeo++** (pore sizes, surface area, and pore
-volume), **pymatgen-diffusion** (ion transport from MD), **pymatgen-structure**
-(symmetry, supercells, XRD), **robocrystallographer** (crystal structures
-described in words), **surfaces** (slabs, adsorption sites, nanoparticle
-shapes), **PyXtal** (random crystal structures for structure prediction),
-**xraylib** (X-ray attenuation, absorption edges, and emission lines),
-**xraylarch** (XANES and EXAFS analysis), **synthesis recipes** (precursors and
-temperatures from papers, routes for new materials), **doping knowledge** (what
-papers report about doping layered materials), **AtomBridge** (lattice spacings
-from STEM/TEM images and paper figures), **CLUE** (metal or not, explained by
-counterfactual compounds), **AtomicShorts** (narrated science explainer videos),
-**structural analogs** (same-structure compounds for estimates by analogy), and
-the **Materials Project** database; and for chemistry, **PySCF** (ab initio
-quantum chemistry), **Psi4** (why and how strongly molecules bind: SAPT,
-CCSD(T)/CBS), **xTB** (fast semiempirical quantum chemistry), **CREST**
-(conformers, protomers, tautomers), **RDKit** (cheminformatics),
-**AiZynthFinder** (synthesis routes from purchasable compounds), **Open Babel**
-(chemical file formats, force fields), **OpenMM** (molecular dynamics),
-**PROPKA** (protein pKa and protonation states), **MDAnalysis** (trajectory
-analysis), **NMR mixtures** (mole fractions from crude 1H NMR), **pyOpenMS**
-(mass spectrometry: exact masses, isotope patterns, peptides), **AutoDock Vina**
-(docking), **UMA-Dock** (docking scored by machine-learned potentials),
-**Catalyze** (Opentrons protocol simulation, GHS hazards), **peptide assembly**
-(self-assembly conditions from similar peptides), **Cantera** (combustion
-chemistry and thermodynamics), **CoolProp** (properties of fluids, refrigerants,
-and humid air), **thermo** (chemical properties and vapor-liquid equilibrium),
-**Reaktoro** (water chemistry and mineral solubility), and **pvlib** (sun
-position and solar PV energy). Every tool reproduces published or
-upstream-tested values before it installs.
+| To add | Run |
+|---|---|
+| The SciPatch tool collection | `scipatch catalog add https://github.com/MJRaei/SciPatch` |
+| A tool from your catalogs | `scipatch add <name>` (`scipatch catalog` lists them) |
+| A tool package (folder or git URL) | `scipatch add ./my-tool` |
+| A research repository | `scipatch onboard https://github.com/org/repo --paper <doi>` |
 
-Onboarding needs a coding agent, such as [Claude Code](https://claude.com/claude-code),
-Codex, or Gemini CLI. See [Turning a repository into a tool](docs/onboarding.md),
-and [tools](tools/README.md) for real repositories turned into tools (the
-universal ML potentials, and pymatgen-analysis-diffusion for diffusivities
-and activation energies), with golden tests that reproduce the values in their
-own test suites.
+You can also just ask your AI app: when it needs a tool from your catalogs, it
+tells you which one and installs it if you agree. Onboarding a repository needs a
+coding agent such as [Claude Code](https://claude.com/claude-code), Codex, or
+Gemini CLI; see [Turning a repository into a tool](docs/onboarding.md).
 
-## Using tools without an AI app
+## Available tools
+
+| Field | Tools |
+|---|---|
+| Quantum chemistry | [PySCF](tools/pyscf/), [Psi4](tools/psi4/), [Quantum ESPRESSO](tools/quantum-espresso/), [GPAW](tools/gpaw/), [xTB](tools/xtb/), [CREST](tools/crest/) |
+| Molecular simulation | [LAMMPS](tools/lammps/), [OpenMM](tools/openmm/), [ML potentials](tools/ml-potentials/) (Orb, MACE, CHGNet, MatGL), [ASE-EMT](src/scipatch/catalog/ase-emt/), [phonopy](tools/phonopy/), [phono3py](tools/phono3py/), [MDAnalysis](tools/mdanalysis/), [OVITO](tools/ovito/) |
+| Materials | [pymatgen](tools/pymatgen-structure/), [Materials Project](tools/materials-project/), [robocrystallographer](tools/robocrys/), [PyXtal](tools/pyxtal/), [surfaces](tools/surfaces/), [ion diffusion](tools/pymatgen-diffusion/), [Zeo++](tools/zeopp/), [RASPA3](tools/raspa3/) |
+| Thermodynamics | [Cantera](tools/cantera/), [CoolProp](tools/coolprop/), [pycalphad](tools/pycalphad/), [Reaktoro](tools/reaktoro/), [thermo](tools/thermo/), [FiPy](tools/fipy/) |
+| Spectroscopy | [xraylarch](tools/larch/), [xraylib](tools/xraylib/), [pyOpenMS](tools/pyopenms/), [NMR mixtures](tools/nmr-mixtures/), [AtomBridge](tools/atombridge/) |
+| Energy | [PyBaMM](tools/pybamm/), [impedance.py](tools/impedance/), [pvlib](tools/pvlib/) |
+| Chemistry and drugs | [RDKit](tools/rdkit/), [RDKit descriptors](src/scipatch/catalog/rdkit-descriptors/), [Open Babel](tools/openbabel/), [AiZynthFinder](tools/aizynthfinder/), [AutoDock Vina](tools/vina/), [PROPKA](tools/propka/), [UMA-Dock](tools/umadock/), [peptide assembly](tools/peptide-assembly/) |
+| Knowledge and lab | [synthesis recipes](tools/synthesis-recipes/), [doping knowledge](tools/doping-knowledge/), [structural analogs](tools/structural-analogs/), [CLUE](tools/clue/), [Catalyze](tools/catalyze/), [AtomicShorts](tools/atomic-shorts/) |
+
+The [tool catalog](tools/README.md) lists what each tool does, its maturity, the
+platforms it runs on, and the results it is checked against.
+
+## Use tools without an AI app
 
 ```bash
 scipatch ui                                         # dashboard in your browser
-scipatch find "lattice constant"                    # search all tools
-scipatch info ase-emt                               # parameters, notes, limits, citation
+scipatch find "lattice constant"                    # search installed tools
+scipatch info ase-emt                               # parameters, limits, citation
 scipatch run ase-emt equation_of_state element=Cu   # run a function
-scipatch runs                                       # history of runs
+scipatch runs                                       # past runs
 ```
 
-Add `--json` to any of these for machine-readable output (agents use this).
+Add `--json` to any command for machine-readable output.
 
-## Learn more
+## Documentation
 
-- [Getting started](docs/getting-started.md): installation on each system, and connecting each app
+- [Getting started](docs/getting-started.md): install on each system and connect each app
 - [Concepts](docs/concepts.md): how SciPatch works, and why
 - [Turning a repository into a tool](docs/onboarding.md)
 - [Tool package format](docs/tool-format.md): `scipatch.yaml`, `api.py`, golden tests, patches
 - [Connecting AI apps](docs/connecting-apps.md)
 - [Troubleshooting](docs/troubleshooting.md)
-- [Contributing](CONTRIBUTING.md)
 
-## Safety
+## Security
 
-Onboarding and installing tools runs code from the repositories you choose, on
-your computer, just like installing them by hand. Only add code you trust.
-SciPatch's servers listen only on your own computer (`127.0.0.1`), and the dashboard
-requires a per-session token. API keys are stored only on your computer, given
-only to the tools that declare them, and entered on a local page rather than in
-the chat, so they never reach the AI model. SciPatch only ever edits its own entry in your AI
-apps' configuration files, and makes a backup first.
+- Installing or onboarding a tool runs code from the repository you choose, as installing it by hand would. Only add code you trust.
+- SciPatch's servers listen only on your computer (`127.0.0.1`), and the dashboard requires a per-session token.
+- API keys stay on your computer, go only to the tools that declare them, and are entered on a local page, never in the chat.
+- SciPatch edits only its own entry in your AI apps' configuration files, and backs them up first.
 
-## Status
+## Status and contributing
 
 SciPatch is early (version 0.1). Environments are built with uv or conda; Docker
-and HPC (Slurm) backends are planned. Feedback and contributions are welcome.
+and HPC (Slurm) backends are planned. Issues and pull requests are welcome; see
+[Contributing](CONTRIBUTING.md).
 
 ## License
 
