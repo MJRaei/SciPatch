@@ -7,51 +7,52 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  @page { size: 1800px 660px; margin: 0; }
-  * { margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @page { size: 1800px 1256px; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   html, body { background: #ffffff; }
-  svg { display: block; }
-  text { font-family: Inter, "Helvetica Neue", Arial, sans-serif; }
+  body { font-family: Inter, "Helvetica Neue", Arial, sans-serif; color: #0b1220; }
+  .page { position: relative; width: 1800px; height: 1256px; overflow: hidden; }
+  svg.flow { position: absolute; left: 0; top: 0; display: block; }
+  svg text { font-family: Inter, "Helvetica Neue", Arial, sans-serif; }
   .mono { font-family: "JetBrains Mono", Menlo, monospace; }
   @media print { .sh { filter: none; } }
+
+  .catalog { position: absolute; left: 10px; top: 690px; width: 1780px; height: 556px; background: #f8fafc;
+             border: 2px solid #e5e9f0; border-radius: 36px; padding: 18px 22px 20px; }
+  .cat-head { display: flex; align-items: center; justify-content: space-between; height: 40px; }
+  .cat-title { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 800; letter-spacing: 3px; color: #334155; }
+  .cat-title .num { width: 40px; height: 40px; border-radius: 50%; background: #334155; color: #fff; display: grid; place-items: center; font-size: 22px; letter-spacing: 0; }
+  .legend { display: flex; align-items: center; gap: 22px; font-size: 20px; font-weight: 600; color: #55657c; }
+  .legend .item { display: flex; align-items: center; gap: 9px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 1fr; gap: 12px; margin-top: 12px; height: calc(100% - 52px); }
+  .card { background: #fff; border: 2px solid #e5e9f0; border-top: 6px solid var(--c); border-radius: 20px; padding: 12px 16px 12px; }
+  .head { display: flex; align-items: center; gap: 11px; margin-bottom: 8px; }
+  .cicon { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex: none; }
+  .cname { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; flex: 1; white-space: nowrap; }
+  .count { font-size: 18px; font-weight: 800; padding: 2px 11px; border-radius: 999px; }
+  .chips { display: grid; grid-template-columns: max-content max-content; justify-content: space-between; column-gap: 12px; row-gap: 6px; }
+  .chip { display: flex; align-items: center; gap: 8px; height: 32px; font-size: 18px; font-weight: 600; color: #1e293b; white-space: nowrap; min-width: 0; }
+  .logo, .tile { width: 30px; height: 30px; border-radius: 8px; flex: none; }
+  .logo { object-fit: contain; background: #fff; }
+  .tile { display: grid; place-items: center; }
 </style>
 </head>
 <body>
-<svg width="1800" height="660" viewBox="0 0 1800 660" xmlns="http://www.w3.org/2000/svg">
+<div class="page">
+
+<svg class="flow" width="1800" height="690" viewBox="0 0 1800 690" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <defs>
-    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#0284c7"/>
-    </linearGradient>
-    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#0284c7"/>
-    </linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.12"/>
-    </filter>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#0284c7"/></linearGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#0284c7"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.12"/></filter>
     <marker id="a-indigo" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto"><path d="M0 0L10 5L0 10z" fill="#4f46e5"/></marker>
     <marker id="a-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto"><path d="M0 0L10 5L0 10z" fill="#059669"/></marker>
     <marker id="a-sky" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto"><path d="M0 0L10 5L0 10z" fill="#0284c7"/></marker>
     <marker id="a-rose" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#e11d48"/></marker>
-
-    <!-- icons: 24x24, stroked with the current colour -->
-    <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></symbol>
-    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
-    <symbol id="i-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></symbol>
-    <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <marker id="a-slate" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748b"/></marker>
     <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
-    <symbol id="i-atom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.2"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/></symbol>
-    <symbol id="i-molecule" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="7" r="2.5"/><circle cx="18.5" cy="7" r="2.5"/><circle cx="12" cy="18" r="2.5"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="7" y1="9.2" x2="10.7" y2="15.8"/><line x1="17" y1="9.2" x2="13.3" y2="15.8"/></symbol>
-    <symbol id="i-cube" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
-    <symbol id="i-wave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
-    <symbol id="i-battery" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2"/><line x1="22" y1="11" x2="22" y2="13"/><path d="M11.5 9.5 9 12h3l-2.5 2.5"/></symbol>
-    <symbol id="i-thermo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></symbol>
-    <symbol id="i-house" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9v12h14V9"/><path d="M10 21v-6h4v6"/></symbol>
-    <symbol id="i-plug" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/></symbol>
-    <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></symbol>
-    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
-    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
-    <symbol id="hex" viewBox="-50 -50 100 100"><polygon points="0,-46 39.8,-23 39.8,23 0,46 -39.8,23 -39.8,-23" stroke-linejoin="round"/></symbol>
+    <clipPath id="rr"><rect x="0" y="0" width="30" height="30" rx="8"/></clipPath>
   </defs>
 
   <!-- zones -->
@@ -64,37 +65,57 @@
   <text x="960" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#fff">2</text>
   <text x="992" y="61" font-size="26" font-weight="800" letter-spacing="3" fill="#0284c7">USE EVERYWHERE</text>
 
-  <!-- 1. research code -->
+  <!-- research code + paper -->
   <circle class="sh" cx="135" cy="310" r="66" fill="#fff" stroke="#4f46e5" stroke-width="4" filter="url(#shadow)"/>
-  <use href="#i-code" x="107" y="282" width="56" height="56" style="color:#4f46e5"/>
-  <circle cx="186" cy="360" r="25" fill="#fff" stroke="#4f46e5" stroke-width="3"/>
-  <use href="#i-file" x="173" y="347" width="26" height="26" style="color:#4f46e5"/>
+  <image href="icons/github.svg" x="105" y="280" width="60" height="60"/>
+  <circle cx="188" cy="362" r="26" fill="#fff" stroke="#4f46e5" stroke-width="3"/>
+  <image href="icons/doi.svg" x="172" y="346" width="32" height="32"/>
   <text x="135" y="428" text-anchor="middle" font-size="28" font-weight="700" fill="#0b1220">Research code</text>
   <text x="135" y="460" text-anchor="middle" font-size="22" fill="#55657c">+ its paper</text>
 
   <line x1="212" y1="310" x2="266" y2="310" stroke="#4f46e5" stroke-width="5" stroke-linecap="round" marker-end="url(#a-indigo)"/>
 
-  <!-- 2. coding agent -->
+  <!-- coding agent -->
   <circle class="sh" cx="345" cy="310" r="66" fill="#4f46e5" filter="url(#shadow)"/>
-  <use href="#i-bot" x="315" y="280" width="60" height="60" style="color:#fff"/>
+  <svg x="311" y="276" width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M6 6a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2l0 -4" />
+  <path d="M12 2v2" />
+  <path d="M9 12v9" />
+  <path d="M15 12v9" />
+  <path d="M5 16l4 -2" />
+  <path d="M15 14l4 2" />
+  <path d="M9 18h6" />
+  <path d="M10 8v.01" />
+  <path d="M14 8v.01" />
+</svg>
   <text x="345" y="428" text-anchor="middle" font-size="28" font-weight="700" fill="#0b1220">Coding agent</text>
-  <text x="345" y="460" text-anchor="middle" font-size="22" fill="#55657c">wraps it as a tool</text>
+  <g>
+    <circle cx="300" cy="472" r="21" fill="#fff" stroke="#dfe2fb" stroke-width="2"/>
+    <image href="icons/claudecode-color.svg" x="286" y="458" width="28" height="28"/>
+    <circle cx="345" cy="472" r="21" fill="#fff" stroke="#dfe2fb" stroke-width="2"/>
+    <image href="icons/codex-color.svg" x="331" y="458" width="28" height="28"/>
+    <circle cx="390" cy="472" r="21" fill="#fff" stroke="#dfe2fb" stroke-width="2"/>
+    <image href="icons/geminicli-color.svg" x="376" y="458" width="28" height="28"/>
+  </g>
 
   <line x1="422" y1="310" x2="480" y2="310" stroke="#4f46e5" stroke-width="5" stroke-linecap="round" marker-end="url(#a-indigo)"/>
 
-  <!-- 3. golden test gate -->
+  <!-- check against known results -->
   <polygon class="sh" points="570,232 648,310 570,388 492,310" fill="#fff" stroke="#059669" stroke-width="4" stroke-linejoin="round" filter="url(#shadow)"/>
-  <use href="#i-shield" x="544" y="284" width="52" height="52" style="color:#059669"/>
+  <svg x="542" y="282" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M11.46 20.846a12 12 0 0 1 -7.96 -14.846a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 -.09 7.06" />
+  <path d="M15 19l2 2l4 -4" />
+</svg>
   <text x="570" y="428" text-anchor="middle" font-size="28" font-weight="700" fill="#0b1220">Matches known</text>
   <text x="570" y="460" text-anchor="middle" font-size="28" font-weight="700" fill="#0b1220">results?</text>
 
-  <!-- no: back to the agent -->
   <path d="M570 226 V182 Q570 168 556 168 H359 Q345 168 345 182 V230" fill="none" stroke="#e11d48" stroke-width="4" stroke-dasharray="10 9" stroke-linecap="round" marker-end="url(#a-rose)"/>
   <circle cx="457" cy="168" r="18" fill="#e11d48"/>
   <use href="#i-x" x="447" y="158" width="20" height="20" style="color:#fff"/>
   <text x="457" y="134" text-anchor="middle" font-size="22" font-weight="700" fill="#e11d48">no: fix and retry</text>
 
-  <!-- example golden test -->
   <rect class="sh" x="430" y="490" width="280" height="140" rx="20" fill="#fff" stroke="#bfe9d6" stroke-width="2" filter="url(#shadow)"/>
   <text x="452" y="526" font-size="21" font-weight="600" fill="#55657c">CO₂ uptake, mmol/g</text>
   <text x="452" y="567" font-size="22" font-weight="700" fill="#0b1220">Tool</text>
@@ -104,39 +125,84 @@
   <rect x="512" y="592" width="118" height="22" rx="11" fill="#94a3b8"/>
   <text x="644" y="610" font-size="22" font-weight="700" fill="#0b1220">1.48</text>
 
-  <!-- yes: into the catalog -->
   <line x1="652" y1="310" x2="740" y2="310" stroke="#059669" stroke-width="5" stroke-linecap="round" marker-end="url(#a-green)"/>
   <circle cx="696" cy="310" r="18" fill="#059669"/>
   <use href="#i-check" x="686" y="300" width="20" height="20" style="color:#fff"/>
 
-  <!-- hub: catalog of verified tools -->
+  <!-- hub -->
   <circle cx="900" cy="310" r="166" fill="none" stroke="#c7d2fe" stroke-width="2" stroke-dasharray="4 8"/>
   <circle class="sh" cx="900" cy="310" r="150" fill="#fff" stroke="url(#ring)" stroke-width="7" filter="url(#shadow)"/>
-  <use href="#hex" x="850" y="260" width="100" height="100" fill="url(#brand)"/>
-  <use href="#i-house" x="879" y="289" width="42" height="42" style="color:#fff"/>
-  <g stroke-width="3">
-    <use href="#hex" x="889.5" y="191.6" width="100" height="100" fill="#f5f3ff" stroke="#c4b5fd"/>
-    <use href="#hex" x="929" y="260" width="100" height="100" fill="#ecfeff" stroke="#99e6f2"/>
-    <use href="#hex" x="889.5" y="328.4" width="100" height="100" fill="#fdf2f8" stroke="#f5b5d6"/>
-    <use href="#hex" x="810.5" y="328.4" width="100" height="100" fill="#f0fdf4" stroke="#a7e3bd"/>
-    <use href="#hex" x="771" y="260" width="100" height="100" fill="#fff7ed" stroke="#fdc79a"/>
-    <use href="#hex" x="810.5" y="191.6" width="100" height="100" fill="#eff6ff" stroke="#b3cdfb"/>
-  </g>
-  <use href="#i-atom" x="921.5" y="223.6" width="36" height="36" style="color:#7c3aed"/>
-  <use href="#i-molecule" x="961" y="292" width="36" height="36" style="color:#0891b2"/>
-  <use href="#i-wave" x="921.5" y="360.4" width="36" height="36" style="color:#db2777"/>
-  <use href="#i-battery" x="842.5" y="360.4" width="36" height="36" style="color:#16a34a"/>
-  <use href="#i-thermo" x="803" y="292" width="36" height="36" style="color:#ea580c"/>
-  <use href="#i-cube" x="842.5" y="223.6" width="36" height="36" style="color:#2563eb"/>
-  <rect x="764" y="480" width="272" height="86" rx="22" fill="#fff"/>
-  <text x="900" y="516" text-anchor="middle" font-size="30" font-weight="800" fill="#0b1220">50 verified tools</text>
-  <text x="900" y="550" text-anchor="middle" font-size="22" fill="#55657c">303 golden tests</text>
+  <circle cx="900.0" cy="212.0" r="30" fill="#f3effe" stroke="#7c3aed" stroke-width="2.5"/><svg x="884.0" y="196.0" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M12 12v.01" />
+  <path d="M19.071 4.929c-1.562 -1.562 -6 .337 -9.9 4.243c-3.905 3.905 -5.804 8.337 -4.242 9.9c1.562 1.561 6 -.338 9.9 -4.244c3.905 -3.905 5.804 -8.337 4.242 -9.9" />
+  <path d="M4.929 4.929c-1.562 1.562 .337 6 4.243 9.9c3.905 3.905 8.337 5.804 9.9 4.242c1.561 -1.562 -.338 -6 -4.244 -9.9c-3.905 -3.905 -8.337 -5.804 -9.9 -4.242" />
+</svg>
+  <circle cx="969.3" cy="240.7" r="30" fill="#eaf1fe" stroke="#2563eb" stroke-width="2.5"/><svg x="953.3" y="224.7" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M3.5 9.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8.5 4.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8.5 14.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M3.5 19.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M13.5 9.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M18.5 4.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M13.5 19.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M18.5 14.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+</svg>
+  <circle cx="998.0" cy="310.0" r="30" fill="#e6f7fb" stroke="#0891b2" stroke-width="2.5"/><svg x="982.0" y="294.0" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718" />
+  <path d="M12 22v-10" />
+  <path d="M12 12l8.73 -5.04" />
+  <path d="M3.27 6.96l8.73 5.04" />
+</svg>
+  <circle cx="969.3" cy="379.3" r="30" fill="#fff1e7" stroke="#ea580c" stroke-width="2.5"/><svg x="953.3" y="363.3" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M10 13.5a4 4 0 1 0 4 0v-8.5a2 2 0 0 0 -4 0v8.5" />
+  <path d="M10 9l4 0" />
+</svg>
+  <circle cx="900.0" cy="408.0" r="30" fill="#fdeef6" stroke="#db2777" stroke-width="2.5"/><svg x="884.0" y="392.0" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M21 12h-2c-.894 0 -1.662 -.857 -1.761 -2c-.296 -3.45 -.749 -6 -2.749 -6s-2.5 3.582 -2.5 8s-.5 8 -2.5 8s-2.452 -2.547 -2.749 -6c-.1 -1.147 -.867 -2 -1.763 -2h-2" />
+</svg>
+  <circle cx="830.7" cy="379.3" r="30" fill="#e9f8ee" stroke="#16a34a" stroke-width="2.5"/><svg x="814.7" y="363.3" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M16 7h1a2 2 0 0 1 2 2v.5a.5 .5 0 0 0 .5 .5a.5 .5 0 0 1 .5 .5v3a.5 .5 0 0 1 -.5 .5a.5 .5 0 0 0 -.5 .5v.5a2 2 0 0 1 -2 2h-2" />
+  <path d="M8 7h-2a2 2 0 0 0 -2 2v6a2 2 0 0 0 2 2h1" />
+  <path d="M12 8l-2 4h3l-2 4" />
+</svg>
+  <circle cx="802.0" cy="310.0" r="30" fill="#e6f6f4" stroke="#0d9488" stroke-width="2.5"/><svg x="786.0" y="294.0" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M9 3l6 0" />
+  <path d="M10 9l4 0" />
+  <path d="M10 3v6l-4 11a.7 .7 0 0 0 .5 1h11a.7 .7 0 0 0 .5 -1l-4 -11v-6" />
+</svg>
+  <circle cx="830.7" cy="240.7" r="30" fill="#fdf3e3" stroke="#b45309" stroke-width="2.5"/><svg x="814.7" y="224.7" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M5 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14" />
+  <path d="M9 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14" />
+  <path d="M5 8h4" />
+  <path d="M9 16h4" />
+  <path d="M13.803 4.56l2.184 -.53c.562 -.135 1.133 .19 1.282 .732l3.695 13.418a1.02 1.02 0 0 1 -.634 1.219l-.133 .041l-2.184 .53c-.562 .135 -1.133 -.19 -1.282 -.732l-3.695 -13.418a1.02 1.02 0 0 1 .634 -1.219l.133 -.041" />
+  <path d="M14 9l4 -1" />
+  <path d="M16 16l3.923 -.98" />
+</svg>
+  <circle cx="900" cy="310" r="50" fill="url(#brand)"/>
+  <svg x="875" y="283" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+  <rect x="770" y="482" width="260" height="56" rx="20" fill="#fff"/>
+  <text x="900" y="521" text-anchor="middle" font-size="30" font-weight="800" fill="#0b1220">50 verified tools</text>
+  <line x1="900" y1="546" x2="900" y2="676" stroke="#64748b" stroke-width="3.5" stroke-dasharray="8 8" stroke-linecap="round" marker-end="url(#a-slate)"/>
 
-  <!-- connection to AI apps -->
+  <!-- MCP -->
   <line x1="1053" y1="310" x2="1126" y2="310" stroke="#0284c7" stroke-width="5" stroke-linecap="round" marker-end="url(#a-sky)"/>
-  <circle cx="1088" cy="310" r="24" fill="#fff" stroke="#0284c7" stroke-width="3"/>
-  <use href="#i-plug" x="1075" y="297" width="26" height="26" style="color:#0284c7"/>
-  <text x="1088" y="366" text-anchor="middle" font-size="22" font-weight="800" letter-spacing="1.5" fill="#0284c7">MCP</text>
+  <circle cx="1088" cy="310" r="25" fill="#fff" stroke="#0284c7" stroke-width="3"/>
+  <image href="icons/mcp.svg" x="1073" y="295" width="30" height="30"/>
+  <text x="1088" y="368" text-anchor="middle" font-size="22" font-weight="800" letter-spacing="1.5" fill="#0284c7">MCP</text>
 
   <!-- AI assistant window -->
   <rect class="sh" x="1140" y="84" width="620" height="466" rx="26" fill="#fff" stroke="#cfe6f4" stroke-width="2" filter="url(#shadow)"/>
@@ -151,13 +217,20 @@
   <text x="1436" y="230" font-size="24" font-weight="500" fill="#f1f5f9">CO₂ from flue gas?</text>
 
   <rect x="1164" y="268" width="372" height="50" rx="25" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
-  <use href="#i-terminal" x="1180" y="281" width="24" height="24" style="color:#0284c7"/>
+  <rect x="1174" y="278" width="30" height="30" rx="8" fill="#e6f7fb"/>
+  <svg x="1179" y="283" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718" />
+  <path d="M12 22v-10" />
+  <path d="M12 12l8.73 -5.04" />
+  <path d="M3.27 6.96l8.73 5.04" />
+</svg>
   <text class="mono" x="1216" y="301" font-size="22" font-weight="600" fill="#0b1220">zeopp<tspan fill="#94a3b8"> · </tspan><tspan font-weight="500" fill="#334155">pores</tspan></text>
   <circle cx="1510" cy="293" r="15" fill="#059669"/>
   <use href="#i-check" x="1501" y="284" width="18" height="18" style="color:#fff"/>
 
   <rect x="1164" y="328" width="372" height="50" rx="25" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
-  <use href="#i-terminal" x="1180" y="341" width="24" height="24" style="color:#0284c7"/>
+  <g transform="translate(1174 338)"><image href="icons/iraspa.png" width="30" height="30" clip-path="url(#rr)"/></g>
   <text class="mono" x="1216" y="361" font-size="22" font-weight="600" fill="#0b1220">raspa3<tspan fill="#94a3b8"> · </tspan><tspan font-weight="500" fill="#334155">adsorption</tspan></text>
   <circle cx="1510" cy="353" r="15" fill="#059669"/>
   <use href="#i-check" x="1501" y="344" width="18" height="18" style="color:#fff"/>
@@ -167,26 +240,284 @@
   <text x="1188" y="468" font-size="24" font-weight="500" fill="#0c2a42">for CO₂ than N₂</text>
 
   <rect x="1164" y="502" width="150" height="34" rx="17" fill="#ecfdf5"/>
-  <use href="#i-shield" x="1176" y="508" width="22" height="22" style="color:#059669"/>
+  <svg x="1176" y="508" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M11.46 20.846a12 12 0 0 1 -7.96 -14.846a12 12 0 0 0 8.5 -3a12 12 0 0 0 8.5 3a12 12 0 0 1 -.09 7.06" />
+  <path d="M15 19l2 2l4 -4" />
+</svg>
   <text x="1206" y="527" font-size="20" font-weight="700" fill="#047857">Verified</text>
   <rect x="1324" y="502" width="118" height="34" rx="17" fill="#eef0ff"/>
-  <use href="#i-book" x="1336" y="508" width="22" height="22" style="color:#4f46e5"/>
+  <svg x="1336" y="508" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M5 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14" />
+  <path d="M9 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14" />
+  <path d="M5 8h4" />
+  <path d="M9 16h4" />
+  <path d="M13.803 4.56l2.184 -.53c.562 -.135 1.133 .19 1.282 .732l3.695 13.418a1.02 1.02 0 0 1 -.634 1.219l-.133 .041l-2.184 .53c-.562 .135 -1.133 -.19 -1.282 -.732l-3.695 -13.418a1.02 1.02 0 0 1 .634 -1.219l.133 -.041" />
+  <path d="M14 9l4 -1" />
+  <path d="M16 16l3.923 -.98" />
+</svg>
   <text x="1366" y="527" font-size="20" font-weight="700" fill="#3730a3">Cited</text>
   <rect x="1452" y="502" width="196" height="34" rx="17" fill="#e6f3fb"/>
-  <use href="#i-lock" x="1464" y="508" width="22" height="22" style="color:#0284c7"/>
+  <svg x="1464" y="508" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+  <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
+  <path d="M9 9l1 0" />
+  <path d="M9 13l6 0" />
+  <path d="M9 17l6 0" />
+</svg>
   <text x="1494" y="527" font-size="20" font-weight="700" fill="#075985">Reproducible</text>
 
-  <!-- apps -->
-  <g font-size="22" font-weight="600" fill="#075985" text-anchor="middle">
-    <rect x="1179" y="572" width="122" height="44" rx="22" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
-    <text x="1240" y="602">Claude</text>
-    <rect x="1313" y="572" width="112" height="44" rx="22" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
-    <text x="1369" y="602">Codex</text>
-    <rect x="1437" y="572" width="158" height="44" rx="22" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
-    <text x="1516" y="602">Gemini CLI</text>
-    <rect x="1607" y="572" width="114" height="44" rx="22" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
-    <text x="1664" y="602">Cursor</text>
+  <!-- AI apps -->
+  <g font-size="22" font-weight="600" fill="#0b1220">
+    <rect x="1158" y="570" width="134" height="48" rx="24" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
+    <image href="icons/claude-color.svg" x="1170" y="580" width="28" height="28"/>
+    <text x="1206" y="602">Claude</text>
+    <rect x="1304" y="570" width="128" height="48" rx="24" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
+    <image href="icons/codex-color.svg" x="1316" y="580" width="28" height="28"/>
+    <text x="1352" y="602">Codex</text>
+    <rect x="1444" y="570" width="170" height="48" rx="24" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
+    <image href="icons/gemini-color.svg" x="1456" y="580" width="28" height="28"/>
+    <text x="1492" y="602">Gemini CLI</text>
+    <rect x="1626" y="570" width="128" height="48" rx="24" fill="#fff" stroke="#cfe6f4" stroke-width="2"/>
+    <image href="icons/cursor.svg" x="1638" y="580" width="28" height="28"/>
+    <text x="1674" y="602">Cursor</text>
   </g>
 </svg>
+
+
+<div class="catalog">
+  <div class="cat-head">
+    <div class="cat-title"><span class="num">3</span>THE CATALOG</div>
+    <div class="legend">
+      <span class="item"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 21l8 0" />
+  <path d="M12 17l0 4" />
+  <path d="M7 4l10 0" />
+  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
+  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+</svg></span>hackathon project</span>
+    </div>
+  </div>
+  <div class="grid"><div class="card" style="--c:#7c3aed"><div class="head"><span class="cicon" style="background:#f3effe"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M12 12v.01" />
+  <path d="M19.071 4.929c-1.562 -1.562 -6 .337 -9.9 4.243c-3.905 3.905 -5.804 8.337 -4.242 9.9c1.562 1.561 6 -.338 9.9 -4.244c3.905 -3.905 5.804 -8.337 4.242 -9.9" />
+  <path d="M4.929 4.929c-1.562 1.562 .337 6 4.243 9.9c3.905 3.905 8.337 5.804 9.9 4.242c1.561 -1.562 -.338 -6 -4.244 -9.9c-3.905 -3.905 -8.337 -5.804 -9.9 -4.242" />
+</svg></span><span class="cname">Quantum chemistry</span><span class="count" style="background:#f3effe;color:#7c3aed">6</span></div><div class="chips"><span class="chip"><img class="logo" src="icons/pyscf.png" alt=""><span>PySCF</span></span><span class="chip"><img class="logo" src="icons/psi4.png" alt=""><span>Psi4</span></span><span class="chip"><img class="logo" src="icons/qef.png" alt=""><span>Quantum ESPRESSO</span></span><span class="chip"><span class="tile" style="background:#f3effe"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M12 12v.01" />
+  <path d="M19.071 4.929c-1.562 -1.562 -6 .337 -9.9 4.243c-3.905 3.905 -5.804 8.337 -4.242 9.9c1.562 1.561 6 -.338 9.9 -4.244c3.905 -3.905 5.804 -8.337 4.242 -9.9" />
+  <path d="M4.929 4.929c-1.562 1.562 .337 6 4.243 9.9c3.905 3.905 8.337 5.804 9.9 4.242c1.561 -1.562 -.338 -6 -4.244 -9.9c-3.905 -3.905 -8.337 -5.804 -9.9 -4.242" />
+</svg></span><span>GPAW</span></span><span class="chip"><img class="logo" src="icons/grimme-lab.png" alt=""><span>xTB</span></span><span class="chip"><img class="logo" src="icons/grimme-lab.png" alt=""><span>CREST</span></span></div></div><div class="card" style="--c:#2563eb"><div class="head"><span class="cicon" style="background:#eaf1fe"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M3.5 9.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8.5 4.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8.5 14.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M3.5 19.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M13.5 9.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M18.5 4.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M13.5 19.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M18.5 14.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+</svg></span><span class="cname">Molecular simulation</span><span class="count" style="background:#eaf1fe;color:#2563eb">8</span></div><div class="chips"><span class="chip"><img class="logo" src="icons/lammps.png" alt=""><span>LAMMPS</span></span><span class="chip"><img class="logo" src="icons/openmm.png" alt=""><span>OpenMM</span></span><span class="chip"><img class="logo" src="icons/ase.png" alt=""><span>ASE</span></span><span class="chip"><span class="tile" style="background:#eaf1fe"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M3.5 9.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8.5 4.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8.5 14.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M3.5 19.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M13.5 9.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M18.5 4.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M13.5 19.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M18.5 14.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+</svg></span><span>ML potentials</span></span><span class="chip"><span class="tile" style="background:#eaf1fe"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M3.5 9.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8.5 4.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8.5 14.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M3.5 19.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M13.5 9.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M18.5 4.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M13.5 19.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M18.5 14.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+</svg></span><span>phonopy</span></span><span class="chip"><span class="tile" style="background:#eaf1fe"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M3.5 9.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8.5 4.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M8.5 14.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M3.5 19.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M13.5 9.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M18.5 4.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M13.5 19.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+  <path d="M18.5 14.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+</svg></span><span>phono3py</span></span><span class="chip"><img class="logo" src="icons/mdanalysis.png" alt=""><span>MDAnalysis</span></span><span class="chip"><img class="logo" src="icons/ovito-org.png" alt=""><span>OVITO</span></span></div></div><div class="card" style="--c:#0891b2"><div class="head"><span class="cicon" style="background:#e6f7fb"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718" />
+  <path d="M12 22v-10" />
+  <path d="M12 12l8.73 -5.04" />
+  <path d="M3.27 6.96l8.73 5.04" />
+</svg></span><span class="cname">Materials</span><span class="count" style="background:#e6f7fb;color:#0891b2">8</span></div><div class="chips"><span class="chip"><span class="tile" style="background:#e6f7fb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718" />
+  <path d="M12 22v-10" />
+  <path d="M12 12l8.73 -5.04" />
+  <path d="M3.27 6.96l8.73 5.04" />
+</svg></span><span>pymatgen</span></span><span class="chip"><img class="logo" src="icons/materialsproject.png" alt=""><span>Materials Project</span></span><span class="chip"><img class="logo" src="icons/hackingmaterials.png" alt=""><span>robocrys</span></span><span class="chip"><span class="tile" style="background:#e6f7fb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718" />
+  <path d="M12 22v-10" />
+  <path d="M12 12l8.73 -5.04" />
+  <path d="M3.27 6.96l8.73 5.04" />
+</svg></span><span>PyXtal</span></span><span class="chip"><span class="tile" style="background:#e6f7fb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718" />
+  <path d="M12 22v-10" />
+  <path d="M12 12l8.73 -5.04" />
+  <path d="M3.27 6.96l8.73 5.04" />
+</svg></span><span>surfaces</span></span><span class="chip"><span class="tile" style="background:#e6f7fb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718" />
+  <path d="M12 22v-10" />
+  <path d="M12 12l8.73 -5.04" />
+  <path d="M3.27 6.96l8.73 5.04" />
+</svg></span><span>ion diffusion</span></span><span class="chip"><span class="tile" style="background:#e6f7fb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M21 16.008v-8.018a1.98 1.98 0 0 0 -1 -1.717l-7 -4.008a2.016 2.016 0 0 0 -2 0l-7 4.008c-.619 .355 -1 1.01 -1 1.718v8.018c0 .709 .381 1.363 1 1.717l7 4.008a2.016 2.016 0 0 0 2 0l7 -4.008c.619 -.355 1 -1.01 1 -1.718" />
+  <path d="M12 22v-10" />
+  <path d="M12 12l8.73 -5.04" />
+  <path d="M3.27 6.96l8.73 5.04" />
+</svg></span><span>Zeo++</span></span><span class="chip"><img class="logo" src="icons/iraspa.png" alt=""><span>RASPA3</span></span></div></div><div class="card" style="--c:#ea580c"><div class="head"><span class="cicon" style="background:#fff1e7"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M10 13.5a4 4 0 1 0 4 0v-8.5a2 2 0 0 0 -4 0v8.5" />
+  <path d="M10 9l4 0" />
+</svg></span><span class="cname">Thermodynamics</span><span class="count" style="background:#fff1e7;color:#ea580c">6</span></div><div class="chips"><span class="chip"><img class="logo" src="icons/cantera.png" alt=""><span>Cantera</span></span><span class="chip"><img class="logo" src="icons/coolprop.png" alt=""><span>CoolProp</span></span><span class="chip"><img class="logo" src="icons/pycalphad.png" alt=""><span>pycalphad</span></span><span class="chip"><img class="logo" src="icons/reaktoro.png" alt=""><span>Reaktoro</span></span><span class="chip"><span class="tile" style="background:#fff1e7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M10 13.5a4 4 0 1 0 4 0v-8.5a2 2 0 0 0 -4 0v8.5" />
+  <path d="M10 9l4 0" />
+</svg></span><span>thermo</span></span><span class="chip"><span class="tile" style="background:#fff1e7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M10 13.5a4 4 0 1 0 4 0v-8.5a2 2 0 0 0 -4 0v8.5" />
+  <path d="M10 9l4 0" />
+</svg></span><span>FiPy</span></span></div></div><div class="card" style="--c:#db2777"><div class="head"><span class="cicon" style="background:#fdeef6"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M21 12h-2c-.894 0 -1.662 -.857 -1.761 -2c-.296 -3.45 -.749 -6 -2.749 -6s-2.5 3.582 -2.5 8s-.5 8 -2.5 8s-2.452 -2.547 -2.749 -6c-.1 -1.147 -.867 -2 -1.763 -2h-2" />
+</svg></span><span class="cname">Spectroscopy</span><span class="count" style="background:#fdeef6;color:#db2777">5</span></div><div class="chips"><span class="chip"><img class="logo" src="icons/xraypy.png" alt=""><span>xraylarch</span></span><span class="chip"><span class="tile" style="background:#fdeef6"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M21 12h-2c-.894 0 -1.662 -.857 -1.761 -2c-.296 -3.45 -.749 -6 -2.749 -6s-2.5 3.582 -2.5 8s-.5 8 -2.5 8s-2.452 -2.547 -2.749 -6c-.1 -1.147 -.867 -2 -1.763 -2h-2" />
+</svg></span><span>xraylib</span></span><span class="chip"><img class="logo" src="icons/openms.png" alt=""><span>pyOpenMS</span></span><span class="chip"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 21l8 0" />
+  <path d="M12 17l0 4" />
+  <path d="M7 4l10 0" />
+  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
+  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+</svg></span><span>MixSense NMR</span></span><span class="chip"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 21l8 0" />
+  <path d="M12 17l0 4" />
+  <path d="M7 4l10 0" />
+  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
+  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+</svg></span><span>AtomBridge</span></span></div></div><div class="card" style="--c:#16a34a"><div class="head"><span class="cicon" style="background:#e9f8ee"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M16 7h1a2 2 0 0 1 2 2v.5a.5 .5 0 0 0 .5 .5a.5 .5 0 0 1 .5 .5v3a.5 .5 0 0 1 -.5 .5a.5 .5 0 0 0 -.5 .5v.5a2 2 0 0 1 -2 2h-2" />
+  <path d="M8 7h-2a2 2 0 0 0 -2 2v6a2 2 0 0 0 2 2h1" />
+  <path d="M12 8l-2 4h3l-2 4" />
+</svg></span><span class="cname">Energy</span><span class="count" style="background:#e9f8ee;color:#16a34a">3</span></div><div class="chips"><span class="chip"><img class="logo" src="icons/pybamm-team.png" alt=""><span>PyBaMM</span></span><span class="chip"><span class="tile" style="background:#e9f8ee"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M16 7h1a2 2 0 0 1 2 2v.5a.5 .5 0 0 0 .5 .5a.5 .5 0 0 1 .5 .5v3a.5 .5 0 0 1 -.5 .5a.5 .5 0 0 0 -.5 .5v.5a2 2 0 0 1 -2 2h-2" />
+  <path d="M8 7h-2a2 2 0 0 0 -2 2v6a2 2 0 0 0 2 2h1" />
+  <path d="M12 8l-2 4h3l-2 4" />
+</svg></span><span>impedance.py</span></span><span class="chip"><img class="logo" src="icons/pvlib.png" alt=""><span>pvlib</span></span></div></div><div class="card" style="--c:#0d9488"><div class="head"><span class="cicon" style="background:#e6f6f4"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M9 3l6 0" />
+  <path d="M10 9l4 0" />
+  <path d="M10 3v6l-4 11a.7 .7 0 0 0 .5 1h11a.7 .7 0 0 0 .5 -1l-4 -11v-6" />
+</svg></span><span class="cname">Chemistry & drugs</span><span class="count" style="background:#e6f6f4;color:#0d9488">8</span></div><div class="chips"><span class="chip"><img class="logo" src="icons/rdkit.png" alt=""><span>RDKit</span></span><span class="chip"><img class="logo" src="icons/rdkit.png" alt=""><span>RDKit descriptors</span></span><span class="chip"><img class="logo" src="icons/openbabel.png" alt=""><span>Open Babel</span></span><span class="chip"><img class="logo" src="icons/molecularai.png" alt=""><span>AiZynthFinder</span></span><span class="chip"><img class="logo" src="icons/ccsb-scripps.png" alt=""><span>AutoDock Vina</span></span><span class="chip"><span class="tile" style="background:#e6f6f4"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M9 3l6 0" />
+  <path d="M10 9l4 0" />
+  <path d="M10 3v6l-4 11a.7 .7 0 0 0 .5 1h11a.7 .7 0 0 0 .5 -1l-4 -11v-6" />
+</svg></span><span>PROPKA</span></span><span class="chip"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 21l8 0" />
+  <path d="M12 17l0 4" />
+  <path d="M7 4l10 0" />
+  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
+  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+</svg></span><span>UMA-Dock</span></span><span class="chip"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 21l8 0" />
+  <path d="M12 17l0 4" />
+  <path d="M7 4l10 0" />
+  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
+  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+</svg></span><span>peptide-agent</span></span></div></div><div class="card" style="--c:#b45309"><div class="head"><span class="cicon" style="background:#fdf3e3"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M5 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14" />
+  <path d="M9 5a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1l0 -14" />
+  <path d="M5 8h4" />
+  <path d="M9 16h4" />
+  <path d="M13.803 4.56l2.184 -.53c.562 -.135 1.133 .19 1.282 .732l3.695 13.418a1.02 1.02 0 0 1 -.634 1.219l-.133 .041l-2.184 .53c-.562 .135 -1.133 -.19 -1.282 -.732l-3.695 -13.418a1.02 1.02 0 0 1 .634 -1.219l.133 -.041" />
+  <path d="M14 9l4 -1" />
+  <path d="M16 16l3.923 -.98" />
+</svg></span><span class="cname">Knowledge & lab</span><span class="count" style="background:#fdf3e3;color:#b45309">6</span></div><div class="chips"><span class="chip"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 21l8 0" />
+  <path d="M12 17l0 4" />
+  <path d="M7 4l10 0" />
+  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
+  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+</svg></span><span>SKY synthesis</span></span><span class="chip"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 21l8 0" />
+  <path d="M12 17l0 4" />
+  <path d="M7 4l10 0" />
+  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
+  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+</svg></span><span>ARIA doping</span></span><span class="chip"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 21l8 0" />
+  <path d="M12 17l0 4" />
+  <path d="M7 4l10 0" />
+  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
+  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+</svg></span><span>MP analogies</span></span><span class="chip"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 21l8 0" />
+  <path d="M12 17l0 4" />
+  <path d="M7 4l10 0" />
+  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
+  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+</svg></span><span>CLUE</span></span><span class="chip"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 21l8 0" />
+  <path d="M12 17l0 4" />
+  <path d="M7 4l10 0" />
+  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
+  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+</svg></span><span>Catalyze</span></span><span class="chip"><span class="tile" style="background:#fdf3d7"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b7791f" stroke-width="2.0" stroke-linecap="round" stroke-linejoin="round">
+  
+  <path d="M8 21l8 0" />
+  <path d="M12 17l0 4" />
+  <path d="M7 4l10 0" />
+  <path d="M17 4v8a5 5 0 0 1 -10 0v-8" />
+  <path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+  <path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+</svg></span><span>AtomicShorts</span></span></div></div></div>
+</div>
+
+</div>
 </body>
 </html>
