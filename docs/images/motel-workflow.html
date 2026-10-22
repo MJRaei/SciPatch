@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>How Motel works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0b1220;
+    --text: #1e293b;
+    --muted: #55657c;
+    --faint: #94a3b8;
+    --line: #e2e8f0;
+    --bg: #f5f7fb;
+    --card: #ffffff;
+    --build: #4f46e5;
+    --build-soft: #eef0ff;
+    --verify: #059669;
+    --verify-soft: #e8f8f1;
+    --catalog: #c2410c;
+    --catalog-soft: #fff1e8;
+    --use: #0369a1;
+    --use-soft: #e6f3fb;
+    --gold: #b45309;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @page { size: 1920px 1080px; margin: 0; }
+  @media print { .card, .stat, .logo { box-shadow: none !important; } }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { background: var(--bg); }
+  body { font-family: Inter, "Helvetica Neue", Arial, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+  .canvas { position: relative; width: 1920px; height: 1080px; overflow: hidden;
+            background:
+              radial-gradient(1200px 500px at 85% -10%, #e9ecff 0%, rgba(233,236,255,0) 60%),
+              radial-gradient(900px 500px at -10% 110%, #e3f4ff 0%, rgba(227,244,255,0) 60%),
+              var(--bg); }
+
+  /* header */
+  .header { position: absolute; left: 44px; right: 44px; top: 30px; height: 92px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 18px; }
+  .logo { width: 68px; height: 68px; border-radius: 18px; background: linear-gradient(135deg, #4f46e5, #0369a1); display: grid; place-items: center; box-shadow: 0 10px 24px rgba(79,70,229,.28); }
+  .title { font-size: 46px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); line-height: 1; }
+  .tagline { margin-top: 8px; font-size: 20px; color: var(--muted); font-weight: 500; }
+  .tagline b { color: var(--ink); font-weight: 600; }
+  .stats { display: flex; gap: 12px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 16px 9px; min-width: 112px; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+  .stat .n { font-size: 28px; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; line-height: 1.05; }
+  .stat .l { font-size: 12.5px; color: var(--muted); font-weight: 500; margin-top: 2px; white-space: nowrap; }
+
+  /* lanes */
+  .lane-label { position: absolute; left: 44px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .lane-label .num { width: 26px; height: 26px; border-radius: 50%; color: #fff; display: grid; place-items: center; font-size: 14px; letter-spacing: 0; }
+  .lane-label .rest { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--muted); font-size: 15px; }
+
+  .card { position: absolute; width: 419px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px 16px; box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 8px 24px rgba(15,23,42,.06); }
+  .card .top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .icon { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; flex: none; }
+  .icon svg { width: 22px; height: 22px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .kicker { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+  .card h3 { font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; line-height: 1.2; }
+  .card p { font-size: 14px; line-height: 1.45; color: var(--muted); }
+
+  .build .icon { background: var(--build-soft); } .build .icon svg { stroke: var(--build); } .build .kicker { color: var(--build); }
+  .verify .icon { background: var(--verify-soft); } .verify .icon svg { stroke: var(--verify); } .verify .kicker { color: var(--verify); }
+  .catalog .icon { background: var(--catalog-soft); } .catalog .icon svg { stroke: var(--catalog); } .catalog .kicker { color: var(--catalog); }
+  .use .icon { background: var(--use-soft); } .use .icon svg { stroke: var(--use); } .use .kicker { color: var(--use); }
+  .card.verify { border: 1.5px solid #a7e3cb; box-shadow: 0 1px 2px rgba(5,150,105,.08), 0 10px 28px rgba(5,150,105,.12); }
+
+  .cmd { font-family: var(--mono); font-size: 13px; background: #0f172a; color: #e2e8f0; border-radius: 9px; padding: 8px 11px; margin-top: 10px; white-space: nowrap; }
+  .cmd .p { color: #7dd3fc; }
+  .cmd .a { color: #a5b4fc; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { font-size: 12.5px; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; white-space: nowrap; }
+  .chip.b { background: var(--build-soft); color: #3730a3; border-color: #dfe2ff; }
+  .chip.u { background: var(--use-soft); color: #075985; border-color: #cfe7f6; }
+  .chip.ok { background: var(--verify-soft); color: #065f46; border-color: #c9eedd; }
+
+  .repo { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .repo .r { font-family: var(--mono); font-size: 12.5px; color: #334155; background: #f8fafc; border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; display: flex; justify-content: space-between; }
+  .repo .r span:last-child { color: var(--faint); font-family: Inter, sans-serif; font-size: 12px; }
+
+  .steps { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
+  .steps li { font-size: 14px; color: var(--text); display: flex; gap: 8px; align-items: baseline; line-height: 1.35; }
+  .steps li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--build); flex: none; transform: translateY(-2px); }
+  .use .steps li::before { background: var(--use); }
+  .files { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .files span { font-family: var(--mono); font-size: 12px; color: #3730a3; background: var(--build-soft); border-radius: 6px; padding: 3px 7px; }
+
+  .golden { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; }
+  .g { display: grid; grid-template-columns: 18px 70px 1fr; align-items: center; gap: 7px; font-size: 13px; line-height: 1.3; white-space: nowrap; }
+  .g-head { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+  .g-head em { font-style: normal; }
+  .tags { display: flex; gap: 6px; margin-top: 9px; }
+  .tags span { font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--catalog-soft); color: #9a3412; }
+  .g .ok { width: 18px; height: 18px; border-radius: 50%; background: var(--verify); display: grid; place-items: center; }
+  .g .ok svg { width: 11px; height: 11px; stroke: #fff; stroke-width: 3.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .g .t { font-weight: 700; color: var(--ink); }
+  .g .v { color: var(--text); }
+  .g .v em { font-style: normal; color: var(--faint); }
+  .bugs { margin-top: 9px; font-size: 12.5px; color: #92400e; background: #fff7ed; border: 1px solid #fde4c8; border-radius: 9px; padding: 7px 10px; line-height: 1.38; }
+  .bugs b { color: #7c2d12; }
+
+  .fields { display: flex; flex-direction: column; gap: 5px; margin-top: 2px; }
+  .f { display: grid; grid-template-columns: 86px 1fr; gap: 8px; font-size: 13px; line-height: 1.32; white-space: nowrap; }
+  .f .k { font-weight: 700; color: var(--catalog); }
+  .f .vv { color: #334155; }
+
+  .bubble { border-radius: 14px; padding: 10px 13px; font-size: 14.5px; line-height: 1.42; }
+  .bubble.q { background: #0f172a; color: #f1f5f9; border-bottom-left-radius: 4px; margin-top: 4px; }
+  .bubble.a { background: var(--use-soft); color: #0c2a42; border: 1px solid #cfe7f6; border-bottom-right-radius: 4px; }
+  .bubble b { font-weight: 700; }
+
+  .call { border: 1px solid var(--line); border-radius: 11px; padding: 8px 10px; margin-top: 7px; background: #fbfcfe; }
+  .call .fn { font-family: var(--mono); font-size: 12.5px; font-weight: 600; color: #075985; }
+  .call .fn i { font-style: normal; color: var(--faint); font-weight: 400; }
+  .call .out { font-size: 13.5px; color: var(--text); margin-top: 3px; }
+  .call .out b { color: var(--ink); }
+  .call .out em { font-style: normal; color: var(--verify); font-weight: 600; }
+
+  .meta { display: flex; flex-direction: column; gap: 5px; margin-top: 9px; }
+  .meta div { font-size: 12.5px; color: var(--muted); display: flex; gap: 7px; line-height: 1.33; }
+  .meta div b { color: var(--ink); font-weight: 600; flex: none; }
+
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+  .badge.est { background: #ecfdf5; color: #047857; border: 1px solid #b7ebd3; }
+
+  /* why it matters */
+  .why { position: absolute; left: 44px; right: 44px; top: 868px; height: 182px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .w { background: #0f172a; border-radius: 18px; padding: 18px 20px; color: #cbd5e1; position: relative; overflow: hidden; }
+  .w .k { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .w h4 { font-size: 18.5px; font-weight: 700; color: #fff; margin-top: 6px; line-height: 1.25; letter-spacing: -0.01em; }
+  .w p { font-size: 13.5px; line-height: 1.45; margin-top: 7px; color: #b6c2d3; }
+  .w .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+
+  svg.arrows { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; }
+  .alabel { position: absolute; font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); background: var(--bg); padding: 1px 6px; border-radius: 6px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="canvas">
+
+  <!-- header -->
+  <div class="header">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-6h6v6"/><path d="M7.5 11.5h0M16.5 11.5h0"/>
+        </svg>
+      </div>
+      <div>
+        <div class="title">Motel</div>
+        <div class="tagline">Any research repository → <b>a verified tool every AI assistant can run</b> · built for the physical sciences</div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n">50</div><div class="l">research tools</div></div>
+      <div class="stat"><div class="n">303</div><div class="l">golden tests</div></div>
+      <div class="stat"><div class="n">10</div><div class="l">hackathon projects</div></div>
+      <div class="stat"><div class="n">5</div><div class="l">AI apps connected</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">OS: Linux · Mac · Win</div></div>
+    </div>
+  </div>
+
+  <!-- lane 1 -->
+  <div class="lane-label" style="top:140px; color: var(--build);"><span class="num" style="background: var(--build);">1</span>Build once<span class="rest">— your coding agent wraps the code, Motel verifies it</span></div>
+
+  <div class="card build" style="left:44px; top:172px; height:296px;">
+    <div class="top">
+      <div class="icon"><svg viewBox="0 0 24 24"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg></div>
+      <div><div class="kicker">Start</div><h3>A research repo + its paper</h3></div>
+    </div>
+    <div class="repo">
+      <div class="r"><span>usnistgov/fipy</span><span>diffusion, phase field</span></div>
+      <div class="r"><span>xraypy/xraylarch</span><span>X-ray absorption</span></div>
+      <div class="r"><span>iRASPA/RASPA3</span><span>adsorption</span></div>
+      <div class="r"><span>MauricioCafiero/UMADock</span><span>hackathon project</span></div>
+    </div>
+    <div class="cmd"><span class="p">$</span> motel onboard <span class="a">&lt;github-url&gt;</span> --paper <span class="a">&lt;doi&gt;</span></div>
+  </div>
+
+  <div class="card build" style="left:515px; top:172px; height:296px;">
+    <div class="top">
+      <div class="icon"><svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div>
+      <div><div class="kicker">Onboard</div><h3>Your coding agent builds the tool</h3></div>
+    </div>
+    <div class="chips" style="margin-top:0; margin-bottom:10px;"><span class="chip b">Claude Code</span><span class="chip b">Codex</span><span class="chip b">Gemini CLI</span><span class="chip">+ Motel onboarding skill</span></div>
+    <ul class="steps">
+      <li>Pin the commit; build an isolated environment</li>
+      <li>Wrap the science, not the UI or LLM layer</li>
+      <li>Fix upstream bugs as replayable patches</li>
+      <li>Typed functions, units, validity limits, citation</li>
+    </ul>
+    <div class="files"><span>motel.yaml</span><span>api.py</span><span>SKILL.md</span><span>patches/</span><span>tests/data/</span></div>
+  </div>
+
+  <div class="card verify" style="left:986px; top:172px; height:296px;">
+    <div class="top">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div><div class="kicker">Verify · golden tests</div><h3>Must reproduce known science</h3></div>
+    </div>
+    <div class="golden">
+      <div class="g g-head"><span></span><span>tool</span><span>computed <em>· reference</em></span></div>
+      <div class="g"><span class="ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="t">RASPA3</span><span class="v">CO₂ in silicalite 1.52 mmol/g <em>· exp. 1.48</em></span></div>
+      <div class="g"><span class="ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="t">Psi4</span><span class="v">water dimer −4.9184 kcal/mol <em>· S66 −4.918</em></span></div>
+      <div class="g"><span class="ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="t">FiPy</span><span class="v">steel carburizing 25,456 s <em>· Callister 25,400</em></span></div>
+      <div class="g"><span class="ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="t">xraylarch</span><span class="v">EXAFS Cu–Cu 2.542 Å <em>· crystal 2.556</em></span></div>
+      <div class="g"><span class="ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="t">Zeo++</span><span class="v">MFI pore 6.30 Å <em>· IZA database 6.36</em></span></div>
+    </div>
+    <div class="bugs"><b>Caught before release:</b> overlapping atoms in UMA-Dock sites, truncated AIMNet2 neighbour lists, a five-compound fallback hazard table in Catalyze.</div>
+  </div>
+
+  <div class="card catalog" style="left:1457px; top:172px; height:296px;">
+    <div class="top">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+      <div><div class="kicker">Share</div><h3>A catalog of 50 verified tools</h3></div>
+    </div>
+    <div class="fields">
+      <div class="f"><span class="k">Quantum</span><span class="vv">PySCF · Psi4 · GPAW · QE · xTB · CREST</span></div>
+      <div class="f"><span class="k">Simulation</span><span class="vv">LAMMPS · OpenMM · phonopy · ML potentials</span></div>
+      <div class="f"><span class="k">Materials</span><span class="vv">pymatgen · PyXtal · Zeo++ · RASPA3</span></div>
+      <div class="f"><span class="k">Continuum</span><span class="vv">Cantera · pycalphad · FiPy · PyBaMM</span></div>
+      <div class="f"><span class="k">Spectra</span><span class="vv">xraylarch · xraylib · pyOpenMS · NMR</span></div>
+      <div class="f"><span class="k">Molecules</span><span class="vv">RDKit · AiZynthFinder · Vina · UMA-Dock</span></div>
+    </div>
+    <div class="tags"><span>established 36</span><span>published 4</span><span>experimental 10</span></div>
+    <div class="cmd" style="margin-top:9px;"><span class="p">$</span> motel add zeopp raspa3</div>
+  </div>
+
+  <!-- lane 2 -->
+  <div class="lane-label" style="top:496px; color: var(--use);"><span class="num" style="background: var(--use);">2</span>Use everywhere<span class="rest">— any AI assistant runs real science through Motel</span></div>
+
+  <div class="card use" style="left:44px; top:528px; height:306px;">
+    <div class="top">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+      <div><div class="kicker">Ask</div><h3>A question, in any AI app</h3></div>
+    </div>
+    <div class="bubble q">Can silicalite (MFI zeolite) capture CO₂ from power-plant flue gas, 15% CO₂ in N₂, at 1 bar and 300 K?</div>
+    <div class="chips" style="margin-top:12px;"><span class="chip u">Claude Desktop</span><span class="chip u">Claude Code</span><span class="chip u">Codex</span><span class="chip u">Gemini CLI</span><span class="chip u">Cursor</span><span class="chip">dashboard · CLI</span></div>
+    <p style="margin-top:9px; font-size:13px;">Connected through the Model Context Protocol and Agent Skills.</p>
+  </div>
+
+  <div class="card use" style="left:515px; top:528px; height:306px;">
+    <div class="top">
+      <div class="icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
+      <div><div class="kicker">Run</div><h3>Motel picks, runs, and records</h3></div>
+    </div>
+    <ul class="steps">
+      <li><span><b>Find</b> — search ranks established, tested tools first</span></li>
+      <li><span><b>Check</b> — typed inputs, units, stated validity limits</span></li>
+      <li><span><b>Run</b> — in the tool's own pinned environment, locally</span></li>
+      <li><span><b>Record</b> — version, source commit, inputs; repeats come from history</span></li>
+    </ul>
+    <div class="chips" style="margin-top:12px;"><span class="chip ok">no dependency conflicts</span><span class="chip ok">reproducible</span><span class="chip ok">data stays local</span><span class="chip ok">Linux · macOS · Windows</span></div>
+  </div>
+
+  <div class="card use" style="left:986px; top:528px; height:306px;">
+    <div class="top">
+      <div class="icon"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+      <div><div class="kicker">Compose</div><h3>The agent chains verified tools</h3></div>
+    </div>
+    <div class="call" style="margin-top:2px;"><div class="fn">zeopp.pore_geometry<i>(MFI.cif)</i></div><div class="out">cavities <b>6.3 Å</b>, windows <b>4.4–4.6 Å</b>, 3D channels</div></div>
+    <div class="call"><div class="fn">raspa3.adsorption_isotherm<i>(MFI, CO₂, 300 K)</i></div><div class="out">pure CO₂ at 1 bar: <b>1.52 mmol/g</b> <em>(measured 1.48)</em></div></div>
+    <div class="call"><div class="fn">raspa3.mixture_adsorption<i>(15% CO₂, 85% N₂)</i></div><div class="out">CO₂/N₂ selectivity <b>18.5</b></div></div>
+  </div>
+
+  <div class="card use" style="left:1457px; top:528px; height:306px;">
+    <div class="top">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <div><div class="kicker">Answer</div><h3>An answer you can check and cite</h3></div>
+    </div>
+    <div class="bubble a">Yes, selectively. Both gases fit MFI's 4.4–4.6 Å channels, but from flue gas it adsorbs CO₂ <b>18× over N₂</b>. Pure CO₂ loads <b>1.5 mmol/g</b> at 1 bar.</div>
+    <div class="meta">
+      <div><b>Trust</b><span><span class="badge est">Established</span> · golden-tested against NIST ISODB and IZA</span></div>
+      <div><b>Cites</b><span>Zeo++ (Willems 2012) · RASPA3 (Ran 2024)</span></div>
+      <div><b>Limits</b><span>rigid framework, generic force field</span></div>
+      <div><b>Record</b><span style="font-family: var(--mono); font-size: 12px;">raspa3 0.1.0 · pinned source commit</span></div>
+    </div>
+  </div>
+
+  <!-- arrows -->
+  <svg class="arrows" viewBox="0 0 1920 1080">
+    <defs>
+      <marker id="hb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#4f46e5"/></marker>
+      <marker id="hg" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#059669"/></marker>
+      <marker id="ho" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c2410c"/></marker>
+      <marker id="hu" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0369a1"/></marker>
+    </defs>
+    <!-- lane 1 -->
+    <line x1="467" y1="320" x2="509" y2="320" stroke="#4f46e5" stroke-width="3" marker-end="url(#hb)"/>
+    <line x1="938" y1="320" x2="980" y2="320" stroke="#4f46e5" stroke-width="3" marker-end="url(#hb)"/>
+    <line x1="1409" y1="320" x2="1451" y2="320" stroke="#059669" stroke-width="3" marker-end="url(#hg)"/>
+    <!-- lane 2 -->
+    <line x1="467" y1="681" x2="509" y2="681" stroke="#0369a1" stroke-width="3" marker-end="url(#hu)"/>
+    <line x1="938" y1="681" x2="980" y2="681" stroke="#0369a1" stroke-width="3" marker-end="url(#hu)"/>
+    <line x1="1409" y1="681" x2="1451" y2="681" stroke="#0369a1" stroke-width="3" marker-end="url(#hu)"/>
+    <!-- catalog feeds the tool chain -->
+    <path d="M1666 470 L1666 486 Q1666 494 1658 494 L1203 494 Q1195 494 1195 502 L1195 520" fill="none" stroke="#c2410c" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#ho)"/>
+    <!-- failed golden test loops back to the agent -->
+    <path d="M1100 172 L1100 158 Q1100 150 1092 150 L732 150 Q724 150 724 158 L724 166" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#hb)"/>
+  </svg>
+  <div class="alabel" style="left:1336px; top:485px; color:#c2410c;">installed on demand</div>
+  <div class="alabel" style="left:812px; top:141px;">fails? the agent fixes it and re-checks</div>
+
+  <!-- why it matters -->
+  <div class="why">
+    <div class="w"><div class="bar" style="background:#38bdf8;"></div>
+      <div class="k" style="color:#7dd3fc;">Impact</div>
+      <h4>Research code anyone can use by asking</h4>
+      <p>Students and researchers run real simulation and analysis codes from the AI assistant they already use: no installs, no environment conflicts, no rewrites. 10 hackathon projects already reusable.</p>
+    </div>
+    <div class="w"><div class="bar" style="background:#818cf8;"></div>
+      <div class="k" style="color:#a5b4fc;">Innovation</div>
+      <h4>Agents build the tools, Motel checks them</h4>
+      <p>Turning a repository into a tool becomes agent work, made trustworthy by pinned sources, saved patches, isolated environments, and golden tests.</p>
+    </div>
+    <div class="w"><div class="bar" style="background:#34d399;"></div>
+      <div class="k" style="color:#6ee7b7;">Novelty</div>
+      <h4>A tool layer that grows and proves itself</h4>
+      <p>Not a fixed toolkit: any repository can join, but only after it reproduces reference results, and agents see each tool's maturity and evidence when choosing.</p>
+    </div>
+    <div class="w"><div class="bar" style="background:#fb923c;"></div>
+      <div class="k" style="color:#fdba74;">Physical sciences &amp; math</div>
+      <h4>Real codes, checked against real data</h4>
+      <p>Quantum chemistry, molecular dynamics, phonons, adsorption, X-ray spectroscopy, batteries, CALPHAD, PDE solvers; checked against NIST, IZA, S66, textbooks, and exact solutions.</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
